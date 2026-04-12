@@ -29,7 +29,7 @@ export default function SpecialistCard({ specialist }) {
         {/* Left: main card info (clickable) */}
         <Link to={`/especialista/${specialist.slug}`} className="flex-1 block p-5 sm:p-6">
           <div className="flex gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-24 sm:w-20 sm:h-20 rounded-2xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist.profile_photo ? (
                 <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover" />
               ) : (
