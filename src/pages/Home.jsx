@@ -49,7 +49,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-1.5 mb-6">
               <MapPin className="w-3.5 h-3.5 text-primary" />
-              <span className="text-xs font-medium text-muted-foreground">Encuentra los mejores doctores y especialistas</span>
+              <span className="text-xs font-medium text-muted-foreground">Monterrey, Nuevo León</span>
             </div>
             <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight">Encuentra los mejores doctores y especialistas de Nuevo Leon
 
