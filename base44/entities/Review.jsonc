@@ -1,0 +1,37 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "ID del especialista"
+    },
+    "specialist_name": {
+      "type": "string",
+      "title": "Nombre del especialista"
+    },
+    "patient_name": {
+      "type": "string",
+      "title": "Nombre del paciente"
+    },
+    "rating": {
+      "type": "number",
+      "title": "Calificaci\u00f3n (1-5)"
+    },
+    "comment": {
+      "type": "string",
+      "title": "Comentario"
+    },
+    "approved": {
+      "type": "boolean",
+      "title": "Aprobada",
+      "default": false
+    }
+  },
+  "required": [
+    "specialist_id",
+    "patient_name",
+    "rating",
+    "comment"
+  ]
+}

@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
+import ReviewList from "../components/ReviewList";
+import ReviewForm from "../components/ReviewForm";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -250,16 +252,17 @@ export default function SpecialistProfile() {
         </div>
       }
 
-      {/* Botón final agendar cita */}
-      <div className="mt-8 bg-gradient-to-br from-primary/5 to-accent rounded-3xl border border-border/50 p-6 sm:p-8 text-center">
-        <h2 className="font-heading font-bold text-xl text-foreground mb-1">¿Listo para tu consulta?</h2>
-        <p className="text-sm text-muted-foreground mb-4">Agenda tu cita con {specialist.full_name} hoy mismo</p>
-        <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold px-8" onClick={() => setShowForm(true)}>
-          <Calendar className="w-4 h-4" />
-          Agendar cita
-        </Button>
+      {/* Reseñas */}
+      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+        <h2 className="font-heading font-bold text-lg text-foreground mb-5">Reseñas de pacientes</h2>
+        <ReviewList specialistId={specialist.id} />
+        <div className="mt-6 pt-6 border-t border-border/50">
+          <h3 className="font-heading font-semibold text-base text-foreground mb-4">Dejar una reseña</h3>
+          <ReviewForm specialist={specialist} />
+        </div>
       </div>
 
+      {/* Botón final agendar cita */}
       {/* Appointment Form Modal */}
       {showForm &&
       <AppointmentForm specialist={specialist} initialDate={selectedDate ? formatDateValue(selectedDate) : ''} onClose={() => {setShowForm(false);setSelectedDate(null);}} />
