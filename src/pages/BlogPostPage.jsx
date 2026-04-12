@@ -104,7 +104,6 @@ export default function BlogPostPage() {
           </div>
         </div>
       )}
-      </div>
     </div>
   );
 }
