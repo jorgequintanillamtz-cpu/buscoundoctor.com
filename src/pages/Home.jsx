@@ -40,27 +40,19 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden" style={{background: 'linear-gradient(160deg, #e8f5fa 0%, #bad5e0 30%, #a8cede 60%, #d4eaf3 100%)'}}>        
-        {/* Mesh gradient blobs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div style={{position:'absolute',top:'-10%',left:'-5%',width:'55%',height:'70%',background:'radial-gradient(ellipse at center, rgba(106,185,215,0.5) 0%, transparent 70%)',filter:'blur(48px)'}} />
-          <div style={{position:'absolute',top:'20%',right:'-10%',width:'50%',height:'65%',background:'radial-gradient(ellipse at center, rgba(7,51,72,0.25) 0%, transparent 70%)',filter:'blur(56px)'}} />
-          <div style={{position:'absolute',bottom:'-15%',left:'30%',width:'55%',height:'60%',background:'radial-gradient(ellipse at center, rgba(186,213,224,0.6) 0%, transparent 70%)',filter:'blur(52px)'}} />
-          <div style={{position:'absolute',top:'10%',left:'40%',width:'35%',height:'50%',background:'radial-gradient(ellipse at center, rgba(106,185,215,0.3) 0%, transparent 70%)',filter:'blur(40px)'}} />
-          {/* fade to white at bottom */}
-          <div style={{position:'absolute',bottom:0,left:0,right:0,height:'40%',background:'linear-gradient(to bottom, transparent, #ffffff)'}} />
-        </div>
+      <section className="relative overflow-hidden bg-gradient-to-b from-accent/50 to-background">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 sm:pt-12 sm:pb-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight mb-4">
-              <span>Encuentra los mejores doctores y especialistas de </span>
-              <span style={{color:'#073348'}}>Nuevo León</span>
-            </h1>
-            <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/40 rounded-full px-4 py-1.5 mb-4">
-              <MapPin className="w-3.5 h-3.5" style={{color:'#073348'}} />
-              <span className="text-xs font-medium" style={{color:'#073348'}}>Monterrey, Nuevo León</span>
+            <div className="inline-flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-1.5 mb-4">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-medium text-muted-foreground">Monterrey, Nuevo León</span>
             </div>
-            <div className="mt-2 max-w-xl mx-auto" style={{background:'rgba(255,255,255,0.6)',backdropFilter:'blur(8px)',borderRadius:'1rem',border:'1px solid rgba(255,255,255,0.4)'}}>
+            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight">
+              <span>Encuentra los mejores doctores y especialistas de </span>
+              <span className="text-primary">Nuevo León</span>
+            </h1>
+            <div className="mt-5 max-w-xl mx-auto">
               <SearchBar />
             </div>
           </div>
@@ -68,7 +60,7 @@ export default function Home() {
       </section>
 
       {/* Specialties */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4" style={{background:'#ffffff'}}>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialidades</h2>
           <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
