@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ const emptyForm = {
   years_experience: "", location: "", city: "Monterrey", zone: "", address: "",
   whatsapp: "", email: "", modality: "presencial", schedule: "", services: [],
   certifications: "", featured: false, active: true, price_range: "$$",
+  profile_photo: "", gallery: [],
 };
 
 export default function AdminSpecialists() {
@@ -25,6 +26,32 @@ export default function AdminSpecialists() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [servicesInput, setServicesInput] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const photoInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    update("profile_photo", file_url);
+    setUploadingPhoto(false);
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploadingGallery(true);
+    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
+    update("gallery", [...(form.gallery || []), ...urls]);
+    setUploadingGallery(false);
+  };
+
+  const removeGalleryImage = (idx) => {
+    update("gallery", (form.gallery || []).filter((_, i) => i !== idx));
+  };
 
   const load = async () => {
     const [specs, specList, zoneList] = await Promise.all([
@@ -59,6 +86,7 @@ export default function AdminSpecialists() {
       whatsapp: s.whatsapp || "", email: s.email || "", modality: s.modality || "presencial",
       schedule: s.schedule || "", services: s.services || [], certifications: s.certifications || "",
       featured: s.featured || false, active: s.active !== false, price_range: s.price_range || "$$",
+      profile_photo: s.profile_photo || "", gallery: s.gallery || [],
     });
     setServicesInput((s.services || []).join(", "));
     setDialogOpen(true);
@@ -153,6 +181,31 @@ export default function AdminSpecialists() {
             <DialogTitle className="font-heading">{editing ? "Editar" : "Nuevo"} Especialista</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
+
+            {/* Foto de perfil */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Foto de perfil</label>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-2xl bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {form.profile_photo ? (
+                    <img src={form.profile_photo} alt="Foto" className="w-full h-full object-cover" />
+                  ) : (
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                  <Button type="button" variant="outline" size="sm" className="rounded-xl gap-2" onClick={() => photoInputRef.current?.click()} disabled={uploadingPhoto}>
+                    <Upload className="w-4 h-4" />
+                    {uploadingPhoto ? "Subiendo..." : "Subir foto"}
+                  </Button>
+                  {form.profile_photo && (
+                    <button type="button" onClick={() => update("profile_photo", "")} className="text-xs text-destructive hover:underline text-left">Eliminar foto</button>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Nombre completo *</label>
@@ -237,8 +290,37 @@ export default function AdminSpecialists() {
               <Input value={servicesInput} onChange={e => setServicesInput(e.target.value)} placeholder="Terapia, Consulta General, etc." className="rounded-xl" />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">Certificaciones</label>
+              <label className="text-sm font-medium mb-1 block">Certificaciones / Cédula</label>
               <Input value={form.certifications} onChange={e => update("certifications", e.target.value)} className="rounded-xl" />
+            </div>
+
+            {/* Galería */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Galería de imágenes</label>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-3">
+                {(form.gallery || []).map((img, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-muted group">
+                    <img src={img} alt={`Galería ${i+1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(i)}
+                      className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  disabled={uploadingGallery}
+                  className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary flex flex-col items-center justify-center gap-1 transition-colors"
+                >
+                  <ImagePlus className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">{uploadingGallery ? "Subiendo..." : "Agregar"}</span>
+                </button>
+              </div>
+              <input ref={galleryInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} />
             </div>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
