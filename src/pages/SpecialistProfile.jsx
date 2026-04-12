@@ -66,10 +66,10 @@ export default function SpecialistProfile() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-      
-
-
-      
+      <Link to="/especialistas" className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground bg-card border border-border/50 hover:border-border rounded-full px-3 py-1.5 transition-all mb-4 w-fit">
+        <ChevronLeft className="w-3.5 h-3.5" />
+        Especialistas
+      </Link>
 
       {/* Header card */}
       <div className="bg-card rounded-3xl border border-border/50 overflow-hidden">
