@@ -12,7 +12,7 @@ import { toast } from "sonner";
 const emptyForm = {
   full_name: "", slug: "", specialty: "", subspecialty: "", description: "",
   years_experience: "", location: "", city: "Monterrey", zone: "", address: "",
-  whatsapp: "", email: "", modality: "presencial", schedule: "", services: [],
+  whatsapp: "", email: "", instagram: "", modality: "presencial", schedule: "", services: [],
   certifications: "", featured: false, active: true, price_range: "$$",
   profile_photo: "", gallery: [], video_url: "",
 };
@@ -94,7 +94,7 @@ export default function AdminSpecialists() {
       subspecialty: s.subspecialty || "", description: s.description || "",
       years_experience: s.years_experience || "", location: s.location || "",
       city: s.city || "Monterrey", zone: s.zone || "", address: s.address || "",
-      whatsapp: s.whatsapp || "", email: s.email || "", modality: s.modality || "presencial",
+      whatsapp: s.whatsapp || "", email: s.email || "", instagram: s.instagram || "", modality: s.modality || "presencial",
       schedule: s.schedule || "", services: s.services || [], certifications: s.certifications || "",
       featured: s.featured || false, active: s.active !== false, price_range: s.price_range || "$$",
       profile_photo: s.profile_photo || "", gallery: s.gallery || [], video_url: s.video_url || "",
@@ -246,6 +246,10 @@ export default function AdminSpecialists() {
               <div>
                 <label className="text-sm font-medium mb-1 block">Email</label>
                 <Input value={form.email} onChange={e => update("email", e.target.value)} className="rounded-xl" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Instagram</label>
+                <Input value={form.instagram} onChange={e => update("instagram", e.target.value)} placeholder="@usuario" className="rounded-xl" />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1 block">Años de experiencia</label>

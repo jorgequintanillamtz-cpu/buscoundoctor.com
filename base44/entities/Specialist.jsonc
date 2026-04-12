@@ -58,6 +58,10 @@
       "type": "string",
       "title": "Email"
     },
+    "instagram": {
+      "type": "string",
+      "title": "Instagram"
+    },
     "modality": {
       "type": "string",
       "title": "Modalidad",
