@@ -96,6 +96,12 @@ export default function SpecialistProfile() {
                   </span>
                 )}
               </div>
+              {specialist.certifications && (
+                <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                  <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                  Cédula profesional: <span className="font-medium text-foreground">{specialist.certifications}</span>
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -173,6 +179,16 @@ export default function SpecialistProfile() {
               </div>
             ))}
           </div>
+          {specialist.insurers?.length > 0 && (
+            <div className="mt-5 pt-5 border-t border-border/50">
+              <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
+              <div className="flex flex-wrap gap-2">
+                {specialist.insurers.map((ins, i) => (
+                  <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{ins}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -215,6 +231,16 @@ export default function SpecialistProfile() {
           )}
         </div>
       )}
+
+      {/* Botón final agendar cita */}
+      <div className="mt-8 bg-gradient-to-br from-primary/5 to-accent rounded-3xl border border-border/50 p-6 sm:p-8 text-center">
+        <h2 className="font-heading font-bold text-xl text-foreground mb-1">¿Listo para tu consulta?</h2>
+        <p className="text-sm text-muted-foreground mb-4">Agenda tu cita con {specialist.full_name} hoy mismo</p>
+        <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold px-8" onClick={() => setShowForm(true)}>
+          <Calendar className="w-4 h-4" />
+          Agendar cita
+        </Button>
+      </div>
 
       {/* Appointment Form Modal */}
       {showForm && (

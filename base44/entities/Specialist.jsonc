@@ -78,6 +78,13 @@
         "type": "string"
       }
     },
+    "insurers": {
+      "type": "array",
+      "title": "Aseguradoras aceptadas",
+      "items": {
+        "type": "string"
+      }
+    },
     "gallery": {
       "type": "array",
       "title": "Galer\u00eda de im\u00e1genes",
