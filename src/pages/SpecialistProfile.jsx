@@ -195,18 +195,20 @@ export default function SpecialistProfile() {
               </div>
           )}
           </div>
-          {specialist.insurers?.length > 0 &&
-        <div className="mt-5 pt-5 border-t border-border/50">
+          <div className="mt-5 pt-5 border-t border-border/50">
               <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
-              <div className="flex flex-wrap gap-2">
-                {specialist.insurers.map((ins, i) =>
+              {specialist.insurers?.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {specialist.insurers.map((ins, i) =>
             <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{ins}</span>
             )}
-              </div>
+                </div>
+              ) : (
+                <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
+              )}
             </div>
-        }
-        </div>
-      }
+          </div>
+          }
 
       {specialist.gallery?.length > 0 &&
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
