@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ChevronLeft } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 import moment from "moment";
 
 export default function BlogPostPage() {
@@ -65,9 +64,20 @@ export default function BlogPostPage() {
         </p>
       )}
 
-      <article className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-semibold prose-a:text-primary prose-p:leading-relaxed">
-        <ReactMarkdown>{post.content}</ReactMarkdown>
-      </article>
+      <article
+        className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-semibold prose-a:text-primary prose-p:leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: post.content }}
+        onClick={(e) => {
+          const anchor = e.target.closest('a');
+          if (anchor) {
+            const href = anchor.getAttribute('href');
+            if (href && href.startsWith('/')) {
+              e.preventDefault();
+              window.location.href = href;
+            }
+          }
+        }}
+      />
     </div>
   );
 }
