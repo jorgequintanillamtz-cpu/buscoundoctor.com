@@ -48,11 +48,6 @@ export default function SpecialistCard({ specialist }) {
               )}
             </div>
 
-            {specialist.description && (
-              <p className="text-sm text-muted-foreground mt-3 line-clamp-2 leading-relaxed">
-                {specialist.description}
-              </p>
-            )}
           </div>
         </div>
 
@@ -64,7 +59,9 @@ export default function SpecialistCard({ specialist }) {
               </span>
             )}
             {specialist.price_range && (
-              <span className="text-xs text-muted-foreground">{specialist.price_range}</span>
+              <span className="text-xs text-muted-foreground">
+                {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+              </span>
             )}
           </div>
           <Button size="sm" variant="ghost" className="text-primary text-xs gap-1 group-hover:bg-accent">
