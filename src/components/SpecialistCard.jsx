@@ -39,8 +39,9 @@ export default function SpecialistCard({ specialist }) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                {specialist.full_name}
+              <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors leading-tight">
+                <span className="block">{specialist.full_name?.split(' ').slice(0, 2).join(' ')}</span>
+                <span className="block">{specialist.full_name?.split(' ').slice(2).join(' ')}</span>
               </h3>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                 <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full">
