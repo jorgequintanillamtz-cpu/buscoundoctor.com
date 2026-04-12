@@ -40,8 +40,14 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-accent/50 to-background">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+      <section className="relative overflow-hidden" style={{background: 'linear-gradient(135deg, #fff5f0 0%, #ffe8e0 25%, #fff0ea 50%, #fde8d8 75%, #fff8f5 100%)'}}>
+        {/* Mesh gradient blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div style={{position:'absolute',top:'-10%',left:'-5%',width:'55%',height:'70%',background:'radial-gradient(ellipse at center, rgba(255,182,153,0.45) 0%, transparent 70%)',filter:'blur(48px)'}} />
+          <div style={{position:'absolute',top:'20%',right:'-10%',width:'50%',height:'65%',background:'radial-gradient(ellipse at center, rgba(255,160,130,0.35) 0%, transparent 70%)',filter:'blur(56px)'}} />
+          <div style={{position:'absolute',bottom:'-15%',left:'30%',width:'55%',height:'60%',background:'radial-gradient(ellipse at center, rgba(253,210,180,0.4) 0%, transparent 70%)',filter:'blur(52px)'}} />
+          <div style={{position:'absolute',top:'10%',left:'40%',width:'35%',height:'50%',background:'radial-gradient(ellipse at center, rgba(255,240,230,0.6) 0%, transparent 70%)',filter:'blur(40px)'}} />
+        </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 sm:pt-12 sm:pb-8">
           <div className="max-w-2xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-1.5 mb-4">
