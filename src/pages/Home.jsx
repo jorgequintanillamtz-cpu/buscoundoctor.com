@@ -55,10 +55,7 @@ export default function Home() {
               Encuentra doctores y especialistas{" "}
               <span className="text-primary">cerca de ti</span>
             </h1>
-            <p className="mt-4 text-muted-foreground text-base sm:text-lg leading-relaxed max-w-lg mx-auto">
-              Busca por especialidad, zona y disponibilidad. Contacta fácilmente por WhatsApp.
-            </p>
-            <div className="mt-8 max-w-xl mx-auto">
+            <div className="mt-6 max-w-xl mx-auto">
               <SearchBar />
             </div>
           </div>
@@ -66,11 +63,10 @@ export default function Home() {
       </section>
 
       {/* Specialties */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="flex items-center justify-between mb-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialidades</h2>
-            <p className="text-sm text-muted-foreground mt-1">Encuentra al especialista que necesitas</p>
           </div>
           <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
             Ver todas <ArrowRight className="w-4 h-4" />
@@ -83,32 +79,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Zones */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="mb-8">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Explora por zona</h2>
-          <p className="text-sm text-muted-foreground mt-1">Busca especialistas cerca de tu ubicación</p>
-        </div>
-        <div className="flex flex-wrap gap-2 sm:gap-3">
-          {zones.map((z) => (
-            <Link
-              key={z.id}
-              to={`/especialistas?zone=${encodeURIComponent(z.name)}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-card border border-border/50 rounded-full text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-accent transition-all"
-            >
-              <MapPin className="w-3.5 h-3.5" />
-              {z.name}
-            </Link>
-          ))}
-        </div>
-      </section>
-
       {/* Featured */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="flex items-center justify-between mb-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialistas destacados</h2>
-            <p className="text-sm text-muted-foreground mt-1">Profesionales con las mejores valoraciones</p>
           </div>
           <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
             Ver todos <ArrowRight className="w-4 h-4" />
@@ -123,11 +98,10 @@ export default function Home() {
 
       {/* Blog */}
       {posts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-          <div className="flex items-center justify-between mb-8">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Blog de salud</h2>
-              <p className="text-sm text-muted-foreground mt-1">Artículos y guías para cuidar tu bienestar</p>
             </div>
             <Link to="/blog" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
               Ver todos <ArrowRight className="w-4 h-4" />
@@ -142,7 +116,7 @@ export default function Home() {
       )}
 
       {/* CTA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-8 sm:p-12 text-center">
           <h2 className="font-heading font-bold text-2xl sm:text-3xl text-primary-foreground">
             ¿Eres profesional de la salud?

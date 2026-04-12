@@ -18,7 +18,6 @@ export default function SpecialtyCard({ specialty }) {
       </div>
       <div className="text-center">
         <h3 className="font-heading font-semibold text-sm text-foreground">{specialty.name}</h3>
-        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{specialty.description}</p>
       </div>
     </Link>
   );
