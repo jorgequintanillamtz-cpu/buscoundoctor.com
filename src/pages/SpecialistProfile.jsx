@@ -10,6 +10,31 @@ export default function SpecialistProfile() {
   const [specialist, setSpecialist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const getNext8Days = () => {
+    const days = [];
+    for (let i = 0; i < 8; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      days.push(d);
+    }
+    return days;
+  };
+
+  const formatDayLabel = (date) => {
+    if (date.toDateString() === new Date().toDateString()) return 'Hoy';
+    return date.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
+  };
+
+  const formatDateValue = (date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setShowForm(true);
+  };
 
   useEffect(() => {
     async function load() {
@@ -205,20 +230,33 @@ export default function SpecialistProfile() {
             )}
           </div>
 
-          {/* Quick CTA */}
-          <div className="bg-primary/5 rounded-2xl p-6 text-center">
-            <p className="text-sm font-medium text-foreground mb-3">¿Listo para agendar?</p>
-            <Button className="w-full gap-2 rounded-xl" onClick={() => setShowForm(true)}>
-              <Calendar className="w-4 h-4" />
-              Solicitar cita
-            </Button>
+          {/* Date picker CTA */}
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
+            <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
+            <p className="text-xs text-muted-foreground mb-4">para agendar tu cita</p>
+            <div className="grid grid-cols-4 gap-2">
+              {getNext8Days().map((date, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleDateSelect(date)}
+                  className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group"
+                >
+                  <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
+                    {formatDayLabel(date).split(' ')[0]}
+                  </span>
+                  <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
+                    {date.getDate()}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Appointment Form Modal */}
       {showForm && (
-        <AppointmentForm specialist={specialist} onClose={() => setShowForm(false)} />
+        <AppointmentForm specialist={specialist} initialDate={selectedDate ? formatDateValue(selectedDate) : ''} onClose={() => { setShowForm(false); setSelectedDate(null); }} />
       )}
     </div>
   );

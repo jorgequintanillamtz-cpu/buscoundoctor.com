@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function AppointmentForm({ specialist, onClose }) {
+export default function AppointmentForm({ specialist, onClose, initialDate = '' }) {
   const [form, setForm] = useState({
     patient_name: "",
     phone: "",
     reason: "",
-    preferred_date: "",
+    preferred_date: initialDate,
     preferred_time: "",
     comments: "",
   });
