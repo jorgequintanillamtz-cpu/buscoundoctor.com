@@ -73,36 +73,38 @@ export default function SpecialistProfile() {
 
       {/* Header card */}
       <div className="bg-card rounded-3xl border border-border/50 overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/5 to-accent p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row gap-6 items-end">
-            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl bg-card border-4 border-card shadow-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
-              {specialist.profile_photo ? (
-                <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="font-heading font-bold text-4xl text-primary">
-                  {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
+        {/* Hero photo background */}
+        <div className="relative h-64 sm:h-80 overflow-hidden">
+          {specialist.profile_photo ? (
+            <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
+              <span className="font-heading font-bold text-6xl text-primary/40">
+                {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
+              </span>
+            </div>
+          )}
+          {/* Gradient overlay at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          {/* Info overlaid at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-white">{specialist.full_name}</h1>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="text-sm font-medium text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                {specialist.specialty}
+              </span>
+              {specialist.subspecialty && (
+                <span className="text-sm text-white/80 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                  {specialist.subspecialty}
                 </span>
               )}
             </div>
-            <div className="flex-1 pb-1">
-              <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialist.full_name}</h1>
-              <div className="flex flex-wrap items-center gap-2 mt-2">
-                <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-                  {specialist.specialty}
-                </span>
-                {specialist.subspecialty && (
-                  <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                    {specialist.subspecialty}
-                  </span>
-                )}
-              </div>
-              {specialist.certifications && (
-                <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                  Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
-                </p>
-              )}
-            </div>
+            {specialist.certifications && (
+              <p className="mt-2 text-xs text-white/70 flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5 text-white/80" />
+                Cédula: <span className="font-medium text-white">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
+              </p>
+            )}
           </div>
         </div>
 
