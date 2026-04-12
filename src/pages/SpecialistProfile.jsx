@@ -189,7 +189,14 @@ export default function SpecialistProfile() {
       {/* Servicios / Especialidades */}
       {specialist.services?.length > 0 &&
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Especialidades y enfoques</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading font-bold text-lg text-foreground">Especialidades y enfoques</h2>
+            {specialist.price_range && (
+              <span className="text-sm font-medium text-primary bg-accent px-3 py-1 rounded-full">
+                {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {specialist.services.map((service, i) =>
           <div key={i} className="flex items-center gap-2.5 text-sm text-foreground">
