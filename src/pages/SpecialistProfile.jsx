@@ -200,22 +200,22 @@ export default function SpecialistProfile() {
           </div>
           <div className="mt-5 pt-5 border-t border-border/50">
               <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
-              {specialist.insurers?.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+              {specialist.insurers?.length > 0 ?
+          <div className="flex flex-wrap gap-2">
                   {specialist.insurers.map((ins, i) =>
             <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{ins}</span>
             )}
-                </div>
-              ) : (
-                <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
-              )}
+                </div> :
+
+          <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
+          }
             </div>
           </div>
-          }
+      }
 
       {specialist.gallery?.length > 0 &&
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Galería</h2>
+          
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {specialist.gallery.map((img, i) =>
           <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
@@ -223,19 +223,6 @@ export default function SpecialistProfile() {
               </div>
           )}
           </div>
-          {specialist.instagram &&
-        <div className="mt-4 pt-4 border-t border-border/50">
-              <a
-                href={`https://instagram.com/${specialist.instagram.replace(/^@/, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium text-primary bg-accent hover:bg-accent/80 px-4 py-2.5 rounded-xl transition-colors"
-              >
-                <Instagram className="w-4 h-4" />
-                @{specialist.instagram.replace(/^@/, '')}
-              </a>
-            </div>
-        }
         </div>
       }
 
@@ -263,6 +250,19 @@ export default function SpecialistProfile() {
               {specialist.address}
             </p>
         }
+          {specialist.instagram &&
+        <div className="mt-4 pt-4 border-t border-border/50">
+              <a
+            href={`https://instagram.com/${specialist.instagram.replace(/^@/, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary bg-accent hover:bg-accent/80 px-4 py-2.5 rounded-xl transition-colors">
+            
+                <Instagram className="w-4 h-4" />
+                @{specialist.instagram.replace(/^@/, '')}
+              </a>
+            </div>
+        }
         </div>
       }
 
@@ -270,25 +270,25 @@ export default function SpecialistProfile() {
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-heading font-bold text-lg text-foreground">Reseñas de pacientes</h2>
-          {!showReviewForm && (
-            <button
-              onClick={() => setShowReviewForm(true)}
-              className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors"
-            >
+          {!showReviewForm &&
+          <button
+            onClick={() => setShowReviewForm(true)}
+            className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors">
+            
               ✏️ Escribir reseña
             </button>
-          )}
+          }
         </div>
         <ReviewList specialistId={specialist.id} />
-        {showReviewForm && (
-          <div className="mt-6 pt-6 border-t border-border/50">
+        {showReviewForm &&
+        <div className="mt-6 pt-6 border-t border-border/50">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-heading font-semibold text-base text-foreground">Dejar una reseña</h3>
               <button onClick={() => setShowReviewForm(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
             </div>
             <ReviewForm specialist={specialist} />
           </div>
-        )}
+        }
       </div>
 
       {/* Botón final agendar cita */}
