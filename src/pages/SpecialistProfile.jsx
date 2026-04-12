@@ -176,6 +176,19 @@ export default function SpecialistProfile() {
         </div>
       )}
 
+      {specialist.gallery?.length > 0 && (
+        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Galería</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {specialist.gallery.map((img, i) => (
+              <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
+                <img src={img} alt={`Galería ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Tipos de consulta */}
       {specialist.modality && (
         <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
@@ -200,20 +213,6 @@ export default function SpecialistProfile() {
               {specialist.address}
             </p>
           )}
-        </div>
-      )}
-
-      {/* Galería */}
-      {specialist.gallery?.length > 0 && (
-        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Galería</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {specialist.gallery.map((img, i) => (
-              <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
-                <img src={img} alt={`Galería ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-              </div>
-            ))}
-          </div>
         </div>
       )}
 
