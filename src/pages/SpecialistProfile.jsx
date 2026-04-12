@@ -99,7 +99,7 @@ export default function SpecialistProfile() {
               {specialist.certifications && (
                 <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
                   <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                  Cédula profesional: <span className="font-medium text-foreground">{specialist.certifications}</span>
+                  Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
                 </p>
               )}
             </div>
