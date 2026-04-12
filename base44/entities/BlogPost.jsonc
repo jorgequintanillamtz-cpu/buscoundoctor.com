@@ -30,6 +30,19 @@
       "type": "string",
       "title": "Autor"
     },
+    "meta_description": {
+      "type": "string",
+      "title": "Meta descripci\u00f3n SEO",
+      "description": "Descripci\u00f3n para buscadores (160 caracteres recomendados)"
+    },
+    "tags": {
+      "type": "array",
+      "title": "Etiquetas (Tags)",
+      "items": {
+        "type": "string"
+      },
+      "description": "Palabras clave para categorizar el art\u00edculo"
+    },
     "published": {
       "type": "boolean",
       "title": "Publicado",

@@ -14,7 +14,7 @@ export default function BlogEditor() {
   const isEditing = !!id;
 
   const [form, setForm] = useState({
-    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", published: false,
+    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", meta_description: "", tags: [], published: false,
   });
   const [loading, setLoading] = useState(isEditing);
 
@@ -27,7 +27,7 @@ export default function BlogEditor() {
           setForm({
             title: post.title || "", slug: post.slug || "", excerpt: post.excerpt || "",
             content: post.content || "", category: post.category || "",
-            author: post.author || "Equipo BuscounDoctor", published: post.published || false,
+            author: post.author || "Equipo BuscounDoctor", meta_description: post.meta_description || "", tags: post.tags || [], published: post.published || false,
           });
         }
         setLoading(false);
@@ -98,6 +98,68 @@ export default function BlogEditor() {
         <div>
           <label className="text-sm font-medium mb-1.5 block">Autor</label>
           <Input value={form.author} onChange={e => update("author", e.target.value)} className="rounded-xl" />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Meta descripción SEO (160 caracteres máx)</label>
+          <Input
+            value={form.meta_description}
+            onChange={e => update("meta_description", e.target.value.slice(0, 160))}
+            maxLength={160}
+            className="rounded-xl"
+            placeholder="Descripción para buscadores que atraiga clicks"
+          />
+          <p className="text-xs text-muted-foreground mt-1">{form.meta_description.length}/160</p>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Etiquetas (Tags)</label>
+          <div className="flex flex-wrap gap-2 mb-2 p-3 rounded-xl border border-border/50 bg-card min-h-[40px]">
+            {form.tags.map((tag, i) => (
+              <span key={i} className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full flex items-center gap-1">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => update("tags", form.tags.filter((_, idx) => idx !== i))}
+                  className="hover:opacity-70"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              id="tagInput"
+              className="rounded-xl"
+              placeholder="Ej: diabetes, prevención, nutrición"
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const input = e.target.value.trim();
+                  if (input && !form.tags.includes(input)) {
+                    update("tags", [...form.tags, input]);
+                    e.target.value = "";
+                  }
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => {
+                const input = document.getElementById("tagInput");
+                const val = input.value.trim();
+                if (val && !form.tags.includes(val)) {
+                  update("tags", [...form.tags, val]);
+                  input.value = "";
+                }
+              }}
+            >
+              Agregar
+            </Button>
+          </div>
         </div>
 
         <div>
