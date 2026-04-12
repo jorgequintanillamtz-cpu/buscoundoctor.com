@@ -80,7 +80,7 @@ export default function SpecialistCard({ specialist }) {
             <Button
               size="sm"
               variant="ghost"
-              className="text-primary text-xs gap-1 group-hover:bg-accent lg:hidden"
+              className="bg-primary text-primary-foreground text-xs gap-1 hover:bg-primary/90 lg:hidden"
               onClick={(e) => { e.preventDefault(); setSelectedDate(null); setShowForm(true); }}
             >
               Agendar cita <ChevronRight className="w-3.5 h-3.5" />
