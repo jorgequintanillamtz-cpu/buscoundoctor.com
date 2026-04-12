@@ -56,12 +56,12 @@ export default function Home() {
               <span>Encuentra los mejores doctores y especialistas de </span>
               <span style={{color:'#073348'}}>Nuevo León</span>
             </h1>
-            <div className="mt-5 max-w-xl mx-auto">
-              <SearchBar />
-            </div>
-            <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/40 rounded-full px-4 py-1.5 mt-4">
+            <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/40 rounded-full px-4 py-1.5 mb-4">
               <MapPin className="w-3.5 h-3.5" style={{color:'#073348'}} />
               <span className="text-xs font-medium" style={{color:'#073348'}}>Monterrey, Nuevo León</span>
+            </div>
+            <div className="mt-2 max-w-xl mx-auto" style={{background:'rgba(255,255,255,0.6)',backdropFilter:'blur(8px)',borderRadius:'1rem',border:'1px solid rgba(255,255,255,0.4)'}}>
+              <SearchBar />
             </div>
           </div>
         </div>
