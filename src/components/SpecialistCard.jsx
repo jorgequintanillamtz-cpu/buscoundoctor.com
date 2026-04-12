@@ -85,8 +85,13 @@ export default function SpecialistCard({ specialist }) {
             >
               Agendar cita <ChevronRight className="w-3.5 h-3.5" />
             </Button>
-            <Button size="sm" variant="ghost" className="text-primary text-xs gap-1 group-hover:bg-accent hidden lg:inline-flex">
-              Ver perfil <ChevronRight className="w-3.5 h-3.5" />
+            <Button
+              size="sm"
+              variant="ghost"
+              className="bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 hidden lg:inline-flex"
+              onClick={(e) => { e.preventDefault(); setSelectedDate(null); setShowForm(true); }}
+            >
+              Agendar cita <ChevronRight className="w-3.5 h-3.5" />
             </Button>
           </div>
         </Link>
