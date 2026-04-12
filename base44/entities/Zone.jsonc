@@ -1,0 +1,27 @@
+{
+  "name": "Zone",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nombre"
+    },
+    "city": {
+      "type": "string",
+      "title": "Ciudad"
+    },
+    "state": {
+      "type": "string",
+      "title": "Estado"
+    },
+    "active": {
+      "type": "boolean",
+      "title": "Activo",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "city"
+  ]
+}

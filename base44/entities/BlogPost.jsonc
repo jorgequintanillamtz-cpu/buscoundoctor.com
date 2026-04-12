@@ -1,0 +1,44 @@
+{
+  "name": "BlogPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "T\u00edtulo"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "image": {
+      "type": "string",
+      "title": "Imagen"
+    },
+    "excerpt": {
+      "type": "string",
+      "title": "Extracto"
+    },
+    "content": {
+      "type": "string",
+      "title": "Contenido"
+    },
+    "category": {
+      "type": "string",
+      "title": "Categor\u00eda"
+    },
+    "author": {
+      "type": "string",
+      "title": "Autor"
+    },
+    "published": {
+      "type": "boolean",
+      "title": "Publicado",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "content"
+  ]
+}

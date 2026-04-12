@@ -1,0 +1,31 @@
+{
+  "name": "Specialty",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nombre"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "icon": {
+      "type": "string",
+      "title": "\u00cdcono"
+    },
+    "description": {
+      "type": "string",
+      "title": "Descripci\u00f3n breve"
+    },
+    "active": {
+      "type": "boolean",
+      "title": "Activo",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ]
+}

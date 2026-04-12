@@ -1,0 +1,48 @@
+{
+  "name": "AppointmentRequest",
+  "type": "object",
+  "properties": {
+    "patient_name": {
+      "type": "string",
+      "title": "Nombre del paciente"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Tel\u00e9fono"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "reason": {
+      "type": "string",
+      "title": "Motivo de consulta"
+    },
+    "preferred_date": {
+      "type": "string",
+      "title": "Fecha preferencial"
+    },
+    "preferred_time": {
+      "type": "string",
+      "title": "Hora preferencial"
+    },
+    "comments": {
+      "type": "string",
+      "title": "Comentarios"
+    },
+    "specialist_id": {
+      "type": "string",
+      "title": "Especialista relacionado"
+    },
+    "specialist_name": {
+      "type": "string",
+      "title": "Nombre del especialista"
+    }
+  },
+  "required": [
+    "patient_name",
+    "phone",
+    "reason",
+    "specialist_id"
+  ]
+}

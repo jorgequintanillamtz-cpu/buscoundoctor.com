@@ -1,0 +1,115 @@
+{
+  "name": "Specialist",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "title": "Nombre completo"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "profile_photo": {
+      "type": "string",
+      "title": "Foto de perfil"
+    },
+    "specialty": {
+      "type": "string",
+      "title": "Especialidad principal"
+    },
+    "subspecialty": {
+      "type": "string",
+      "title": "Subespecialidad"
+    },
+    "description": {
+      "type": "string",
+      "title": "Descripci\u00f3n larga"
+    },
+    "years_experience": {
+      "type": "number",
+      "title": "A\u00f1os de experiencia"
+    },
+    "location": {
+      "type": "string",
+      "title": "Ubicaci\u00f3n"
+    },
+    "city": {
+      "type": "string",
+      "title": "Ciudad"
+    },
+    "zone": {
+      "type": "string",
+      "title": "Zona"
+    },
+    "address": {
+      "type": "string",
+      "title": "Direcci\u00f3n"
+    },
+    "whatsapp": {
+      "type": "string",
+      "title": "WhatsApp"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "modality": {
+      "type": "string",
+      "title": "Modalidad",
+      "enum": [
+        "presencial",
+        "online",
+        "ambas"
+      ]
+    },
+    "schedule": {
+      "type": "string",
+      "title": "Horarios disponibles"
+    },
+    "services": {
+      "type": "array",
+      "title": "Servicios",
+      "items": {
+        "type": "string"
+      }
+    },
+    "gallery": {
+      "type": "array",
+      "title": "Galer\u00eda de im\u00e1genes",
+      "items": {
+        "type": "string"
+      }
+    },
+    "certifications": {
+      "type": "string",
+      "title": "C\u00e9dula / Certificaciones"
+    },
+    "featured": {
+      "type": "boolean",
+      "title": "Destacado",
+      "default": false
+    },
+    "active": {
+      "type": "boolean",
+      "title": "Activo",
+      "default": true
+    },
+    "price_range": {
+      "type": "string",
+      "title": "Rango de precio",
+      "enum": [
+        "$",
+        "$$",
+        "$$$",
+        "$$$$"
+      ]
+    }
+  },
+  "required": [
+    "full_name",
+    "slug",
+    "specialty",
+    "whatsapp"
+  ]
+}

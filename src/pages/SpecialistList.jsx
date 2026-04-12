@@ -1,0 +1,237 @@
+import { useState, useEffect, useMemo } from "react";
+import { base44 } from "@/api/base44Client";
+import { SlidersHorizontal, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchBar from "../components/SearchBar";
+import SpecialistCard from "../components/SpecialistCard";
+
+export default function SpecialistList() {
+  const [specialists, setSpecialists] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [zones, setZones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const [filterSpecialty, setFilterSpecialty] = useState(urlParams.get("specialty") || "");
+  const [filterZone, setFilterZone] = useState(urlParams.get("zone") || "");
+  const [filterModality, setFilterModality] = useState("");
+  const [filterPrice, setFilterPrice] = useState("");
+  const searchQuery = urlParams.get("q") || "";
+
+  useEffect(() => {
+    async function load() {
+      const [specs, specList, zoneList] = await Promise.all([
+        base44.entities.Specialist.filter({ active: true }),
+        base44.entities.Specialty.filter({ active: true }),
+        base44.entities.Zone.filter({ active: true }),
+      ]);
+      setSpecialists(specs);
+      setSpecialties(specList);
+      setZones(zoneList);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const filtered = useMemo(() => {
+    let result = [...specialists];
+
+    if (filterSpecialty) {
+      result = result.filter((s) => s.specialty === filterSpecialty);
+    }
+    if (filterZone) {
+      result = result.filter((s) => s.zone === filterZone || s.location === filterZone);
+    }
+    if (filterModality) {
+      result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
+    }
+    if (filterPrice) {
+      result = result.filter((s) => s.price_range === filterPrice);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (s) =>
+          s.full_name?.toLowerCase().includes(q) ||
+          s.specialty?.toLowerCase().includes(q) ||
+          s.subspecialty?.toLowerCase().includes(q) ||
+          s.zone?.toLowerCase().includes(q) ||
+          s.description?.toLowerCase().includes(q)
+      );
+    }
+
+    return result;
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, searchQuery]);
+
+  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice].filter(Boolean).length;
+
+  const clearFilters = () => {
+    setFilterSpecialty("");
+    setFilterZone("");
+    setFilterModality("");
+    setFilterPrice("");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="mb-8">
+        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
+          {filterSpecialty || "Todos los especialistas"}
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
+        </p>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Mobile filter toggle */}
+        <div className="lg:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Filtros {activeFilters > 0 && `(${activeFilters})`}
+          </Button>
+        </div>
+
+        {/* Filters sidebar */}
+        <div className={`lg:w-64 flex-shrink-0 ${showFilters ? "block" : "hidden lg:block"}`}>
+          <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-5 sticky top-20">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading font-semibold text-sm text-foreground">Filtros</h3>
+              {activeFilters > 0 && (
+                <button onClick={clearFilters} className="text-xs text-primary hover:underline">
+                  Limpiar
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
+                <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
+                  <SelectTrigger className="h-10 rounded-xl text-sm">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {specialties.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
+                <Select value={filterZone} onValueChange={setFilterZone}>
+                  <SelectTrigger className="h-10 rounded-xl text-sm">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {zones.map((z) => (
+                      <SelectItem key={z.id} value={z.name}>{z.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Modalidad</label>
+                <Select value={filterModality} onValueChange={setFilterModality}>
+                  <SelectTrigger className="h-10 rounded-xl text-sm">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="presencial">Presencial</SelectItem>
+                    <SelectItem value="online">En línea</SelectItem>
+                    <SelectItem value="ambas">Ambas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio</label>
+                <Select value={filterPrice} onValueChange={setFilterPrice}>
+                  <SelectTrigger className="h-10 rounded-xl text-sm">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="$">$ Económico</SelectItem>
+                    <SelectItem value="$$">$$ Moderado</SelectItem>
+                    <SelectItem value="$$$">$$$ Alto</SelectItem>
+                    <SelectItem value="$$$$">$$$$ Premium</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="flex-1">
+          <div className="mb-6">
+            <SearchBar placeholder="Buscar por nombre, especialidad o zona..." />
+          </div>
+
+          {/* Active filter tags */}
+          {activeFilters > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {filterSpecialty && (
+                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
+                  {filterSpecialty}
+                  <button onClick={() => setFilterSpecialty("")}><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {filterZone && (
+                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
+                  {filterZone}
+                  <button onClick={() => setFilterZone("")}><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {filterModality && (
+                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
+                  {filterModality}
+                  <button onClick={() => setFilterModality("")}><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {filterPrice && (
+                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
+                  {filterPrice}
+                  <button onClick={() => setFilterPrice("")}><X className="w-3 h-3" /></button>
+                </span>
+              )}
+            </div>
+          )}
+
+          {filtered.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">No se encontraron especialistas con estos filtros.</p>
+              <Button variant="link" className="text-primary mt-2" onClick={clearFilters}>
+                Limpiar filtros
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {filtered.map((s) => (
+                <SpecialistCard key={s.id} specialist={s} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

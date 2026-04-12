@@ -5,7 +5,19 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+import Layout from './components/Layout';
+import AdminLayout from './components/AdminLayout';
+import Home from './pages/Home';
+import SpecialistList from './pages/SpecialistList';
+import SpecialistProfile from './pages/SpecialistProfile';
+import BlogList from './pages/BlogList';
+import BlogPostPage from './pages/BlogPostPage';
+import Dashboard from './pages/admin/Dashboard';
+import AdminSpecialists from './pages/admin/AdminSpecialists';
+import AdminSpecialties from './pages/admin/AdminSpecialties';
+import AdminZones from './pages/admin/AdminZones';
+import AdminBlog from './pages/admin/AdminBlog';
+import BlogEditor from './pages/admin/BlogEditor';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,7 +45,22 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/especialistas" element={<SpecialistList />} />
+        <Route path="/especialista/:slug" element={<SpecialistProfile />} />
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
+      </Route>
+      <Route element={<AdminLayout />}>
+        <Route path="/admin" element={<Dashboard />} />
+        <Route path="/admin/especialistas" element={<AdminSpecialists />} />
+        <Route path="/admin/especialidades" element={<AdminSpecialties />} />
+        <Route path="/admin/zonas" element={<AdminZones />} />
+        <Route path="/admin/blog" element={<AdminBlog />} />
+        <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
+        <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
