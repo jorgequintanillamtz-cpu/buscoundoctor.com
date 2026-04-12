@@ -12,6 +12,7 @@ export default function SpecialistProfile() {
   const [specialist, setSpecialist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
   const getNext8Days = () => {
@@ -254,12 +255,27 @@ export default function SpecialistProfile() {
 
       {/* Reseñas */}
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-        <h2 className="font-heading font-bold text-lg text-foreground mb-5">Reseñas de pacientes</h2>
-        <ReviewList specialistId={specialist.id} />
-        <div className="mt-6 pt-6 border-t border-border/50">
-          <h3 className="font-heading font-semibold text-base text-foreground mb-4">Dejar una reseña</h3>
-          <ReviewForm specialist={specialist} />
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-heading font-bold text-lg text-foreground">Reseñas de pacientes</h2>
+          {!showReviewForm && (
+            <button
+              onClick={() => setShowReviewForm(true)}
+              className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors"
+            >
+              ✏️ Escribir reseña
+            </button>
+          )}
         </div>
+        <ReviewList specialistId={specialist.id} />
+        {showReviewForm && (
+          <div className="mt-6 pt-6 border-t border-border/50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-heading font-semibold text-base text-foreground">Dejar una reseña</h3>
+              <button onClick={() => setShowReviewForm(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
+            </div>
+            <ReviewForm specialist={specialist} />
+          </div>
+        )}
       </div>
 
       {/* Botón final agendar cita */}
