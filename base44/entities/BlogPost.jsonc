@@ -34,6 +34,13 @@
       "type": "boolean",
       "title": "Publicado",
       "default": false
+    },
+    "featured_specialists": {
+      "type": "array",
+      "title": "Especialistas destacados (slugs)",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [
