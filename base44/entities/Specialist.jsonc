@@ -30,6 +30,10 @@
       "type": "number",
       "title": "A\u00f1os de experiencia"
     },
+    "rating": {
+      "type": "number",
+      "title": "Calificaci\u00f3n (0-5)"
+    },
     "location": {
       "type": "string",
       "title": "Ubicaci\u00f3n"

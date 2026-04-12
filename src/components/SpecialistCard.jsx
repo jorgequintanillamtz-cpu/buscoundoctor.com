@@ -55,10 +55,10 @@ export default function SpecialistCard({ specialist }) {
                   <MapPin className="w-3.5 h-3.5" />
                   {specialist.zone || specialist.location}
                 </span>
-                {specialist.years_experience && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
-                    {specialist.years_experience} años exp.
+                {specialist.rating != null && (
+                  <span className="flex items-center gap-1 text-amber-500 font-medium">
+                    {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+                    <span className="text-muted-foreground font-normal">{specialist.rating.toFixed(1)}</span>
                   </span>
                 )}
               </div>
