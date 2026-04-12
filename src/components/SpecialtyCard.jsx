@@ -5,8 +5,22 @@ const iconMap = {
   Brain, Smile, Heart, Baby, Stethoscope, Sparkles,
 };
 
-export default function SpecialtyCard({ specialty }) {
+export default function SpecialtyCard({ specialty, mobile = false }) {
   const Icon = iconMap[specialty.icon] || Heart;
+
+  if (mobile) {
+    return (
+      <Link
+        to={`/especialistas?specialty=${encodeURIComponent(specialty.name)}`}
+        className="flex-shrink-0 flex flex-col items-center gap-2"
+      >
+        <div className="w-14 h-14 rounded-full bg-secondary border border-border/50 flex items-center justify-center hover:bg-primary/10 transition-colors duration-300">
+          <Icon className="w-6 h-6 text-primary" />
+        </div>
+        <span className="text-xs font-medium text-foreground text-center leading-tight w-16 line-clamp-2">{specialty.name}</span>
+      </Link>
+    );
+  }
 
   return (
     <Link

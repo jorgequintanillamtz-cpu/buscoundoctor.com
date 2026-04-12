@@ -75,7 +75,14 @@ export default function Home() {
             <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        {/* Mobile: horizontal scroll circles */}
+        <div className="flex gap-4 overflow-x-auto pb-2 sm:hidden" style={{scrollbarWidth:'none'}}>
+          {specialties.slice(0, 6).map((s) => (
+            <SpecialtyCard key={s.id} specialty={s} mobile />
+          ))}
+        </div>
+        {/* Desktop: 3-col grid */}
+        <div className="hidden sm:grid grid-cols-3 gap-3">
           {specialties.slice(0, 6).map((s) => (
             <SpecialtyCard key={s.id} specialty={s} />
           ))}
