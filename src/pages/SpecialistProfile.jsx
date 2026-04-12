@@ -73,54 +73,68 @@ export default function SpecialistProfile() {
 
       {/* Header card */}
       <div className="bg-card rounded-3xl border border-border/50 overflow-hidden">
-        <div className="bg-gradient-to-br from-primary/5 to-accent p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-card border-4 border-card shadow-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
-              {specialist.profile_photo ? (
-                <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="font-heading font-bold text-3xl text-primary">
-                  {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                </span>
-              )}
+        {/* Hero photo */}
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/7] bg-accent overflow-hidden">
+          {specialist.profile_photo ? (
+            <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent">
+              <span className="font-heading font-bold text-7xl text-primary/30">
+                {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
+              </span>
             </div>
-            <div className="flex-1">
-              <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialist.full_name}</h1>
-              <div className="flex flex-wrap items-center gap-2 mt-2">
-                <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-                  {specialist.specialty}
+          )}
+          {/* Name overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-5 sm:p-7">
+            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-white">{specialist.full_name}</h1>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="text-sm font-medium text-white/90 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                {specialist.specialty}
+              </span>
+              {specialist.subspecialty && (
+                <span className="text-sm text-white/80 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                  {specialist.subspecialty}
                 </span>
-                {specialist.subspecialty && (
-                  <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
-                    {specialist.subspecialty}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4" />
-                  {specialist.zone || specialist.location}, {specialist.city}
-                </span>
-                {specialist.years_experience && (
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {specialist.years_experience} años de experiencia
-                  </span>
-                )}
-              </div>
-              {specialist.rating != null && (
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className="text-amber-400 text-base leading-none">
-                    {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
-                </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="p-6 sm:p-8">
+        {/* Info section */}
+        <div className="p-6 sm:p-8 space-y-4">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4" />
+              {specialist.zone || specialist.location}{specialist.city ? `, ${specialist.city}` : ''}
+            </span>
+            {specialist.years_experience && (
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {specialist.years_experience} años de experiencia
+              </span>
+            )}
+          </div>
+          {specialist.rating != null && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-amber-400 text-lg leading-none">
+                {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+              </span>
+              <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
+            </div>
+          )}
+          {specialist.modality && (
+            <div className="flex flex-wrap gap-2">
+              <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full capitalize">{specialist.modality}</span>
+              {specialist.price_range && (
+                <span className="text-xs bg-muted text-muted-foreground px-3 py-1 rounded-full">
+                  {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
         <div className="flex flex-wrap gap-3">
           <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
             <Calendar className="w-4 h-4" />
