@@ -108,149 +108,47 @@ export default function SpecialistProfile() {
                   </span>
                 )}
               </div>
+              {specialist.rating != null && (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span className="text-amber-400 text-base leading-none">
+                    {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+                  </span>
+                  <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         <div className="p-6 sm:p-8">
-          <div className="flex flex-wrap gap-3">
-            <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
-              <Calendar className="w-4 h-4" />
-              Agendar cita
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="gap-2 rounded-xl flex-1 sm:flex-none"
-              onClick={() => {
-                const msg = `Hola ${specialist.full_name}, me gustaría solicitar información sobre una cita.`;
-                window.open(`https://wa.me/${specialist.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
-              }}
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp directo
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 space-y-6">
-          {/* About */}
-          {specialist.description && (
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="font-heading font-semibold text-lg text-foreground mb-3">Acerca del especialista</h2>
-              <p className="text-muted-foreground leading-relaxed">{specialist.description}</p>
-            </div>
-          )}
-
-          {/* Services */}
-          {specialist.services?.length > 0 && (
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="font-heading font-semibold text-lg text-foreground mb-4">Servicios y tratamientos</h2>
-              <div className="flex flex-wrap gap-2">
-                {specialist.services.map((service, i) => (
-                  <span key={i} className="text-sm bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                    {service}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Certifications */}
-          {specialist.certifications && (
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="font-heading font-semibold text-lg text-foreground mb-3 flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                Certificaciones
-              </h2>
-              <p className="text-muted-foreground text-sm leading-relaxed">{specialist.certifications}</p>
-            </div>
-          )}
-
-          {/* Gallery */}
-          {specialist.gallery?.length > 0 && (
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h2 className="font-heading font-semibold text-lg text-foreground mb-4">Galería</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {specialist.gallery.map((img, i) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden bg-muted">
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="flex flex-wrap gap-3">
+          <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
+            <Calendar className="w-4 h-4" />
+            Agendar cita
+          </Button>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Schedule */}
-          {specialist.schedule && (
-            <div className="bg-card rounded-2xl border border-border/50 p-6">
-              <h3 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                Horarios
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                {specialist.schedule.split("|").map(s => s.trim()).join("\n")}
-              </p>
-            </div>
-          )}
-
-          {/* Info */}
-          <div className="bg-card rounded-2xl border border-border/50 p-6 space-y-4">
-            <h3 className="font-heading font-semibold text-foreground">Información</h3>
-
-            {specialist.address && (
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                <span className="text-sm text-muted-foreground">{specialist.address}</span>
-              </div>
-            )}
-            {specialist.email && (
-              <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-muted-foreground mt-0.5" />
-                <span className="text-sm text-muted-foreground">{specialist.email}</span>
-              </div>
-            )}
-            {specialist.modality && (
-              <div className="text-sm">
-                <span className="text-muted-foreground">Modalidad: </span>
-                <span className="font-medium text-foreground capitalize">{specialist.modality}</span>
-              </div>
-            )}
-            {specialist.price_range && (
-              <div className="text-sm">
-                <span className="text-muted-foreground">Precio: </span>
-                <span className="font-medium text-foreground">{specialist.price_range}</span>
-              </div>
-            )}
+        {/* Date picker mobile - below button */}
+        <div className="mt-4 lg:hidden">
+          <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
+          <p className="text-xs text-muted-foreground mb-3">para agendar tu cita</p>
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+            {getNext8Days().map((date, i) => (
+              <button
+                key={i}
+                onClick={() => handleDateSelect(date)}
+                className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group"
+              >
+                <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
+                  {formatDayLabel(date).split(' ')[0]}
+                </span>
+                <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
+                  {date.getDate()}
+                </span>
+              </button>
+            ))}
           </div>
-
-          {/* Date picker CTA */}
-          <div className="bg-card rounded-2xl border border-border/50 p-5">
-            <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
-            <p className="text-xs text-muted-foreground mb-4">para agendar tu cita</p>
-            <div className="grid grid-cols-4 gap-2">
-              {getNext8Days().map((date, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleDateSelect(date)}
-                  className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group"
-                >
-                  <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
-                    {formatDayLabel(date).split(' ')[0]}
-                  </span>
-                  <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
-                    {date.getDate()}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+        </div>
         </div>
       </div>
 
