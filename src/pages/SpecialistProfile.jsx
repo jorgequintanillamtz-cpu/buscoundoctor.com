@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Mail, Shield, Calendar, ChevronLeft, MessageCircle } from "lucide-react";
+import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
 
@@ -152,6 +152,70 @@ export default function SpecialistProfile() {
         </div>
         </div>
       </div>
+
+      {/* Descripción */}
+      {specialist.description && (
+        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">{specialist.description}</p>
+        </div>
+      )}
+
+      {/* Servicios / Especialidades */}
+      {specialist.services?.length > 0 && (
+        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Especialidades y enfoques</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {specialist.services.map((service, i) => (
+              <div key={i} className="flex items-center gap-2.5 text-sm text-foreground">
+                <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                {service}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tipos de consulta */}
+      {specialist.modality && (
+        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Tipos de consulta</h2>
+          <div className="flex flex-wrap gap-3">
+            {(specialist.modality === 'presencial' || specialist.modality === 'ambas') && (
+              <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
+                <Users className="w-4 h-4" />
+                Presencial
+              </div>
+            )}
+            {(specialist.modality === 'online' || specialist.modality === 'ambas') && (
+              <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
+                <Monitor className="w-4 h-4" />
+                En línea
+              </div>
+            )}
+          </div>
+          {specialist.address && (
+            <p className="mt-3 text-sm text-muted-foreground flex items-center gap-1.5">
+              <MapPin className="w-4 h-4" />
+              {specialist.address}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Galería */}
+      {specialist.gallery?.length > 0 && (
+        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Galería</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {specialist.gallery.map((img, i) => (
+              <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
+                <img src={img} alt={`Galería ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Appointment Form Modal */}
       {showForm && (
