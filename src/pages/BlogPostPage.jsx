@@ -1,18 +1,27 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ChevronLeft } from "lucide-react";
 import moment from "moment";
+import SpecialistCard from "../components/SpecialistCard";
 
 export default function BlogPostPage() {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
+  const [specialists, setSpecialists] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       const results = await base44.entities.BlogPost.filter({ slug });
-      if (results.length > 0) setPost(results[0]);
+      if (results.length > 0) {
+        const p = results[0];
+        setPost(p);
+        if (p.featured_specialists?.length > 0) {
+          const all = await base44.entities.Specialist.filter({ active: true });
+          setSpecialists(all.filter(s => p.featured_specialists.includes(s.slug)));
+        }
+      }
       setLoading(false);
     }
     load();
@@ -67,17 +76,18 @@ export default function BlogPostPage() {
       <article
         className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-semibold prose-a:text-primary prose-p:leading-relaxed"
         dangerouslySetInnerHTML={{ __html: post.content }}
-        onClick={(e) => {
-          const anchor = e.target.closest('a');
-          if (anchor) {
-            const href = anchor.getAttribute('href');
-            if (href && href.startsWith('/')) {
-              e.preventDefault();
-              window.location.href = href;
-            }
-          }
-        }}
       />
+
+      {specialists.length > 0 && (
+        <div className="mt-8">
+          <h3 className="font-heading font-bold text-xl text-foreground mb-4">Especialistas recomendados</h3>
+          <div className="grid grid-cols-1 gap-4">
+            {specialists.map(s => (
+              <SpecialistCard key={s.id} specialist={s} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
