@@ -84,32 +84,27 @@ export default function SpecialistProfile() {
               </span>
             </div>
           )}
-          {/* Gradient overlay at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           {/* Info overlaid at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-white">{specialist.full_name}</h1>
+            <h1 className="font-heading font-bold text-2xl sm:text-3xl" style={{color:'#073348'}}>
+              <span className="block">{specialist.full_name?.split(' ')[0]}</span>
+              <span className="block">{specialist.full_name?.split(' ').slice(1).join(' ')}</span>
+            </h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="text-sm font-medium text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+              <span className="text-sm font-medium bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full" style={{color:'#073348'}}>
                 {specialist.specialty}
               </span>
               {specialist.subspecialty && (
-                <span className="text-sm text-white/80 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
+                <span className="text-sm bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full" style={{color:'#073348'}}>
                   {specialist.subspecialty}
                 </span>
               )}
             </div>
-            {specialist.certifications && (
-              <p className="mt-2 text-xs text-white/70 flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-white/80" />
-                Cédula: <span className="font-medium text-white">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
-              </p>
-            )}
           </div>
         </div>
 
         <div className="p-6 sm:p-8">
-          {/* Info: ubicación, experiencia, estrellas */}
+          {/* Info: ubicación, experiencia, cedula, estrellas */}
           <div className="flex flex-wrap items-center gap-4 mb-5 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
@@ -119,6 +114,12 @@ export default function SpecialistProfile() {
               <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
                 {specialist.years_experience} años de experiencia
+              </span>
+            )}
+            {specialist.certifications && (
+              <span className="flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5 text-primary" />
+                Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
               </span>
             )}
             {specialist.rating != null && (
