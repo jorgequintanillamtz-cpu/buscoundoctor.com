@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Upload, X, ImagePlus } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X, ImagePlus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +14,7 @@ const emptyForm = {
   years_experience: "", location: "", city: "Monterrey", zone: "", address: "",
   whatsapp: "", email: "", modality: "presencial", schedule: "", services: [],
   certifications: "", featured: false, active: true, price_range: "$$",
-  profile_photo: "", gallery: [],
+  profile_photo: "", gallery: [], video_url: "",
 };
 
 export default function AdminSpecialists() {
@@ -28,8 +28,10 @@ export default function AdminSpecialists() {
   const [servicesInput, setServicesInput] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const photoInputRef = useRef(null);
   const galleryInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
@@ -51,6 +53,15 @@ export default function AdminSpecialists() {
 
   const removeGalleryImage = (idx) => {
     update("gallery", (form.gallery || []).filter((_, i) => i !== idx));
+  };
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    update("video_url", file_url);
+    setUploadingVideo(false);
   };
 
   const load = async () => {
@@ -86,7 +97,7 @@ export default function AdminSpecialists() {
       whatsapp: s.whatsapp || "", email: s.email || "", modality: s.modality || "presencial",
       schedule: s.schedule || "", services: s.services || [], certifications: s.certifications || "",
       featured: s.featured || false, active: s.active !== false, price_range: s.price_range || "$$",
-      profile_photo: s.profile_photo || "", gallery: s.gallery || [],
+      profile_photo: s.profile_photo || "", gallery: s.gallery || [], video_url: s.video_url || "",
     });
     setServicesInput((s.services || []).join(", "));
     setDialogOpen(true);
@@ -292,6 +303,29 @@ export default function AdminSpecialists() {
             <div>
               <label className="text-sm font-medium mb-1 block">Certificaciones / Cédula</label>
               <Input value={form.certifications} onChange={e => update("certifications", e.target.value)} className="rounded-xl" />
+            </div>
+
+            {/* Video de presentación */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Video de presentación</label>
+              <p className="text-xs text-muted-foreground mb-3">Máximo 20 segundos. El doctor puede saludar y explicar lo que hace.</p>
+              {form.video_url ? (
+                <div className="space-y-2">
+                  <video src={form.video_url} controls className="w-full rounded-xl max-h-48" />
+                  <button type="button" onClick={() => update("video_url", "")} className="text-xs text-destructive hover:underline">Eliminar video</button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => videoInputRef.current?.click()}
+                  disabled={uploadingVideo}
+                  className="w-full border-2 border-dashed border-border hover:border-primary rounded-xl p-6 flex flex-col items-center gap-2 transition-colors"
+                >
+                  <Video className="w-6 h-6 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">{uploadingVideo ? "Subiendo video..." : "Subir video (máx. 20 seg)"}</span>
+                </button>
+              )}
+              <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
             </div>
 
             {/* Galería */}

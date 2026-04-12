@@ -162,11 +162,24 @@ export default function SpecialistProfile() {
         </div>
       </div>
 
-      {/* Descripción */}
-      {specialist.description && (
+      {/* Descripción + Video */}
+      {(specialist.description || specialist.video_url) && (
         <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
           <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">{specialist.description}</p>
+          {specialist.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{specialist.description}</p>
+          )}
+          {specialist.video_url && (
+            <div className="mt-5">
+              <p className="text-sm font-medium text-foreground mb-2">Video de presentación</p>
+              <video
+                src={specialist.video_url}
+                controls
+                className="w-full rounded-2xl max-h-64 bg-black"
+                playsInline
+              />
+            </div>
+          )}
         </div>
       )}
 

@@ -92,6 +92,10 @@
         "type": "string"
       }
     },
+    "video_url": {
+      "type": "string",
+      "title": "Video de presentaci\u00f3n"
+    },
     "certifications": {
       "type": "string",
       "title": "C\u00e9dula / Certificaciones"
