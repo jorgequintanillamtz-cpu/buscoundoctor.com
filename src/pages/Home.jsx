@@ -75,8 +75,8 @@ export default function Home() {
             <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          {specialties.slice(0, 6).map((s) => (
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+          {specialties.map((s) => (
             <SpecialtyCard key={s.id} specialty={s} />
           ))}
         </div>
