@@ -40,13 +40,15 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden" style={{background: 'linear-gradient(135deg, #fff5f0 0%, #ffe8e0 25%, #fff0ea 50%, #fde8d8 75%, #fff8f5 100%)'}}>
+      <section className="relative overflow-hidden" style={{background: 'linear-gradient(160deg, #fff5f0 0%, #ffe8e0 25%, #fff0ea 50%, #fde8d8 75%, #fff8f5 100%)'}}>        
         {/* Mesh gradient blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div style={{position:'absolute',top:'-10%',left:'-5%',width:'55%',height:'70%',background:'radial-gradient(ellipse at center, rgba(255,182,153,0.45) 0%, transparent 70%)',filter:'blur(48px)'}} />
           <div style={{position:'absolute',top:'20%',right:'-10%',width:'50%',height:'65%',background:'radial-gradient(ellipse at center, rgba(255,160,130,0.35) 0%, transparent 70%)',filter:'blur(56px)'}} />
           <div style={{position:'absolute',bottom:'-15%',left:'30%',width:'55%',height:'60%',background:'radial-gradient(ellipse at center, rgba(253,210,180,0.4) 0%, transparent 70%)',filter:'blur(52px)'}} />
           <div style={{position:'absolute',top:'10%',left:'40%',width:'35%',height:'50%',background:'radial-gradient(ellipse at center, rgba(255,240,230,0.6) 0%, transparent 70%)',filter:'blur(40px)'}} />
+          {/* fade to white at bottom */}
+          <div style={{position:'absolute',bottom:0,left:0,right:0,height:'40%',background:'linear-gradient(to bottom, transparent, #ffffff)'}} />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 sm:pt-12 sm:pb-8">
           <div className="max-w-2xl mx-auto text-center">
@@ -66,7 +68,7 @@ export default function Home() {
       </section>
 
       {/* Specialties */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4" style={{background:'#ffffff'}}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialidades</h2>
           <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
