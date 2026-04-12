@@ -74,17 +74,17 @@ export default function SpecialistProfile() {
       {/* Header card */}
       <div className="bg-card rounded-3xl border border-border/50 overflow-hidden">
         <div className="bg-gradient-to-br from-primary/5 to-accent p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row gap-5 items-start">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-card border-4 border-card shadow-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+          <div className="flex flex-col sm:flex-row gap-6 items-end">
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl bg-card border-4 border-card shadow-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist.profile_photo ? (
                 <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover" />
               ) : (
-                <span className="font-heading font-bold text-3xl text-primary">
+                <span className="font-heading font-bold text-4xl text-primary">
                   {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
                 </span>
               )}
             </div>
-            <div className="flex-1">
+            <div className="flex-1 pb-1">
               <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialist.full_name}</h1>
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
@@ -96,31 +96,32 @@ export default function SpecialistProfile() {
                   </span>
                 )}
               </div>
-              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4" />
-                  {specialist.zone || specialist.location}, {specialist.city}
-                </span>
-                {specialist.years_experience && (
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    {specialist.years_experience} años de experiencia
-                  </span>
-                )}
-              </div>
-              {specialist.rating != null && (
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className="text-amber-400 text-base leading-none">
-                    {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
         <div className="p-6 sm:p-8">
+          {/* Info: ubicación, experiencia, estrellas */}
+          <div className="flex flex-wrap items-center gap-4 mb-5 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4" />
+              {specialist.zone || specialist.location}{specialist.city ? `, ${specialist.city}` : ''}
+            </span>
+            {specialist.years_experience && (
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {specialist.years_experience} años de experiencia
+              </span>
+            )}
+            {specialist.rating != null && (
+              <span className="flex items-center gap-1.5">
+                <span className="text-amber-400 text-base leading-none">
+                  {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+                </span>
+                <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
+              </span>
+            )}
+          </div>
         <div className="flex flex-wrap gap-3">
           <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
             <Calendar className="w-4 h-4" />
