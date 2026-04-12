@@ -51,8 +51,8 @@ export default function SpecialistProfile() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!specialist) {
@@ -60,8 +60,8 @@ export default function SpecialistProfile() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 text-center">
         <h1 className="font-heading font-bold text-2xl text-foreground">Especialista no encontrado</h1>
         <Link to="/especialistas" className="text-primary mt-4 inline-block">Ver todos los especialistas</Link>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -75,30 +75,30 @@ export default function SpecialistProfile() {
       <div className="bg-card rounded-3xl border border-border/50 overflow-hidden">
         {/* Hero photo background */}
         <div className="relative h-64 sm:h-80 overflow-hidden">
-          {specialist.profile_photo ? (
-            <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
+          {specialist.profile_photo ?
+          <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" /> :
+
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
               <span className="font-heading font-bold text-6xl text-primary/40">
-                {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
               </span>
             </div>
-          )}
+          }
           {/* Info overlaid at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl" style={{color:'#073348'}}>
+            <h1 className="font-heading font-bold text-2xl sm:text-3xl" style={{ color: '#073348' }}>
               <span className="block">{specialist.full_name?.split(' ')[0]}</span>
               <span className="block">{specialist.full_name?.split(' ').slice(1).join(' ')}</span>
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="text-sm font-medium bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full" style={{color:'#073348'}}>
+              <span className="text-sm font-medium bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full" style={{ color: '#073348' }}>
                 {specialist.specialty}
               </span>
-              {specialist.subspecialty && (
-                <span className="text-sm bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full" style={{color:'#073348'}}>
+              {specialist.subspecialty &&
+              <span className="text-sm bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full" style={{ color: '#073348' }}>
                   {specialist.subspecialty}
                 </span>
-              )}
+              }
             </div>
           </div>
         </div>
@@ -110,26 +110,26 @@ export default function SpecialistProfile() {
               <MapPin className="w-4 h-4" />
               {specialist.zone || specialist.location}{specialist.city ? `, ${specialist.city}` : ''}
             </span>
-            {specialist.years_experience && (
-              <span className="flex items-center gap-1.5">
+            {specialist.years_experience &&
+            <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
                 {specialist.years_experience} años de experiencia
               </span>
-            )}
-            {specialist.certifications && (
-              <span className="flex items-center gap-1.5">
+            }
+            {specialist.certifications &&
+            <span className="flex items-center gap-1.5">
                 <CheckCircle className="w-3.5 h-3.5 text-primary" />
                 Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
               </span>
-            )}
-            {specialist.rating != null && (
-              <span className="flex items-center gap-1.5">
+            }
+            {specialist.rating != null &&
+            <span className="flex items-center gap-1.5">
                 <span className="text-amber-400 text-base leading-none">
                   {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
                 </span>
                 <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
               </span>
-            )}
+            }
           </div>
         <div className="flex flex-wrap gap-3">
           <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
@@ -143,12 +143,12 @@ export default function SpecialistProfile() {
           <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
           <p className="text-xs text-muted-foreground mb-3">para agendar tu cita</p>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-            {getNext8Days().map((date, i) => (
+            {getNext8Days().map((date, i) =>
               <button
                 key={i}
                 onClick={() => handleDateSelect(date)}
-                className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group"
-              >
+                className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group">
+                
                 <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
                   {formatDayLabel(date).split(' ')[0]}
                 </span>
@@ -156,97 +156,97 @@ export default function SpecialistProfile() {
                   {date.getDate()}
                 </span>
               </button>
-            ))}
+              )}
           </div>
         </div>
         </div>
       </div>
 
       {/* Descripción + Video */}
-      {(specialist.description || specialist.video_url) && (
-        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+      {(specialist.description || specialist.video_url) &&
+      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
           <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
-          {specialist.video_url && (
-            <div className="mt-0 mb-5">
-              <p className="text-sm font-medium text-foreground mb-2">Video de presentación</p>
+          {specialist.video_url &&
+        <div className="mt-0 mb-5">
+              
               <video
-                src={specialist.video_url}
-                controls
-                className="w-full rounded-2xl max-h-64 bg-black"
-                playsInline
-              />
+            src={specialist.video_url}
+            controls
+            className="w-full rounded-2xl max-h-64 bg-black"
+            playsInline />
+          
             </div>
-          )}
-          {specialist.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed">{specialist.description}</p>
-          )}
+        }
+          {specialist.description &&
+        <p className="text-sm text-muted-foreground leading-relaxed">{specialist.description}</p>
+        }
         </div>
-      )}
+      }
 
       {/* Servicios / Especialidades */}
-      {specialist.services?.length > 0 && (
-        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+      {specialist.services?.length > 0 &&
+      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
           <h2 className="font-heading font-bold text-lg text-foreground mb-4">Especialidades y enfoques</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {specialist.services.map((service, i) => (
-              <div key={i} className="flex items-center gap-2.5 text-sm text-foreground">
+            {specialist.services.map((service, i) =>
+          <div key={i} className="flex items-center gap-2.5 text-sm text-foreground">
                 <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
                 {service}
               </div>
-            ))}
+          )}
           </div>
-          {specialist.insurers?.length > 0 && (
-            <div className="mt-5 pt-5 border-t border-border/50">
+          {specialist.insurers?.length > 0 &&
+        <div className="mt-5 pt-5 border-t border-border/50">
               <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
               <div className="flex flex-wrap gap-2">
-                {specialist.insurers.map((ins, i) => (
-                  <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{ins}</span>
-                ))}
+                {specialist.insurers.map((ins, i) =>
+            <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{ins}</span>
+            )}
               </div>
             </div>
-          )}
+        }
         </div>
-      )}
+      }
 
-      {specialist.gallery?.length > 0 && (
-        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+      {specialist.gallery?.length > 0 &&
+      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
           <h2 className="font-heading font-bold text-lg text-foreground mb-4">Galería</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {specialist.gallery.map((img, i) => (
-              <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
+            {specialist.gallery.map((img, i) =>
+          <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
                 <img src={img} alt={`Galería ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
               </div>
-            ))}
+          )}
           </div>
         </div>
-      )}
+      }
 
       {/* Tipos de consulta */}
-      {specialist.modality && (
-        <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+      {specialist.modality &&
+      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
           <h2 className="font-heading font-bold text-lg text-foreground mb-4">Tipos de consulta</h2>
           <div className="flex flex-wrap gap-3">
-            {(specialist.modality === 'presencial' || specialist.modality === 'ambas') && (
-              <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
+            {(specialist.modality === 'presencial' || specialist.modality === 'ambas') &&
+          <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
                 <Users className="w-4 h-4" />
                 Presencial
               </div>
-            )}
-            {(specialist.modality === 'online' || specialist.modality === 'ambas') && (
-              <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
+          }
+            {(specialist.modality === 'online' || specialist.modality === 'ambas') &&
+          <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
                 <Monitor className="w-4 h-4" />
                 En línea
               </div>
-            )}
+          }
           </div>
-          {specialist.address && (
-            <p className="mt-3 text-sm text-muted-foreground flex items-center gap-1.5">
+          {specialist.address &&
+        <p className="mt-3 text-sm text-muted-foreground flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
               {specialist.address}
             </p>
-          )}
+        }
         </div>
-      )}
+      }
 
       {/* Botón final agendar cita */}
       <div className="mt-8 bg-gradient-to-br from-primary/5 to-accent rounded-3xl border border-border/50 p-6 sm:p-8 text-center">
@@ -259,9 +259,9 @@ export default function SpecialistProfile() {
       </div>
 
       {/* Appointment Form Modal */}
-      {showForm && (
-        <AppointmentForm specialist={specialist} initialDate={selectedDate ? formatDateValue(selectedDate) : ''} onClose={() => { setShowForm(false); setSelectedDate(null); }} />
-      )}
-    </div>
-  );
+      {showForm &&
+      <AppointmentForm specialist={specialist} initialDate={selectedDate ? formatDateValue(selectedDate) : ''} onClose={() => {setShowForm(false);setSelectedDate(null);}} />
+      }
+    </div>);
+
 }
