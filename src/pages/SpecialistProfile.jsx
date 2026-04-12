@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Star, Award, Briefcase } from "lucide-react";
+import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
 
@@ -73,80 +73,61 @@ export default function SpecialistProfile() {
 
       {/* Header card */}
       <div className="bg-card rounded-3xl border border-border/50 overflow-hidden">
-        {/* Hero: photo right, info left */}
-        <div className="relative flex flex-row min-h-56 sm:min-h-72 bg-white">
-          {/* Left: text info */}
-          <div className="flex-1 flex flex-col justify-center p-6 sm:p-8 pr-4 z-10">
-            {/* Name split in two lines */}
-            {(() => {
-              const parts = specialist.full_name?.split(' ') || [];
-              const firstLine = parts.slice(0, 2).join(' ');
-              const secondLine = parts.slice(2).join(' ');
-              return (
-                <>
-                  <h1 className="font-heading font-bold text-2xl sm:text-3xl leading-tight" style={{color:'#073348'}}>{firstLine}</h1>
-                  {secondLine && <h1 className="font-heading font-bold text-2xl sm:text-3xl leading-tight" style={{color:'#073348'}}>{secondLine}</h1>}
-                </>
-              );
-            })()}
-            <div className="flex flex-wrap items-center gap-2 mt-3">
-              <span className="text-sm font-medium text-primary bg-accent px-3 py-1 rounded-full">
+        {/* Hero photo background */}
+        <div className="relative h-64 sm:h-80 overflow-hidden">
+          {specialist.profile_photo ? (
+            <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
+              <span className="font-heading font-bold text-6xl text-primary/40">
+                {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
+              </span>
+            </div>
+          )}
+          {/* Gradient overlay at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          {/* Info overlaid at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-white">{specialist.full_name}</h1>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="text-sm font-medium text-white bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
                 {specialist.specialty}
               </span>
               {specialist.subspecialty && (
-                <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                <span className="text-sm text-white/80 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full">
                   {specialist.subspecialty}
                 </span>
               )}
             </div>
             {specialist.certifications && (
-              <p className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                <span>Céd. Prof.: <span className="font-semibold text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span></span>
+              <p className="mt-2 text-xs text-white/70 flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5 text-white/80" />
+                Cédula: <span className="font-medium text-white">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
               </p>
-            )}
-            <div className="mt-3 text-xs text-muted-foreground flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-              <span>{specialist.zone || specialist.location}{specialist.city ? `, ${specialist.city}` : ''}</span>
-            </div>
-          </div>
-          {/* Right: photo */}
-          <div className="w-44 sm:w-64 flex-shrink-0 relative overflow-hidden">
-            {specialist.profile_photo ? (
-              <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" />
-            ) : (
-              <div className="w-full h-full bg-accent flex items-center justify-center">
-                <span className="font-heading font-bold text-5xl text-primary/40">
-                  {specialist.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                </span>
-              </div>
             )}
           </div>
         </div>
 
         <div className="p-6 sm:p-8">
-          {/* Stats icons row */}
-          <div className="flex items-center gap-4 mb-5">
-            {specialist.rating != null && (
-              <div className="flex-1 flex flex-col items-center gap-1 bg-accent/50 rounded-2xl py-3 px-2">
-                <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-                <span className="font-heading font-bold text-lg text-foreground">{specialist.rating.toFixed(1)}</span>
-                <span className="text-xs text-muted-foreground">Calificación</span>
-              </div>
-            )}
+          {/* Info: ubicación, experiencia, estrellas */}
+          <div className="flex flex-wrap items-center gap-4 mb-5 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4" />
+              {specialist.zone || specialist.location}{specialist.city ? `, ${specialist.city}` : ''}
+            </span>
             {specialist.years_experience && (
-              <div className="flex-1 flex flex-col items-center gap-1 bg-accent/50 rounded-2xl py-3 px-2">
-                <Briefcase className="w-5 h-5 text-primary" />
-                <span className="font-heading font-bold text-lg text-foreground">{specialist.years_experience}</span>
-                <span className="text-xs text-muted-foreground">Años exp.</span>
-              </div>
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {specialist.years_experience} años de experiencia
+              </span>
             )}
-            {specialist.modality && (
-              <div className="flex-1 flex flex-col items-center gap-1 bg-accent/50 rounded-2xl py-3 px-2">
-                {specialist.modality === 'online' ? <Monitor className="w-5 h-5 text-primary" /> : specialist.modality === 'ambas' ? <Users className="w-5 h-5 text-primary" /> : <Users className="w-5 h-5 text-primary" />}
-                <span className="font-heading font-bold text-sm text-foreground capitalize">{specialist.modality === 'ambas' ? 'Híbrido' : specialist.modality}</span>
-                <span className="text-xs text-muted-foreground">Modalidad</span>
-              </div>
+            {specialist.rating != null && (
+              <span className="flex items-center gap-1.5">
+                <span className="text-amber-400 text-base leading-none">
+                  {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+                </span>
+                <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
+              </span>
             )}
           </div>
         <div className="flex flex-wrap gap-3">
