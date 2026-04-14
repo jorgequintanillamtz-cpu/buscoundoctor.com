@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 export default function BlogEditor() {
   const { id } = useParams();
@@ -14,9 +15,11 @@ export default function BlogEditor() {
   const isEditing = !!id;
 
   const [form, setForm] = useState({
-    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", meta_description: "", tags: [], published: false,
+    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", meta_description: "", tags: [], published: false, image: "",
   });
   const [loading, setLoading] = useState(isEditing);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -27,7 +30,7 @@ export default function BlogEditor() {
           setForm({
             title: post.title || "", slug: post.slug || "", excerpt: post.excerpt || "",
             content: post.content || "", category: post.category || "",
-            author: post.author || "Equipo BuscounDoctor", meta_description: post.meta_description || "", tags: post.tags || [], published: post.published || false,
+            author: post.author || "Equipo BuscounDoctor", meta_description: post.meta_description || "", tags: post.tags || [], published: post.published || false, image: post.image || "",
           });
         }
         setLoading(false);
@@ -37,6 +40,20 @@ export default function BlogEditor() {
   }, [id, isEditing]);
 
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      update("image", file_url);
+      toast.success("Imagen cargada");
+    } catch (error) {
+      toast.error("Error al cargar imagen");
+    }
+    setUploadingImage(false);
+  };
 
   const handleSave = async () => {
     const data = {
@@ -98,6 +115,38 @@ export default function BlogEditor() {
         <div>
           <label className="text-sm font-medium mb-1.5 block">Autor</label>
           <Input value={form.author} onChange={e => update("author", e.target.value)} className="rounded-xl" />
+        </div>
+
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Imagen principal</label>
+          <div className="flex items-center gap-4">
+            {form.image && (
+              <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+                <img src={form.image} alt="Portada" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => update("image", "")}
+                  className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            )}
+            <div>
+              <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-xl gap-2"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                <Upload className="w-4 h-4" />
+                {uploadingImage ? "Cargando..." : "Subir imagen"}
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -164,11 +213,11 @@ export default function BlogEditor() {
 
         <div>
           <label className="text-sm font-medium mb-1.5 block">Contenido</label>
-          <div className="bg-card rounded-xl border border-border/50 overflow-hidden">
+          <div className="bg-card rounded-xl border border-border/50 overflow-hidden [&_.ql-container]:border-0 [&_.ql-editor]:text-base [&_.ql-editor]:font-body [&_.ql-editor]:text-foreground [&_.ql-editor]:bg-white [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-border/50">
             <ReactQuill
               value={form.content}
               onChange={v => update("content", v)}
-              className="[&_.ql-editor]:min-h-[300px]"
+              theme="snow"
               modules={{
                 toolbar: [
                   [{ header: [1, 2, 3, false] }],
@@ -178,6 +227,7 @@ export default function BlogEditor() {
                   ["clean"],
                 ],
               }}
+              style={{ minHeight: "300px" }}
             />
           </div>
         </div>
