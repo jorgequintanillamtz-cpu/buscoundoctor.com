@@ -88,3 +88,20 @@
     @apply bg-background text-foreground font-body;
   }
 }
+
+/* ReactQuill Editor Styling */
+.ql-editor h1 {
+  @apply text-3xl font-bold mt-6 mb-3;
+}
+
+.ql-editor h2 {
+  @apply text-2xl font-bold mt-5 mb-2;
+}
+
+.ql-editor h3 {
+  @apply text-xl font-bold mt-4 mb-2;
+}
+
+.ql-editor p {
+  @apply leading-relaxed;
+}
