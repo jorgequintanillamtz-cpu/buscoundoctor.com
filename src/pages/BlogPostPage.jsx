@@ -90,7 +90,7 @@ export default function BlogPostPage() {
       )}
 
       <article
-        className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-semibold prose-a:text-primary prose-p:leading-relaxed"
+        className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-semibold prose-a:text-primary prose-p:leading-relaxed prose-h1:text-3xl prose-h1:font-bold prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-xl prose-h3:font-bold prose-h3:mt-5 prose-h3:mb-2"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
 

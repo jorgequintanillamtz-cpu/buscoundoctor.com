@@ -9,6 +9,37 @@ import { toast } from "sonner";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+// Función para procesar imágenes en el contenido
+const processContentImages = async (htmlContent) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, "text/html");
+  const images = doc.querySelectorAll("img");
+  
+  for (const img of images) {
+    const src = img.getAttribute("src");
+    
+    // Si la imagen es base64 o blob, necesita subirse
+    if (src && (src.startsWith("data:") || src.startsWith("blob:"))) {
+      try {
+        // Convertir data URL a blob
+        const response = await fetch(src);
+        const blob = await response.blob();
+        const file = new File([blob], "image.png", { type: blob.type });
+        
+        // Subir a servidor
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        img.setAttribute("src", file_url);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        toast.error("Error al procesar una imagen");
+        throw new Error("Image upload failed");
+      }
+    }
+  }
+  
+  return doc.documentElement.innerHTML;
+};
+
 export default function BlogEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -56,18 +87,25 @@ export default function BlogEditor() {
   };
 
   const handleSave = async () => {
-    // Validar tamaño del contenido
-    if (form.content.length > 50000) {
-      toast.error("El contenido es muy grande. Intenta reducir el texto o elimina imágenes embebidas.");
-      return;
-    }
-
-    const data = {
-      ...form,
-      slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, "-").replace(/(^-|-$)/g, ""),
-    };
-
     try {
+      // Procesar imágenes en el contenido antes de guardar
+      let processedContent = form.content;
+      if (form.content.includes("<img")) {
+        processedContent = await processContentImages(form.content);
+      }
+
+      // Validar tamaño del contenido procesado
+      if (processedContent.length > 50000) {
+        toast.error("El contenido es muy grande. Intenta reducir el texto.");
+        return;
+      }
+
+      const data = {
+        ...form,
+        content: processedContent,
+        slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, "-").replace(/(^-|-$)/g, ""),
+      };
+
       if (isEditing) {
         await base44.entities.BlogPost.update(id, data);
         toast.success("Artículo actualizado");
@@ -77,7 +115,7 @@ export default function BlogEditor() {
       }
       navigate("/admin/blog");
     } catch (error) {
-      toast.error("Error al guardar: " + (error.message || "Intenta reducir el contenido"));
+      toast.error("Error al guardar: " + (error.message || "Verifica las imágenes e intenta de nuevo"));
     }
   };
 
