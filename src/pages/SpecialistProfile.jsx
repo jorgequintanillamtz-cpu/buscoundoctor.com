@@ -43,7 +43,43 @@ export default function SpecialistProfile() {
     async function load() {
       const results = await base44.entities.Specialist.filter({ slug, active: true });
       if (results.length > 0) {
-        setSpecialist(results[0]);
+        const specialist = results[0];
+        setSpecialist(specialist);
+        
+        // Add JSON-LD LocalBusiness schema
+        const schema = {
+          "@context": "https://schema.org",
+          "@type": "MedicalBusiness",
+          "name": specialist.full_name,
+          "description": specialist.description || specialist.specialty,
+          "medicalSpecialty": specialist.specialty,
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": specialist.address || "",
+            "addressLocality": specialist.city || "Monterrey",
+            "addressRegion": "Nuevo León",
+            "addressCountry": "MX"
+          },
+          "telephone": specialist.whatsapp ? `+52${specialist.whatsapp}` : "",
+          "url": window.location.href,
+          ...(specialist.rating && {
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": specialist.rating,
+              "bestRating": "5",
+              "worstRating": "1"
+            }
+          })
+        };
+        
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.innerHTML = JSON.stringify(schema);
+        document.head.appendChild(script);
+        
+        return () => {
+          document.head.removeChild(script);
+        };
       }
       setLoading(false);
     }
