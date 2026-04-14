@@ -1,43 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Upload, X } from "lucide-react";
+import { ChevronLeft, Upload, X, Eye, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import ReactMarkdown from "react-markdown";
 
-// Función para procesar imágenes en el contenido
-const processContentImages = async (htmlContent) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlContent, "text/html");
-  const images = doc.querySelectorAll("img");
-  
-  for (const img of images) {
-    const src = img.getAttribute("src");
-    
-    // Si la imagen es base64 o blob, necesita subirse
-    if (src && (src.startsWith("data:") || src.startsWith("blob:"))) {
-      try {
-        // Convertir data URL a blob
-        const response = await fetch(src);
-        const blob = await response.blob();
-        const file = new File([blob], "image.png", { type: blob.type });
-        
-        // Subir a servidor
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
-        img.setAttribute("src", file_url);
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        toast.error("Error al procesar una imagen");
-        throw new Error("Image upload failed");
-      }
-    }
-  }
-  
-  return doc.documentElement.innerHTML;
+// Función para insertar imagen en Markdown
+const insertImageToMarkdown = (markdown, imageUrl, altText = "imagen") => {
+  const markdownImage = `![${altText}](${imageUrl})\n`;
+  return markdown + markdownImage;
 };
 
 export default function BlogEditor() {
@@ -50,7 +24,9 @@ export default function BlogEditor() {
   });
   const [loading, setLoading] = useState(isEditing);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const imageInputRef = useRef(null);
+  const contentInputRef = useRef(null);
 
   useEffect(() => {
     if (isEditing) {
@@ -78,31 +54,40 @@ export default function BlogEditor() {
     setUploadingImage(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      update("image", file_url);
-      toast.success("Imagen cargada");
+      // Si está insertando imagen en contenido, agregar al markdown
+      if (contentInputRef.current && contentInputRef.current.dataset.insertImage === "true") {
+        const newContent = insertImageToMarkdown(form.content, file_url, file.name.split(".")[0]);
+        update("content", newContent);
+        contentInputRef.current.dataset.insertImage = "false";
+        toast.success("Imagen insertada");
+      } else {
+        // Imagen principal del artículo
+        update("image", file_url);
+        toast.success("Imagen cargada");
+      }
     } catch (error) {
       toast.error("Error al cargar imagen");
     }
     setUploadingImage(false);
   };
 
+  const handleInsertImage = () => {
+    if (contentInputRef.current) {
+      contentInputRef.current.dataset.insertImage = "true";
+      imageInputRef.current?.click();
+    }
+  };
+
   const handleSave = async () => {
     try {
-      // Procesar imágenes en el contenido antes de guardar
-      let processedContent = form.content;
-      if (form.content.includes("<img")) {
-        processedContent = await processContentImages(form.content);
-      }
-
-      // Validar tamaño del contenido procesado
-      if (processedContent.length > 50000) {
+      // Validar tamaño del contenido
+      if (form.content.length > 100000) {
         toast.error("El contenido es muy grande. Intenta reducir el texto.");
         return;
       }
 
       const data = {
         ...form,
-        content: processedContent,
         slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, "-").replace(/(^-|-$)/g, ""),
       };
 
@@ -115,7 +100,7 @@ export default function BlogEditor() {
       }
       navigate("/admin/blog");
     } catch (error) {
-      toast.error("Error al guardar: " + (error.message || "Verifica las imágenes e intenta de nuevo"));
+      toast.error("Error al guardar: " + error.message);
     }
   };
 
@@ -260,24 +245,59 @@ export default function BlogEditor() {
         </div>
 
         <div>
-          <label className="text-sm font-medium mb-1.5 block">Contenido</label>
-          <div className="bg-card rounded-xl border border-border/50 overflow-hidden [&_.ql-container]:border-0 [&_.ql-editor]:font-body [&_.ql-editor]:text-foreground [&_.ql-editor]:bg-white [&_.ql-editor_p]:text-base [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-border/50">
-            <ReactQuill
-              value={form.content}
-              onChange={v => update("content", v)}
-              theme="snow"
-              modules={{
-                toolbar: [
-                  [{ header: [1, 2, 3, false] }],
-                  ["bold", "italic", "underline"],
-                  [{ list: "ordered" }, { list: "bullet" }],
-                  ["link", "image"],
-                  ["clean"],
-                ],
-              }}
-              style={{ minHeight: "300px" }}
-            />
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-sm font-medium block">Contenido (Markdown)</label>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className={`text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${
+                  !showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                <Edit3 className="w-3 h-3" />
+                Editar
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className={`text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${
+                  showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                <Eye className="w-3 h-3" />
+                Vista previa
+              </button>
+            </div>
           </div>
+
+          {!showPreview ? (
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg">
+                <strong>Sintaxis Markdown:</strong> # H1 · ## H2 · ### H3 · **bold** · *italic* · ![alt](url) · [link](url) · - lista
+              </div>
+              <textarea
+                ref={contentInputRef}
+                value={form.content}
+                onChange={e => update("content", e.target.value)}
+                placeholder="Escribe tu contenido en Markdown..."
+                className="w-full min-h-[400px] p-4 font-mono text-sm bg-white border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+              />
+              <button
+                type="button"
+                onClick={handleInsertImage}
+                disabled={uploadingImage}
+                className="text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors flex items-center gap-1 disabled:opacity-50"
+              >
+                <Upload className="w-3 h-3" />
+                {uploadingImage ? "Subiendo..." : "Insertar imagen"}
+              </button>
+            </div>
+          ) : (
+            <div className="w-full min-h-[400px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-h1:text-3xl prose-h1:font-bold prose-h1:mt-6 prose-h1:mb-3 prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-5 prose-h2:mb-2 prose-h3:text-xl prose-h3:font-bold prose-h3:mt-4 prose-h3:mb-2 prose-p:leading-relaxed">
+              <ReactMarkdown>{form.content}</ReactMarkdown>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
