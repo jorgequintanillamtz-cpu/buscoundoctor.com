@@ -53,8 +53,8 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 sm:pt-12 sm:pb-8">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight mb-4">
-              
-              
+              <span>Encuentra los mejores doctores y especialistas de </span>
+              <span style={{ color: '#073348' }}>Nuevo León</span>
             </h1>
             <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/40 rounded-full px-4 py-1.5 mb-4">
               <MapPin className="w-3.5 h-3.5" style={{ color: '#073348' }} />
