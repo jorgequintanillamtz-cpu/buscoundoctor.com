@@ -56,19 +56,29 @@ export default function BlogEditor() {
   };
 
   const handleSave = async () => {
+    // Validar tamaño del contenido
+    if (form.content.length > 50000) {
+      toast.error("El contenido es muy grande. Intenta reducir el texto o elimina imágenes embebidas.");
+      return;
+    }
+
     const data = {
       ...form,
       slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, "-").replace(/(^-|-$)/g, ""),
     };
 
-    if (isEditing) {
-      await base44.entities.BlogPost.update(id, data);
-      toast.success("Artículo actualizado");
-    } else {
-      await base44.entities.BlogPost.create(data);
-      toast.success("Artículo creado");
+    try {
+      if (isEditing) {
+        await base44.entities.BlogPost.update(id, data);
+        toast.success("Artículo actualizado");
+      } else {
+        await base44.entities.BlogPost.create(data);
+        toast.success("Artículo creado");
+      }
+      navigate("/admin/blog");
+    } catch (error) {
+      toast.error("Error al guardar: " + (error.message || "Intenta reducir el contenido"));
     }
-    navigate("/admin/blog");
   };
 
   if (loading) {
