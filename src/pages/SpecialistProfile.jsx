@@ -76,10 +76,6 @@ export default function SpecialistProfile() {
         script.type = 'application/ld+json';
         script.innerHTML = JSON.stringify(schema);
         document.head.appendChild(script);
-        
-        return () => {
-          document.head.removeChild(script);
-        };
       }
       setLoading(false);
     }
