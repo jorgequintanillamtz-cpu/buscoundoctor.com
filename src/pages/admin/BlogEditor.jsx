@@ -213,7 +213,7 @@ export default function BlogEditor() {
 
         <div>
           <label className="text-sm font-medium mb-1.5 block">Contenido</label>
-          <div className="bg-card rounded-xl border border-border/50 overflow-hidden [&_.ql-container]:border-0 [&_.ql-editor]:text-base [&_.ql-editor]:font-body [&_.ql-editor]:text-foreground [&_.ql-editor]:bg-white [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-border/50">
+          <div className="bg-card rounded-xl border border-border/50 overflow-hidden [&_.ql-container]:border-0 [&_.ql-editor]:font-body [&_.ql-editor]:text-foreground [&_.ql-editor]:bg-white [&_.ql-editor_p]:text-base [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-border/50">
             <ReactQuill
               value={form.content}
               onChange={v => update("content", v)}
