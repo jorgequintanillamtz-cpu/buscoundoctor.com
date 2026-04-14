@@ -50,9 +50,9 @@ export default function Home() {
           {/* fade to white at bottom */}
           <div style={{position:'absolute',bottom:0,left:0,right:0,height:'40%',background:'linear-gradient(to bottom, transparent, #ffffff)'}} />
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 sm:pt-12 sm:pb-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-2 pb-2 sm:pt-12 sm:pb-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight mb-4">
+            <h1 className="hidden sm:block font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight mb-4">
               <span>Encuentra los mejores doctores y especialistas de </span>
               <span style={{color:'#073348'}}>Nuevo León</span>
             </h1>
