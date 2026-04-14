@@ -8,7 +8,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
-      <div className="bg-[hsl(var(--accent))] mx-auto px-4 max-w-7xl sm:px-6">
+      <div className="bg-[hsl(var(--accent))] w-full px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
