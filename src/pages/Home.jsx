@@ -56,7 +56,7 @@ export default function Home() {
               <span>Encuentra los mejores doctores y especialistas de </span>
               <span style={{ color: '#073348' }}>Nuevo León</span>
             </h1>
-            <div className="bg-white/60 mt-4 mb-4 px-4 py-1.5 rounded-full inline-flex items-center gap-2 backdrop-blur border border-white/40">
+            <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/40 rounded-full px-4 py-1.5 mb-4">
               <MapPin className="w-3.5 h-3.5" style={{ color: '#073348' }} />
               <span className="text-xs font-medium" style={{ color: '#073348' }}>Monterrey, Nuevo León</span>
             </div>
