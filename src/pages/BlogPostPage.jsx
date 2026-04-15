@@ -97,11 +97,34 @@ export default function BlogPostPage() {
         </p>
       )}
 
-      <article className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-primary prose-p:leading-relaxed prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-2xl prose-h2:mt-7 prose-h2:mb-3 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-2 prose-img:rounded-xl prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-xl prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 prose-hr:border-border">
+      <article className="max-w-none text-foreground">
         {isHtmlContent(post.content) ? (
           <div dangerouslySetInnerHTML={{ __html: post.content }} />
         ) : (
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[[rehypeSanitize, { ...defaultSchema, attributes: { ...defaultSchema.attributes, code: ['className'], span: ['className'], div: ['className'] } }]]}>{post.content}</ReactMarkdown>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[[rehypeSanitize, { ...defaultSchema, attributes: { ...defaultSchema.attributes, code: ['className'], span: ['className'], div: ['className'] } }]]}
+            components={{
+              h1: ({children}) => <h1 style={{fontSize:'1.875rem', fontWeight:'700', marginTop:'2rem', marginBottom:'1rem', lineHeight:'1.3'}}>{children}</h1>,
+              h2: ({children}) => <h2 style={{fontSize:'1.5rem', fontWeight:'700', marginTop:'1.75rem', marginBottom:'0.75rem', lineHeight:'1.3'}}>{children}</h2>,
+              h3: ({children}) => <h3 style={{fontSize:'1.25rem', fontWeight:'600', marginTop:'1.5rem', marginBottom:'0.5rem', lineHeight:'1.3'}}>{children}</h3>,
+              h4: ({children}) => <h4 style={{fontSize:'1.1rem', fontWeight:'600', marginTop:'1.25rem', marginBottom:'0.5rem'}}>{children}</h4>,
+              p: ({children}) => <p style={{marginBottom:'1rem', lineHeight:'1.75'}}>{children}</p>,
+              ul: ({children}) => <ul style={{listStyleType:'disc', paddingLeft:'1.5rem', marginBottom:'1rem'}}>{children}</ul>,
+              ol: ({children}) => <ol style={{listStyleType:'decimal', paddingLeft:'1.5rem', marginBottom:'1rem'}}>{children}</ol>,
+              li: ({children}) => <li style={{marginBottom:'0.25rem', lineHeight:'1.75'}}>{children}</li>,
+              blockquote: ({children}) => <blockquote style={{borderLeft:'4px solid #0ea5e9', paddingLeft:'1rem', fontStyle:'italic', color:'#64748b', margin:'1.5rem 0'}}>{children}</blockquote>,
+              code: ({inline, children, className}) => inline
+                ? <code style={{backgroundColor:'#f1f5f9', padding:'0.2em 0.4em', borderRadius:'4px', fontSize:'0.875em', fontFamily:'monospace'}}>{children}</code>
+                : <pre style={{backgroundColor:'#f1f5f9', padding:'1rem', borderRadius:'0.75rem', overflowX:'auto', marginBottom:'1rem'}}><code style={{fontFamily:'monospace', fontSize:'0.875em'}}>{children}</code></pre>,
+              pre: ({children}) => <>{children}</>,
+              a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer" style={{color:'hsl(var(--primary))', textDecoration:'underline'}}>{children}</a>,
+              img: ({src, alt}) => <img src={src} alt={alt} style={{borderRadius:'0.75rem', maxWidth:'100%', margin:'1rem 0'}} />,
+              hr: () => <hr style={{border:'none', borderTop:'1px solid #e2e8f0', margin:'2rem 0'}} />,
+              strong: ({children}) => <strong style={{fontWeight:'700'}}>{children}</strong>,
+              em: ({children}) => <em style={{fontStyle:'italic'}}>{children}</em>,
+            }}
+          >{post.content}</ReactMarkdown>
         )}
       </article>
 
