@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 
 // Función para insertar imagen en Markdown
 const insertImageToMarkdown = (markdown, imageUrl, altText = "imagen") => {
@@ -295,7 +297,7 @@ export default function BlogEditor() {
             </div>
           ) : (
             <div className="w-full min-h-[400px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-h1:text-3xl prose-h1:font-bold prose-h1:mt-6 prose-h1:mb-3 prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-5 prose-h2:mb-2 prose-h3:text-xl prose-h3:font-bold prose-h3:mt-4 prose-h3:mb-2 prose-p:leading-relaxed">
-              <ReactMarkdown>{form.content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>{form.content}</ReactMarkdown>
             </div>
           )}
         </div>

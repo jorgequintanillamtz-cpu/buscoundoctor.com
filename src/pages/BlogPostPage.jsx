@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { ChevronLeft, Tag } from "lucide-react";
 import moment from "moment";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 import SpecialistCard from "../components/SpecialistCard";
 
 export default function BlogPostPage() {
@@ -91,7 +93,7 @@ export default function BlogPostPage() {
       )}
 
       <article className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-primary prose-p:leading-relaxed prose-h1:text-4xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-3xl prose-h2:mt-7 prose-h2:mb-3 prose-h3:text-2xl prose-h3:mt-6 prose-h3:mb-2 prose-img:rounded-xl prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-xl">
-        <ReactMarkdown>{post.content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>{post.content}</ReactMarkdown>
       </article>
 
       {specialists.length > 0 && (
