@@ -5,7 +5,6 @@ import { ChevronLeft, Tag } from "lucide-react";
 import moment from "moment";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import SpecialistCard from "../components/SpecialistCard";
 
 // Detecta si el contenido es HTML legado o Markdown puro
@@ -103,7 +102,6 @@ export default function BlogPostPage() {
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[[rehypeSanitize, { ...defaultSchema, tagNames: [...(defaultSchema.tagNames || []), 'img'], attributes: { ...defaultSchema.attributes, img: ['src', 'alt', 'title', 'width', 'height'], code: ['className'], span: ['className'], div: ['className'] } }]]}
 
             components={{
               h1: ({children}) => <h1 style={{fontSize:'1.875rem', fontWeight:'700', marginTop:'2rem', marginBottom:'1rem', lineHeight:'1.3'}}>{children}</h1>,
