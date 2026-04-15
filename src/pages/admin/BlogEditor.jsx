@@ -296,7 +296,7 @@ export default function BlogEditor() {
               </button>
             </div>
           ) : (
-            <div className="w-full min-h-[400px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-h1:text-3xl prose-h1:font-bold prose-h1:mt-6 prose-h1:mb-3 prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-5 prose-h2:mb-2 prose-h3:text-xl prose-h3:font-bold prose-h3:mt-4 prose-h3:mb-2 prose-p:leading-relaxed">
+            <div className="w-full min-h-[400px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-primary prose-p:leading-relaxed prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-2 prose-img:rounded-xl prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-muted prose-code:text-foreground prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-xl prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 prose-hr:border-border">
               <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>{form.content}</ReactMarkdown>
             </div>
           )}
