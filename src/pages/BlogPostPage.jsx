@@ -103,7 +103,8 @@ export default function BlogPostPage() {
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[[rehypeSanitize, { ...defaultSchema, attributes: { ...defaultSchema.attributes, code: ['className'], span: ['className'], div: ['className'] } }]]}
+            rehypePlugins={[[rehypeSanitize, { ...defaultSchema, tagNames: [...(defaultSchema.tagNames || []), 'img'], attributes: { ...defaultSchema.attributes, img: ['src', 'alt', 'title', 'width', 'height'], code: ['className'], span: ['className'], div: ['className'] } }]]}
+
             components={{
               h1: ({children}) => <h1 style={{fontSize:'1.875rem', fontWeight:'700', marginTop:'2rem', marginBottom:'1rem', lineHeight:'1.3'}}>{children}</h1>,
               h2: ({children}) => <h2 style={{fontSize:'1.5rem', fontWeight:'700', marginTop:'1.75rem', marginBottom:'0.75rem', lineHeight:'1.3'}}>{children}</h2>,
