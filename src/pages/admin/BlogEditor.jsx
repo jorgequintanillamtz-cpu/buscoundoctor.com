@@ -58,7 +58,10 @@ export default function BlogEditor() {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       // Si está insertando imagen en contenido, agregar al markdown
       if (contentInputRef.current && contentInputRef.current.dataset.insertImage === "true") {
-        const newContent = insertImageToMarkdown(form.content, file_url, file.name.split(".")[0]);
+        const cursorStart = parseInt(contentInputRef.current.dataset.cursorStart || form.content.length);
+        const cursorEnd = parseInt(contentInputRef.current.dataset.cursorEnd || form.content.length);
+        const markdownImage = `![${file.name.split(".")[0]}](${file_url})\n`;
+        const newContent = form.content.slice(0, cursorStart) + markdownImage + form.content.slice(cursorEnd);
         update("content", newContent);
         contentInputRef.current.dataset.insertImage = "false";
         toast.success("Imagen insertada");
@@ -75,6 +78,8 @@ export default function BlogEditor() {
 
   const handleInsertImage = () => {
     if (contentInputRef.current) {
+      contentInputRef.current.dataset.cursorStart = contentInputRef.current.selectionStart;
+      contentInputRef.current.dataset.cursorEnd = contentInputRef.current.selectionEnd;
       contentInputRef.current.dataset.insertImage = "true";
       imageInputRef.current?.click();
     }
