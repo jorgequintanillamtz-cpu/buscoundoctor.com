@@ -48,6 +48,11 @@
       "title": "Publicado",
       "default": false
     },
+    "scheduled_at": {
+      "type": "string",
+      "title": "Publicaci\u00f3n programada",
+      "description": "Fecha y hora en que se publicar\u00e1 autom\u00e1ticamente (ISO 8601)"
+    },
     "featured_specialists": {
       "type": "array",
       "title": "Especialistas destacados (slugs)",

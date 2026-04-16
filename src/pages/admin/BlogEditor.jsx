@@ -22,7 +22,7 @@ export default function BlogEditor() {
   const isEditing = !!id;
 
   const [form, setForm] = useState({
-    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", meta_description: "", tags: [], published: false, image: "",
+    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", meta_description: "", tags: [], published: false, image: "", scheduled_at: "",
   });
   const [loading, setLoading] = useState(isEditing);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -39,7 +39,7 @@ export default function BlogEditor() {
           setForm({
             title: post.title || "", slug: post.slug || "", excerpt: post.excerpt || "",
             content: post.content || "", category: post.category || "",
-            author: post.author || "Equipo BuscounDoctor", meta_description: post.meta_description || "", tags: post.tags || [], published: post.published || false, image: post.image || "",
+            author: post.author || "Equipo BuscounDoctor", meta_description: post.meta_description || "", tags: post.tags || [], published: post.published || false, image: post.image || "", scheduled_at: post.scheduled_at ? post.scheduled_at.slice(0, 16) : "",
           });
         }
         setLoading(false);
@@ -96,6 +96,9 @@ export default function BlogEditor() {
       const data = {
         ...form,
         slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, "-").replace(/(^-|-$)/g, ""),
+        scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
+        // Si tiene programación, no publicar de inmediato aunque el switch esté activo
+        published: form.scheduled_at ? false : form.published,
       };
 
       if (isEditing) {
@@ -307,9 +310,40 @@ export default function BlogEditor() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <Switch checked={form.published} onCheckedChange={v => update("published", v)} />
-          <span className="text-sm font-medium">Publicar artículo</span>
+        {/* Programar publicación */}
+        <div className="bg-muted/50 rounded-xl p-4 space-y-3 border border-border/50">
+          <p className="text-sm font-medium">Publicación</p>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={form.published && !form.scheduled_at}
+              onCheckedChange={v => { update("published", v); if (v) update("scheduled_at", ""); }}
+              disabled={!!form.scheduled_at}
+            />
+            <span className="text-sm">Publicar ahora</span>
+          </div>
+          <div>
+            <label className="text-sm text-muted-foreground mb-1 block">— o programar para:</label>
+            <input
+              type="datetime-local"
+              value={form.scheduled_at}
+              onChange={e => { update("scheduled_at", e.target.value); if (e.target.value) update("published", false); }}
+              className="w-full sm:w-auto h-9 px-3 py-1 text-sm bg-background border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            {form.scheduled_at && (
+              <button
+                type="button"
+                onClick={() => update("scheduled_at", "")}
+                className="ml-2 text-xs text-destructive hover:underline"
+              >
+                Quitar programación
+              </button>
+            )}
+          </div>
+          {form.scheduled_at && (
+            <p className="text-xs text-primary flex items-center gap-1">
+              📅 Se publicará el {new Date(form.scheduled_at).toLocaleString('es-MX', { dateStyle: 'full', timeStyle: 'short' })}
+            </p>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4">

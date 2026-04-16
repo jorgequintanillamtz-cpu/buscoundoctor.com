@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import moment from "moment";
@@ -58,10 +58,17 @@ export default function AdminBlog() {
               <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                 {post.category && <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded-full">{post.category}</span>}
                 <span>{moment(post.created_date).format("DD MMM YYYY")}</span>
-                <span className={`flex items-center gap-1 ${post.published ? 'text-green-600' : 'text-muted-foreground'}`}>
-                  {post.published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                  {post.published ? "Publicado" : "Borrador"}
-                </span>
+                {post.scheduled_at && !post.published ? (
+                  <span className="flex items-center gap-1 text-amber-600">
+                    <Clock className="w-3 h-3" />
+                    Prog. {moment(post.scheduled_at).format("DD MMM · HH:mm")}
+                  </span>
+                ) : (
+                  <span className={`flex items-center gap-1 ${post.published ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    {post.published ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    {post.published ? "Publicado" : "Borrador"}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-1">
