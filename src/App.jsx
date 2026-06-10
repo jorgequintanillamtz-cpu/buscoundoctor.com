@@ -19,6 +19,8 @@ import AdminZones from './pages/admin/AdminZones';
 import AdminBlog from './pages/admin/AdminBlog';
 import BlogEditor from './pages/admin/BlogEditor';
 import AdminReviews from './pages/admin/AdminReviews';
+import AdminDoctores from './pages/admin/AdminDoctores';
+import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -62,6 +64,9 @@ const AuthenticatedApp = () => {
         <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
         <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
         <Route path="/admin/resenas" element={<AdminReviews />} />
+        <Route path="/admin/doctores" element={<AdminDoctores />} />
+        <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
+        <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

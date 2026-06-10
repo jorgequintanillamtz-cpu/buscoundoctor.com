@@ -1,0 +1,135 @@
+{
+  "name": "Doctor",
+  "type": "object",
+  "properties": {
+    "nombre_completo": {
+      "type": "string",
+      "title": "Nombre completo"
+    },
+    "cedula_profesional": {
+      "type": "string",
+      "title": "C\u00e9dula profesional"
+    },
+    "especialidad": {
+      "type": "string",
+      "title": "Especialidad"
+    },
+    "sub_especialidades": {
+      "type": "array",
+      "title": "Sub-especialidades",
+      "items": {
+        "type": "string"
+      }
+    },
+    "descripcion_profesional": {
+      "type": "string",
+      "title": "Descripci\u00f3n profesional"
+    },
+    "hospital_o_consultorio": {
+      "type": "string",
+      "title": "Hospital o consultorio"
+    },
+    "direccion": {
+      "type": "string",
+      "title": "Direcci\u00f3n"
+    },
+    "ciudad": {
+      "type": "string",
+      "title": "Ciudad",
+      "default": "Monterrey"
+    },
+    "telefono": {
+      "type": "string",
+      "title": "Tel\u00e9fono"
+    },
+    "whatsapp": {
+      "type": "string",
+      "title": "WhatsApp"
+    },
+    "correo_contacto": {
+      "type": "string",
+      "title": "Correo de contacto"
+    },
+    "sitio_web": {
+      "type": "string",
+      "title": "Sitio web"
+    },
+    "foto_perfil": {
+      "type": "string",
+      "title": "Foto de perfil"
+    },
+    "galeria_fotos": {
+      "type": "array",
+      "title": "Galer\u00eda de fotos",
+      "items": {
+        "type": "string"
+      }
+    },
+    "anos_experiencia": {
+      "type": "number",
+      "title": "A\u00f1os de experiencia"
+    },
+    "acepta_seguros": {
+      "type": "boolean",
+      "title": "Acepta seguros",
+      "default": false
+    },
+    "seguros_aceptados": {
+      "type": "array",
+      "title": "Seguros aceptados",
+      "items": {
+        "type": "string"
+      }
+    },
+    "idiomas": {
+      "type": "array",
+      "title": "Idiomas",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "Espa\u00f1ol"
+      ]
+    },
+    "precio_consulta_aproximado": {
+      "type": "string",
+      "title": "Precio de consulta aproximado"
+    },
+    "horarios": {
+      "type": "string",
+      "title": "Horarios"
+    },
+    "titulo_seo": {
+      "type": "string",
+      "title": "T\u00edtulo SEO"
+    },
+    "descripcion_seo": {
+      "type": "string",
+      "title": "Descripci\u00f3n SEO"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "estado_perfil": {
+      "type": "string",
+      "title": "Estado del perfil",
+      "enum": [
+        "borrador",
+        "en_revision",
+        "publicado"
+      ],
+      "default": "borrador"
+    },
+    "destacado": {
+      "type": "boolean",
+      "title": "Destacado",
+      "default": false
+    }
+  },
+  "required": [
+    "nombre_completo",
+    "cedula_profesional",
+    "especialidad"
+  ]
+}
