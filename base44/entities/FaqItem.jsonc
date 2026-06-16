@@ -1,0 +1,69 @@
+{
+  "name": "FaqItem",
+  "type": "object",
+  "properties": {
+    "faq_page_id": {
+      "type": "string",
+      "title": "ID de p\u00e1gina FAQ"
+    },
+    "specialty": {
+      "type": "string",
+      "title": "Especialidad"
+    },
+    "city": {
+      "type": "string",
+      "title": "Ciudad"
+    },
+    "question": {
+      "type": "string",
+      "title": "Pregunta"
+    },
+    "answer": {
+      "type": "string",
+      "title": "Respuesta"
+    },
+    "primary_keyword": {
+      "type": "string",
+      "title": "Keyword principal"
+    },
+    "secondary_keywords": {
+      "type": "string",
+      "title": "Keywords secundarias"
+    },
+    "category": {
+      "type": "string",
+      "title": "Categor\u00eda"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "meta_title": {
+      "type": "string",
+      "title": "Meta t\u00edtulo"
+    },
+    "meta_description": {
+      "type": "string",
+      "title": "Meta descripci\u00f3n"
+    },
+    "position": {
+      "type": "number",
+      "title": "Posici\u00f3n",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "title": "Estado",
+      "enum": [
+        "borrador",
+        "publicado"
+      ],
+      "default": "borrador"
+    }
+  },
+  "required": [
+    "faq_page_id",
+    "question",
+    "answer"
+  ]
+}

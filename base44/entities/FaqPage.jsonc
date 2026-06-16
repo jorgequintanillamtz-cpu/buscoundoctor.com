@@ -1,0 +1,54 @@
+{
+  "name": "FaqPage",
+  "type": "object",
+  "properties": {
+    "specialty": {
+      "type": "string",
+      "title": "Especialidad"
+    },
+    "city": {
+      "type": "string",
+      "title": "Ciudad"
+    },
+    "title": {
+      "type": "string",
+      "title": "T\u00edtulo"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "meta_title": {
+      "type": "string",
+      "title": "Meta t\u00edtulo"
+    },
+    "meta_description": {
+      "type": "string",
+      "title": "Meta descripci\u00f3n"
+    },
+    "schema_json": {
+      "type": "string",
+      "title": "Schema JSON-LD"
+    },
+    "status": {
+      "type": "string",
+      "title": "Estado",
+      "enum": [
+        "borrador",
+        "publicado",
+        "programado"
+      ],
+      "default": "borrador"
+    },
+    "faq_count": {
+      "type": "number",
+      "title": "Total FAQs",
+      "default": 0
+    }
+  },
+  "required": [
+    "specialty",
+    "city",
+    "slug"
+  ]
+}

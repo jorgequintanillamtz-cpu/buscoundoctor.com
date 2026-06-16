@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, UserRound } from "lucide-react";
 
 const navItems = [
   { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -7,7 +7,9 @@ const navItems = [
   { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
   { path: "/admin/zonas", label: "Zonas", icon: MapPin },
   { path: "/admin/blog", label: "Blog", icon: FileText },
+  { path: "/admin/doctores", label: "Doctores", icon: UserRound },
   { path: "/admin/resenas", label: "Reseñas", icon: Star },
+  { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
 ];
 
 export default function AdminLayout() {
