@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Save, Eye, EyeOff, Trash2, Code2, Plus, GripVertical } from "lucide-react";
+import { ChevronLeft, Save, Globe, Clock, Trash2, Code2, Plus, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -145,7 +145,10 @@ export default function AdminFaqEditor() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [showSchema, setShowSchema] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState("");
   const [pendingUpdates, setPendingUpdates] = useState({});
 
   useEffect(() => {
@@ -188,34 +191,80 @@ export default function AdminFaqEditor() {
     setPage(p => ({ ...p, faq_count: (p.faq_count || 0) + 1 }));
   };
 
-  const handleSave = async () => {
-    setSaving(true);
+  const buildSchema = () => JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": items.map(it => ({
+      "@type": "Question",
+      "name": it.question,
+      "acceptedAnswer": { "@type": "Answer", "text": it.answer }
+    }))
+  });
+
+  const savePendingItems = async () => {
+    await Promise.all(
+      Object.entries(pendingUpdates).map(([itemId, changes]) =>
+        base44.entities.FaqItem.update(itemId, changes)
+      )
+    );
+    setPendingUpdates({});
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
     try {
-      // Regenerate schema
-      const schema = JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": items.map(it => ({
-          "@type": "Question",
-          "name": it.question,
-          "acceptedAnswer": { "@type": "Answer", "text": it.answer }
-        }))
-      });
+      // Publish all items
+      const unpublished = items.filter(it => it.status !== "publicado");
+      await Promise.all(unpublished.map(it => base44.entities.FaqItem.update(it.id, { status: "publicado" })));
+      setItems(prev => prev.map(it => ({ ...it, status: "publicado" })));
 
       await base44.entities.FaqPage.update(id, {
         ...page,
-        schema_json: schema,
+        status: "publicado",
+        schema_json: buildSchema(),
         faq_count: items.length,
         slug: page.slug || slugify(`${page.specialty}-${page.city}`),
       });
-
-      // Batch save pending item updates
-      await Promise.all(
-        Object.entries(pendingUpdates).map(([itemId, changes]) =>
-          base44.entities.FaqItem.update(itemId, changes)
-        )
-      );
+      setPage(p => ({ ...p, status: "publicado" }));
       setPendingUpdates({});
+      toast.success("¡Página y preguntas publicadas!");
+    } catch (e) {
+      toast.error("Error: " + e.message);
+    }
+    setPublishing(false);
+  };
+
+  const handleSchedule = async () => {
+    if (!scheduledAt) { toast.error("Selecciona una fecha y hora"); return; }
+    setPublishing(true);
+    try {
+      await base44.entities.FaqPage.update(id, {
+        ...page,
+        status: "programado",
+        schema_json: buildSchema(),
+        faq_count: items.length,
+        slug: page.slug || slugify(`${page.specialty}-${page.city}`),
+      });
+      setPage(p => ({ ...p, status: "programado" }));
+      await savePendingItems();
+      setShowSchedule(false);
+      toast.success(`Programado para ${new Date(scheduledAt).toLocaleString("es-MX")}`);
+    } catch (e) {
+      toast.error("Error: " + e.message);
+    }
+    setPublishing(false);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await base44.entities.FaqPage.update(id, {
+        ...page,
+        schema_json: buildSchema(),
+        faq_count: items.length,
+        slug: page.slug || slugify(`${page.specialty}-${page.city}`),
+      });
+      await savePendingItems();
       toast.success("FAQs guardadas");
     } catch (e) {
       toast.error("Error: " + e.message);
@@ -255,14 +304,22 @@ export default function AdminFaqEditor() {
           <h1 className="font-heading font-bold text-xl text-foreground">{page.specialty} en {page.city}</h1>
           <p className="text-sm text-muted-foreground font-mono mt-0.5">/faq/{page.slug}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={() => setShowSchema(s => !s)} className="rounded-xl gap-1.5">
             <Code2 className="w-4 h-4" />
             Schema
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="rounded-xl gap-1.5">
-            {saving ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-            Guardar
+          <Button variant="outline" size="sm" onClick={() => setShowSchedule(s => !s)} className="rounded-xl gap-1.5">
+            <Clock className="w-4 h-4" />
+            Programar
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleSave} disabled={saving} className="rounded-xl gap-1.5">
+            {saving ? <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+            Guardar borrador
+          </Button>
+          <Button onClick={handlePublish} disabled={publishing || saving} className="rounded-xl gap-1.5">
+            {publishing ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Globe className="w-4 h-4" />}
+            {page.status === "publicado" ? "Actualizar" : "Publicar todo"}
           </Button>
         </div>
       </div>
@@ -302,6 +359,30 @@ export default function AdminFaqEditor() {
               </div>
             )}
           </div>
+
+          {/* Schedule panel */}
+          {showSchedule && (
+            <div className="bg-card border border-amber-200 rounded-2xl p-5 space-y-3">
+              <h2 className="font-heading font-semibold text-sm text-amber-700 flex items-center gap-2">
+                <Clock className="w-4 h-4" /> Programar publicación
+              </h2>
+              <p className="text-xs text-muted-foreground">Selecciona cuándo se publicará automáticamente esta página de FAQs.</p>
+              <input
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={e => setScheduledAt(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowSchedule(false)} className="rounded-xl flex-1">Cancelar</Button>
+                <Button size="sm" onClick={handleSchedule} disabled={publishing} className="rounded-xl flex-1 gap-1.5 bg-amber-500 hover:bg-amber-600 text-white border-amber-500">
+                  {publishing ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Clock className="w-3.5 h-3.5" />}
+                  Confirmar
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Schema JSON */}
           {showSchema && (
