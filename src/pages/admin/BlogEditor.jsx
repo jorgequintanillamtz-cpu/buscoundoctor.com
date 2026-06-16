@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, FileEdit, Clock, Sparkles } from "lucide-react";
+import { ChevronLeft, Save, FileEdit, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import BlogEditorMain from "@/components/admin/BlogEditorMain";
 import BlogEditorSidebar from "@/components/admin/BlogEditorSidebar";
+import AIGeneratorModal from "@/components/admin/AIGeneratorModal";
 
 export function generateBlogSlug(title) {
   return (title || "")
@@ -220,106 +221,6 @@ export default function BlogEditor() {
       {showAIModal && (
         <AIGeneratorModal form={form} update={update} onClose={() => setShowAIModal(false)} />
       )}
-    </div>
-  );
-}
-
-// ---- AI Modal ----
-function AIGeneratorModal({ form, update, onClose }) {
-  const [fields, setFields] = useState({
-    keyword: form.primary_keyword || "",
-    city: "Monterrey",
-    specialty: form.category || "",
-    type: "Guía",
-  });
-  const [generating, setGenerating] = useState(false);
-
-  const TYPES = ["Guía", "Comparativa", "Top 10", "Preguntas frecuentes", "Informativo", "Tratamiento", "Síntomas"];
-
-  const handleGenerate = async () => {
-    if (!fields.keyword) { toast.error("Ingresa una keyword principal"); return; }
-    setGenerating(true);
-    try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Genera un artículo de blog médico completo en español para SEO.
-Keyword principal: "${fields.keyword}"
-Ciudad: ${fields.city}
-Especialidad: ${fields.specialty || "medicina general"}
-Tipo: ${fields.type}
-
-Devuelve JSON con: title, meta_title, meta_description, content (Markdown con H1, intro, H2s, H3s, FAQs al final, conclusión), excerpt`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            meta_title: { type: "string" },
-            meta_description: { type: "string" },
-            excerpt: { type: "string" },
-            content: { type: "string" },
-          }
-        }
-      });
-      if (result.title) update("title", result.title);
-      if (result.meta_title) update("meta_title", result.meta_title);
-      if (result.meta_description) update("meta_description", result.meta_description);
-      if (result.excerpt) update("excerpt", result.excerpt);
-      if (result.content) update("content", result.content);
-      update("primary_keyword", fields.keyword);
-      toast.success("Artículo generado con IA");
-      onClose();
-    } catch (e) {
-      toast.error("Error al generar: " + e.message);
-    }
-    setGenerating(false);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-heading font-bold text-lg flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" /> Generar artículo con IA
-          </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">✕</button>
-        </div>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs font-medium mb-1 block text-muted-foreground">Keyword principal *</label>
-            <input value={fields.keyword} onChange={e => setFields(p => ({ ...p, keyword: e.target.value }))}
-              className="w-full h-9 px-3 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring"
-              placeholder="mejores cardiólogos monterrey" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium mb-1 block text-muted-foreground">Ciudad</label>
-              <input value={fields.city} onChange={e => setFields(p => ({ ...p, city: e.target.value }))}
-                className="w-full h-9 px-3 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" />
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1 block text-muted-foreground">Especialidad</label>
-              <input value={fields.specialty} onChange={e => setFields(p => ({ ...p, specialty: e.target.value }))}
-                className="w-full h-9 px-3 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder="Cardiología" />
-            </div>
-          </div>
-          <div>
-            <label className="text-xs font-medium mb-1 block text-muted-foreground">Tipo de artículo</label>
-            <div className="flex flex-wrap gap-1.5">
-              {TYPES.map(t => (
-                <button key={t} type="button" onClick={() => setFields(p => ({ ...p, type: t }))}
-                  className={`px-3 py-1 rounded-full text-xs transition-colors ${fields.type === t ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        <Button onClick={handleGenerate} disabled={generating} className="w-full rounded-xl gap-2">
-          {generating
-            ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generando...</>
-            : <><Sparkles className="w-4 h-4" /> Generar artículo</>}
-        </Button>
-      </div>
     </div>
   );
 }
