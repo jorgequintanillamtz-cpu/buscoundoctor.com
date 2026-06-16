@@ -12,7 +12,11 @@
     },
     "image": {
       "type": "string",
-      "title": "Imagen"
+      "title": "Imagen destacada"
+    },
+    "image_alt": {
+      "type": "string",
+      "title": "Alt text imagen"
     },
     "excerpt": {
       "type": "string",
@@ -30,32 +34,56 @@
       "type": "string",
       "title": "Autor"
     },
+    "meta_title": {
+      "type": "string",
+      "title": "Meta t\u00edtulo SEO"
+    },
     "meta_description": {
       "type": "string",
-      "title": "Meta descripci\u00f3n SEO",
-      "description": "Descripci\u00f3n para buscadores (160 caracteres recomendados)"
+      "title": "Meta descripci\u00f3n SEO"
+    },
+    "primary_keyword": {
+      "type": "string",
+      "title": "Keyword principal"
+    },
+    "secondary_keywords": {
+      "type": "string",
+      "title": "Keywords secundarias"
     },
     "tags": {
       "type": "array",
-      "title": "Etiquetas (Tags)",
+      "title": "Tags",
       "items": {
         "type": "string"
-      },
-      "description": "Palabras clave para categorizar el art\u00edculo"
+      }
     },
     "published": {
       "type": "boolean",
       "title": "Publicado",
       "default": false
     },
+    "featured": {
+      "type": "boolean",
+      "title": "Destacado",
+      "default": false
+    },
+    "indexable": {
+      "type": "boolean",
+      "title": "Indexable",
+      "default": true
+    },
+    "schema_type": {
+      "type": "string",
+      "title": "Schema markup",
+      "default": "Article"
+    },
     "scheduled_at": {
       "type": "string",
-      "title": "Publicaci\u00f3n programada",
-      "description": "Fecha y hora en que se publicar\u00e1 autom\u00e1ticamente (ISO 8601)"
+      "title": "Publicaci\u00f3n programada"
     },
     "featured_specialists": {
       "type": "array",
-      "title": "Especialistas destacados (slugs)",
+      "title": "Especialistas destacados",
       "items": {
         "type": "string"
       }

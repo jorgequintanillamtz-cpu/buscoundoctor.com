@@ -17,7 +17,7 @@ import AdminSpecialists from './pages/admin/AdminSpecialists';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
 import AdminZones from './pages/admin/AdminZones';
 import AdminBlog from './pages/admin/AdminBlog';
-import BlogEditor from './pages/admin/BlogEditor';
+import BlogEditor from './pages/admin/BlogEditor.jsx';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminDoctores from './pages/admin/AdminDoctores';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';

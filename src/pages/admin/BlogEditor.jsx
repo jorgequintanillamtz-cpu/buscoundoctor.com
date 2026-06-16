@@ -1,19 +1,43 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Upload, X, Eye, Edit3 } from "lucide-react";
+import { ChevronLeft, Eye, Save, FileEdit, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeSanitize from "rehype-sanitize";
+import BlogEditorMain from "@/components/admin/BlogEditorMain";
+import BlogEditorSidebar from "@/components/admin/BlogEditorSidebar";
 
-// Función para insertar imagen en Markdown
-const insertImageToMarkdown = (markdown, imageUrl, altText = "imagen") => {
-  const markdownImage = `![${altText}](${imageUrl})\n`;
-  return markdown + markdownImage;
+export function generateBlogSlug(title) {
+  return (title || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+export const EMPTY_BLOG_FORM = {
+  title: "",
+  slug: "",
+  content: "",
+  excerpt: "",
+  image: "",
+  image_alt: "",
+  meta_title: "",
+  meta_description: "",
+  primary_keyword: "",
+  secondary_keywords: "",
+  category: "",
+  author: "",
+  tags: [],
+  published: false,
+  featured: false,
+  indexable: true,
+  schema_type: "Article",
+  scheduled_at: "",
+  featured_specialists: [],
 };
 
 export default function BlogEditor() {
@@ -21,97 +45,119 @@ export default function BlogEditor() {
   const navigate = useNavigate();
   const isEditing = !!id;
 
-  const [form, setForm] = useState({
-    title: "", slug: "", excerpt: "", content: "", category: "", author: "Equipo BuscounDoctor", meta_description: "", tags: [], published: false, image: "", scheduled_at: "",
-  });
+  const [form, setForm] = useState(EMPTY_BLOG_FORM);
   const [loading, setLoading] = useState(isEditing);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const imageInputRef = useRef(null);
-  const contentInputRef = useRef(null);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const autoSaveRef = useRef(null);
+  const formRef = useRef(form);
+
+  useEffect(() => { formRef.current = form; }, [form]);
 
   useEffect(() => {
     if (isEditing) {
-      async function load() {
-        const posts = await base44.entities.BlogPost.list();
+      base44.entities.BlogPost.list().then(posts => {
         const post = posts.find(p => p.id === id);
         if (post) {
           setForm({
-            title: post.title || "", slug: post.slug || "", excerpt: post.excerpt || "",
-            content: post.content || "", category: post.category || "",
-            author: post.author || "Equipo BuscounDoctor", meta_description: post.meta_description || "", tags: post.tags || [], published: post.published || false, image: post.image || "", scheduled_at: post.scheduled_at ? post.scheduled_at.slice(0, 16) : "",
+            ...EMPTY_BLOG_FORM,
+            title: post.title || "",
+            slug: post.slug || "",
+            content: post.content || "",
+            excerpt: post.excerpt || "",
+            image: post.image || "",
+            image_alt: post.image_alt || "",
+            meta_title: post.meta_title || "",
+            meta_description: post.meta_description || "",
+            primary_keyword: post.primary_keyword || "",
+            secondary_keywords: post.secondary_keywords || "",
+            category: post.category || "",
+            author: post.author || "",
+            tags: post.tags || [],
+            published: post.published || false,
+            featured: post.featured || false,
+            indexable: post.indexable !== false,
+            schema_type: post.schema_type || "Article",
+            scheduled_at: post.scheduled_at ? post.scheduled_at.slice(0, 16) : "",
+            featured_specialists: post.featured_specialists || [],
           });
         }
         setLoading(false);
-      }
-      load();
+      });
     }
   }, [id, isEditing]);
 
-  const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
+  // Auto-save every 30s (only when editing existing)
+  useEffect(() => {
+    if (!isEditing) return;
+    autoSaveRef.current = setInterval(async () => {
+      const f = formRef.current;
+      if (!f.title) return;
+      try {
+        await base44.entities.BlogPost.update(id, buildSaveData(f));
+        setLastSaved(new Date());
+      } catch {}
+    }, 30000);
+    return () => clearInterval(autoSaveRef.current);
+  }, [id, isEditing]);
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingImage(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      // Si está insertando imagen en contenido, agregar al markdown
-      if (contentInputRef.current && contentInputRef.current.dataset.insertImage === "true") {
-        const cursorStart = parseInt(contentInputRef.current.dataset.cursorStart || form.content.length);
-        const cursorEnd = parseInt(contentInputRef.current.dataset.cursorEnd || form.content.length);
-        const markdownImage = `![${file.name.split(".")[0]}](${file_url})\n`;
-        const newContent = form.content.slice(0, cursorStart) + markdownImage + form.content.slice(cursorEnd);
-        update("content", newContent);
-        contentInputRef.current.dataset.insertImage = "false";
-        toast.success("Imagen insertada");
-      } else {
-        // Imagen principal del artículo
-        update("image", file_url);
-        toast.success("Imagen cargada");
+  const update = useCallback((field, value) => {
+    setForm(prev => {
+      const next = { ...prev, [field]: value };
+      if (field === "title" && !prev._slugManual) {
+        next.slug = generateBlogSlug(value);
       }
-    } catch (error) {
-      toast.error("Error al cargar imagen");
-    }
-    setUploadingImage(false);
-  };
+      return next;
+    });
+  }, []);
 
-  const handleInsertImage = () => {
-    if (contentInputRef.current) {
-      contentInputRef.current.dataset.cursorStart = contentInputRef.current.selectionStart;
-      contentInputRef.current.dataset.cursorEnd = contentInputRef.current.selectionEnd;
-      contentInputRef.current.dataset.insertImage = "true";
-      imageInputRef.current?.click();
-    }
-  };
+  const buildSaveData = (f) => ({
+    ...f,
+    slug: f.slug || generateBlogSlug(f.title),
+    scheduled_at: f.scheduled_at ? new Date(f.scheduled_at).toISOString() : null,
+    published: f.scheduled_at ? false : f.published,
+  });
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
+    if (!form.title) { toast.error("El título es obligatorio"); return; }
+    setSaving(true);
     try {
-      // Validar tamaño del contenido
-      if (form.content.length > 100000) {
-        toast.error("El contenido es muy grande. Intenta reducir el texto.");
-        return;
-      }
-
-      const data = {
-        ...form,
-        slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, "-").replace(/(^-|-$)/g, ""),
-        scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
-        // Si tiene programación, no publicar de inmediato aunque el switch esté activo
-        published: form.scheduled_at ? false : form.published,
-      };
-
+      const data = buildSaveData(formRef.current);
       if (isEditing) {
         await base44.entities.BlogPost.update(id, data);
-        toast.success("Artículo actualizado");
+        toast.success("Borrador guardado");
       } else {
-        await base44.entities.BlogPost.create(data);
-        toast.success("Artículo creado");
+        const created = await base44.entities.BlogPost.create(data);
+        toast.success("Artículo guardado");
+        navigate(`/admin/blog/editar/${created.id}`, { replace: true });
       }
-      navigate("/admin/blog");
-    } catch (error) {
-      toast.error("Error al guardar: " + error.message);
+      setLastSaved(new Date());
+    } catch (e) {
+      toast.error("Error al guardar: " + e.message);
     }
+    setSaving(false);
+  };
+
+  const handlePublish = async () => {
+    if (!form.title) { toast.error("El título es obligatorio"); return; }
+    setSaving(true);
+    try {
+      const data = { ...buildSaveData(formRef.current), published: true };
+      if (isEditing) {
+        await base44.entities.BlogPost.update(id, data);
+        setForm(prev => ({ ...prev, published: true }));
+        toast.success("Artículo publicado");
+      } else {
+        const created = await base44.entities.BlogPost.create(data);
+        toast.success("Artículo publicado");
+        navigate(`/admin/blog/editar/${created.id}`, { replace: true });
+      }
+      setLastSaved(new Date());
+    } catch (e) {
+      toast.error("Error al publicar: " + e.message);
+    }
+    setSaving(false);
   };
 
   if (loading) {
@@ -123,233 +169,156 @@ export default function BlogEditor() {
   }
 
   return (
-    <div className="max-w-3xl">
-      <button onClick={() => navigate("/admin/blog")} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
-        <ChevronLeft className="w-4 h-4" />
-        Volver al blog
-      </button>
-
-      <h1 className="font-heading font-bold text-2xl text-foreground mb-6">
-        {isEditing ? "Editar artículo" : "Nuevo artículo"}
-      </h1>
-
-      <div className="space-y-5">
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Título *</label>
-          <Input value={form.title} onChange={e => update("title", e.target.value)} className="rounded-xl h-11" placeholder="Título del artículo" />
+    <div className="min-h-screen bg-background">
+      {/* Top bar */}
+      <div className="sticky top-0 z-30 bg-white border-b border-border/50 px-6 py-3 flex items-center justify-between">
+        <button onClick={() => navigate("/admin/blog")}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeft className="w-4 h-4" />
+          Volver al blog
+        </button>
+        <div className="flex items-center gap-2">
+          {lastSaved && (
+            <span className="text-xs text-muted-foreground flex items-center gap-1 mr-1">
+              <Clock className="w-3 h-3" />
+              Guardado {lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+          <Button variant="outline" size="sm" className="rounded-xl gap-1.5 h-8"
+            onClick={() => setShowAIModal(true)}>
+            <Sparkles className="w-3.5 h-3.5" />
+            Generar con IA
+          </Button>
+          <Button variant="outline" size="sm" className="rounded-xl gap-1.5 h-8"
+            onClick={handleSaveDraft} disabled={saving}>
+            {saving
+              ? <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+              : <FileEdit className="w-3.5 h-3.5" />}
+            Guardar borrador
+          </Button>
+          <Button size="sm" className="rounded-xl gap-1.5 h-8"
+            onClick={handlePublish} disabled={saving}>
+            {saving
+              ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : <Save className="w-3.5 h-3.5" />}
+            {form.published ? "Actualizar" : "Crear artículo"}
+          </Button>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Body */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-0 items-start">
+        <div className="p-6 max-w-4xl">
+          <BlogEditorMain form={form} update={update} onOpenAI={() => setShowAIModal(true)} />
+        </div>
+        <div className="xl:border-l border-border/50 p-5 xl:sticky xl:top-[57px] xl:max-h-[calc(100vh-57px)] xl:overflow-y-auto">
+          <BlogEditorSidebar form={form} update={update} onSaveDraft={handleSaveDraft} onPublish={handlePublish} saving={saving} />
+        </div>
+      </div>
+
+      {/* AI Modal */}
+      {showAIModal && (
+        <AIGeneratorModal form={form} update={update} onClose={() => setShowAIModal(false)} />
+      )}
+    </div>
+  );
+}
+
+// ---- AI Modal ----
+function AIGeneratorModal({ form, update, onClose }) {
+  const [fields, setFields] = useState({
+    keyword: form.primary_keyword || "",
+    city: "Monterrey",
+    specialty: form.category || "",
+    type: "Guía",
+  });
+  const [generating, setGenerating] = useState(false);
+
+  const TYPES = ["Guía", "Comparativa", "Top 10", "Preguntas frecuentes", "Informativo", "Tratamiento", "Síntomas"];
+
+  const handleGenerate = async () => {
+    if (!fields.keyword) { toast.error("Ingresa una keyword principal"); return; }
+    setGenerating(true);
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Genera un artículo de blog médico completo en español para SEO.
+Keyword principal: "${fields.keyword}"
+Ciudad: ${fields.city}
+Especialidad: ${fields.specialty || "medicina general"}
+Tipo: ${fields.type}
+
+Devuelve JSON con: title, meta_title, meta_description, content (Markdown con H1, intro, H2s, H3s, FAQs al final, conclusión), excerpt`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            meta_title: { type: "string" },
+            meta_description: { type: "string" },
+            excerpt: { type: "string" },
+            content: { type: "string" },
+          }
+        }
+      });
+      if (result.title) update("title", result.title);
+      if (result.meta_title) update("meta_title", result.meta_title);
+      if (result.meta_description) update("meta_description", result.meta_description);
+      if (result.excerpt) update("excerpt", result.excerpt);
+      if (result.content) update("content", result.content);
+      update("primary_keyword", fields.keyword);
+      toast.success("Artículo generado con IA");
+      onClose();
+    } catch (e) {
+      toast.error("Error al generar: " + e.message);
+    }
+    setGenerating(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading font-bold text-lg flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" /> Generar artículo con IA
+          </h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">✕</button>
+        </div>
+        <div className="space-y-3">
           <div>
-            <label className="text-sm font-medium mb-1.5 block">Slug</label>
-            <Input value={form.slug} onChange={e => update("slug", e.target.value)} className="rounded-xl" placeholder="auto-generado" />
+            <label className="text-xs font-medium mb-1 block text-muted-foreground">Keyword principal *</label>
+            <input value={fields.keyword} onChange={e => setFields(p => ({ ...p, keyword: e.target.value }))}
+              className="w-full h-9 px-3 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring"
+              placeholder="mejores cardiólogos monterrey" />
           </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Categoría</label>
-            <Input value={form.category} onChange={e => update("category", e.target.value)} className="rounded-xl" placeholder="Salud Mental, etc." />
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Extracto</label>
-          <Input value={form.excerpt} onChange={e => update("excerpt", e.target.value)} className="rounded-xl" placeholder="Resumen breve del artículo" />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Autor</label>
-          <Input value={form.author} onChange={e => update("author", e.target.value)} className="rounded-xl" />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Imagen principal</label>
-          <div className="flex items-center gap-4">
-            {form.image && (
-              <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                <img src={form.image} alt="Portada" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => update("image", "")}
-                  className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              </div>
-            )}
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="rounded-xl gap-2"
-                onClick={() => imageInputRef.current?.click()}
-                disabled={uploadingImage}
-              >
-                <Upload className="w-4 h-4" />
-                {uploadingImage ? "Cargando..." : "Subir imagen"}
-              </Button>
+              <label className="text-xs font-medium mb-1 block text-muted-foreground">Ciudad</label>
+              <input value={fields.city} onChange={e => setFields(p => ({ ...p, city: e.target.value }))}
+                className="w-full h-9 px-3 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" />
             </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Meta descripción SEO (160 caracteres máx)</label>
-          <Input
-            value={form.meta_description}
-            onChange={e => update("meta_description", e.target.value.slice(0, 160))}
-            maxLength={160}
-            className="rounded-xl"
-            placeholder="Descripción para buscadores que atraiga clicks"
-          />
-          <p className="text-xs text-muted-foreground mt-1">{form.meta_description.length}/160</p>
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-1.5 block">Etiquetas (Tags)</label>
-          <div className="flex flex-wrap gap-2 mb-2 p-3 rounded-xl border border-border/50 bg-card min-h-[40px]">
-            {form.tags.map((tag, i) => (
-              <span key={i} className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full flex items-center gap-1">
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => update("tags", form.tags.filter((_, idx) => idx !== i))}
-                  className="hover:opacity-70"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              id="tagInput"
-              className="rounded-xl"
-              placeholder="Ej: diabetes, prevención, nutrición"
-              onKeyDown={e => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  const input = e.target.value.trim();
-                  if (input && !form.tags.includes(input)) {
-                    update("tags", [...form.tags, input]);
-                    e.target.value = "";
-                  }
-                }
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => {
-                const input = document.getElementById("tagInput");
-                const val = input.value.trim();
-                if (val && !form.tags.includes(val)) {
-                  update("tags", [...form.tags, val]);
-                  input.value = "";
-                }
-              }}
-            >
-              Agregar
-            </Button>
-          </div>
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-sm font-medium block">Contenido (Markdown)</label>
-            <div className="flex gap-1">
-              <button
-                type="button"
-                onClick={() => setShowPreview(false)}
-                className={`text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${
-                  !showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                <Edit3 className="w-3 h-3" />
-                Editar
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowPreview(true)}
-                className={`text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${
-                  showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                <Eye className="w-3 h-3" />
-                Vista previa
-              </button>
+            <div>
+              <label className="text-xs font-medium mb-1 block text-muted-foreground">Especialidad</label>
+              <input value={fields.specialty} onChange={e => setFields(p => ({ ...p, specialty: e.target.value }))}
+                className="w-full h-9 px-3 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring"
+                placeholder="Cardiología" />
             </div>
-          </div>
-
-          {!showPreview ? (
-            <div className="space-y-2">
-              <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg">
-                <strong>Sintaxis Markdown:</strong> # H1 · ## H2 · ### H3 · **bold** · *italic* · ![alt](url) · [link](url) · - lista
-              </div>
-              <textarea
-                ref={contentInputRef}
-                value={form.content}
-                onChange={e => update("content", e.target.value)}
-                placeholder="Escribe tu contenido en Markdown..."
-                className="w-full min-h-[400px] p-4 font-mono text-sm bg-white border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-              />
-              <button
-                type="button"
-                onClick={handleInsertImage}
-                disabled={uploadingImage}
-                className="text-xs px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/80 transition-colors flex items-center gap-1 disabled:opacity-50"
-              >
-                <Upload className="w-3 h-3" />
-                {uploadingImage ? "Subiendo..." : "Insertar imagen"}
-              </button>
-            </div>
-          ) : (
-            <div className="w-full min-h-[400px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-a:text-primary prose-p:leading-relaxed prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4 prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3 prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-2 prose-img:rounded-xl prose-img:my-4 prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic prose-code:bg-muted prose-code:text-foreground prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-xl prose-ul:list-disc prose-ol:list-decimal prose-li:my-1 prose-hr:border-border">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>{form.content}</ReactMarkdown>
-            </div>
-          )}
-        </div>
-
-        {/* Programar publicación */}
-        <div className="bg-muted/50 rounded-xl p-4 space-y-3 border border-border/50">
-          <p className="text-sm font-medium">Publicación</p>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={form.published && !form.scheduled_at}
-              onCheckedChange={v => { update("published", v); if (v) update("scheduled_at", ""); }}
-              disabled={!!form.scheduled_at}
-            />
-            <span className="text-sm">Publicar ahora</span>
           </div>
           <div>
-            <label className="text-sm text-muted-foreground mb-1 block">— o programar para:</label>
-            <input
-              type="datetime-local"
-              value={form.scheduled_at}
-              onChange={e => { update("scheduled_at", e.target.value); if (e.target.value) update("published", false); }}
-              className="w-full sm:w-auto h-9 px-3 py-1 text-sm bg-background border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-            {form.scheduled_at && (
-              <button
-                type="button"
-                onClick={() => update("scheduled_at", "")}
-                className="ml-2 text-xs text-destructive hover:underline"
-              >
-                Quitar programación
-              </button>
-            )}
+            <label className="text-xs font-medium mb-1 block text-muted-foreground">Tipo de artículo</label>
+            <div className="flex flex-wrap gap-1.5">
+              {TYPES.map(t => (
+                <button key={t} type="button" onClick={() => setFields(p => ({ ...p, type: t }))}
+                  className={`px-3 py-1 rounded-full text-xs transition-colors ${fields.type === t ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
-          {form.scheduled_at && (
-            <p className="text-xs text-primary flex items-center gap-1">
-              📅 Se publicará el {new Date(form.scheduled_at).toLocaleString('es-MX', { dateStyle: 'full', timeStyle: 'short' })}
-            </p>
-          )}
         </div>
-
-        <div className="flex justify-end gap-3 pt-4">
-          <Button variant="outline" onClick={() => navigate("/admin/blog")} className="rounded-xl">Cancelar</Button>
-          <Button onClick={handleSave} className="rounded-xl">{isEditing ? "Guardar cambios" : "Crear artículo"}</Button>
-        </div>
+        <Button onClick={handleGenerate} disabled={generating} className="w-full rounded-xl gap-2">
+          {generating
+            ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generando...</>
+            : <><Sparkles className="w-4 h-4" /> Generar artículo</>}
+        </Button>
       </div>
     </div>
   );
