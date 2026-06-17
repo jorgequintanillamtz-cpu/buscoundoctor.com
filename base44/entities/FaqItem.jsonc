@@ -22,6 +22,11 @@
       "type": "string",
       "title": "Respuesta"
     },
+    "description": {
+      "type": "string",
+      "title": "Descripci\u00f3n",
+      "maxLength": 1000
+    },
     "primary_keyword": {
       "type": "string",
       "title": "Keyword principal"

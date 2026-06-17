@@ -29,6 +29,12 @@ export default function Header() {
             <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Blog
             </Link>
+            <Link to="/nosotros" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Nosotros
+            </Link>
+            <Link to="/contacto" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Contacto
+            </Link>
             <Link to="/admin">
               <Button size="sm" variant="outline" className="text-xs">
                 Admin
@@ -66,8 +72,19 @@ export default function Header() {
             to="/blog"
             onClick={() => setOpen(false)}
             className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-            
               Blog
+            </Link>
+            <Link
+            to="/nosotros"
+            onClick={() => setOpen(false)}
+            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+              Nosotros
+            </Link>
+            <Link
+            to="/contacto"
+            onClick={() => setOpen(false)}
+            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+              Contacto
             </Link>
             <Link
             to="/admin"

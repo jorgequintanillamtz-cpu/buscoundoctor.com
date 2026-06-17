@@ -35,6 +35,8 @@ export default function Footer() {
               <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">Inicio</Link>
               <Link to="/especialistas" className="text-sm text-muted-foreground hover:text-primary transition-colors">Especialistas</Link>
               <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+              <Link to="/nosotros" className="text-sm text-muted-foreground hover:text-primary transition-colors">Nosotros</Link>
+              <Link to="/contacto" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contacto</Link>
             </div>
           </div>
 
@@ -43,7 +45,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2.5 text-sm text-muted-foreground">
               <span>Monterrey, Nuevo León</span>
               <span>México</span>
-              <span>contacto@buscoundoctor.com</span>
+              <a href="mailto:contacto@buscoundoctor.com" className="hover:text-primary transition-colors">contacto@buscoundoctor.com</a>
             </div>
           </div>
         </div>

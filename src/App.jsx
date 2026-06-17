@@ -23,6 +23,8 @@ import AdminDoctores from './pages/admin/AdminDoctores';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
 import AdminFaqs from './pages/admin/AdminFaqs';
 import AdminFaqEditor from './pages/admin/AdminFaqEditor';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -56,6 +58,8 @@ const AuthenticatedApp = () => {
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
         <Route path="/blog" element={<BlogList />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/nosotros" element={<About />} />
+        <Route path="/contacto" element={<Contact />} />
       </Route>
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<Dashboard />} />
