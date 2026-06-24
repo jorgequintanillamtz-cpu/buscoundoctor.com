@@ -135,12 +135,12 @@ export default function BlogEditorMain({ form, update }) {
           className="w-full px-5 pt-5 pb-2 text-2xl font-heading font-bold text-foreground placeholder:text-muted-foreground/40 bg-transparent border-0 focus:outline-none resize-none leading-tight"
         />
         <div className="flex items-center justify-between px-5 pb-4">
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <span className="text-muted-foreground/50">/blog/</span>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground flex-1 mr-4 min-w-0">
+            <span className="text-muted-foreground/50 shrink-0">/blog/</span>
             <input
               value={form.slug}
               onChange={e => update("slug", e.target.value.replace(/[^a-z0-9-]/g, ""))}
-              className="text-sm text-primary bg-transparent border-0 focus:outline-none min-w-[120px] placeholder:text-muted-foreground/40"
+              className="text-sm text-primary bg-transparent border-0 focus:outline-none w-full placeholder:text-muted-foreground/40"
               placeholder="slug-del-articulo"
             />
           </div>

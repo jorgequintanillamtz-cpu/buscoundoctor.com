@@ -132,15 +132,14 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
           <SideLabel>Estatus</SideLabel>
           <div className="relative">
             <select
-              value={form.published ? "publicado" : form.scheduled_at ? "programado" : "borrador"}
+              value={form.published ? "publicado" : "borrador"}
               onChange={e => {
                 if (e.target.value === "publicado") { update("published", true); update("scheduled_at", ""); }
-                else if (e.target.value === "borrador") { update("published", false); update("scheduled_at", ""); }
+                else if (e.target.value === "borrador") { update("published", false); }
               }}
               className="w-full h-9 pl-3 pr-8 text-sm bg-background border border-input rounded-xl appearance-none focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="borrador">Borrador</option>
-              <option value="programado">Programado</option>
               <option value="publicado">Publicado</option>
             </select>
             <ChevronDown className="absolute right-2.5 top-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />

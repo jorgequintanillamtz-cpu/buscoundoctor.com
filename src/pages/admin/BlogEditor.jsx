@@ -202,7 +202,7 @@ export default function BlogEditor() {
             {saving
               ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : <Save className="w-3.5 h-3.5" />}
-            {form.published ? "Actualizar" : "Crear artículo"}
+            {form.published ? "Actualizar artículo" : "Publicar artículo"}
           </Button>
         </div>
       </div>
