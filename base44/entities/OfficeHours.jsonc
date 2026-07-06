@@ -1,0 +1,37 @@
+{
+  "name": "OfficeHours",
+  "type": "object",
+  "properties": {
+    "office_id": {
+      "type": "string",
+      "title": "Consultorio (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Office"
+    },
+    "day_of_week": {
+      "type": "number",
+      "title": "D\u00eda de la semana",
+      "description": "0 = domingo, 6 = s\u00e1bado",
+      "minimum": 0,
+      "maximum": 6
+    },
+    "open_time": {
+      "type": "string",
+      "title": "Hora de apertura",
+      "format": "time"
+    },
+    "close_time": {
+      "type": "string",
+      "title": "Hora de cierre",
+      "format": "time"
+    },
+    "is_closed": {
+      "type": "boolean",
+      "title": "Cerrado",
+      "default": false
+    }
+  },
+  "required": [
+    "office_id",
+    "day_of_week"
+  ]
+}
