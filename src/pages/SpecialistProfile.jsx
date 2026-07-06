@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram } from "lucide-react";
+import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
 import ReviewList from "../components/ReviewList";
@@ -125,6 +125,12 @@ export default function SpecialistProfile() {
               <span className="block">{specialist.full_name?.split(' ')[0]}</span>
               <span className="block">{specialist.full_name?.split(' ').slice(1).join(' ')}</span>
             </h1>
+            {specialist.license_verification_status === "verified" && (
+              <div className="inline-flex items-center gap-1.5 mt-2 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm w-fit">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Cédula profesional verificada
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <span className="text-sm font-medium bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full" style={{ color: '#073348' }}>
                 {specialist.specialty}
