@@ -123,6 +123,42 @@
         "$$$",
         "$$$$"
       ]
+    },
+    "professional_license_number": {
+      "type": "string",
+      "title": "C\u00e9dula profesional",
+      "description": "N\u00famero de c\u00e9dula profesional. Debe ser \u00fanico entre todos los especialistas."
+    },
+    "license_verification_status": {
+      "type": "string",
+      "title": "Estado de verificaci\u00f3n de c\u00e9dula",
+      "enum": [
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "license_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Fecha de verificaci\u00f3n"
+    },
+    "license_verified_by": {
+      "type": "string",
+      "title": "Verificado por (User ID)"
+    },
+    "publication_status": {
+      "type": "string",
+      "title": "Estado de publicaci\u00f3n",
+      "enum": [
+        "draft",
+        "pending_review",
+        "published",
+        "suspended",
+        "rejected"
+      ],
+      "default": "draft"
     }
   },
   "required": [
@@ -130,5 +166,8 @@
     "slug",
     "specialty",
     "whatsapp"
+  ],
+  "uniqueFields": [
+    "professional_license_number"
   ]
 }
