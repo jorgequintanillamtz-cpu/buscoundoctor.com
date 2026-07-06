@@ -154,6 +154,17 @@ export default function DoctorEditorPerfil({ form, update }) {
           />
         </div>
 
+        <div>
+          <label className="text-sm font-medium mb-1.5 block">Cédula profesional *</label>
+          <Input
+            value={form.professional_license_number}
+            onChange={e => update("professional_license_number", e.target.value.trim())}
+            className="rounded-xl font-mono"
+            placeholder="1234567"
+            maxLength={10}
+          />
+        </div>
+
         <div className="flex gap-5 items-start flex-wrap">
           <div className="flex flex-col items-center gap-2 flex-shrink-0">
             <div className="relative w-24 h-24 cursor-pointer group" onClick={() => fotoRef.current?.click()}>

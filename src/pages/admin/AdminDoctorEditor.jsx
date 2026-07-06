@@ -10,6 +10,7 @@ import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 export const EMPTY_FORM = {
   full_name: "",
   slug: "",
+  professional_license_number: "",
   specialty: "",
   subspecialty: "",
   description: "",
@@ -110,6 +111,7 @@ export default function AdminDoctorEditor() {
   });
 
   const handleSaveDraft = async () => {
+    if (!formRef.current.professional_license_number) { toast.error("La cédula profesional es obligatoria"); return; }
     setSaving(true);
     try {
       const data = buildData(formRef.current);
@@ -134,6 +136,7 @@ export default function AdminDoctorEditor() {
     if (!f.full_name) { toast.error("El nombre es obligatorio"); return; }
     if (!f.specialty) { toast.error("La especialidad es obligatoria"); return; }
     if (!f.whatsapp) { toast.error("El WhatsApp es obligatorio para publicar"); return; }
+    if (!f.professional_license_number) { toast.error("La cédula profesional es obligatoria"); return; }
     setSaving(true);
     try {
       const data = { ...buildData(f), active: true };
