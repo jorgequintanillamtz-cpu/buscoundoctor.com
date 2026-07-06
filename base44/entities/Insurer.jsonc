@@ -1,0 +1,25 @@
+{
+  "name": "Insurer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nombre"
+    },
+    "logo_url": {
+      "type": "string",
+      "title": "Logo (URL de imagen)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "title": "Activo",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "uniqueFields": [
+    "name"
+  ]
+}
