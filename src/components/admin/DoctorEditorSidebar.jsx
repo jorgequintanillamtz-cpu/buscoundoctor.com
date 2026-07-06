@@ -1,11 +1,10 @@
-import { useState } from "react";
-import { CheckCircle2, XCircle, Star, Globe, Plus, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle2, Star, Globe, Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
-
-const SEGUROS = ["GNP", "AXA", "Metlife", "BBVA Salud", "Atlas", "Allianz", "Mapfre", "Seguros Monterrey", "HDI"];
+import { base44 } from "@/api/base44Client";
 
 const MODALIDADES = [
   { value: "presencial", label: "Presencial" },
@@ -26,7 +25,7 @@ function calcCompletitud(form) {
     form.certifications, form.profile_photo, form.address, form.city, form.zone,
     form.whatsapp, form.email, form.instagram, form.schedule, form.modality,
     form.years_experience, form.price_range, form.gallery?.length > 0,
-    form.video_url, form.services?.length > 0, form.insurers?.length > 0,
+    form.video_url, form.services?.length > 0, form.insurers_relation?.length > 0,
   ];
   return Math.round((campos.filter(Boolean).length / campos.length) * 100);
 }
@@ -45,10 +44,15 @@ const SelectBox = ({ value, onChange, options, placeholder }) => (
 export default function DoctorEditorSidebar({ form, update, onSaveDraft, saving }) {
   const completitud = calcCompletitud(form);
   const [serviceInput, setServiceInput] = useState("");
+  const [insurers, setInsurers] = useState([]);
 
-  const toggleSeguro = (s) => {
-    const cur = form.insurers || [];
-    update("insurers", cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s]);
+  useEffect(() => {
+    base44.entities.Insurer.list('name', 50).then(setInsurers).catch(() => {});
+  }, []);
+
+  const toggleInsurer = (id) => {
+    const cur = form.insurers_relation || [];
+    update("insurers_relation", cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id]);
   };
 
   const addService = () => {
@@ -151,18 +155,25 @@ export default function DoctorEditorSidebar({ form, update, onSaveDraft, saving 
         </div>
       </div>
 
-      {/* Seguros */}
+      {/* Aseguradoras (catálogo Insurer) */}
       <div className="bg-card rounded-2xl border border-border/50 p-4 space-y-3">
         <h3 className="font-heading font-semibold text-sm">Aseguradoras aceptadas</h3>
-        <div className="grid grid-cols-1 gap-2">
-          {SEGUROS.map(s => (
-            <label key={s} className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={(form.insurers || []).includes(s)} onChange={() => toggleSeguro(s)}
-                className="w-4 h-4 rounded border-input accent-primary" />
-              <span className="text-sm text-muted-foreground">{s}</span>
-            </label>
-          ))}
-        </div>
+        {insurers.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Cargando catálogo…</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-2">
+            {insurers.map(ins => (
+              <label key={ins.id} className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={(form.insurers_relation || []).includes(ins.id)} onChange={() => toggleInsurer(ins.id)}
+                  className="w-4 h-4 rounded border-input accent-primary" />
+                <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
+                  {ins.name}
+                </span>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

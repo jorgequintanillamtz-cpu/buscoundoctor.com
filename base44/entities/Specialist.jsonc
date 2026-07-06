@@ -82,9 +82,10 @@
         "type": "string"
       }
     },
-    "insurers": {
+    "insurers_relation": {
       "type": "array",
-      "title": "Aseguradoras aceptadas",
+      "title": "Aseguradoras (relaci\u00f3n)",
+      "description": "IDs de registros de la entidad Insurer",
       "items": {
         "type": "string"
       }

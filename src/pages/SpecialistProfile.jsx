@@ -14,6 +14,7 @@ export default function SpecialistProfile() {
   const [showForm, setShowForm] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [insurers, setInsurers] = useState([]);
 
   const getNext8Days = () => {
     const days = [];
@@ -45,6 +46,10 @@ export default function SpecialistProfile() {
       if (results.length > 0) {
         const specialist = results[0];
         setSpecialist(specialist);
+        try {
+          const insList = await base44.entities.Insurer.list('name', 50);
+          setInsurers(insList);
+        } catch {}
         
         // Add JSON-LD LocalBusiness schema
         const schema = {
@@ -98,6 +103,10 @@ export default function SpecialistProfile() {
       </div>);
 
   }
+
+  const resolvedInsurers = (specialist.insurers_relation || [])
+    .map(id => insurers.find(i => i.id === id))
+    .filter(Boolean);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -243,15 +252,18 @@ export default function SpecialistProfile() {
           </div>
           <div className="mt-5 pt-5 border-t border-border/50">
               <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
-              {specialist.insurers?.length > 0 ?
-          <div className="flex flex-wrap gap-2">
-                  {specialist.insurers.map((ins, i) =>
-            <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">{ins}</span>
-            )}
-                </div> :
+              {resolvedInsurers.length > 0 ?
+              <div className="flex flex-wrap gap-2">
+                  {resolvedInsurers.map((ins, i) =>
+              <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                     {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
+                     {ins.name}
+                   </span>
+              )}
+               </div> :
 
-          <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
-          }
+              <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
+              }
             </div>
           </div>
       }

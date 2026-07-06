@@ -26,7 +26,7 @@ export const EMPTY_FORM = {
   modality: "presencial",
   schedule: "",
   services: [],
-  insurers: [],
+  insurers_relation: [],
   gallery: [],
   video_url: "",
   certifications: "",
@@ -70,7 +70,7 @@ export default function AdminDoctorEditor() {
             ...EMPTY_FORM,
             ...item,
             services: item.services || [],
-            insurers: item.insurers || [],
+            insurers_relation: item.insurers_relation || [],
             gallery: item.gallery || [],
           });
         }
