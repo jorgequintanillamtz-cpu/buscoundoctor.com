@@ -1,27 +1,23 @@
 import { useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Upload, X, Plus, Eye, Edit3, Bold, Italic, Link, List, Quote, Image } from "lucide-react";
+import { Upload, X, Plus, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { generateSlug } from "@/pages/admin/AdminDoctorEditor";
 
 const ESPECIALIDADES = [
   "Medicina General", "Cardiología", "Pediatría", "Ginecología", "Ortopedia",
   "Dermatología", "Neurología", "Psiquiatría", "Oftalmología", "Otorrinolaringología",
   "Urología", "Gastroenterología", "Endocrinología", "Oncología", "Reumatología",
+  "Dentista", "Nutrición", "Psicología",
 ];
 
 function ToolbarBtn({ onClick, title, children, active }) {
   return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className={`px-2 py-1 rounded text-xs font-mono hover:bg-accent transition-colors ${active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"}`}
-    >
+    <button type="button" title={title} onClick={onClick}
+      className={`px-2 py-1 rounded text-xs font-mono hover:bg-accent transition-colors ${active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"}`}>
       {children}
     </button>
   );
@@ -31,27 +27,19 @@ function MarkdownToolbar({ textareaRef, value, onChange, onInsertImage }) {
   const insert = (before, after = "", placeholder = "") => {
     const el = textareaRef.current;
     if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
+    const start = el.selectionStart, end = el.selectionEnd;
     const selected = value.slice(start, end) || placeholder;
-    const newVal = value.slice(0, start) + before + selected + after + value.slice(end);
-    onChange(newVal);
-    setTimeout(() => {
-      el.focus();
-      el.setSelectionRange(start + before.length, start + before.length + selected.length);
-    }, 0);
+    onChange(value.slice(0, start) + before + selected + after + value.slice(end));
+    setTimeout(() => { el.focus(); el.setSelectionRange(start + before.length, start + before.length + selected.length); }, 0);
   };
-
   const insertLine = (prefix) => {
     const el = textareaRef.current;
     if (!el) return;
     const start = el.selectionStart;
     const lineStart = value.lastIndexOf("\n", start - 1) + 1;
-    const newVal = value.slice(0, lineStart) + prefix + value.slice(lineStart);
-    onChange(newVal);
+    onChange(value.slice(0, lineStart) + prefix + value.slice(lineStart));
     setTimeout(() => { el.focus(); el.setSelectionRange(start + prefix.length, start + prefix.length); }, 0);
   };
-
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-muted/50 border border-border/50 rounded-t-xl border-b-0">
       <ToolbarBtn onClick={() => insertLine("# ")} title="Título H1">H1</ToolbarBtn>
@@ -73,17 +61,17 @@ function MarkdownToolbar({ textareaRef, value, onChange, onInsertImage }) {
 export default function DoctorEditorPerfil({ form, update }) {
   const fotoRef = useRef(null);
   const galeriaRef = useRef(null);
+  const videoRef = useRef(null);
   const contentRef = useRef(null);
   const imageInsertRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingGaleria, setUploadingGaleria] = useState(false);
   const [uploadingInline, setUploadingInline] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [subInput, setSubInput] = useState("");
-  const [idiomaInput, setIdiomaInput] = useState("");
   const [showEspecialidadList, setShowEspecialidadList] = useState(false);
 
-  const words = (form.descripcion_profesional || "").trim().split(/\s+/).filter(Boolean).length;
+  const words = (form.description || "").trim().split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(1, Math.ceil(words / 200));
 
   const handleFotoUpload = async (e) => {
@@ -92,7 +80,7 @@ export default function DoctorEditorPerfil({ form, update }) {
     setUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      update("foto_perfil", file_url);
+      update("profile_photo", file_url);
       toast.success("Foto de perfil cargada");
     } catch { toast.error("Error al subir foto"); }
     setUploading(false);
@@ -104,10 +92,22 @@ export default function DoctorEditorPerfil({ form, update }) {
     setUploadingGaleria(true);
     try {
       const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
-      update("galeria_fotos", [...(form.galeria_fotos || []), ...urls]);
+      update("gallery", [...(form.gallery || []), ...urls]);
       toast.success(`${urls.length} foto(s) agregada(s)`);
     } catch { toast.error("Error al subir galería"); }
     setUploadingGaleria(false);
+  };
+
+  const handleVideoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      update("video_url", file_url);
+      toast.success("Video cargado");
+    } catch { toast.error("Error al subir video"); }
+    setUploadingVideo(false);
   };
 
   const handleInlineImageUpload = async (e) => {
@@ -117,45 +117,35 @@ export default function DoctorEditorPerfil({ form, update }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       const el = contentRef.current;
-      const start = el ? el.selectionStart : (form.descripcion_profesional || "").length;
+      const start = el ? el.selectionStart : (form.description || "").length;
       const end = el ? el.selectionEnd : start;
       const md = `![${file.name.split(".")[0]}](${file_url})\n`;
-      const content = form.descripcion_profesional || "";
-      update("descripcion_profesional", content.slice(0, start) + md + content.slice(end));
+      const content = form.description || "";
+      update("description", content.slice(0, start) + md + content.slice(end));
       toast.success("Imagen insertada");
     } catch { toast.error("Error al subir imagen"); }
     setUploadingInline(false);
   };
-
-  const addTag = (field, input, setInput, current) => {
-    const val = input.trim();
-    if (val && !current.includes(val)) update(field, [...current, val]);
-    setInput("");
-  };
-
-  const removeTag = (field, idx, current) => update(field, current.filter((_, i) => i !== idx));
 
   return (
     <div className="space-y-5">
 
       {/* Sección 1 – Identidad */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
-        {/* Nombre */}
         <div>
           <Input
-            value={form.nombre_completo}
-            onChange={e => update("nombre_completo", e.target.value)}
+            value={form.full_name}
+            onChange={e => update("full_name", e.target.value)}
             className="rounded-xl h-12 text-lg font-heading font-semibold border-0 bg-transparent px-0 focus-visible:ring-0 placeholder:text-muted-foreground/50"
             placeholder="Nombre completo del doctor"
           />
-          {form.nombre_completo && form.nombre_completo.length < 10 && (
+          {form.full_name && form.full_name.length < 10 && (
             <p className="text-xs text-amber-600 mt-1">Mínimo 10 caracteres</p>
           )}
         </div>
 
-        {/* Slug */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground border border-border/40 rounded-xl px-3 py-2 bg-muted/30">
-          <span className="flex-shrink-0">/doctores/</span>
+          <span className="flex-shrink-0">/especialista/</span>
           <input
             value={form.slug}
             onChange={e => update("slug", e.target.value.replace(/[^a-z0-9-]/g, ""))}
@@ -164,25 +154,17 @@ export default function DoctorEditorPerfil({ form, update }) {
           />
         </div>
 
-        {/* Foto de perfil + Especialidad + Cédula */}
         <div className="flex gap-5 items-start flex-wrap">
-          {/* Foto circular */}
           <div className="flex flex-col items-center gap-2 flex-shrink-0">
-            <div
-              className="relative w-24 h-24 cursor-pointer group"
-              onClick={() => fotoRef.current?.click()}
-            >
-              {form.foto_perfil ? (
+            <div className="relative w-24 h-24 cursor-pointer group" onClick={() => fotoRef.current?.click()}>
+              {form.profile_photo ? (
                 <>
-                  <img src={form.foto_perfil} alt="Foto" className="w-24 h-24 rounded-full object-cover border-4 border-primary/20 group-hover:opacity-80 transition-opacity" />
+                  <img src={form.profile_photo} alt="Foto" className="w-24 h-24 rounded-full object-cover border-4 border-primary/20 group-hover:opacity-80 transition-opacity" />
                   <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Upload className="w-5 h-5 text-white" />
                   </div>
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); update("foto_perfil", ""); }}
-                    className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5 z-10"
-                  >
+                  <button type="button" onClick={e => { e.stopPropagation(); update("profile_photo", ""); }}
+                    className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5 z-10">
                     <X className="w-3 h-3" />
                   </button>
                 </>
@@ -199,13 +181,12 @@ export default function DoctorEditorPerfil({ form, update }) {
           </div>
 
           <div className="flex-1 space-y-3 min-w-0">
-            {/* Especialidad */}
             <div>
               <label className="text-sm font-medium mb-1.5 block">Especialidad principal *</label>
               <div className="relative">
                 <Input
-                  value={form.especialidad}
-                  onChange={e => update("especialidad", e.target.value)}
+                  value={form.specialty}
+                  onChange={e => update("specialty", e.target.value)}
                   onFocus={() => setShowEspecialidadList(true)}
                   onBlur={() => setTimeout(() => setShowEspecialidadList(false), 150)}
                   className="rounded-xl"
@@ -213,8 +194,8 @@ export default function DoctorEditorPerfil({ form, update }) {
                 />
                 {showEspecialidadList && (
                   <div className="absolute z-20 mt-1 w-full bg-card border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                    {ESPECIALIDADES.filter(e => e.toLowerCase().includes(form.especialidad.toLowerCase())).map(e => (
-                      <button key={e} type="button" onMouseDown={() => update("especialidad", e)}
+                    {ESPECIALIDADES.filter(e => e.toLowerCase().includes((form.specialty || "").toLowerCase())).map(e => (
+                      <button key={e} type="button" onMouseDown={() => update("specialty", e)}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors">{e}</button>
                     ))}
                   </div>
@@ -222,19 +203,24 @@ export default function DoctorEditorPerfil({ form, update }) {
               </div>
             </div>
 
-            {/* Cédula */}
             <div>
-              <label className="text-sm font-medium mb-1.5 block">Cédula profesional *</label>
+              <label className="text-sm font-medium mb-1.5 block">Subespecialidad</label>
               <Input
-                value={form.cedula_profesional}
-                onChange={e => update("cedula_profesional", e.target.value.replace(/\D/g, ""))}
-                className="rounded-xl font-mono"
-                placeholder="1234567"
-                maxLength={8}
+                value={form.subspecialty}
+                onChange={e => update("subspecialty", e.target.value)}
+                className="rounded-xl"
+                placeholder="Ej: Ortodoncia"
               />
-              {form.cedula_profesional && !/^\d{7,8}$/.test(form.cedula_profesional) && (
-                <p className="text-xs text-amber-600 mt-1">Debe tener 7-8 dígitos numéricos</p>
-              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Cédula / Certificaciones</label>
+              <Input
+                value={form.certifications}
+                onChange={e => update("certifications", e.target.value)}
+                className="rounded-xl font-mono"
+                placeholder="Cédula: 1234567 | Especialidad en ... - UDEM"
+              />
             </div>
           </div>
         </div>
@@ -259,18 +245,14 @@ export default function DoctorEditorPerfil({ form, update }) {
         {!showPreview ? (
           <>
             <div className="px-5">
-              <MarkdownToolbar
-                textareaRef={contentRef}
-                value={form.descripcion_profesional || ""}
-                onChange={v => update("descripcion_profesional", v)}
-                onInsertImage={() => imageInsertRef.current?.click()}
-              />
+              <MarkdownToolbar textareaRef={contentRef} value={form.description || ""}
+                onChange={v => update("description", v)} onInsertImage={() => imageInsertRef.current?.click()} />
             </div>
             <div className="px-5">
               <textarea
                 ref={contentRef}
-                value={form.descripcion_profesional || ""}
-                onChange={e => update("descripcion_profesional", e.target.value)}
+                value={form.description || ""}
+                onChange={e => update("description", e.target.value)}
                 placeholder="Escribe la descripción profesional del doctor aquí..."
                 className="w-full min-h-[380px] p-4 font-mono text-sm bg-white border border-border/50 rounded-b-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
               />
@@ -280,12 +262,11 @@ export default function DoctorEditorPerfil({ form, update }) {
         ) : (
           <div className="px-5 pb-4">
             <div className="w-full min-h-[380px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-headings:font-heading prose-img:rounded-xl prose-blockquote:border-l-4 prose-blockquote:border-primary">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{form.descripcion_profesional || "*Sin contenido aún*"}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{form.description || "*Sin contenido aún*"}</ReactMarkdown>
             </div>
           </div>
         )}
 
-        {/* Word count */}
         <div className="px-5 py-2.5 border-t border-border/30 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">
             <span>{words} palabras</span>
@@ -300,79 +281,76 @@ export default function DoctorEditorPerfil({ form, update }) {
 
       {/* Sección 3 – Contacto */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
-        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Información de contacto</h2>
+        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Información de contacto y ubicación</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
-            <label className="text-sm font-medium mb-1.5 block">Hospital o consultorio</label>
-            <Input value={form.hospital_o_consultorio} onChange={e => update("hospital_o_consultorio", e.target.value)} className="rounded-xl" placeholder="Hospital Christus Muguerza" />
-          </div>
-          <div className="sm:col-span-2">
             <label className="text-sm font-medium mb-1.5 block">Dirección</label>
-            <Input value={form.direccion} onChange={e => update("direccion", e.target.value)} className="rounded-xl" placeholder="Av. Gonzalitos 100, Col. Mitras Centro" />
+            <Input value={form.address} onChange={e => update("address", e.target.value)} className="rounded-xl" placeholder="Av. Gonzalitos 100, Col. Mitras Centro" />
           </div>
           <div>
             <label className="text-sm font-medium mb-1.5 block">Ciudad</label>
-            <Input value={form.ciudad} onChange={e => update("ciudad", e.target.value)} className="rounded-xl" placeholder="Monterrey" />
+            <Input value={form.city} onChange={e => update("city", e.target.value)} className="rounded-xl" placeholder="Monterrey" />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block">Teléfono</label>
-            <Input value={form.telefono} onChange={e => update("telefono", e.target.value)} className="rounded-xl" placeholder="+52 81 1234 5678" />
+            <label className="text-sm font-medium mb-1.5 block">Zona</label>
+            <Input value={form.zone} onChange={e => update("zone", e.target.value)} className="rounded-xl" placeholder="Valle Oriente" />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block">WhatsApp</label>
-            <Input value={form.whatsapp} onChange={e => update("whatsapp", e.target.value)} className="rounded-xl" placeholder="+52 81 9876 5432" />
+            <label className="text-sm font-medium mb-1.5 block">WhatsApp *</label>
+            <Input value={form.whatsapp} onChange={e => update("whatsapp", e.target.value)} className="rounded-xl" placeholder="528112345678" />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block">Correo de contacto</label>
-            <Input type="email" value={form.correo_contacto} onChange={e => update("correo_contacto", e.target.value)} className="rounded-xl" placeholder="doctor@ejemplo.com" />
+            <label className="text-sm font-medium mb-1.5 block">Email</label>
+            <Input type="email" value={form.email} onChange={e => update("email", e.target.value)} className="rounded-xl" placeholder="doctor@ejemplo.com" />
           </div>
-          <div className="sm:col-span-2">
-            <label className="text-sm font-medium mb-1.5 block">Sitio web</label>
-            <Input value={form.sitio_web} onChange={e => update("sitio_web", e.target.value)} className="rounded-xl" placeholder="https://drjuangarcia.com" />
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Instagram</label>
+            <Input value={form.instagram} onChange={e => update("instagram", e.target.value)} className="rounded-xl" placeholder="@usuario" />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Horarios</label>
+            <Input value={form.schedule} onChange={e => update("schedule", e.target.value)} className="rounded-xl" placeholder="Lunes a Viernes: 9:00 - 18:00" />
           </div>
         </div>
       </div>
 
-      {/* Sección 4 – Galería */}
+      {/* Sección 4 – Galería + Video */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
-        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Galería del consultorio</h2>
+        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Galería y video</h2>
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-          {(form.galeria_fotos || []).map((url, idx) => (
+          {(form.gallery || []).map((url, idx) => (
             <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden bg-muted">
               <img src={url} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => update("galeria_fotos", form.galeria_fotos.filter((_, i) => i !== idx))}
-                className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
+              <button type="button" onClick={() => update("gallery", form.gallery.filter((_, i) => i !== idx))}
+                className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                 <X className="w-3 h-3 text-white" />
               </button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={() => galeriaRef.current?.click()}
-            disabled={uploadingGaleria}
-            className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent/20 transition-colors flex flex-col items-center justify-center gap-1"
-          >
+          <button type="button" onClick={() => galeriaRef.current?.click()} disabled={uploadingGaleria}
+            className="aspect-square rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent/20 transition-colors flex flex-col items-center justify-center gap-1">
             <Upload className="w-4 h-4 text-muted-foreground" />
             <span className="text-[10px] text-muted-foreground">{uploadingGaleria ? "Subiendo…" : "Agregar"}</span>
           </button>
         </div>
         <input ref={galeriaRef} type="file" accept="image/*" multiple className="hidden" onChange={handleGaleriaUpload} />
-      </div>
 
-      {/* Sección 5 – Extracto */}
-      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-2">
-        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Extracto / Resumen</h2>
-        <textarea
-          value={form.extracto || ""}
-          onChange={e => update("extracto", e.target.value)}
-          placeholder="Breve descripción que aparece en las tarjetas del directorio (2-3 líneas)"
-          className="w-full min-h-[90px] p-4 text-sm bg-white border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-          maxLength={300}
-        />
-        <p className="text-xs text-muted-foreground text-right">{(form.extracto || "").length}/300</p>
+        <div className="pt-2 border-t border-border/40">
+          <label className="text-sm font-medium mb-2 block">Video de presentación</label>
+          {form.video_url ? (
+            <div className="space-y-2">
+              <video src={form.video_url} controls className="w-full rounded-xl max-h-48" />
+              <button type="button" onClick={() => update("video_url", "")} className="text-xs text-destructive hover:underline">Eliminar video</button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => videoRef.current?.click()} disabled={uploadingVideo}
+              className="w-full border-2 border-dashed border-border hover:border-primary rounded-xl p-6 flex flex-col items-center gap-2 transition-colors">
+              <Video className="w-6 h-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{uploadingVideo ? "Subiendo video..." : "Subir video (máx. 20 seg)"}</span>
+            </button>
+          )}
+          <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
+        </div>
       </div>
     </div>
   );

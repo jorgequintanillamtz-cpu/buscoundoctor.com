@@ -8,36 +8,31 @@ import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 
 export const EMPTY_FORM = {
-  nombre_completo: "",
+  full_name: "",
   slug: "",
-  especialidad: "",
-  cedula_profesional: "",
-  sub_especialidades: [],
-  descripcion_profesional: "",
-  extracto: "",
-  hospital_o_consultorio: "",
-  direccion: "",
-  ciudad: "Monterrey",
-  telefono: "",
+  specialty: "",
+  subspecialty: "",
+  description: "",
+  years_experience: "",
+  rating: "",
+  location: "",
+  city: "Monterrey",
+  zone: "",
+  address: "",
   whatsapp: "",
-  correo_contacto: "",
-  sitio_web: "",
-  foto_perfil: "",
-  galeria_fotos: [],
-  anos_experiencia: "",
-  acepta_seguros: false,
-  seguros_aceptados: [],
-  idiomas: ["Español"],
-  precio_consulta_aproximado: "",
-  horarios: "",
-  titulo_seo: "",
-  descripcion_seo: "",
-  keyword_principal: "",
-  keywords_secundarias: "",
-  estado_perfil: "borrador",
-  destacado: false,
-  indexable: true,
-  schema_type: "Physician",
+  email: "",
+  instagram: "",
+  modality: "presencial",
+  schedule: "",
+  services: [],
+  insurers: [],
+  gallery: [],
+  video_url: "",
+  certifications: "",
+  profile_photo: "",
+  featured: false,
+  active: true,
+  price_range: "$$",
 };
 
 export function generateSlug(nombre) {
@@ -60,7 +55,6 @@ export default function AdminDoctorEditor() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
-  const [showPreview, setShowPreview] = useState(false);
   const autoSaveRef = useRef(null);
   const formRef = useRef(form);
 
@@ -68,16 +62,15 @@ export default function AdminDoctorEditor() {
 
   useEffect(() => {
     if (isEditing) {
-      base44.entities.Doctor.list().then(docs => {
-        const doc = docs.find(d => d.id === id);
-        if (doc) {
+      base44.entities.Specialist.list().then(list => {
+        const item = list.find(d => d.id === id);
+        if (item) {
           setForm({
             ...EMPTY_FORM,
-            ...doc,
-            galeria_fotos: doc.galeria_fotos || [],
-            sub_especialidades: doc.sub_especialidades || [],
-            seguros_aceptados: doc.seguros_aceptados || [],
-            idiomas: doc.idiomas?.length ? doc.idiomas : ["Español"],
+            ...item,
+            services: item.services || [],
+            insurers: item.insurers || [],
+            gallery: item.gallery || [],
           });
         }
         setLoading(false);
@@ -90,9 +83,9 @@ export default function AdminDoctorEditor() {
     if (!isEditing) return;
     autoSaveRef.current = setInterval(async () => {
       const f = formRef.current;
-      if (!f.nombre_completo) return;
+      if (!f.full_name) return;
       try {
-        await base44.entities.Doctor.update(id, f);
+        await base44.entities.Specialist.update(id, f);
         setLastSaved(new Date());
       } catch {}
     }, 30000);
@@ -102,24 +95,31 @@ export default function AdminDoctorEditor() {
   const update = useCallback((field, value) => {
     setForm(prev => {
       const next = { ...prev, [field]: value };
-      if (field === "nombre_completo" && !prev._slugManual) {
+      if (field === "full_name" && !prev._slugManual) {
         next.slug = generateSlug(value);
       }
       return next;
     });
   }, []);
 
+  const buildData = (f) => ({
+    ...f,
+    years_experience: f.years_experience ? Number(f.years_experience) : undefined,
+    rating: f.rating ? Number(f.rating) : undefined,
+    slug: f.slug || generateSlug(f.full_name),
+  });
+
   const handleSaveDraft = async () => {
     setSaving(true);
     try {
-      const data = { ...formRef.current, slug: formRef.current.slug || generateSlug(formRef.current.nombre_completo) };
+      const data = buildData(formRef.current);
       if (isEditing) {
-        await base44.entities.Doctor.update(id, data);
+        await base44.entities.Specialist.update(id, data);
         toast.success("Borrador guardado");
       } else {
-        if (!data.nombre_completo) { toast.error("El nombre es obligatorio"); setSaving(false); return; }
-        const created = await base44.entities.Doctor.create(data);
-        toast.success("Doctor creado");
+        if (!data.full_name) { toast.error("El nombre es obligatorio"); setSaving(false); return; }
+        const created = await base44.entities.Specialist.create(data);
+        toast.success("Especialista creado");
         navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       }
       setLastSaved(new Date());
@@ -131,18 +131,18 @@ export default function AdminDoctorEditor() {
 
   const handlePublish = async () => {
     const f = formRef.current;
-    if (!f.cedula_profesional) { toast.error("La cédula profesional es obligatoria para publicar"); return; }
-    const words = (f.descripcion_profesional || "").trim().split(/\s+/).filter(Boolean).length;
-    if (words < 150) { toast.error("La descripción necesita al menos 150 palabras para publicar"); return; }
+    if (!f.full_name) { toast.error("El nombre es obligatorio"); return; }
+    if (!f.specialty) { toast.error("La especialidad es obligatoria"); return; }
+    if (!f.whatsapp) { toast.error("El WhatsApp es obligatorio para publicar"); return; }
     setSaving(true);
     try {
-      const data = { ...f, estado_perfil: "publicado", slug: f.slug || generateSlug(f.nombre_completo) };
+      const data = { ...buildData(f), active: true };
       if (isEditing) {
-        await base44.entities.Doctor.update(id, data);
-        setForm(prev => ({ ...prev, estado_perfil: "publicado" }));
+        await base44.entities.Specialist.update(id, data);
+        setForm(prev => ({ ...prev, active: true }));
         toast.success("Perfil publicado");
       } else {
-        const created = await base44.entities.Doctor.create(data);
+        const created = await base44.entities.Specialist.create(data);
         toast.success("Perfil publicado");
         navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       }
@@ -163,17 +163,15 @@ export default function AdminDoctorEditor() {
 
   return (
     <div className="max-w-7xl">
-      {/* Breadcrumb */}
       <button onClick={() => navigate("/admin/doctores")} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5">
         <ChevronLeft className="w-4 h-4" />
         Volver a doctores
       </button>
 
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="font-heading font-bold text-2xl text-foreground leading-tight">
-            {form.nombre_completo || (isEditing ? "Editar doctor" : "Nuevo doctor")}
+            {form.full_name || (isEditing ? "Editar doctor" : "Nuevo doctor")}
           </h1>
           {lastSaved && (
             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -197,15 +195,14 @@ export default function AdminDoctorEditor() {
           </Button>
           <Button onClick={handlePublish} disabled={saving} className="rounded-xl gap-1.5">
             {saving ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-            {form.estado_perfil === "publicado" ? "Actualizar perfil" : "Publicar perfil"}
+            {form.active ? "Actualizar perfil" : "Publicar perfil"}
           </Button>
         </div>
       </div>
 
-      {/* Main layout */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 items-start">
         <DoctorEditorPerfil form={form} update={update} />
-        <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveDraft} onPublish={handlePublish} saving={saving} />
+        <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveDraft} saving={saving} />
       </div>
     </div>
   );
