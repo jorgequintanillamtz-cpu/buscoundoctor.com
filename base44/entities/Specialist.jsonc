@@ -160,6 +160,11 @@
         "rejected"
       ],
       "default": "draft"
+    },
+    "owner_user_id": {
+      "type": "string",
+      "title": "Propietario (relaci\u00f3n)",
+      "description": "ID de registro de la entidad User nativa. Opcional: perfiles gestionados solo por admin pueden estar vac\u00edos."
     }
   },
   "required": [
