@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "../components/SearchBar";
 import SpecialtyCard from "../components/SpecialtyCard";
@@ -139,6 +139,40 @@ export default function Home() {
           </div>
         </section>
       }
+
+      {/* Cómo funciona */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+        <div className="text-center mb-8">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">¿Cómo funciona?</h2>
+          <p className="text-sm text-muted-foreground mt-1">Encuentra y contacta a tu especialista en 3 pasos</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center mb-3">
+              <Search className="w-6 h-6 text-primary" />
+            </div>
+            <span className="font-heading font-bold text-sm text-primary mb-1">Paso 1</span>
+            <h3 className="font-heading font-semibold text-sm text-foreground">Busca tu especialista</h3>
+            <p className="text-xs text-muted-foreground mt-1">Filtra por especialidad o zona en Monterrey.</p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center mb-3">
+              <ShieldCheck className="w-6 h-6 text-primary" />
+            </div>
+            <span className="font-heading font-bold text-sm text-primary mb-1">Paso 2</span>
+            <h3 className="font-heading font-semibold text-sm text-foreground">Compara perfiles verificados</h3>
+            <p className="text-xs text-muted-foreground mt-1">Revisa cédula profesional, reseñas y ubicación.</p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center mb-3">
+              <MessageCircle className="w-6 h-6 text-primary" />
+            </div>
+            <span className="font-heading font-bold text-sm text-primary mb-1">Paso 3</span>
+            <h3 className="font-heading font-semibold text-sm text-foreground">Contacta y agenda</h3>
+            <p className="text-xs text-muted-foreground mt-1">Escríbele por WhatsApp o agenda tu cita directo.</p>
+          </div>
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-10">
