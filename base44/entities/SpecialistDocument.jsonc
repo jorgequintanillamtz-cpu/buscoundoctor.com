@@ -1,0 +1,56 @@
+{
+  "name": "SpecialistDocument",
+  "type": "object",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Especialista (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialist"
+    },
+    "document_type": {
+      "type": "string",
+      "title": "Tipo de documento",
+      "enum": [
+        "cedula_profesional",
+        "identificacion_oficial",
+        "titulo",
+        "certificado_especialidad"
+      ]
+    },
+    "file_url": {
+      "type": "string",
+      "title": "Archivo",
+      "format": "file"
+    },
+    "upload_status": {
+      "type": "string",
+      "title": "Estado de carga",
+      "enum": [
+        "uploaded",
+        "under_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "uploaded"
+    },
+    "reviewed_by": {
+      "type": "string",
+      "title": "Revisado por (relaci\u00f3n)",
+      "description": "ID de registro de la entidad User"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "title": "Fecha de revisi\u00f3n",
+      "format": "date-time"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "title": "Motivo de rechazo"
+    }
+  },
+  "required": [
+    "specialist_id",
+    "document_type",
+    "file_url"
+  ]
+}
