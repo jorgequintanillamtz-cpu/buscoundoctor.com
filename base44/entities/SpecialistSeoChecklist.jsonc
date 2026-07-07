@@ -1,0 +1,42 @@
+{
+  "name": "SpecialistSeoChecklist",
+  "type": "object",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Especialista (relaci\u00f3n uno-a-uno)",
+      "description": "ID de registro de la entidad Specialist"
+    },
+    "has_optimized_title": {
+      "type": "boolean",
+      "title": "T\u00edtulo optimizado",
+      "default": false
+    },
+    "has_meta_description": {
+      "type": "boolean",
+      "title": "Meta descripci\u00f3n",
+      "default": false
+    },
+    "has_specialty_zone_keywords": {
+      "type": "boolean",
+      "title": "Keywords de especialidad y zona",
+      "default": false
+    },
+    "has_alt_text_images": {
+      "type": "boolean",
+      "title": "Alt text en im\u00e1genes",
+      "default": false
+    },
+    "has_min_word_biography": {
+      "type": "boolean",
+      "title": "Biograf\u00eda m\u00ednima (50 palabras)",
+      "default": false
+    }
+  },
+  "required": [
+    "specialist_id"
+  ],
+  "uniqueFields": [
+    "specialist_id"
+  ]
+}

@@ -36,6 +36,8 @@ export const EMPTY_FORM = {
   featured: false,
   active: true,
   price_range: "$$",
+  completeness_score: 0,
+  seo_score: 0,
 };
 
 export function generateSlug(nombre) {
@@ -135,6 +137,7 @@ export default function AdminDoctorEditor() {
       try {
         await base44.entities.Specialist.update(id, f);
         setLastSaved(new Date());
+        recalculateScore(id);
       } catch {}
     }, 30000);
     return () => clearInterval(autoSaveRef.current);
@@ -168,6 +171,16 @@ export default function AdminDoctorEditor() {
     return data;
   };
 
+  const recalculateScore = async (specialistId) => {
+    try {
+      const res = await base44.functions.invoke('recalculateSpecialistScore', { specialist_id: specialistId });
+      const data = res.data || res;
+      if (typeof data.completeness_score === 'number') {
+        setForm(prev => ({ ...prev, completeness_score: data.completeness_score, seo_score: data.seo_score ?? prev.seo_score }));
+      }
+    } catch {}
+  };
+
   const handleSaveDraft = async () => {
     if (!formRef.current.professional_license_number) { toast.error("La cédula profesional es obligatoria"); return; }
     setSaving(true);
@@ -176,10 +189,12 @@ export default function AdminDoctorEditor() {
       if (isEditing) {
         await base44.entities.Specialist.update(id, data);
         toast.success("Borrador guardado");
+        recalculateScore(id);
       } else {
         if (!data.full_name) { toast.error("El nombre es obligatorio"); setSaving(false); return; }
         const created = await base44.entities.Specialist.create(data);
         toast.success("Especialista creado");
+        recalculateScore(created.id);
         navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       }
       setLastSaved(new Date());
@@ -202,9 +217,11 @@ export default function AdminDoctorEditor() {
         await base44.entities.Specialist.update(id, data);
         setForm(prev => ({ ...prev, active: true }));
         toast.success("Perfil publicado");
+        recalculateScore(id);
       } else {
         const created = await base44.entities.Specialist.create(data);
         toast.success("Perfil publicado");
+        recalculateScore(created.id);
         navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       }
       setLastSaved(new Date());

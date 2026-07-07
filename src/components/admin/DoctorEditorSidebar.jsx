@@ -19,17 +19,6 @@ const PRECIOS = [
   { value: "$$$$", label: "$$$$ Premium" },
 ];
 
-function calcCompletitud(form) {
-  const campos = [
-    form.full_name, form.specialty, form.subspecialty, form.description,
-    form.certifications, form.profile_photo, form.address, form.city, form.zone,
-    form.whatsapp, form.email, form.instagram, form.schedule, form.modality,
-    form.years_experience, form.price_range, form.gallery?.length > 0,
-    form.video_url, form.services?.length > 0, form.insurers_relation?.length > 0,
-  ];
-  return Math.round((campos.filter(Boolean).length / campos.length) * 100);
-}
-
 const SelectBox = ({ value, onChange, options, placeholder }) => (
   <div className="relative">
     <select value={value || ""} onChange={e => onChange(e.target.value)}
@@ -42,7 +31,7 @@ const SelectBox = ({ value, onChange, options, placeholder }) => (
 );
 
 export default function DoctorEditorSidebar({ form, update, onSaveDraft, saving }) {
-  const completitud = calcCompletitud(form);
+  const completitud = form.completeness_score || 0;
   const [serviceInput, setServiceInput] = useState("");
   const [insurers, setInsurers] = useState([]);
 

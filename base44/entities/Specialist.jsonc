@@ -165,6 +165,18 @@
       "type": "string",
       "title": "Propietario (relaci\u00f3n)",
       "description": "ID de registro de la entidad User nativa. Opcional: perfiles gestionados solo por admin pueden estar vac\u00edos."
+    },
+    "completeness_score": {
+      "type": "number",
+      "title": "Score de completitud (0-100)",
+      "default": 0,
+      "multipleOf": 1
+    },
+    "seo_score": {
+      "type": "number",
+      "title": "Score SEO (0-100)",
+      "default": 0,
+      "multipleOf": 1
     }
   },
   "required": [
