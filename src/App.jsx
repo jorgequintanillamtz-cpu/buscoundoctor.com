@@ -10,6 +10,7 @@ import AdminLayout from './components/AdminLayout';
 import Home from './pages/Home';
 import SpecialistList from './pages/SpecialistList';
 import SpecialistProfile from './pages/SpecialistProfile';
+import SpecialtyPage from './pages/SpecialtyPage';
 import BlogList from './pages/BlogList';
 import BlogPostPage from './pages/BlogPostPage';
 import Dashboard from './pages/admin/Dashboard';
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
+        <Route path="/especialidad/:slug" element={<SpecialtyPage />} />
         <Route path="/blog" element={<BlogList />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/nosotros" element={<About />} />
