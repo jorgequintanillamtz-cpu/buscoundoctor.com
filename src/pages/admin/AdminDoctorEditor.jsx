@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 import OfficeManager from "@/components/admin/OfficeManager";
+import DocumentManager from "@/components/admin/DocumentManager";
 
 export const EMPTY_FORM = {
   full_name: "",
@@ -212,6 +213,12 @@ export default function AdminDoctorEditor() {
       {isEditing && (
         <div className="mt-6">
           <OfficeManager specialistId={id} />
+        </div>
+      )}
+
+      {isEditing && (
+        <div className="mt-6">
+          <DocumentManager specialistId={id} />
         </div>
       )}
     </div>
