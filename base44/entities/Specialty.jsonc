@@ -22,6 +22,11 @@
       "type": "boolean",
       "title": "Activo",
       "default": true
+    },
+    "parent_specialty_id": {
+      "type": "string",
+      "title": "Especialidad padre (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialty. Si est\u00e1 seteado, esta entrada es una subespecialidad de la especialidad indicada."
     }
   },
   "required": [

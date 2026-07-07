@@ -10,6 +10,11 @@
       "type": "string",
       "title": "Especialidad"
     },
+    "specialty_id": {
+      "type": "string",
+      "title": "Especialidad (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialty. Opcional: FAQs generales pueden no tener especialidad asignada."
+    },
     "city": {
       "type": "string",
       "title": "Ciudad"

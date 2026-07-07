@@ -10,6 +10,9 @@ import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Accordion, AccordionItem, AccordionTrigger, AccordionContent,
+} from "@/components/ui/accordion";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -30,6 +33,8 @@ export default function SpecialtyPage() {
   const [filterModality, setFilterModality] = useState("");
   const [filterPrice, setFilterPrice] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [subspecialties, setSubspecialties] = useState([]);
+  const [faqs, setFaqs] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -42,9 +47,16 @@ export default function SpecialtyPage() {
       if (!active) return;
       const spec = specList[0];
       if (!spec) { setNotFound(true); setLoading(false); return; }
+      const [subs, faqItems] = await Promise.all([
+        base44.entities.Specialty.filter({ parent_specialty_id: spec.id, active: true }),
+        base44.entities.FaqItem.filter({ specialty_id: spec.id, status: "publicado" }),
+      ]);
+      if (!active) return;
       setSpecialty(spec);
       setSpecialists(allSpecs);
       setZones(zoneList);
+      setSubspecialties(subs);
+      setFaqs(faqItems);
       setLoading(false);
     })();
     return () => { active = false; };
@@ -55,6 +67,41 @@ export default function SpecialtyPage() {
     document.title = `${specialty.name} en Monterrey y San Pedro Garza García | BuscoUnDoctor`;
     setMeta("description", `Encuentra los mejores especialistas en ${specialty.name} en Monterrey y San Pedro Garza García. Perfiles verificados con cédula profesional, reseñas y contacto directo por WhatsApp.`);
   }, [specialty]);
+
+  useEffect(() => {
+    if (!specialty) return;
+    const scripts = [];
+    const medical = {
+      "@context": "https://schema.org",
+      "@type": "MedicalSpecialty",
+      "name": specialty.name,
+      "description": specialty.description || `${specialty.name} en Monterrey y San Pedro Garza García.`,
+    };
+    const medScript = document.createElement("script");
+    medScript.type = "application/ld+json";
+    medScript.id = "specialty-jsonld";
+    medScript.text = JSON.stringify(medical);
+    document.head.appendChild(medScript);
+    scripts.push(medScript);
+    if (faqs.length > 0) {
+      const faqLd = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(f => ({
+          "@type": "Question",
+          "name": f.question,
+          "acceptedAnswer": { "@type": "Answer", "text": f.answer },
+        })),
+      };
+      const faqScript = document.createElement("script");
+      faqScript.type = "application/ld+json";
+      faqScript.id = "specialty-jsonld-faq";
+      faqScript.text = JSON.stringify(faqLd);
+      document.head.appendChild(faqScript);
+      scripts.push(faqScript);
+    }
+    return () => { scripts.forEach(s => s.remove()); };
+  }, [specialty, faqs]);
 
   const filtered = useMemo(() => {
     if (!specialty) return [];
@@ -118,13 +165,31 @@ export default function SpecialtyPage() {
 
       <div className="mb-8">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialty.name}</h1>
-        {specialty.description && (
-          <p className="text-muted-foreground mt-1 max-w-2xl">{specialty.description}</p>
-        )}
+        <section className="mt-4 max-w-3xl space-y-3">
+          {(specialty.description
+            ? specialty.description.split(/\n{2,}|\n/).filter(Boolean)
+            : ["Contenido en preparación."]
+          ).map((para, i) => (
+            <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
+          ))}
+        </section>
         <p className="text-sm text-muted-foreground mt-2">
           {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
         </p>
       </div>
+
+      {subspecialties.length > 0 && (
+        <section className="mb-8">
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-3">Subespecialidades</h2>
+          <div className="flex flex-wrap gap-2">
+            {subspecialties.map(sub => (
+              <Link key={sub.id} to={`/especialidad/${sub.slug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+                {sub.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:hidden">
@@ -217,6 +282,20 @@ export default function SpecialtyPage() {
           )}
         </div>
       </div>
+
+      {faqs.length > 0 && (
+        <section className="mt-12">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground mb-5">Preguntas frecuentes sobre {specialty.name}</h2>
+          <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
+            {faqs.map((f, i) => (
+              <AccordionItem key={f.id} value={`faq-${i}`} className="px-5">
+                <AccordionTrigger className="text-left font-heading font-semibold text-sm sm:text-base text-foreground hover:no-underline">{f.question}</AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">{f.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
+      )}
     </div>
   );
 }
