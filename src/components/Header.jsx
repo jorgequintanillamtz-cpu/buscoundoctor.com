@@ -47,7 +47,7 @@ export default function Header() {
                 {specialties.length === 0 && <DropdownMenuItem disabled>Cargando…</DropdownMenuItem>}
                 {specialties.map(s => (
                   <DropdownMenuItem key={s.id} asChild>
-                    <Link to={`/especialistas?specialty=${encodeURIComponent(s.name)}`}>{s.name}</Link>
+                    <Link to={`/especialidad/${s.slug}`}>{s.name}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -119,7 +119,7 @@ export default function Header() {
                   {specialties.map(s => (
                     <Link
                       key={s.id}
-                      to={`/especialistas?specialty=${encodeURIComponent(s.name)}`}
+                      to={`/especialidad/${s.slug}`}
                       onClick={() => setOpen(false)}
                       className="px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                       {s.name}
