@@ -1,0 +1,52 @@
+{
+  "name": "SpecialistEducation",
+  "type": "object",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Especialista (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialist"
+    },
+    "institution_name": {
+      "type": "string",
+      "title": "Instituci\u00f3n"
+    },
+    "degree_type": {
+      "type": "string",
+      "title": "Tipo de grado",
+      "enum": [
+        "licenciatura",
+        "especialidad",
+        "subespecialidad",
+        "maestria",
+        "doctorado",
+        "certificacion"
+      ]
+    },
+    "field_of_study": {
+      "type": "string",
+      "title": "Campo de estudio"
+    },
+    "start_year": {
+      "type": "number",
+      "title": "A\u00f1o de inicio",
+      "multipleOf": 1
+    },
+    "end_year": {
+      "type": "number",
+      "title": "A\u00f1o de fin",
+      "multipleOf": 1
+    },
+    "display_order": {
+      "type": "number",
+      "title": "Orden de visualizaci\u00f3n",
+      "default": 0,
+      "multipleOf": 1
+    }
+  },
+  "required": [
+    "specialist_id",
+    "institution_name",
+    "degree_type"
+  ]
+}
