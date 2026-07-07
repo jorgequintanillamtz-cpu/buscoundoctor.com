@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
 import ReviewList from "../components/ReviewList";
 import ReviewForm from "../components/ReviewForm";
+import PublicOfficeList from "../components/PublicOfficeList";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -156,10 +157,6 @@ export default function SpecialistProfile() {
         <div className="p-6 sm:p-8">
           {/* Info: ubicación, experiencia, cedula, estrellas */}
           <div className="flex flex-wrap items-center gap-4 mb-5 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
-              {specialist.zone || specialist.location}{specialist.city ? `, ${specialist.city}` : ''}
-            </span>
             {specialist.years_experience &&
             <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
@@ -281,6 +278,8 @@ export default function SpecialistProfile() {
         </div>
       }
 
+      <PublicOfficeList specialistId={specialist.id} />
+
       {/* Tipos de consulta */}
       {specialist.modality &&
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
@@ -299,12 +298,6 @@ export default function SpecialistProfile() {
               </div>
           }
           </div>
-          {specialist.address &&
-        <p className="mt-3 text-sm text-muted-foreground flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" />
-              {specialist.address}
-            </p>
-        }
           {specialist.instagram &&
         <div className="mt-4 pt-4 border-t border-border/50">
               <a
