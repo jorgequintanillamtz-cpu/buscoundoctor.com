@@ -7,23 +7,27 @@ import SearchBar from "../components/SearchBar";
 import SpecialtyCard from "../components/SpecialtyCard";
 import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
+import ZoneCard from "../components/ZoneCard";
 
 export default function Home() {
   const [specialties, setSpecialties] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
-      base44.entities.BlogPost.filter({ published: true }, "-created_date", 3)]
+      base44.entities.BlogPost.filter({ published: true }, "-created_date", 3),
+      base44.entities.Zone.filter({ active: true })]
       );
       setSpecialties(specs);
       setFeatured(specialists);
       setPosts(blogPosts);
+      setZones(zoneList);
       setLoading(false);
     }
     load();
@@ -85,6 +89,21 @@ export default function Home() {
         <div className="hidden sm:grid grid-cols-3 gap-3">
           {specialties.slice(0, 6).map((s) =>
           <SpecialtyCard key={s.id} specialty={s} />
+          )}
+        </div>
+      </section>
+
+      {/* Zonas destacadas */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Zonas destacadas</h2>
+          <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
+            <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {zones.slice(0, 6).map((z) =>
+          <ZoneCard key={z.id} zone={z} />
           )}
         </div>
       </section>
