@@ -25,6 +25,7 @@ import AdminFaqs from './pages/admin/AdminFaqs';
 import AdminFaqEditor from './pages/admin/AdminFaqEditor';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import RegistroMedico from './pages/RegistroMedico';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/nosotros" element={<About />} />
         <Route path="/contacto" element={<Contact />} />
+        <Route path="/registro-medico" element={<RegistroMedico />} />
       </Route>
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<Dashboard />} />

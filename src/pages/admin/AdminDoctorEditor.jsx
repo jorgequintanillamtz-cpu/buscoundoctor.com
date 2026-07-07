@@ -60,12 +60,54 @@ export default function AdminDoctorEditor() {
   const [lastSaved, setLastSaved] = useState(null);
   const autoSaveRef = useRef(null);
   const formRef = useRef(form);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => { formRef.current = form; }, [form]);
 
   useEffect(() => {
-    if (isEditing) {
-      base44.entities.Specialist.list().then(list => {
+    let active = true;
+    (async () => {
+      const u = await base44.auth.me().catch(() => null);
+      if (!active) return;
+      setCurrentUser(u);
+      const admin = u && (u.role === "admin" || u.role === "superadmin");
+
+      // Médico (no admin): solo puede editar su propio perfil
+      if (!admin && u) {
+        const own = await base44.entities.Specialist.filter({ owner_user_id: u.id });
+        if (!active) return;
+        if (isEditing) {
+          const ownsThis = own.find(s => s.id === id);
+          if (!ownsThis) {
+            setBlocked(true);
+            setLoading(false);
+            return;
+          }
+          setForm({
+            ...EMPTY_FORM,
+            ...ownsThis,
+            services: ownsThis.services || [],
+            insurers_relation: ownsThis.insurers_relation || [],
+            gallery: ownsThis.gallery || [],
+          });
+          setLoading(false);
+        } else {
+          // Ruta /nuevo: redirigir a su propio perfil si existe
+          if (own.length > 0) {
+            navigate(`/admin/doctores/editar/${own[0].id}`, { replace: true });
+          } else {
+            setBlocked(true);
+            setLoading(false);
+          }
+        }
+        return;
+      }
+
+      // Admin: acceso total (como hoy)
+      if (isEditing) {
+        const list = await base44.entities.Specialist.list();
+        if (!active) return;
         const item = list.find(d => d.id === id);
         if (item) {
           setForm({
@@ -77,9 +119,12 @@ export default function AdminDoctorEditor() {
           });
         }
         setLoading(false);
-      });
-    }
-  }, [id, isEditing]);
+      } else {
+        setLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [id, isEditing, navigate]);
 
   // Auto-save every 30s
   useEffect(() => {
@@ -105,12 +150,23 @@ export default function AdminDoctorEditor() {
     });
   }, []);
 
-  const buildData = (f) => ({
-    ...f,
-    years_experience: f.years_experience ? Number(f.years_experience) : undefined,
-    rating: f.rating ? Number(f.rating) : undefined,
-    slug: f.slug || generateSlug(f.full_name),
-  });
+  const buildData = (f) => {
+    const data = {
+      ...f,
+      years_experience: f.years_experience ? Number(f.years_experience) : undefined,
+      rating: f.rating ? Number(f.rating) : undefined,
+      slug: f.slug || generateSlug(f.full_name),
+    };
+    // Los médicos no pueden cambiar publication_status ni license_verification_status
+    const admin = currentUser && (currentUser.role === "admin" || currentUser.role === "superadmin");
+    if (!admin) {
+      delete data.publication_status;
+      delete data.license_verification_status;
+      delete data.license_verified_at;
+      delete data.license_verified_by;
+    }
+    return data;
+  };
 
   const handleSaveDraft = async () => {
     if (!formRef.current.professional_license_number) { toast.error("La cédula profesional es obligatoria"); return; }
@@ -162,6 +218,16 @@ export default function AdminDoctorEditor() {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (blocked) {
+    return (
+      <div className="max-w-2xl text-center py-16">
+        <h1 className="font-heading font-bold text-2xl text-foreground">No tienes permiso para editar este perfil</h1>
+        <p className="text-sm text-muted-foreground mt-2">Solo puedes editar tu propio perfil de especialista.</p>
+        <Button variant="outline" className="mt-5 rounded-xl" onClick={() => navigate("/admin/doctores")}>Volver</Button>
       </div>
     );
   }
