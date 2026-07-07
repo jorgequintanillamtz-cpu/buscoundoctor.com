@@ -131,7 +131,7 @@ export default function SpecialistProfile() {
           }
           {/* Info overlaid at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl" style={{ color: '#073348' }}>
+            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-brand-navy">
               <span className="block">{specialist.full_name?.split(' ')[0]}</span>
               <span className="block">{specialist.full_name?.split(' ').slice(1).join(' ')}</span>
             </h1>
@@ -142,11 +142,11 @@ export default function SpecialistProfile() {
               </div>
             )}
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="text-sm font-medium bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full" style={{ color: '#073348' }}>
+              <span className="text-sm font-medium bg-white/70 backdrop-blur-sm px-3 py-1 rounded-full text-brand-navy">
                 {specialist.specialty}
               </span>
               {specialist.subspecialty &&
-              <span className="text-sm bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full" style={{ color: '#073348' }}>
+              <span className="text-sm bg-white/50 backdrop-blur-sm px-3 py-1 rounded-full text-brand-navy">
                   {specialist.subspecialty}
                 </span>
               }

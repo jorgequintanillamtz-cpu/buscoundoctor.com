@@ -104,24 +104,24 @@ export default function BlogPostPage() {
             remarkPlugins={[remarkGfm]}
 
             components={{
-              h1: ({children}) => <h1 style={{fontSize:'1.875rem', fontWeight:'700', marginTop:'2rem', marginBottom:'1rem', lineHeight:'1.3'}}>{children}</h1>,
-              h2: ({children}) => <h2 style={{fontSize:'1.5rem', fontWeight:'700', marginTop:'1.75rem', marginBottom:'0.75rem', lineHeight:'1.3'}}>{children}</h2>,
-              h3: ({children}) => <h3 style={{fontSize:'1.25rem', fontWeight:'600', marginTop:'1.5rem', marginBottom:'0.5rem', lineHeight:'1.3'}}>{children}</h3>,
-              h4: ({children}) => <h4 style={{fontSize:'1.1rem', fontWeight:'600', marginTop:'1.25rem', marginBottom:'0.5rem'}}>{children}</h4>,
-              p: ({children}) => <p style={{marginBottom:'1rem', lineHeight:'1.75'}}>{children}</p>,
-              ul: ({children}) => <ul style={{listStyleType:'disc', paddingLeft:'1.5rem', marginBottom:'1rem'}}>{children}</ul>,
-              ol: ({children}) => <ol style={{listStyleType:'decimal', paddingLeft:'1.5rem', marginBottom:'1rem'}}>{children}</ol>,
-              li: ({children}) => <li style={{marginBottom:'0.25rem', lineHeight:'1.75'}}>{children}</li>,
-              blockquote: ({children}) => <blockquote style={{borderLeft:'4px solid #0ea5e9', paddingLeft:'1rem', fontStyle:'italic', color:'#64748b', margin:'1.5rem 0'}}>{children}</blockquote>,
+              h1: ({children}) => <h1 className="text-3xl font-heading font-bold mt-8 mb-4 leading-snug">{children}</h1>,
+              h2: ({children}) => <h2 className="text-2xl font-heading font-bold mt-7 mb-3 leading-snug">{children}</h2>,
+              h3: ({children}) => <h3 className="text-xl font-heading font-semibold mt-6 mb-2 leading-snug">{children}</h3>,
+              h4: ({children}) => <h4 className="text-lg font-heading font-semibold mt-5 mb-2">{children}</h4>,
+              p: ({children}) => <p className="mb-4 leading-relaxed">{children}</p>,
+              ul: ({children}) => <ul className="list-disc pl-6 mb-4">{children}</ul>,
+              ol: ({children}) => <ol className="list-decimal pl-6 mb-4">{children}</ol>,
+              li: ({children}) => <li className="mb-1 leading-relaxed">{children}</li>,
+              blockquote: ({children}) => <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-6">{children}</blockquote>,
               code: ({inline, children, className}) => inline
-                ? <code style={{backgroundColor:'#f1f5f9', padding:'0.2em 0.4em', borderRadius:'4px', fontSize:'0.875em', fontFamily:'monospace'}}>{children}</code>
-                : <pre style={{backgroundColor:'#f1f5f9', padding:'1rem', borderRadius:'0.75rem', overflowX:'auto', marginBottom:'1rem'}}><code style={{fontFamily:'monospace', fontSize:'0.875em'}}>{children}</code></pre>,
+                ? <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono">{children}</code>
+                : <pre className="bg-muted p-4 rounded-xl overflow-x-auto mb-4"><code className="font-mono text-sm">{children}</code></pre>,
               pre: ({children}) => <>{children}</>,
-              a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer" style={{color:'hsl(var(--primary))', textDecoration:'underline'}}>{children}</a>,
-              img: ({src, alt}) => <img src={src} alt={alt} style={{borderRadius:'0.75rem', maxWidth:'100%', margin:'1rem 0'}} />,
-              hr: () => <hr style={{border:'none', borderTop:'1px solid #e2e8f0', margin:'2rem 0'}} />,
-              strong: ({children}) => <strong style={{fontWeight:'700'}}>{children}</strong>,
-              em: ({children}) => <em style={{fontStyle:'italic'}}>{children}</em>,
+              a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline">{children}</a>,
+              img: ({src, alt}) => <img src={src} alt={alt} className="rounded-xl max-w-full my-4" />,
+              hr: () => <hr className="border-0 border-t border-border my-8" />,
+              strong: ({children}) => <strong className="font-bold">{children}</strong>,
+              em: ({children}) => <em className="italic">{children}</em>,
             }}
           >{post.content}</ReactMarkdown>
         )}
