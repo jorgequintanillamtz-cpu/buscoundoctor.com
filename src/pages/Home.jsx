@@ -130,8 +130,10 @@ export default function Home() {
           <p className="text-primary-foreground/80 mt-3 max-w-md mx-auto">
             <span>Únete a nuestra plataforma y conecta con nuevos pacientes en Monterrey</span>
           </p>
-          <Button size="lg" variant="secondary" className="mt-6 font-heading font-semibold">
-            <span>Registrarme como especialista</span>
+          <Button size="lg" variant="secondary" className="mt-6 font-heading font-semibold" asChild>
+            <Link to="/registro-medico">
+              <span>Registrarme como especialista</span>
+            </Link>
           </Button>
         </div>
       </section>
