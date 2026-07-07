@@ -1,0 +1,23 @@
+{
+  "name": "Language",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nombre"
+    },
+    "iso_code": {
+      "type": "string",
+      "title": "C\u00f3digo ISO",
+      "minLength": 2,
+      "maxLength": 2
+    }
+  },
+  "required": [
+    "name",
+    "iso_code"
+  ],
+  "uniqueFields": [
+    "name"
+  ]
+}

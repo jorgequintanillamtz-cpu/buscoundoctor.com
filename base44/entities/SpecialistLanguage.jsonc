@@ -1,0 +1,26 @@
+{
+  "name": "SpecialistLanguage",
+  "type": "object",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Especialista (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialist"
+    },
+    "language_id": {
+      "type": "string",
+      "title": "Idioma (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Language"
+    }
+  },
+  "required": [
+    "specialist_id",
+    "language_id"
+  ],
+  "uniqueFields": [
+    [
+      "specialist_id",
+      "language_id"
+    ]
+  ]
+}
