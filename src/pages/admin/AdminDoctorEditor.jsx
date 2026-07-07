@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
+import OfficeManager from "@/components/admin/OfficeManager";
 
 export const EMPTY_FORM = {
   full_name: "",
@@ -207,6 +208,12 @@ export default function AdminDoctorEditor() {
         <DoctorEditorPerfil form={form} update={update} />
         <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveDraft} saving={saving} />
       </div>
+
+      {isEditing && (
+        <div className="mt-6">
+          <OfficeManager specialistId={id} />
+        </div>
+      )}
     </div>
   );
 }
