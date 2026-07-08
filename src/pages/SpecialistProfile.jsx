@@ -59,7 +59,7 @@ export default function SpecialistProfile() {
         // Add JSON-LD LocalBusiness schema
         const schema = {
           "@context": "https://schema.org",
-          "@type": "MedicalBusiness",
+          "@type": "Physician",
           "name": specialist.full_name,
           "description": specialist.description || specialist.specialty,
           "medicalSpecialty": specialist.specialty,
