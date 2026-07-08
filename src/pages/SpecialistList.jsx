@@ -13,6 +13,7 @@ export default function SpecialistList() {
   const [specialists, setSpecialists] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
+  const [insurers, setInsurers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -21,18 +22,21 @@ export default function SpecialistList() {
   const [filterZone, setFilterZone] = useState(urlParams.get("zone") || "");
   const [filterModality, setFilterModality] = useState("");
   const [filterPrice, setFilterPrice] = useState("");
+  const [filterInsurer, setFilterInsurer] = useState("");
   const [searchQuery, setSearchQuery] = useState(urlParams.get("q") || "");
 
   useEffect(() => {
     async function load() {
-      const [specs, specList, zoneList] = await Promise.all([
+      const [specs, specList, zoneList, insList] = await Promise.all([
         base44.entities.Specialist.filter({ active: true }),
         base44.entities.Specialty.filter({ active: true }),
         base44.entities.Zone.filter({ active: true }),
+        base44.entities.Insurer.filter({ is_active: true }),
       ]);
       setSpecialists(specs);
       setSpecialties(specList);
       setZones(zoneList);
+      setInsurers(insList);
       setLoading(false);
     }
     load();
@@ -53,6 +57,9 @@ export default function SpecialistList() {
     if (filterPrice) {
       result = result.filter((s) => s.price_range === filterPrice);
     }
+    if (filterInsurer) {
+      result = result.filter((s) => (s.insurers_relation || []).includes(filterInsurer));
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -66,15 +73,16 @@ export default function SpecialistList() {
     }
 
     return result;
-  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, searchQuery]);
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, searchQuery]);
 
-  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice].filter(Boolean).length;
+  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer].filter(Boolean).length;
 
   const clearFilters = () => {
     setFilterSpecialty("");
     setFilterZone("");
     setFilterModality("");
     setFilterPrice("");
+    setFilterInsurer("");
   };
 
   if (loading) {
@@ -202,6 +210,20 @@ export default function SpecialistList() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Aseguradora</label>
+                <Select value={filterInsurer} onValueChange={setFilterInsurer}>
+                  <SelectTrigger className="h-10 rounded-xl text-sm">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {insurers.map((i) => (
+                      <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
@@ -237,6 +259,12 @@ export default function SpecialistList() {
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {filterPrice}
                   <button onClick={() => setFilterPrice("")}><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {filterInsurer && (
+                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
+                  {insurers.find((i) => i.id === filterInsurer)?.name}
+                  <button onClick={() => setFilterInsurer("")}><X className="w-3 h-3" /></button>
                 </span>
               )}
             </div>
