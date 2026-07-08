@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram, ShieldCheck } from "lucide-react";
+import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram, ShieldCheck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
 import ReviewList from "../components/ReviewList";
@@ -167,6 +167,17 @@ export default function SpecialistProfile() {
                 </span>
               }
             </div>
+            {specialist.whatsapp && (
+              <a
+                href={`https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, encontré su perfil en BuscoUnDoctor y me gustaría agendar una cita.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-colors w-fit"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Contactar por WhatsApp
+              </a>
+            )}
           </div>
         </div>
 
