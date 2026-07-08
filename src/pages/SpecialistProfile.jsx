@@ -9,6 +9,7 @@ import ReviewList from "../components/ReviewList";
 import ReviewForm from "../components/ReviewForm";
 import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
+import LanguagesChips from "../components/LanguagesChips";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -241,6 +242,8 @@ export default function SpecialistProfile() {
         </div>
         </div>
       </div>
+
+      <LanguagesChips specialistId={specialist.id} />
 
       {/* Descripción + Video */}
       {(specialist.description || specialist.video_url) &&
