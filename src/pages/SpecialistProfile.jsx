@@ -10,6 +10,7 @@ import ReviewForm from "../components/ReviewForm";
 import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
 import LanguagesChips from "../components/LanguagesChips";
+import SimilarSpecialists from "../components/SimilarSpecialists";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -371,6 +372,8 @@ export default function SpecialistProfile() {
           </div>
         }
       </div>
+
+      <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
 
       {/* Botón final agendar cita */}
       {/* Appointment Form Modal */}
