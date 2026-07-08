@@ -8,6 +8,7 @@ import AppointmentForm from "../components/AppointmentForm";
 import ReviewList from "../components/ReviewList";
 import ReviewForm from "../components/ReviewForm";
 import PublicOfficeList from "../components/PublicOfficeList";
+import EducationTimeline from "../components/EducationTimeline";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -261,6 +262,8 @@ export default function SpecialistProfile() {
         }
         </div>
       }
+
+      <EducationTimeline specialistId={specialist.id} />
 
       {/* Servicios / Especialidades */}
       {specialist.services?.length > 0 &&
