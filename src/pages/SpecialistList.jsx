@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import SearchBar from "../components/SearchBar";
 import SpecialistCard from "../components/SpecialistCard";
 import { Link } from "react-router-dom";
@@ -20,7 +21,7 @@ export default function SpecialistList() {
   const [filterZone, setFilterZone] = useState(urlParams.get("zone") || "");
   const [filterModality, setFilterModality] = useState("");
   const [filterPrice, setFilterPrice] = useState("");
-  const searchQuery = urlParams.get("q") || "";
+  const [searchQuery, setSearchQuery] = useState(urlParams.get("q") || "");
 
   useEffect(() => {
     async function load() {
@@ -133,6 +134,18 @@ export default function SpecialistList() {
             </div>
 
             <div className="space-y-4">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar por nombre..."
+                    className="pl-9 h-10 rounded-xl text-sm"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
                 <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
