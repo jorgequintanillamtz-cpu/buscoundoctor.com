@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Tag } from "lucide-react";
+import { ChevronLeft, Tag, ChevronDown } from "lucide-react";
 import moment from "moment";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,6 +11,17 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbP
 // Detecta si el contenido es HTML legado o Markdown puro
 function isHtmlContent(content) {
   return /<[a-z][\s\S]*>/i.test(content);
+}
+
+function slugify(text) {
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function childrenToText(children) {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) return children.map(childrenToText).join('');
+  if (children && typeof children === 'object' && 'props' in children) return childrenToText(children.props.children);
+  return '';
 }
 
 export default function BlogPostPage() {
@@ -40,6 +51,62 @@ export default function BlogPostPage() {
     load();
   }, [slug]);
 
+  const [tocOpen, setTocOpen] = useState(false);
+
+  // Tabla de contenidos desde encabezados H2
+  const toc = useMemo(() => {
+    if (!post?.content) return [];
+    if (isHtmlContent(post.content)) {
+      const items = [];
+      const re = /<h2[^>]*>([\s\S]*?)<\/h2>/gi;
+      let m;
+      while ((m = re.exec(post.content)) !== null) {
+        const text = m[1].replace(/<[^>]+>/g, '').trim();
+        if (text) items.push({ id: slugify(text), text });
+      }
+      return items;
+    }
+    return post.content
+      .split('\n')
+      .map(line => {
+        const m = line.match(/^##\s+(.+)$/);
+        if (!m) return null;
+        const text = m[1].replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*_`]/g, '').trim();
+        return text ? { id: slugify(text), text } : null;
+      })
+      .filter(Boolean);
+  }, [post]);
+
+  // HTML legado: inyecta ids en los <h2> para que coincidan con el TOC
+  const htmlWithIds = useMemo(() => {
+    if (!post?.content || !isHtmlContent(post.content)) return null;
+    return post.content.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (full, attrs, inner) => {
+      if (/id\s*=/.test(attrs)) return full;
+      const text = inner.replace(/<[^>]+>/g, '').trim();
+      return `<h2${attrs} id="${slugify(text)}">${inner}</h2>`;
+    });
+  }, [post]);
+
+  const handleScroll = (e, id) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const updatedDifferent = !!post && !!post.updated_date
+    && moment(post.updated_date).format('YYYY-MM-DD') !== moment(post.created_date).format('YYYY-MM-DD');
+
+  // Datos estructurados JSON-LD (Article / BlogPosting)
+  const jsonLd = post ? {
+    '@context': 'https://schema.org',
+    '@type': post.schema_type || 'Article',
+    headline: post.title,
+    datePublished: post.created_date,
+    dateModified: post.updated_date || post.created_date,
+    author: { '@type': 'Person', name: post.author || 'BuscounDoctor' },
+    ...(post.image ? { image: post.image } : {}),
+    ...(post.meta_description || post.excerpt ? { description: post.meta_description || post.excerpt } : {}),
+  } : null;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -59,6 +126,9 @@ export default function BlogPostPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        {jsonLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        )}
         <Breadcrumb className="mb-4">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -89,7 +159,10 @@ export default function BlogPostPage() {
         {post.category && (
           <span className="text-xs font-medium text-primary bg-accent px-3 py-1 rounded-full">{post.category}</span>
         )}
-        <span className="text-xs text-muted-foreground">{moment(post.created_date).format("DD MMMM YYYY")}</span>
+        <span className="text-xs text-muted-foreground">Publicado el {moment(post.created_date).format("DD MMMM YYYY")}</span>
+        {updatedDifferent && (
+          <span className="text-xs text-muted-foreground">· Actualizado el {moment(post.updated_date).format("DD MMMM YYYY")}</span>
+        )}
         {post.author && <span className="text-xs text-muted-foreground">· {post.author}</span>}
       </div>
 
@@ -112,16 +185,45 @@ export default function BlogPostPage() {
         </p>
       )}
 
+      {toc.length > 0 && (
+        <nav className="mb-8 rounded-2xl border border-border/50 bg-card p-4">
+          <button
+            type="button"
+            onClick={() => setTocOpen(o => !o)}
+            className="flex items-center justify-between w-full text-sm font-heading font-semibold text-foreground"
+          >
+            <span>Tabla de contenidos</span>
+            <ChevronDown className={`w-4 h-4 transition-transform sm:hidden ${tocOpen ? 'rotate-180' : ''}`} />
+          </button>
+          <ul className={`mt-3 space-y-1.5 text-sm border-t border-border/30 pt-3 ${tocOpen ? 'block' : 'hidden'} sm:block`}>
+            {toc.map(item => (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  onClick={(e) => handleScroll(e, item.id)}
+                  className="text-muted-foreground hover:text-primary transition-colors block py-0.5"
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
       <article className="max-w-none text-foreground">
         {isHtmlContent(post.content) ? (
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
+          <div dangerouslySetInnerHTML={{ __html: htmlWithIds || post.content }} />
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
 
             components={{
               h1: ({children}) => <h1 className="text-3xl font-heading font-bold mt-8 mb-4 leading-snug">{children}</h1>,
-              h2: ({children}) => <h2 className="text-2xl font-heading font-bold mt-7 mb-3 leading-snug">{children}</h2>,
+              h2: ({children}) => {
+                const id = slugify(childrenToText(children));
+                return <h2 id={id} className="text-2xl font-heading font-bold mt-7 mb-3 leading-snug scroll-mt-24">{children}</h2>;
+              },
               h3: ({children}) => <h3 className="text-xl font-heading font-semibold mt-6 mb-2 leading-snug">{children}</h3>,
               h4: ({children}) => <h4 className="text-lg font-heading font-semibold mt-5 mb-2">{children}</h4>,
               p: ({children}) => <p className="mb-4 leading-relaxed">{children}</p>,
