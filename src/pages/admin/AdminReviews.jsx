@@ -97,6 +97,7 @@ export default function AdminReviews() {
                   {!r.approved && (
                     <button
                       onClick={() => approve(r.id)}
+                      aria-label="Aprobar reseña"
                       className="p-2 rounded-xl bg-green-50 hover:bg-green-100 transition-colors"
                       title="Aprobar"
                     >
@@ -105,6 +106,7 @@ export default function AdminReviews() {
                   )}
                   <button
                     onClick={() => remove(r.id)}
+                    aria-label="Eliminar reseña"
                     className="p-2 rounded-xl hover:bg-destructive/10 transition-colors"
                     title="Eliminar"
                   >

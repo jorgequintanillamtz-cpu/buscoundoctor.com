@@ -128,8 +128,8 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {featured.map((s) =>
-          <SpecialistCard key={s.id} specialist={s} />
+          {featured.map((s, i) =>
+          <SpecialistCard key={s.id} specialist={s} priority={i === 0} />
           )}
         </div>
       </section>
@@ -144,8 +144,8 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {posts.map((p) =>
-          <BlogCard key={p.id} post={p} />
+            {posts.map((p, i) =>
+          <BlogCard key={p.id} post={p} priority={i === 0} />
           )}
           </div>
         </section>
@@ -194,7 +194,7 @@ export default function Home() {
           <p className="text-primary-foreground/80 mt-3 max-w-md mx-auto">
             <span>Únete a nuestra plataforma y conecta con nuevos pacientes en Monterrey</span>
           </p>
-          <Button size="lg" variant="secondary" className="mt-6 font-heading font-semibold" asChild>
+          <Button size="lg" variant="secondary" className="mt-6 min-h-[44px] font-heading font-semibold" asChild>
             <Link to="/registro-medico">
               <span>Registrarme como especialista</span>
             </Link>

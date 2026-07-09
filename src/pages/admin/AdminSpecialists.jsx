@@ -171,10 +171,10 @@ export default function AdminSpecialists() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openEdit(s)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+                      <button onClick={() => openEdit(s)} aria-label="Editar especialista" className="p-1.5 rounded-lg hover:bg-muted transition-colors">
                         <Pencil className="w-4 h-4 text-muted-foreground" />
                       </button>
-                      <button onClick={() => handleDelete(s.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                      <button onClick={() => handleDelete(s.id)} aria-label="Eliminar especialista" className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </button>
                     </div>
@@ -341,6 +341,7 @@ export default function AdminSpecialists() {
                     <img src={img} alt={`Galería ${i+1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
+                      aria-label="Quitar imagen de la galería"
                       onClick={() => removeGalleryImage(i)}
                       className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >

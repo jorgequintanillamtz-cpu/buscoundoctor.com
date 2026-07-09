@@ -95,7 +95,7 @@ export default function AdminDoctores() {
             {doctors.map(doc => (
               <div key={doc.id} className="bg-card rounded-2xl border border-border/50 p-4 flex items-center gap-4">
                 {doc.profile_photo ? (
-                  <img src={doc.profile_photo} alt={doc.full_name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                  <img src={doc.profile_photo} alt={doc.full_name} loading="lazy" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0 flex items-center justify-center text-muted-foreground text-lg font-bold">
                     {(doc.full_name || "D")[0]}
@@ -113,11 +113,11 @@ export default function AdminDoctores() {
                     {doc.active !== false ? "Activo" : "Inactivo"}
                   </span>
                   <Link to={`/admin/doctores/editar/${doc.id}`}>
-                    <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8">
+                    <Button variant="ghost" size="icon" aria-label="Editar doctor" className="rounded-xl h-8 w-8">
                       <Pencil className="w-4 h-4" />
                     </Button>
                   </Link>
-                  <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.full_name)}>
+                  <Button variant="ghost" size="icon" aria-label="Eliminar doctor" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.full_name)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

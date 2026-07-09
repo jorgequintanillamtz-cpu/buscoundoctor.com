@@ -72,13 +72,13 @@ export default function AdminBlog() {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={() => togglePublish(post)} className="p-2 rounded-lg hover:bg-muted transition-colors" title={post.published ? "Despublicar" : "Publicar"}>
+              <button onClick={() => togglePublish(post)} aria-label={post.published ? "Despublicar artículo" : "Publicar artículo"} className="p-2 rounded-lg hover:bg-muted transition-colors" title={post.published ? "Despublicar" : "Publicar"}>
                 {post.published ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-primary" />}
               </button>
-              <Link to={`/admin/blog/editar/${post.id}`} className="p-2 rounded-lg hover:bg-muted transition-colors">
+              <Link to={`/admin/blog/editar/${post.id}`} aria-label="Editar artículo" className="p-2 rounded-lg hover:bg-muted transition-colors">
                 <Pencil className="w-4 h-4 text-muted-foreground" />
               </Link>
-              <button onClick={() => handleDelete(post.id)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
+              <button onClick={() => handleDelete(post.id)} aria-label="Eliminar artículo" className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
                 <Trash2 className="w-4 h-4 text-destructive" />
               </button>
             </div>

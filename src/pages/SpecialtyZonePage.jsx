@@ -132,7 +132,7 @@ export default function SpecialtyZonePage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {filtered.map((s) => <SpecialistCard key={s.id} specialist={s} />)}
+          {filtered.map((s, i) => <SpecialistCard key={s.id} specialist={s} priority={i === 0} />)}
         </div>
       )}
     </div>

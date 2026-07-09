@@ -255,31 +255,31 @@ export default function SpecialistList() {
               {filterSpecialty && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {filterSpecialty}
-                  <button onClick={() => setFilterSpecialty("")}><X className="w-3 h-3" /></button>
+                  <button onClick={() => setFilterSpecialty("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterZone && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {filterZone}
-                  <button onClick={() => setFilterZone("")}><X className="w-3 h-3" /></button>
+                  <button onClick={() => setFilterZone("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterModality && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
                   {filterModality}
-                  <button onClick={() => setFilterModality("")}><X className="w-3 h-3" /></button>
+                  <button onClick={() => setFilterModality("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterPrice && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {filterPrice}
-                  <button onClick={() => setFilterPrice("")}><X className="w-3 h-3" /></button>
+                  <button onClick={() => setFilterPrice("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterInsurer && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {insurers.find((i) => i.id === filterInsurer)?.name}
-                  <button onClick={() => setFilterInsurer("")}><X className="w-3 h-3" /></button>
+                  <button onClick={() => setFilterInsurer("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
             </div>
@@ -294,8 +294,8 @@ export default function SpecialistList() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {filtered.map((s) => (
-                <SpecialistCard key={s.id} specialist={s} />
+              {filtered.map((s, i) => (
+                <SpecialistCard key={s.id} specialist={s} priority={i === 0} />
               ))}
             </div>
           )}

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import moment from "moment";
 
-export default function BlogCard({ post }) {
+export default function BlogCard({ post, priority = false }) {
   return (
     <Link
       to={`/blog/${post.slug}`}
@@ -10,7 +10,7 @@ export default function BlogCard({ post }) {
     >
       <div className="aspect-video bg-accent flex items-center justify-center overflow-hidden">
         {post.image ? (
-          <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <img src={post.image} alt={post.title} loading={priority ? "eager" : "lazy"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent flex items-center justify-center">
             <span className="font-heading font-bold text-2xl text-primary/30">BD</span>

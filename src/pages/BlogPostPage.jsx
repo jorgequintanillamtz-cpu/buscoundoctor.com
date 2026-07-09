@@ -282,7 +282,7 @@ export default function BlogPostPage() {
                 : <pre className="bg-muted p-4 rounded-xl overflow-x-auto mb-4"><code className="font-mono text-sm">{children}</code></pre>,
               pre: ({children}) => <>{children}</>,
               a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline">{children}</a>,
-              img: ({src, alt}) => <img src={src} alt={alt} className="rounded-xl max-w-full my-4" />,
+              img: ({src, alt}) => <img src={src} alt={alt || post.title} className="rounded-xl max-w-full my-4" />,
               hr: () => <hr className="border-0 border-t border-border my-8" />,
               strong: ({children}) => <strong className="font-bold">{children}</strong>,
               em: ({children}) => <em className="italic">{children}</em>,

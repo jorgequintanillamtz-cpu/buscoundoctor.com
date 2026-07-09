@@ -54,7 +54,7 @@ Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${for
             <h2 className="font-heading font-bold text-lg text-foreground">Solicitar cita</h2>
             <p className="text-sm text-muted-foreground">{specialist.full_name}</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted transition-colors">
+          <button onClick={onClose} aria-label="Cerrar" className="p-2 rounded-xl hover:bg-muted transition-colors">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>

@@ -85,8 +85,8 @@ export default function AdminSpecialties() {
                 <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openEdit(item)} className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+                <button onClick={() => openEdit(item)} aria-label="Editar especialidad" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                <button onClick={() => handleDelete(item.id)} aria-label="Eliminar especialidad" className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
               </div>
             </div>
             <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">

@@ -81,8 +81,8 @@ export default function AdminZones() {
               <span className={`inline-block w-1.5 h-1.5 rounded-full mt-2 ${item.active !== false ? 'bg-green-500' : 'bg-red-400'}`} />
             </div>
             <div className="flex gap-1">
-              <button onClick={() => openEdit(item)} className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-              <button onClick={() => handleDelete(item.id)} className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+              <button onClick={() => openEdit(item)} aria-label="Editar zona" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
+              <button onClick={() => handleDelete(item.id)} aria-label="Eliminar zona" className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
             </div>
           </div>
         ))}

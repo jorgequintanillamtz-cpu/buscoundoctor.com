@@ -254,17 +254,17 @@ export default function SpecialtyPage() {
             <div className="flex flex-wrap gap-2 mb-4">
               {filterZone && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                  {filterZone}<button onClick={() => setFilterZone("")}><X className="w-3 h-3" /></button>
+                  {filterZone}<button onClick={() => setFilterZone("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterModality && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
-                  {filterModality}<button onClick={() => setFilterModality("")}><X className="w-3 h-3" /></button>
+                  {filterModality}<button onClick={() => setFilterModality("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterPrice && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                  {filterPrice}<button onClick={() => setFilterPrice("")}><X className="w-3 h-3" /></button>
+                  {filterPrice}<button onClick={() => setFilterPrice("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
             </div>
@@ -277,7 +277,7 @@ export default function SpecialtyPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {filtered.map((s) => <SpecialistCard key={s.id} specialist={s} />)}
+              {filtered.map((s, i) => <SpecialistCard key={s.id} specialist={s} priority={i === 0} />)}
             </div>
           )}
         </div>

@@ -14,7 +14,7 @@ function getNext8Days() {
   });
 }
 
-export default function SpecialistCard({ specialist }) {
+export default function SpecialistCard({ specialist, priority = false }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -31,7 +31,7 @@ export default function SpecialistCard({ specialist }) {
           <div className="flex gap-4">
             <div className="w-24 h-24 sm:w-20 sm:h-20 rounded-2xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist.profile_photo ? (
-                <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover" />
+                <img src={specialist.profile_photo} alt={specialist.full_name} loading={priority ? "eager" : "lazy"} className="w-full h-full object-cover" />
               ) : (
                 <span className="font-heading font-bold text-xl text-primary">
                   {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
@@ -80,7 +80,7 @@ export default function SpecialistCard({ specialist }) {
             <Button
               size="sm"
               variant="ghost"
-              className="bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 lg:hidden"
+              className="min-h-[44px] bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 lg:hidden"
               onClick={(e) => { e.preventDefault(); setSelectedDate(null); setShowForm(true); }}
             >
               Agendar cita <ChevronRight className="w-3.5 h-3.5" />
@@ -88,7 +88,7 @@ export default function SpecialistCard({ specialist }) {
             <Button
               size="sm"
               variant="ghost"
-              className="bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 hidden lg:inline-flex"
+              className="min-h-[44px] bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 hidden lg:inline-flex"
               onClick={(e) => { e.preventDefault(); setSelectedDate(null); setShowForm(true); }}
             >
               Agendar cita <ChevronRight className="w-3.5 h-3.5" />

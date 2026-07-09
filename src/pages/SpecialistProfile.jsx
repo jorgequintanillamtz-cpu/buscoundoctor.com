@@ -185,7 +185,7 @@ export default function SpecialistProfile() {
                 href={`https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, encontré su perfil en BuscoUnDoctor y me gustaría agendar una cita.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition-colors w-fit"
+                className="inline-flex items-center gap-2 mt-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] rounded-xl shadow-sm transition-colors w-fit"
               >
                 <MessageCircle className="w-4 h-4" />
                 Contactar por WhatsApp
@@ -219,7 +219,7 @@ export default function SpecialistProfile() {
             }
           </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button size="lg" className="gap-2 rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
+          <Button size="lg" className="gap-2 min-h-[44px] rounded-xl font-heading font-semibold flex-1 sm:flex-none" onClick={() => setShowForm(true)}>
             <Calendar className="w-4 h-4" />
             Agendar cita
           </Button>
@@ -315,7 +315,7 @@ export default function SpecialistProfile() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {specialist.gallery.map((img, i) =>
           <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
-                <img src={img} alt={`Galería ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                <img src={img} alt={`Galería de ${specialist.full_name}, imagen ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
               </div>
           )}
           </div>

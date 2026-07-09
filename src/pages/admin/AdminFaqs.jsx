@@ -213,12 +213,13 @@ export default function AdminFaqs() {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           <Link to={`/admin/faqs/editar/${page.id}`}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                            <Button variant="ghost" size="icon" aria-label="Editar FAQ" className="h-8 w-8 rounded-lg">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </Link>
                           <Button
                             variant="ghost" size="icon"
+                            aria-label="Eliminar FAQ"
                             className="h-8 w-8 rounded-lg text-destructive hover:text-destructive"
                             onClick={() => handleDelete(page.id)}
                             disabled={deleting === page.id}

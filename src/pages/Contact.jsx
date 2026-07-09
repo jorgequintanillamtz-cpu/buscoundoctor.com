@@ -110,7 +110,7 @@ export default function Contact() {
                 className="w-full text-sm border border-input rounded-xl px-3 py-2.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring resize-none"
               />
             </div>
-            <Button type="submit" disabled={sending} className="rounded-xl">
+            <Button type="submit" disabled={sending} className="min-h-[44px] rounded-xl">
               {sending ? "Enviando..." : "Enviar mensaje"}
             </Button>
           </form>

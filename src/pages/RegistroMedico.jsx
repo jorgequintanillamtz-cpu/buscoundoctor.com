@@ -117,7 +117,7 @@ export default function RegistroMedico() {
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
-            <Button type="submit" disabled={loading} className="w-full rounded-xl gap-1.5">
+            <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Crear cuenta
             </Button>
@@ -146,7 +146,7 @@ export default function RegistroMedico() {
               maxLength={6}
             />
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full rounded-xl gap-1.5">
+            <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Verificar y crear perfil
             </Button>
@@ -165,7 +165,7 @@ export default function RegistroMedico() {
             <p className="text-sm text-muted-foreground">
               Tu cuenta fue creada. Tu perfil está en revisión y será publicado una vez verificada tu cédula profesional.
             </p>
-            <Button onClick={() => navigate("/admin/doctores")} className="rounded-xl">
+            <Button onClick={() => navigate("/admin/doctores")} className="min-h-[44px] rounded-xl">
               Ir a mi perfil
             </Button>
           </div>

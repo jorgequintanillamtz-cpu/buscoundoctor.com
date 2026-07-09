@@ -52,6 +52,7 @@ export default function ReviewForm({ specialist }) {
             <button
               key={star}
               type="button"
+              aria-label={`${star} estrellas`}
               onClick={() => setRating(star)}
               onMouseEnter={() => setHover(star)}
               onMouseLeave={() => setHover(0)}
@@ -87,7 +88,7 @@ export default function ReviewForm({ specialist }) {
         />
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full rounded-xl font-heading font-semibold">
+      <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl font-heading font-semibold">
         {loading ? "Enviando..." : "Enviar reseña"}
       </Button>
       <p className="text-xs text-muted-foreground text-center">Tu reseña será revisada antes de publicarse.</p>
