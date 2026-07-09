@@ -42,6 +42,21 @@ export default function SpecialistList() {
     load();
   }, []);
 
+  useEffect(() => {
+    const hasFilters = !!(filterSpecialty || filterZone || filterInsurer || searchQuery);
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (hasFilters) {
+      if (!metaRobots) {
+        metaRobots = document.createElement('meta');
+        metaRobots.setAttribute('name', 'robots');
+        document.head.appendChild(metaRobots);
+      }
+      metaRobots.setAttribute('content', 'noindex, follow');
+    } else if (metaRobots) {
+      metaRobots.remove();
+    }
+  }, [filterSpecialty, filterZone, filterInsurer, searchQuery]);
+
   const filtered = useMemo(() => {
     let result = [...specialists];
 
