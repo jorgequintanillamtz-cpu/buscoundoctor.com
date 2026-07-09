@@ -87,6 +87,11 @@
       "items": {
         "type": "string"
       }
+    },
+    "specialty_id": {
+      "type": "string",
+      "title": "Especialidad (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialty. Opcional: art\u00edculos generales pueden no tener especialidad asignada."
     }
   },
   "required": [

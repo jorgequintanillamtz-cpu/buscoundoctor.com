@@ -6,6 +6,7 @@ import moment from "moment";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import SpecialistCard from "../components/SpecialistCard";
+import BlogCard from "../components/BlogCard";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 // Detecta si el contenido es HTML legado o Markdown puro
@@ -28,6 +29,8 @@ export default function BlogPostPage() {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
   const [specialists, setSpecialists] = useState([]);
+  const [specialty, setSpecialty] = useState(null);
+  const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +47,29 @@ export default function BlogPostPage() {
         if (p.featured_specialists?.length > 0) {
           const all = await base44.entities.Specialist.filter({ active: true });
           setSpecialists(all.filter(s => p.featured_specialists.includes(s.slug)));
+        }
+
+        if (p.specialty_id) {
+          try {
+            const spec = await base44.entities.Specialty.get(p.specialty_id);
+            setSpecialty(spec);
+            let rel = (await base44.entities.BlogPost.filter({ specialty_id: p.specialty_id, published: true }))
+              .filter(r => r.slug !== p.slug)
+              .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+            if (rel.length < 3) {
+              const recent = (await base44.entities.BlogPost.filter({ published: true }))
+                .filter(r => r.slug !== p.slug)
+                .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+              const have = new Set([p.id, ...rel.map(r => r.id)]);
+              rel = [...rel, ...recent.filter(r => !have.has(r.id)).slice(0, 3 - rel.length)];
+            } else {
+              rel = rel.slice(0, 3);
+            }
+            setRelated(rel);
+          } catch (e) {
+            setSpecialty(null);
+            setRelated([]);
+          }
         }
       }
       setLoading(false);
@@ -185,6 +211,18 @@ export default function BlogPostPage() {
         </p>
       )}
 
+      {specialty && (
+        <div className="mb-8 rounded-2xl bg-primary text-primary-foreground p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1">
+            <p className="font-heading font-bold text-lg">Encuentra un {specialty.name} cerca de ti</p>
+            <p className="text-sm text-primary-foreground/80 mt-1">Explora especialistas disponibles en tu zona.</p>
+          </div>
+          <Link to={`/especialidad/${specialty.slug}`} className="inline-flex items-center justify-center rounded-xl bg-background text-primary px-4 py-2 text-sm font-semibold hover:bg-background/90 transition-colors flex-shrink-0">
+            Ver {specialty.name}
+          </Link>
+        </div>
+      )}
+
       {toc.length > 0 && (
         <nav className="mb-8 rounded-2xl border border-border/50 bg-card p-4">
           <button
@@ -251,6 +289,17 @@ export default function BlogPostPage() {
           <div className="grid grid-cols-1 gap-4">
             {specialists.map(s => (
               <SpecialistCard key={s.id} specialist={s} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {specialty && related.length > 0 && (
+        <div className="mt-10">
+          <h3 className="font-heading font-bold text-xl text-foreground mb-4">Artículos relacionados</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {related.map(r => (
+              <BlogCard key={r.id} post={r} />
             ))}
           </div>
         </div>
