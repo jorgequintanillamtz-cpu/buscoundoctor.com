@@ -11,6 +11,7 @@ import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
 import LanguagesChips from "../components/LanguagesChips";
 import SimilarSpecialists from "../components/SimilarSpecialists";
+import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -86,6 +87,15 @@ export default function SpecialistProfile() {
         script.type = 'application/ld+json';
         script.innerHTML = JSON.stringify(schema);
         document.head.appendChild(script);
+
+        // Open Graph: sobrescribe los defaults del Layout con datos del médico
+        setOpenGraph({
+          title: `${specialist.full_name} — ${specialist.specialty} | BuscoUnDoctor`,
+          description: specialist.description
+            ? specialist.description.slice(0, 160)
+            : `Especialista en ${specialist.specialty} en ${specialist.zone || specialist.location || 'Monterrey'}. Cédula profesional verificada. Contacta directo y agenda tu cita.`,
+          image: specialist.profile_photo || SITE_OG.image,
+        });
       }
       setLoading(false);
     }

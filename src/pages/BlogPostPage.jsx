@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 
 // Detecta si el contenido es HTML legado o Markdown puro
 function isHtmlContent(content) {
@@ -43,6 +44,13 @@ export default function BlogPostPage() {
         // Update document title and meta tags for SEO
         document.title = `${p.title} | BuscounDoctor`;
         document.querySelector('meta[name="description"]')?.setAttribute('content', p.meta_description || p.excerpt || '');
+
+        // Open Graph: sobrescribe los defaults del Layout con datos del artículo
+        setOpenGraph({
+          title: `${p.title} | BuscoUnDoctor`,
+          description: p.meta_description || p.excerpt || '',
+          image: p.image || SITE_OG.image,
+        });
         
         if (p.featured_specialists?.length > 0) {
           const all = await base44.entities.Specialist.filter({ active: true });
