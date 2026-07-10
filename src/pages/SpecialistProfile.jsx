@@ -174,23 +174,22 @@ export default function SpecialistProfile() {
         Especialistas
       </Link>
 
-      {/* Header: foto + tarjeta de info. Móvil: apiladas con superposición. Escritorio: 2 columnas de igual altura. */}
-      <div className="lg:grid lg:grid-cols-5 lg:gap-8 lg:items-stretch">
-        <div className="relative h-72 sm:h-96 lg:h-full lg:col-span-2 lg:sticky lg:top-24 rounded-3xl overflow-hidden">
-          {specialist.profile_photo ?
-          <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
+      {/* Header: tarjeta única con avatar circular profesional */}
+      <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-md ring-1 ring-border/50 flex-shrink-0 bg-card">
+            {specialist.profile_photo ?
+            <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
 
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
-              <span className="font-heading font-bold text-6xl text-primary/40">
-                {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-              </span>
-            </div>
-          }
-        </div>
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
+                <span className="font-heading font-bold text-3xl text-primary/40">
+                  {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                </span>
+              </div>
+            }
+          </div>
 
-        {/* Tarjeta de info: superpuesta en móvil, columna independiente en escritorio */}
-        <div className="relative z-10 -mt-14 sm:-mt-16 lg:mt-0 mx-2 sm:mx-6 lg:mx-0 lg:col-span-3">
-          <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-8">
+          <div className="flex-1 text-center sm:text-left min-w-0">
             <h1 className="font-heading font-bold text-2xl sm:text-3xl text-brand-navy">
               {specialist.full_name}
             </h1>
@@ -199,7 +198,7 @@ export default function SpecialistProfile() {
               {displayLocation && <span className="text-muted-foreground"> · {displayLocation}</span>}
             </p>
             {displayAddress &&
-            <p className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2">
+            <p className="flex items-center justify-center sm:justify-start gap-1.5 text-sm text-muted-foreground mt-2">
                 <MapPin className="w-4 h-4 text-brand-blue flex-shrink-0" />
                 {displayAddress}
               </p>
@@ -211,88 +210,88 @@ export default function SpecialistProfile() {
                 Cédula profesional verificada
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Botones de acción tipo píldora */}
-            <div className="flex flex-wrap items-center gap-2.5 mt-5">
-              {whatsappHref &&
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
-                
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp
-                </a>
-              }
-              {displayPhone &&
-              <a
-                href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
-                className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
-                
-                  <Phone className="w-4 h-4" />
-                  Llamar
-                </a>
-              }
+        {/* Botones de acción tipo píldora */}
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mt-6">
+          {whatsappHref &&
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
+            
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </a>
+          }
+          {displayPhone &&
+          <a
+            href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
+            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
+            
+              <Phone className="w-4 h-4" />
+              Llamar
+            </a>
+          }
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-2 bg-brand-bluePale hover:bg-brand-bluePale/70 text-brand-navy text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
+            
+            <Calendar className="w-4 h-4" />
+            Agendar cita
+          </button>
+          {specialist.price_range && (
+            <span className="text-sm font-medium text-primary bg-accent px-3 py-2 rounded-full">
+              {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+            </span>
+          )}
+        </div>
+
+        {/* Info: experiencia, cedula, estrellas */}
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-5 pt-5 border-t border-border/50 text-sm text-muted-foreground">
+          {specialist.years_experience &&
+          <span className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4" />
+              {specialist.years_experience} años de experiencia
+            </span>
+          }
+          {specialist.certifications &&
+          <span className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5 text-primary" />
+              Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
+            </span>
+          }
+          {specialist.rating != null &&
+          <span className="flex items-center gap-1.5">
+              <span className="text-brand-blue text-base leading-none">
+                {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+              </span>
+              <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
+            </span>
+          }
+        </div>
+
+        {/* Date picker mobile - selección de fecha para agendar */}
+        <div className="mt-5 lg:hidden">
+          <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
+          <p className="text-xs text-muted-foreground mb-3">para agendar tu cita</p>
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+            {getNext8Days().map((date, i) =>
               <button
-                onClick={() => setShowForm(true)}
-                className="inline-flex items-center gap-2 bg-brand-bluePale hover:bg-brand-bluePale/70 text-brand-navy text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
+                key={i}
+                onClick={() => handleDateSelect(date)}
+                className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group">
                 
-                <Calendar className="w-4 h-4" />
-                Agendar cita
+                <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
+                  {formatDayLabel(date).split(' ')[0]}
+                </span>
+                <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
+                  {date.getDate()}
+                </span>
               </button>
-              {specialist.price_range && (
-                <span className="text-sm font-medium text-primary bg-accent px-3 py-2 rounded-full">
-                  {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
-                </span>
               )}
-            </div>
-
-            {/* Info: experiencia, cedula, estrellas */}
-            <div className="flex flex-wrap items-center gap-4 mt-5 pt-5 border-t border-border/50 text-sm text-muted-foreground">
-              {specialist.years_experience &&
-              <span className="flex items-center gap-1.5">
-                  <Clock className="w-4 h-4" />
-                  {specialist.years_experience} años de experiencia
-                </span>
-              }
-              {specialist.certifications &&
-              <span className="flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5 text-primary" />
-                  Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
-                </span>
-              }
-              {specialist.rating != null &&
-              <span className="flex items-center gap-1.5">
-                  <span className="text-brand-blue text-base leading-none">
-                    {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
-                  </span>
-                  <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
-                </span>
-              }
-            </div>
-
-            {/* Date picker mobile - selección de fecha para agendar */}
-            <div className="mt-5 lg:hidden">
-              <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
-              <p className="text-xs text-muted-foreground mb-3">para agendar tu cita</p>
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                {getNext8Days().map((date, i) =>
-                  <button
-                    key={i}
-                    onClick={() => handleDateSelect(date)}
-                    className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group">
-                    
-                    <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
-                      {formatDayLabel(date).split(' ')[0]}
-                    </span>
-                    <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
-                      {date.getDate()}
-                    </span>
-                  </button>
-                  )}
-              </div>
-            </div>
           </div>
         </div>
       </div>
