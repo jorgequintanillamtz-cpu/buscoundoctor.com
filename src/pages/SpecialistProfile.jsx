@@ -174,9 +174,9 @@ export default function SpecialistProfile() {
         Especialistas
       </Link>
 
-      {/* Header: foto + tarjeta de info. Móvil: apiladas con superposición. Escritorio: 2 columnas lado a lado. */}
-      <div className="lg:grid lg:grid-cols-5 lg:gap-8 lg:items-start">
-        <div className="relative h-72 sm:h-96 lg:h-[560px] lg:col-span-2 lg:sticky lg:top-24 rounded-3xl overflow-hidden">
+      {/* Header: foto + tarjeta de info. Móvil: apiladas con superposición. Escritorio: 2 columnas de igual altura. */}
+      <div className="lg:grid lg:grid-cols-5 lg:gap-8 lg:items-stretch">
+        <div className="relative h-72 sm:h-96 lg:h-full lg:col-span-2 lg:sticky lg:top-24 rounded-3xl overflow-hidden">
           {specialist.profile_photo ?
           <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
 
