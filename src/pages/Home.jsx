@@ -8,6 +8,15 @@ import SpecialtyCard from "../components/SpecialtyCard";
 import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
 import ZoneCard from "../components/ZoneCard";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+
+const HOME_FAQS = [
+  { question: "¿Cuesta usar BuscoUnDoctor?", answer: "Es gratis para pacientes, no cobramos por buscar ni contactar médicos." },
+  { question: "¿Cómo se verifica a los médicos?", answer: "Cada médico sube su cédula profesional, que un administrador revisa antes de publicar su perfil." },
+  { question: "¿Cómo agendo una cita?", answer: "Contactas directamente al médico por WhatsApp o teléfono desde su perfil; nosotros no gestionamos la agenda." },
+  { question: "¿BuscoUnDoctor da consejos médicos?", answer: "No, somos un directorio; toda consulta médica debe hacerse directamente con el especialista." },
+  { question: "¿Puedo dejar una reseña de mi médico?", answer: "Sí, desde el perfil del médico después de haberlo consultado." },
+];
 
 // Ilustración placeholder de médico (no hay foto real disponible todavía).
 // Sustituir por una fotografía real cuando esté disponible.
@@ -78,6 +87,24 @@ export default function Home() {
       document.head.appendChild(metaDesc);
     }
     metaDesc.setAttribute('content', "Encuentra especialistas verificados en Monterrey y San Pedro Garza García. Busca por especialidad y zona, compara perfiles con cédula profesional verificada y contacta directo.");
+  }, []);
+
+  useEffect(() => {
+    const faqLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": HOME_FAQS.map((f) => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": { "@type": "Answer", "text": f.answer },
+      })),
+    };
+    const faqScript = document.createElement("script");
+    faqScript.type = "application/ld+json";
+    faqScript.id = "home-jsonld-faq";
+    faqScript.text = JSON.stringify(faqLd);
+    document.head.appendChild(faqScript);
+    return () => { faqScript.remove(); };
   }, []);
 
   if (loading) {
@@ -285,6 +312,23 @@ export default function Home() {
             <h3 className="font-heading font-semibold text-sm text-foreground">Contacta y agenda</h3>
             <p className="text-xs text-muted-foreground mt-1">Escríbele por WhatsApp o agenda tu cita directo.</p>
           </div>
+        </div>
+      </section>
+
+      {/* Preguntas frecuentes */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-10">
+        <div className="text-center mb-8">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Preguntas frecuentes</h2>
+        </div>
+        <div className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
+            {HOME_FAQS.map((f, i) =>
+            <AccordionItem key={i} value={`home-faq-${i}`} className="px-5">
+              <AccordionTrigger className="text-left font-heading font-semibold text-sm sm:text-base text-foreground hover:no-underline">{f.question}</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">{f.answer}</AccordionContent>
+            </AccordionItem>
+            )}
+          </Accordion>
         </div>
       </section>
 
