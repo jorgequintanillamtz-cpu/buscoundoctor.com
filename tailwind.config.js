@@ -48,7 +48,10 @@ module.exports = {
   				input: 'hsl(var(--input))',
   				ring: 'hsl(var(--ring))',
   				brand: {
-  					navy: '#073348',
+  					navy: '#0B1E4D',
+  					blue: '#2F6FED',
+  					blueLight: '#EAF2FF',
+  					bluePale: '#DCE9FF',
   				},
   			chart: {
   				'1': 'hsl(var(--chart-1))',

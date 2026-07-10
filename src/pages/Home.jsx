@@ -9,6 +9,30 @@ import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
 import ZoneCard from "../components/ZoneCard";
 
+// Ilustración placeholder de médico (no hay foto real disponible todavía).
+// Sustituir por una fotografía real cuando esté disponible.
+function DoctorHeroIllustration({ className = "" }) {
+  return (
+    <svg viewBox="0 0 320 360" className={className} role="img" aria-label="Ilustración de médico">
+      <defs>
+        <clipPath id="doctorHeroFrame">
+          <path d="M160 10c85 0 150 65 150 150 0 90-65 190-150 190S10 250 10 160C10 75 75 10 160 10z" />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#doctorHeroFrame)">
+        <rect width="320" height="360" fill="#EAF2FF" />
+        <path d="M55 360 C55 258 108 228 160 228 C212 228 265 258 265 360 Z" fill="#FFFFFF" />
+        <path d="M120 233 L160 272 L200 233 L188 218 L132 218 Z" fill="#2F6FED" />
+        <rect x="140" y="188" width="40" height="46" fill="#F2C29A" />
+        <circle cx="160" cy="148" r="65" fill="#F5CEA6" />
+        <path d="M96 138 C96 88 120 58 160 58 C200 58 224 88 224 138 C224 118 210 103 190 98 C175 94 145 94 130 98 C112 103 96 118 96 138Z" fill="#0B1E4D" />
+        <path d="M128 240 C128 270 148 286 160 286 C172 286 192 270 192 240" stroke="#0B1E4D" strokeWidth="6" fill="none" strokeLinecap="round" />
+        <circle cx="160" cy="293" r="8" fill="#0B1E4D" />
+      </g>
+    </svg>
+  );
+}
+
 export default function Home() {
   const [specialties, setSpecialties] = useState([]);
   const [featured, setFeatured] = useState([]);
@@ -55,32 +79,70 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #e8f5fa 0%, #bad5e0 30%, #a8cede 60%, #d4eaf3 100%)' }}>        
-        {/* Mesh gradient blobs */}
+      <section className="relative bg-brand-navy">
+        {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '55%', height: '70%', background: 'radial-gradient(ellipse at center, rgba(106,185,215,0.5) 0%, transparent 70%)', filter: 'blur(48px)' }} />
-          <div style={{ position: 'absolute', top: '20%', right: '-10%', width: '50%', height: '65%', background: 'radial-gradient(ellipse at center, rgba(7,51,72,0.25) 0%, transparent 70%)', filter: 'blur(56px)' }} />
-          <div style={{ position: 'absolute', bottom: '-15%', left: '30%', width: '55%', height: '60%', background: 'radial-gradient(ellipse at center, rgba(186,213,224,0.6) 0%, transparent 70%)', filter: 'blur(52px)' }} />
-          <div style={{ position: 'absolute', top: '10%', left: '40%', width: '35%', height: '50%', background: 'radial-gradient(ellipse at center, rgba(106,185,215,0.3) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-          {/* fade to white at bottom */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(to bottom, transparent, #ffffff)' }} />
+          <div
+            className="absolute -top-24 -right-16 w-[420px] h-[420px] bg-brand-blue/20"
+            style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
+          />
+          <div
+            className="absolute bottom-0 -left-24 w-[300px] h-[300px] bg-brand-blue/10"
+            style={{ borderRadius: '42% 58% 35% 65% / 45% 55% 45% 55%' }}
+          />
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-6 sm:pt-12 sm:pb-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-foreground leading-tight tracking-tight mb-4">
-              <span>Encuentra los mejores doctores y especialistas de </span>
-              <span className="text-brand-navy">Nuevo León</span>
-            </h1>
-            <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-white/40 rounded-full px-4 py-1.5 mb-4">
-              <MapPin className="w-3.5 h-3.5 text-brand-navy" />
-              <span className="text-xs font-medium text-brand-navy">Monterrey, Nuevo León</span>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-14 sm:pt-20 sm:pb-16">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            {/* Left: copy + search */}
+            <div className="text-left">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-5">
+                <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
+                <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
+              </div>
+              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white leading-tight tracking-tight mb-4">
+                <span>Encuentra los mejores doctores y especialistas de </span>
+                <span className="text-brand-bluePale">Nuevo León</span>
+              </h1>
+              <p className="text-white/80 text-base sm:text-lg max-w-lg mb-6">
+                Directorio médico verificado en Monterrey y San Pedro Garza García. Compara perfiles con cédula profesional verificada y contacta directo, sin intermediarios.
+              </p>
+
+              {/* Floating white search card */}
+              <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-5">
+                <SearchBar />
+              </div>
             </div>
-            <div className="mt-2 max-w-xl mx-auto" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.4)' }}>
-              <SearchBar />
+
+            {/* Right: doctor illustration over organic blob */}
+            <div className="relative hidden md:flex justify-end items-center">
+              <div
+                className="absolute w-[360px] h-[400px] bg-gradient-to-br from-brand-blue/50 to-brand-bluePale/20"
+                style={{ borderRadius: '62% 38% 55% 45% / 50% 60% 40% 50%' }}
+              />
+              <DoctorHeroIllustration className="relative z-10 w-64 h-72 lg:w-72 lg:h-80 drop-shadow-2xl" />
             </div>
           </div>
         </div>
       </section>
+
+      {/* Trust badges: sibling block pulled up with a negative top margin so it overlaps the hero's bottom edge */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+          <div className="flex items-center gap-3 bg-white rounded-2xl shadow-lg border border-border/50 px-4 py-3.5">
+            <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-5 h-5 text-brand-blue" />
+            </div>
+            <span className="text-sm font-semibold text-brand-navy leading-snug">Cédula Profesional Verificada</span>
+          </div>
+          <div className="flex items-center gap-3 bg-white rounded-2xl shadow-lg border border-border/50 px-4 py-3.5">
+            <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-5 h-5 text-brand-blue" />
+            </div>
+            <span className="text-sm font-semibold text-brand-navy leading-snug">Contacto Directo sin Intermediarios</span>
+          </div>
+        </div>
+      </div>
 
       {/* Specialties */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4" style={{ background: '#ffffff' }}>
