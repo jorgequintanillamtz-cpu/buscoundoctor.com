@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "../components/SearchBar";
 import SpecialtyCard from "../components/SpecialtyCard";
@@ -38,20 +38,32 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, topReviews] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 3),
-      base44.entities.Zone.filter({ active: true })]
+      base44.entities.Zone.filter({ active: true }),
+      base44.entities.Review.filter({ approved: true }, "-rating", 3)]
       );
       setSpecialties(specs);
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
+
+      if (topReviews.length >= 3) {
+        const specialistIds = [...new Set(topReviews.map((r) => r.specialist_id).filter(Boolean))];
+        const reviewedSpecialists = specialistIds.length ?
+        await base44.entities.Specialist.filter({ id: { $in: specialistIds } }) :
+        [];
+        const specialtyById = Object.fromEntries(reviewedSpecialists.map((s) => [s.id, s.specialty]));
+        setTestimonials(topReviews.map((r) => ({ ...r, specialistSpecialty: specialtyById[r.specialist_id] || "" })));
+      }
+
       setLoading(false);
     }
     load();
@@ -211,6 +223,35 @@ export default function Home() {
           )}
           </div>
         </section>
+      }
+
+      {/* Testimonios */}
+      {testimonials.length >= 3 &&
+      <section className="relative bg-brand-navy">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="text-center mb-8">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-white">Lo que dicen nuestros pacientes</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            {testimonials.slice(0, 3).map((r) =>
+            <div key={r.id} className="flex flex-col bg-white rounded-2xl p-6 shadow-lg">
+              <div className="flex gap-0.5 mb-3">
+                {[1, 2, 3, 4, 5].map((s) =>
+                <Star key={s} className={`w-4 h-4 ${r.rating >= s ? "fill-brand-blue text-brand-blue" : "text-border"}`} />
+                )}
+              </div>
+              <p className="text-sm text-foreground leading-relaxed flex-1">"{r.comment}"</p>
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <p className="font-heading font-semibold text-sm text-brand-navy">{r.patient_name || "Paciente verificado"}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {r.specialist_name}{r.specialistSpecialty ? ` — ${r.specialistSpecialty}` : ""}
+                </p>
+              </div>
+            </div>
+            )}
+          </div>
+        </div>
+      </section>
       }
 
       {/* Cómo funciona */}
