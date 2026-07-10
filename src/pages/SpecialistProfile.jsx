@@ -211,7 +211,7 @@ export default function SpecialistProfile() {
             }
             {specialist.rating != null &&
             <span className="flex items-center gap-1.5">
-                <span className="text-amber-400 text-base leading-none">
+                <span className="text-brand-blue text-base leading-none">
                   {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
                 </span>
                 <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>

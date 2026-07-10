@@ -56,7 +56,7 @@ export default function SpecialistCard({ specialist, priority = false }) {
                   {specialist.zone || specialist.location}
                 </span>
                 {specialist.rating != null && (
-                  <span className="flex items-center gap-1 text-amber-500 font-medium">
+                  <span className="flex items-center gap-1 text-brand-blue font-medium">
                     {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
                     <span className="text-muted-foreground font-normal">{specialist.rating.toFixed(1)}</span>
                   </span>

@@ -7,7 +7,7 @@ function StarDisplay({ rating }) {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <Star key={s} className={`w-4 h-4 ${rating >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+        <Star key={s} className={`w-4 h-4 ${rating >= s ? "fill-brand-blue text-brand-blue" : "text-muted-foreground/30"}`} />
       ))}
     </div>
   );

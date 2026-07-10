@@ -1,4 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+const brand = {
+	navy: '#0B1E4D',
+	blue: '#2F6FED',
+	blueLight: '#EAF2FF',
+	bluePale: '#DCE9FF',
+};
+
 module.exports = {
     darkMode: ["class"],
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
@@ -25,7 +32,7 @@ module.exports = {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
+  				DEFAULT: brand.blue,
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
@@ -47,12 +54,7 @@ module.exports = {
   			border: 'hsl(var(--border))',
   				input: 'hsl(var(--input))',
   				ring: 'hsl(var(--ring))',
-  				brand: {
-  					navy: '#0B1E4D',
-  					blue: '#2F6FED',
-  					blueLight: '#EAF2FF',
-  					bluePale: '#DCE9FF',
-  				},
+  				brand,
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',

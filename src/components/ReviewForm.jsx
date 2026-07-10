@@ -59,7 +59,7 @@ export default function ReviewForm({ specialist }) {
               className="transition-transform hover:scale-110"
             >
               <Star
-                className={`w-8 h-8 ${(hover || rating) >= star ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`}
+                className={`w-8 h-8 ${(hover || rating) >= star ? "fill-brand-blue text-brand-blue" : "text-muted-foreground"}`}
               />
             </button>
           ))}

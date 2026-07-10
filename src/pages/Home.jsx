@@ -184,7 +184,7 @@ export default function Home() {
       </div>
 
       {/* Specialties */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4" style={{ background: '#ffffff' }}>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4 bg-white">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialidades</h2>
           <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
