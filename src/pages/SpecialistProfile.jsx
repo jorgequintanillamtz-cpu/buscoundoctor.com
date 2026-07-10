@@ -297,11 +297,23 @@ export default function SpecialistProfile() {
         </div>
       </div>
 
+      {/* Navegación interna sticky (escritorio) */}
+      <nav className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky top-16 z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm">
+        <a href="#sobre-mi" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Sobre mí</a>
+        <a href="#formacion" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Formación</a>
+        <a href="#consultorios" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Consultorios</a>
+        <a href="#aseguradoras" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Aseguradoras</a>
+        <a href="#resenas" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Reseñas</a>
+      </nav>
+
+      <div className="mt-2 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
+      <div className="lg:col-span-2">
+
       <LanguagesChips specialistId={specialist.id} />
 
       {/* Descripción + Video */}
       {(specialist.description || specialist.video_url) &&
-      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+      <div id="sobre-mi" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
           <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
           {specialist.video_url &&
         <div className="mt-0 mb-5">
@@ -330,7 +342,9 @@ export default function SpecialistProfile() {
         </div>
       }
 
-      <EducationTimeline specialistId={specialist.id} />
+      <div id="formacion" className="scroll-mt-32">
+        <EducationTimeline specialistId={specialist.id} />
+      </div>
 
       {/* Servicios / Especialidades */}
       {specialist.services?.length > 0 &&
@@ -344,7 +358,7 @@ export default function SpecialistProfile() {
               </div>
           )}
           </div>
-          <div className="mt-5 pt-5 border-t border-border/50">
+          <div id="aseguradoras" className="mt-5 pt-5 border-t border-border/50 scroll-mt-32">
               <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
               {resolvedInsurers.length > 0 ?
               <div className="flex flex-wrap gap-2">
@@ -375,7 +389,9 @@ export default function SpecialistProfile() {
         </div>
       }
 
-      <PublicOfficeList specialistId={specialist.id} />
+      <div id="consultorios" className="scroll-mt-32">
+        <PublicOfficeList specialistId={specialist.id} />
+      </div>
 
       {/* Tipos de consulta */}
       {specialist.modality &&
@@ -412,7 +428,7 @@ export default function SpecialistProfile() {
       }
 
       {/* Reseñas */}
-      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
+      <div id="resenas" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-heading font-bold text-lg text-foreground">Reseñas de pacientes</h2>
           {!showReviewForm &&
@@ -434,6 +450,51 @@ export default function SpecialistProfile() {
             <ReviewForm specialist={specialist} />
           </div>
         }
+      </div>
+
+      </div>
+
+      {/* Sidebar de contacto fijo (escritorio) */}
+      <aside className="hidden lg:block lg:col-span-1">
+        <div className="sticky top-32 bg-card rounded-3xl border border-border/50 shadow-sm p-6 space-y-4">
+          <div>
+            <p className="font-heading font-semibold text-base text-foreground">¿Tienes alguna pregunta?</p>
+            <p className="text-xs text-muted-foreground mt-1">Contacta directamente a {specialist.full_name?.split(' ')[0]}.</p>
+          </div>
+          {specialist.license_verification_status === "verified" && (
+            <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Cédula verificada
+            </div>
+          )}
+          <div className="flex flex-col gap-2.5">
+            {whatsappHref &&
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
+              
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </a>
+            }
+            <button
+              onClick={() => setShowForm(true)}
+              className="inline-flex items-center justify-center gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
+              
+              <Calendar className="w-4 h-4" />
+              Agendar cita
+            </button>
+          </div>
+          {specialist.price_range && (
+            <p className="text-xs text-muted-foreground">Precio de consulta: <span className="font-semibold text-foreground">
+              {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+            </span></p>
+          )}
+          <p className="text-[11px] text-muted-foreground border-t border-border/50 pt-3">La reserva y el contacto son gratuitos.</p>
+        </div>
+      </aside>
       </div>
 
       <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
