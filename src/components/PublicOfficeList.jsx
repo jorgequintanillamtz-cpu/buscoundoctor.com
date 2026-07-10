@@ -12,6 +12,17 @@ const DAYS = [
   { v: 6, label: "Sábado" },
 ];
 
+function buildMapEmbedUrl(office) {
+  if (office.maps_url) {
+    const coordMatch = office.maps_url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (coordMatch) {
+      return `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&z=16&output=embed`;
+    }
+  }
+  const query = encodeURIComponent(`${office.address_line}, Monterrey, Nuevo León, México`);
+  return `https://www.google.com/maps?q=${query}&output=embed`;
+}
+
 export default function PublicOfficeList({ specialistId }) {
   const [offices, setOffices] = useState([]);
   const [zones, setZones] = useState([]);
@@ -77,6 +88,17 @@ export default function PublicOfficeList({ specialistId }) {
                   </p>
                 )}
               </div>
+            </div>
+            <div className="mt-3 rounded-xl overflow-hidden border border-border/50">
+              <iframe
+                title={`Mapa de ${office.address_line}`}
+                src={buildMapEmbedUrl(office)}
+                width="100%"
+                height="220"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
             <div className="ml-8">
               <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
