@@ -174,9 +174,9 @@ export default function SpecialistProfile() {
         Especialistas
       </Link>
 
-      {/* Header: foto grande + tarjeta blanca superpuesta (estilo app de referencia) */}
-      <div>
-        <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden">
+      {/* Header: foto + tarjeta de info. Móvil: apiladas con superposición. Escritorio: 2 columnas lado a lado. */}
+      <div className="lg:grid lg:grid-cols-5 lg:gap-8 lg:items-start">
+        <div className="relative h-72 sm:h-96 lg:h-[560px] lg:col-span-2 lg:sticky lg:top-24 rounded-3xl overflow-hidden">
           {specialist.profile_photo ?
           <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
 
@@ -188,8 +188,8 @@ export default function SpecialistProfile() {
           }
         </div>
 
-        {/* Tarjeta blanca superpuesta */}
-        <div className="relative z-10 -mt-14 sm:-mt-16 mx-2 sm:mx-6">
+        {/* Tarjeta de info: superpuesta en móvil, columna independiente en escritorio */}
+        <div className="relative z-10 -mt-14 sm:-mt-16 lg:mt-0 mx-2 sm:mx-6 lg:mx-0 lg:col-span-3">
           <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-8">
             <h1 className="font-heading font-bold text-2xl sm:text-3xl text-brand-navy">
               {specialist.full_name}
