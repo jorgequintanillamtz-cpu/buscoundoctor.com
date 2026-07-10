@@ -25,7 +25,7 @@ const emptyHours = () =>
     is_closed: d.v === 0 || d.v === 6,
   }));
 
-const emptyOffice = () => ({ zone_id: "", address_line: "", phone: "", is_primary: false });
+const emptyOffice = () => ({ zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false });
 
 function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, saving }) {
   const [office, setOffice] = useState(initial || emptyOffice());
@@ -73,6 +73,16 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
             className="rounded-xl text-sm"
             placeholder="8123456789"
           />
+        </div>
+        <div className="sm:col-span-3">
+          <label className="text-xs font-medium mb-1 block">Enlace de Google Maps (opcional)</label>
+          <Input
+            value={office.maps_url || ""}
+            onChange={(e) => setOffice({ ...office, maps_url: e.target.value })}
+            className="rounded-xl text-sm"
+            placeholder='Pega aquí el link para compartir de Google Maps de tu consultorio'
+          />
+          <p className="text-[11px] text-muted-foreground mt-1">Búscate en Google Maps, presiona "Compartir" y pega el enlace aquí. Si lo dejas vacío, usaremos tu dirección de texto para mostrar el mapa.</p>
         </div>
         <label className="flex items-center gap-2 sm:col-span-2 text-sm cursor-pointer">
           <input
@@ -174,6 +184,7 @@ export default function OfficeManager({ specialistId }) {
           zone_id: data.zone_id,
           address_line: data.address_line,
           phone: data.phone,
+          maps_url: data.maps_url,
           is_primary: data.is_primary,
         });
         officeId = data.id;
@@ -184,6 +195,7 @@ export default function OfficeManager({ specialistId }) {
           zone_id: data.zone_id,
           address_line: data.address_line,
           phone: data.phone,
+          maps_url: data.maps_url,
           is_primary: data.is_primary,
         });
         officeId = created.id;
