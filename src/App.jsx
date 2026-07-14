@@ -23,6 +23,7 @@ import BlogEditor from './pages/admin/BlogEditor.jsx';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminDoctores from './pages/admin/AdminDoctores';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
+import MiPerfil from './pages/admin/MiPerfil';
 import AdminFaqs from './pages/admin/AdminFaqs';
 import AdminFaqEditor from './pages/admin/AdminFaqEditor';
 import About from './pages/About';
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
         <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
         <Route path="/admin/resenas" element={<AdminReviews />} />
+        <Route path="/admin/mi-perfil" element={<MiPerfil />} />
         <Route path="/admin/doctores" element={<AdminDoctores />} />
         <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
         <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
