@@ -1,9 +1,10 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, UserRound, LogOut } from "lucide-react";
 
-const navItems = [
+const adminNavItems = [
   { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { path: "/admin/mi-perfil", label: "Mi Perfil", icon: UserRound },
   { path: "/admin/especialistas", label: "Especialistas", icon: Users },
   { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
   { path: "/admin/zonas", label: "Zonas", icon: MapPin },
@@ -13,8 +14,28 @@ const navItems = [
   { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
 ];
 
+const doctorNavItems = [
+  { path: "/admin/mi-perfil", label: "Mi Perfil", icon: UserRound, exact: true },
+];
+
 export default function AdminLayout() {
   const location = useLocation();
+  const [role, setRole] = useState("loading"); // loading | admin | doctor | none
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const u = await base44.auth.me().catch(() => null);
+      if (!active) return;
+      if (!u) { setRole("none"); return; }
+      setRole(u.role === "admin" || u.role === "superadmin" ? "admin" : "doctor");
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const isDoctor = role === "doctor";
+  const navItems = isDoctor ? doctorNavItems : adminNavItems;
+  const panelTitle = isDoctor ? "Panel de Médico" : "Panel de Administración";
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path;
@@ -30,7 +51,10 @@ export default function AdminLayout() {
               <ArrowLeft className="w-4 h-4" />
               Volver al sitio
             </Link>
-            <h2 className="font-heading font-bold text-lg text-foreground">Admin Panel</h2>
+            <h2 className="font-heading font-bold text-lg text-foreground">{panelTitle}</h2>
+            {isDoctor && (
+              <p className="text-xs text-muted-foreground mt-1">Edita la información de tu perfil médico.</p>
+            )}
           </div>
           <nav className="flex-1 p-3">
             <div className="flex flex-col gap-1">
@@ -50,6 +74,17 @@ export default function AdminLayout() {
               ))}
             </div>
           </nav>
+          {isDoctor && (
+            <div className="p-3 border-t border-border/50">
+              <Link
+                to="/"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Salir del panel
+              </Link>
+            </div>
+          )}
         </aside>
 
         <div className="flex-1 min-h-screen">
@@ -59,7 +94,7 @@ export default function AdminLayout() {
                 <ArrowLeft className="w-4 h-4" />
                 Sitio
               </Link>
-              <h2 className="font-heading font-bold text-foreground">Admin</h2>
+              <h2 className="font-heading font-bold text-foreground">{isDoctor ? "Mi Panel" : "Admin"}</h2>
             </div>
             <div className="flex gap-1 overflow-x-auto pb-1 -mx-1 px-1">
               {navItems.map((item) => (
