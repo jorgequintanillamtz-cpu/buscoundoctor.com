@@ -11,11 +11,11 @@ import ZoneCard from "../components/ZoneCard";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 const HOME_FAQS = [
-  { question: "¿Cuesta usar BuscoUnDoctor?", answer: "Es gratis para pacientes, no cobramos por buscar ni contactar médicos." },
-  { question: "¿Cómo se verifica a los médicos?", answer: "Cada médico sube su cédula profesional, que un administrador revisa antes de publicar su perfil." },
-  { question: "¿Cómo agendo una cita?", answer: "Contactas directamente al médico por WhatsApp o teléfono desde su perfil; nosotros no gestionamos la agenda." },
-  { question: "¿BuscoUnDoctor da consejos médicos?", answer: "No, somos un directorio; toda consulta médica debe hacerse directamente con el especialista." },
-  { question: "¿Puedo dejar una reseña de mi médico?", answer: "Sí, desde el perfil del médico después de haberlo consultado." },
+  { question: "¿Cuesta usar BuscoUnDoctor?", answer: "No, usar BuscoUnDoctor es completamente gratuito para pacientes. Puedes buscar especialistas, revisar perfiles verificados y contactar directamente a cualquier médico sin costo ni necesidad de registrarte." },
+  { question: "¿Cómo se verifica a los médicos?", answer: "Cada médico debe subir su cédula profesional al crear su perfil. Un administrador de BuscoUnDoctor revisa ese documento manualmente antes de aprobar la publicación, y el sello de ‘Cédula profesional verificada’ solo aparece una vez confirmada la revisión." },
+  { question: "¿Cómo agendo una cita?", answer: "Contactas directamente al médico desde su perfil, por WhatsApp o llamada telefónica. BuscoUnDoctor no gestiona la agenda del consultorio; es el propio médico quien confirma contigo el horario disponible." },
+  { question: "¿BuscoUnDoctor da consejos médicos o diagnósticos?", answer: "No. Somos un directorio que te ayuda a encontrar y contactar especialistas; no ofrecemos diagnósticos, recomendaciones de tratamiento ni asesoría médica. Cualquier duda de salud debe consultarse directamente con un profesional." },
+  { question: "¿Puedo dejar una reseña de mi médico?", answer: "Sí. Desde el perfil del médico que consultaste puedes escribir una reseña con tu calificación y comentario. Las reseñas se revisan antes de publicarse para mantener la calidad de la información y evitar spam." },
 ];
 
 // Ilustración placeholder de médico (no hay foto real disponible todavía).
