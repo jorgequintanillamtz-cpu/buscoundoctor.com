@@ -3,11 +3,12 @@ import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpC
 
 const navItems = [
   { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { path: "/admin/mi-perfil", label: "Mi Perfil", icon: UserRound },
   { path: "/admin/especialistas", label: "Especialistas", icon: Users },
   { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
   { path: "/admin/zonas", label: "Zonas", icon: MapPin },
   { path: "/admin/blog", label: "Blog", icon: FileText },
-  { path: "/admin/doctores", label: "Doctores", icon: UserRound },
+  { path: "/admin/doctores", label: "Doctores", icon: Users },
   { path: "/admin/resenas", label: "Reseñas", icon: Star },
   { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
 ];
