@@ -24,6 +24,7 @@ import AdminReviews from './pages/admin/AdminReviews';
 import AdminDoctores from './pages/admin/AdminDoctores';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
 import MiPerfil from './pages/admin/MiPerfil';
+import RequireAdmin from './components/RequireAdmin';
 import AdminFaqs from './pages/admin/AdminFaqs';
 import AdminFaqEditor from './pages/admin/AdminFaqEditor';
 import About from './pages/About';
@@ -69,20 +70,22 @@ const AuthenticatedApp = () => {
         <Route path="/registro-medico" element={<RegistroMedico />} />
       </Route>
       <Route element={<AdminLayout />}>
-        <Route path="/admin" element={<Dashboard />} />
-        <Route path="/admin/especialistas" element={<AdminSpecialists />} />
-        <Route path="/admin/especialidades" element={<AdminSpecialties />} />
-        <Route path="/admin/zonas" element={<AdminZones />} />
-        <Route path="/admin/blog" element={<AdminBlog />} />
-        <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
-        <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
-        <Route path="/admin/resenas" element={<AdminReviews />} />
         <Route path="/admin/mi-perfil" element={<MiPerfil />} />
-        <Route path="/admin/doctores" element={<AdminDoctores />} />
-        <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
         <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
-        <Route path="/admin/faqs" element={<AdminFaqs />} />
-        <Route path="/admin/faqs/editar/:id" element={<AdminFaqEditor />} />
+        <Route element={<RequireAdmin />}>
+          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/especialistas" element={<AdminSpecialists />} />
+          <Route path="/admin/especialidades" element={<AdminSpecialties />} />
+          <Route path="/admin/zonas" element={<AdminZones />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
+          <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
+          <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
+          <Route path="/admin/resenas" element={<AdminReviews />} />
+          <Route path="/admin/doctores" element={<AdminDoctores />} />
+          <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
+          <Route path="/admin/faqs" element={<AdminFaqs />} />
+          <Route path="/admin/faqs/editar/:id" element={<AdminFaqEditor />} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
