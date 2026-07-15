@@ -1,17 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, ShieldCheck, Mail, Lock, User, FileText, CheckCircle2, ArrowLeft } from "lucide-react";
 
+function GoogleIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" {...props}>
+      <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.82z" />
+      <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.87-3c-1.08.72-2.46 1.15-4.08 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24z" />
+      <path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28v-3.1H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38l4-3.1z" />
+      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.62l4 3.1c.95-2.85 3.6-4.97 6.73-4.97z" />
+    </svg>
+  );
+}
+
 export default function RegistroMedico() {
   const navigate = useNavigate();
-  const [step, setStep] = useState("form"); // form | otp | done
+  // choose | google-checking | cedula-only | form | otp | done
+  const [step, setStep] = useState("choose");
   const [form, setForm] = useState({ full_name: "", email: "", password: "", cedula: "" });
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Al cargar: si el usuario ya está autenticado (ej. acaba de volver de Google),
+  // revisa si ya tiene un perfil de médico vinculado o si falta completarlo.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setStep("google-checking");
+      const isAuth = await base44.auth.isAuthenticated().catch(() => false);
+      if (!active) return;
+      if (!isAuth) {
+        setStep("choose");
+        return;
+      }
+      const u = await base44.auth.me().catch(() => null);
+      if (!active || !u) { setStep("choose"); return; }
+      const own = await base44.entities.Specialist.filter({ owner_user_id: u.id }).catch(() => []);
+      if (!active) return;
+      if (own.length > 0) {
+        navigate(`/admin/doctores/editar/${own[0].id}`, { replace: true });
+        return;
+      }
+      // Autenticado (vía Google) pero sin perfil todavía: solo falta la cédula.
+      setForm((f) => ({ ...f, full_name: u.full_name || f.full_name, email: u.email || f.email }));
+      setStep("cedula-only");
+    })();
+    return () => { active = false; };
+  }, [navigate]);
+
+  const continueWithGoogle = () => {
+    base44.auth.loginWithProvider("google", window.location.href);
+  };
+
+  const submitCedulaOnly = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!form.cedula) {
+      setError("Ingresa tu número de cédula profesional");
+      return;
+    }
+    setLoading(true);
+    try {
+      await base44.functions.invoke("createDoctorProfile", {
+        full_name: form.full_name,
+        professional_license_number: form.cedula,
+      });
+      try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
+      setStep("done");
+    } catch (err) {
+      setError(err.message || "No se pudo crear tu perfil. Intenta de nuevo.");
+    }
+    setLoading(false);
+  };
 
   const submitForm = async (e) => {
     e.preventDefault();
@@ -44,13 +108,11 @@ export default function RegistroMedico() {
     setLoading(true);
     try {
       await base44.auth.verifyOtp({ email: form.email, otpCode: otp });
-      const { user } = await base44.auth.loginViaEmailPassword(form.email, form.password);
-      // Crear el perfil Specialist (draft, en revisión) vía función backend segura
+      await base44.auth.loginViaEmailPassword(form.email, form.password);
       await base44.functions.invoke("createDoctorProfile", {
         full_name: form.full_name,
         professional_license_number: form.cedula,
       });
-      // Asignar rol doctor (best-effort; el control de acceso no depende solo de esto)
       try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
       setStep("done");
     } catch (err) {
@@ -65,6 +127,80 @@ export default function RegistroMedico() {
         <Link to="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
         </Link>
+
+        {step === "google-checking" && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
+        {step === "choose" && (
+          <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
+            <div className="text-center mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+                <ShieldCheck className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="font-heading font-bold text-xl text-foreground">Registro médico</h1>
+              <p className="text-sm text-muted-foreground">Crea tu cuenta de especialista</p>
+            </div>
+
+            <Button
+              type="button"
+              onClick={continueWithGoogle}
+              variant="outline"
+              className="w-full min-h-[44px] rounded-xl gap-2 border-border"
+            >
+              <GoogleIcon />
+              Continuar con Google
+            </Button>
+
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px bg-border flex-1" />
+              <span className="text-xs text-muted-foreground">o con tu correo</span>
+              <div className="h-px bg-border flex-1" />
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setStep("form")}
+              className="w-full min-h-[44px] rounded-xl"
+            >
+              Registrarme con correo electrónico
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center pt-2">
+              Al registrarte, tu perfil quedará en revisión hasta que verifiquemos tu cédula profesional.
+            </p>
+          </div>
+        )}
+
+        {step === "cedula-only" && (
+          <form onSubmit={submitCedulaOnly} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
+            <div className="text-center mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+                <FileText className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="font-heading font-bold text-xl text-foreground">Un último paso</h1>
+              <p className="text-sm text-muted-foreground">
+                Hola{form.full_name ? `, ${form.full_name.split(" ")[0]}` : ""}. Solo necesitamos tu cédula profesional para crear tu perfil.
+              </p>
+            </div>
+            <div className="relative">
+              <FileText className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={form.cedula}
+                onChange={(e) => setForm({ ...form, cedula: e.target.value })}
+                placeholder="Número de cédula profesional"
+                className="rounded-xl pl-9"
+              />
+            </div>
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Crear mi perfil
+            </Button>
+          </form>
+        )}
 
         {step === "form" && (
           <form onSubmit={submitForm} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
@@ -124,6 +260,9 @@ export default function RegistroMedico() {
             <p className="text-xs text-muted-foreground text-center">
               Te enviaremos un código de verificación a tu correo.
             </p>
+            <button type="button" onClick={() => setStep("choose")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
+              ← Volver
+            </button>
           </form>
         )}
 
@@ -165,7 +304,7 @@ export default function RegistroMedico() {
             <p className="text-sm text-muted-foreground">
               Tu cuenta fue creada. Tu perfil está en revisión y será publicado una vez verificada tu cédula profesional.
             </p>
-            <Button onClick={() => navigate("/admin/doctores")} className="min-h-[44px] rounded-xl">
+            <Button onClick={() => navigate("/admin/mi-perfil")} className="min-h-[44px] rounded-xl">
               Ir a mi perfil
             </Button>
           </div>
