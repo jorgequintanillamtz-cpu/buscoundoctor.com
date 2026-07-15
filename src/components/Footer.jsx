@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="bg-brand-navy border-t border-white/10 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-7 h-7 rounded-lg bg-brand-blue flex items-center justify-center">
                 <span className="text-white font-heading font-bold text-xs">B</span>
@@ -30,6 +30,16 @@ export default function Footer() {
           </div>
 
           <div>
+            <h4 className="font-heading font-semibold text-sm mb-4 text-white">Zonas</h4>
+            <div className="flex flex-col gap-2.5">
+              <Link to="/especialistas?zone=San Pedro Garza García" className="text-sm text-white/60 hover:text-brand-blue transition-colors">San Pedro Garza García</Link>
+              <Link to="/especialistas?zone=Del Valle" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Del Valle</Link>
+              <Link to="/especialistas?zone=Cumbres" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Cumbres</Link>
+              <Link to="/especialistas?zone=Contry" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Contry</Link>
+            </div>
+          </div>
+
+          <div>
             <h4 className="font-heading font-semibold text-sm mb-4 text-white">Navegación</h4>
             <div className="flex flex-col gap-2.5">
               <Link to="/" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Inicio</Link>
@@ -37,7 +47,9 @@ export default function Footer() {
               <Link to="/blog" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Blog</Link>
               <Link to="/nosotros" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Nosotros</Link>
               <Link to="/contacto" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Contacto</Link>
+              <Link to="/registro-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Registro Doctor</Link>
               <Link to="/admin/mi-perfil" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Acceso para médicos</Link>
+              <Link to="/admin" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Admin</Link>
             </div>
           </div>
 
