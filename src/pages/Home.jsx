@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "../components/SearchBar";
 import SpecialtyCard from "../components/SpecialtyCard";
@@ -42,27 +42,37 @@ function DoctorHeroIllustration({ className = "" }) {
   );
 }
 
+const TRUST_STRIP = [
+  { icon: MessageCircle, label: "Contacto Directo", sub: "Sin intermediarios" },
+  { icon: ShieldCheck, label: "Perfiles Verificados", sub: "Cédula profesional" },
+  { icon: Sparkles, label: "Sin Costo", sub: "100% gratis para pacientes" },
+  { icon: Star, label: "Reseñas Reales", sub: "De pacientes verificados" },
+];
+
 export default function Home() {
   const [specialties, setSpecialties] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, topReviews] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, topReviews, allActive] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 3),
       base44.entities.Zone.filter({ active: true }),
-      base44.entities.Review.filter({ approved: true }, "-rating", 3)]
+      base44.entities.Review.filter({ approved: true }, "-rating", 3),
+      base44.entities.Specialist.filter({ active: true })]
       );
       setSpecialties(specs);
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
+      setTotalSpecialists(allActive.length);
 
       if (topReviews.length >= 3) {
         const specialistIds = [...new Set(topReviews.map((r) => r.specialist_id).filter(Boolean))];
@@ -118,7 +128,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy">
+      <section className="relative bg-brand-navy overflow-hidden">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -131,7 +141,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-14 sm:pt-20 sm:pb-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-20 sm:pt-20 sm:pb-28">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             {/* Left: copy + search */}
             <div className="text-left">
@@ -139,74 +149,131 @@ export default function Home() {
                 <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
                 <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
               </div>
-              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white leading-tight tracking-tight mb-4">
-                <span>Encuentra los mejores doctores y especialistas de </span>
-                <span className="text-brand-bluePale">Nuevo León</span>
+              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-4">
+                <span className="text-white block">Encuentra al doctor</span>
+                <span className="text-brand-bluePale block">ideal para ti</span>
               </h1>
               <p className="text-white/80 text-base sm:text-lg max-w-lg mb-6">
                 Directorio médico verificado en Monterrey y San Pedro Garza García. Compara perfiles con cédula profesional verificada y contacta directo, sin intermediarios.
               </p>
 
+              {/* Iconos de confianza en línea */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6">
+                <span className="flex items-center gap-1.5 text-xs sm:text-sm text-white/90">
+                  <ShieldCheck className="w-4 h-4 text-brand-bluePale" /> Cédula profesional verificada
+                </span>
+                <span className="flex items-center gap-1.5 text-xs sm:text-sm text-white/90">
+                  <MessageCircle className="w-4 h-4 text-brand-bluePale" /> Contacto directo sin intermediarios
+                </span>
+                <span className="flex items-center gap-1.5 text-xs sm:text-sm text-white/90">
+                  <Sparkles className="w-4 h-4 text-brand-bluePale" /> Búsqueda 100% gratuita
+                </span>
+              </div>
+
               {/* Floating white search card */}
-              <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-5">
+              <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-5 mb-6">
                 <SearchBar />
+              </div>
+
+              {/* Botones */}
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <Button size="lg" className="min-h-[44px] font-heading font-semibold bg-brand-blue hover:bg-brand-blue/90 text-white" asChild>
+                  <Link to="/especialistas">
+                    Buscar especialista <ArrowRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="min-h-[44px] font-heading font-semibold bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white" asChild>
+                  <Link to="/registro-medico">
+                    Soy médico, quiero unirme
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Prueba social */}
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="w-9 h-9 rounded-full bg-brand-blue/40 border-2 border-brand-navy flex items-center justify-center">
+                      <Users className="w-4 h-4 text-white/80" />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-white/80">
+                  {totalSpecialists > 0
+                    ? <>Más de <span className="font-semibold text-white">{totalSpecialists} especialistas</span> ya forman parte de BuscoUnDoctor</>
+                    : "Especialistas verificados en Monterrey y San Pedro"}
+                </p>
               </div>
             </div>
 
-            {/* Right: doctor illustration over organic blob */}
-            <div className="relative hidden md:flex justify-end items-center">
+            {/* Right: doctor illustration + tarjetas flotantes */}
+            <div className="relative hidden md:flex justify-center items-center">
               <div
                 className="absolute w-[360px] h-[400px] bg-gradient-to-br from-brand-blue/50 to-brand-bluePale/20"
                 style={{ borderRadius: '62% 38% 55% 45% / 50% 60% 40% 50%' }}
               />
               <DoctorHeroIllustration className="relative z-10 w-64 h-72 lg:w-72 lg:h-80 drop-shadow-2xl" />
+
+              {/* Tarjetas flotantes superpuestas */}
+              <div className="absolute -left-4 top-6 z-20 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5">
+                <ShieldCheck className="w-5 h-5 text-brand-blue flex-shrink-0" />
+                <span className="text-xs font-semibold text-brand-navy">Cédula verificada</span>
+              </div>
+              <div className="absolute right-0 top-1/3 z-20 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5">
+                <Users className="w-5 h-5 text-brand-blue flex-shrink-0" />
+                <span className="text-xs font-semibold text-brand-navy">
+                  {totalSpecialists > 0 ? `+${totalSpecialists} especialistas` : "Directorio en crecimiento"}
+                </span>
+              </div>
+              <div className="absolute left-2 bottom-4 z-20 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5">
+                <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-xs font-semibold text-brand-navy">Contacto directo</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust badges: sibling block pulled up with a negative top margin so it overlaps the hero's bottom edge */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
-          <div className="flex items-center gap-3 bg-white rounded-2xl shadow-lg border border-border/50 px-4 py-3.5">
-            <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-5 h-5 text-brand-blue" />
-            </div>
-            <span className="text-sm font-semibold text-brand-navy leading-snug">Cédula Profesional Verificada</span>
-          </div>
-          <div className="flex items-center gap-3 bg-white rounded-2xl shadow-lg border border-border/50 px-4 py-3.5">
-            <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-5 h-5 text-brand-blue" />
-            </div>
-            <span className="text-sm font-semibold text-brand-navy leading-snug">Contacto Directo sin Intermediarios</span>
+      {/* Tira de confianza (4 tarjetas) */}
+      <section className="relative z-10 -mt-10 sm:-mt-14 mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="bg-white rounded-3xl shadow-xl border border-border/50 grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-border/50">
+            {TRUST_STRIP.map((item, i) => (
+              <div key={i} className="flex flex-col items-center text-center gap-2 px-4 py-5">
+                <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-brand-blue" />
+                </div>
+                <div>
+                  <p className="text-sm font-heading font-semibold text-brand-navy leading-tight">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{item.sub}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Specialties */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4 bg-white">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialidades</h2>
-          <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
-            <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        {/* Mobile: horizontal scroll circles */}
-        <div className="flex gap-4 overflow-x-auto pb-2 sm:hidden" style={{ scrollbarWidth: 'none' }}>
-          {specialties.slice(0, 6).map((s) =>
-          <SpecialtyCard key={s.id} specialty={s} mobile />
-          )}
-        </div>
-        {/* Desktop: 3-col grid */}
-        <div className="hidden sm:grid grid-cols-3 gap-3">
-          {specialties.slice(0, 6).map((s) =>
-          <SpecialtyCard key={s.id} specialty={s} />
-          )}
+      {/* Specialties: estilo "Shop by Category" */}
+      <section className="bg-brand-blueLight/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialidades</h2>
+            <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
+              <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+            {specialties.slice(0, 7).map((s) =>
+            <div key={s.id} className="flex-shrink-0 w-24 sm:w-28">
+              <SpecialtyCard specialty={s} mobile />
+            </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* Zonas destacadas */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Zonas destacadas</h2>
           <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
@@ -220,24 +287,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Especialistas destacados</h2>
-          <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
-            <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {featured.map((s, i) =>
-          <SpecialistCard key={s.id} specialist={s} priority={i === 0} />
-          )}
+      {/* Featured: carrusel horizontal */}
+      <section className="bg-brand-blueLight/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialistas destacados</h2>
+            <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
+              <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible" style={{ scrollbarWidth: 'none' }}>
+            {featured.map((s, i) =>
+            <div key={s.id} className="flex-shrink-0 w-[85vw] sm:w-auto">
+              <SpecialistCard specialist={s} priority={i === 0} />
+            </div>
+            )}
+          </div>
         </div>
       </section>
 
       {/* Blog */}
       {posts.length > 0 &&
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Blog de salud</h2>
             <Link to="/blog" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
@@ -282,41 +353,43 @@ export default function Home() {
       }
 
       {/* Cómo funciona */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
-        <div className="text-center mb-8">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">¿Cómo funciona?</h2>
-          <p className="text-sm text-muted-foreground mt-1">Encuentra y contacta a tu especialista en 3 pasos</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center mb-3">
-              <Search className="w-6 h-6 text-primary" />
-            </div>
-            <span className="font-heading font-bold text-sm text-primary mb-1">Paso 1</span>
-            <h3 className="font-heading font-semibold text-sm text-foreground">Busca tu especialista</h3>
-            <p className="text-xs text-muted-foreground mt-1">Filtra por especialidad o zona en Monterrey.</p>
+      <section className="bg-brand-blueLight/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
+          <div className="text-center mb-8">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Cómo funciona?</h2>
+            <p className="text-sm text-muted-foreground mt-1">Encuentra y contacta a tu especialista en 3 pasos</p>
           </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center mb-3">
-              <ShieldCheck className="w-6 h-6 text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
+                <Search className="w-6 h-6 text-brand-blue" />
+              </div>
+              <span className="font-heading font-bold text-sm text-brand-blue mb-1">Paso 1</span>
+              <h3 className="font-heading font-semibold text-sm text-brand-navy">Busca tu especialista</h3>
+              <p className="text-xs text-muted-foreground mt-1">Filtra por especialidad o zona en Monterrey.</p>
             </div>
-            <span className="font-heading font-bold text-sm text-primary mb-1">Paso 2</span>
-            <h3 className="font-heading font-semibold text-sm text-foreground">Compara perfiles verificados</h3>
-            <p className="text-xs text-muted-foreground mt-1">Revisa cédula profesional, reseñas y ubicación.</p>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border/50 flex items-center justify-center mb-3">
-              <MessageCircle className="w-6 h-6 text-primary" />
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
+                <ShieldCheck className="w-6 h-6 text-brand-blue" />
+              </div>
+              <span className="font-heading font-bold text-sm text-brand-blue mb-1">Paso 2</span>
+              <h3 className="font-heading font-semibold text-sm text-brand-navy">Compara perfiles verificados</h3>
+              <p className="text-xs text-muted-foreground mt-1">Revisa cédula profesional, reseñas y ubicación.</p>
             </div>
-            <span className="font-heading font-bold text-sm text-primary mb-1">Paso 3</span>
-            <h3 className="font-heading font-semibold text-sm text-foreground">Contacta y agenda</h3>
-            <p className="text-xs text-muted-foreground mt-1">Escríbele por WhatsApp o agenda tu cita directo.</p>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
+                <MessageCircle className="w-6 h-6 text-brand-blue" />
+              </div>
+              <span className="font-heading font-bold text-sm text-brand-blue mb-1">Paso 3</span>
+              <h3 className="font-heading font-semibold text-sm text-brand-navy">Contacta y agenda</h3>
+              <p className="text-xs text-muted-foreground mt-1">Escríbele por WhatsApp o agenda tu cita directo.</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Preguntas frecuentes */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-10">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
         <div className="text-center mb-8">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Preguntas frecuentes</h2>
         </div>
@@ -332,20 +405,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-10">
-        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-8 sm:p-12 text-center">
-          <h2 className="font-heading font-bold text-2xl sm:text-3xl text-primary-foreground">
-            <span>¿Eres profesional de la salud?</span>
-          </h2>
-          <p className="text-primary-foreground/80 mt-3 max-w-md mx-auto">
-            <span>Únete a nuestra plataforma y conecta con nuevos pacientes en Monterrey</span>
-          </p>
-          <Button size="lg" variant="secondary" className="mt-6 min-h-[44px] font-heading font-semibold" asChild>
-            <Link to="/registro-medico">
-              <span>Registrarme como especialista</span>
-            </Link>
-          </Button>
+      {/* CTA: banner navy de ancho completo */}
+      <section className="relative bg-brand-navy overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute -bottom-16 -right-10 w-[280px] h-[280px] bg-brand-blue/20"
+            style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
+          />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+          <div className="grid md:grid-cols-3 gap-8 items-center">
+            <div className="md:col-span-2 text-center md:text-left">
+              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white">
+                Únete como especialista y llega a más pacientes
+              </h2>
+              <p className="text-white/80 mt-3 max-w-lg mx-auto md:mx-0">
+                Crea tu perfil verificado en minutos, sin costo, y deja que los pacientes te contacten directamente por WhatsApp.
+              </p>
+              <Button size="lg" variant="secondary" className="mt-6 min-h-[44px] font-heading font-semibold bg-white text-brand-navy hover:bg-white/90" asChild>
+                <Link to="/registro-medico">
+                  Registrarme como especialista
+                </Link>
+              </Button>
+            </div>
+            <div className="hidden md:flex justify-center">
+              <div className="w-28 h-28 rounded-full bg-brand-blue/20 flex items-center justify-center">
+                <Stethoscope className="w-14 h-14 text-brand-bluePale" />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>);
