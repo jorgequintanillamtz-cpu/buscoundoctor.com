@@ -33,53 +33,12 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
-              Inicio
-            </Link>
             <Link to="/especialistas" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
               Especialistas
             </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors outline-none">
-                Especialidades <ChevronDown className="w-3.5 h-3.5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[12rem] max-h-[70vh] overflow-y-auto">
-                {specialties.length === 0 && <DropdownMenuItem disabled>Cargando…</DropdownMenuItem>}
-                {specialties.map(s => (
-                  <DropdownMenuItem key={s.id} asChild>
-                    <Link to={`/especialidad/${s.slug}`}>{s.name}</Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors outline-none">
-                Zonas <ChevronDown className="w-3.5 h-3.5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[12rem] max-h-[70vh] overflow-y-auto">
-                {zones.length === 0 && <DropdownMenuItem disabled>Cargando…</DropdownMenuItem>}
-                {zones.map(z => (
-                  <DropdownMenuItem key={z.id} asChild>
-                    <Link to={`/especialistas?zone=${encodeURIComponent(z.name)}`}>{z.name}</Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Link to="/blog" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
-              Blog
-            </Link>
-            <Link to="/nosotros" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
-              Nosotros
-            </Link>
-            <Link to="/contacto" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
-              Contacto
-            </Link>
-            <Link to="/admin" className="text-sm font-medium text-brand-navy/50 hover:text-brand-navy transition-colors">
-              Admin
-            </Link>
             <Link to="/registro-medico">
               <Button size="sm" className="text-xs bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold">
-                Registrarme como doctor
+                Registro Doctor
               </Button>
             </Link>
           </nav>
@@ -98,92 +57,18 @@ export default function Header() {
       <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
           <nav className="flex flex-col px-4 py-3 gap-1">
             <Link
-            to="/"
-            onClick={() => setOpen(false)}
-            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-            
-              Inicio
-            </Link>
-            <Link
             to="/especialistas"
             onClick={() => setOpen(false)}
             className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
             
               Especialistas
             </Link>
-            <div className="flex flex-col">
-              <button
-                onClick={() => setOpenSpecs(v => !v)}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-                Especialidades
-                <ChevronDown className={`w-4 h-4 transition-transform ${openSpecs ? "rotate-180" : ""}`} />
-              </button>
-              {openSpecs && (
-                <div className="flex flex-col pl-3">
-                  {specialties.map(s => (
-                    <Link
-                      key={s.id}
-                      to={`/especialidad/${s.slug}`}
-                      onClick={() => setOpen(false)}
-                      className="px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-                      {s.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <button
-                onClick={() => setOpenZones(v => !v)}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-                Zonas
-                <ChevronDown className={`w-4 h-4 transition-transform ${openZones ? "rotate-180" : ""}`} />
-              </button>
-              {openZones && (
-                <div className="flex flex-col pl-3">
-                  {zones.map(z => (
-                    <Link
-                      key={z.id}
-                      to={`/especialistas?zone=${encodeURIComponent(z.name)}`}
-                      onClick={() => setOpen(false)}
-                      className="px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-                      {z.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Link
-            to="/blog"
-            onClick={() => setOpen(false)}
-            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-              Blog
-            </Link>
-            <Link
-            to="/nosotros"
-            onClick={() => setOpen(false)}
-            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-              Nosotros
-            </Link>
-            <Link
-            to="/contacto"
-            onClick={() => setOpen(false)}
-            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-              Contacto
-            </Link>
             <Link
             to="/registro-medico"
             onClick={() => setOpen(false)}
             className="px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-brand-blue hover:bg-brand-blue/90 transition-colors text-center mt-1">
             
-              Registrarme como doctor
-            </Link>
-            <Link
-            to="/admin"
-            onClick={() => setOpen(false)}
-            className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-            
-              Admin
+              Registro Doctor
             </Link>
           </nav>
         </div>
