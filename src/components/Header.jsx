@@ -74,9 +74,12 @@ export default function Header() {
             <Link to="/contacto" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
               Contacto
             </Link>
-            <Link to="/admin">
-              <Button size="sm" className="text-xs bg-brand-blue hover:bg-brand-blue/90 text-white">
-                Admin
+            <Link to="/admin" className="text-sm font-medium text-brand-navy/50 hover:text-brand-navy transition-colors">
+              Admin
+            </Link>
+            <Link to="/registro-medico">
+              <Button size="sm" className="text-xs bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold">
+                Registrarme como doctor
               </Button>
             </Link>
           </nav>
@@ -167,6 +170,13 @@ export default function Header() {
             onClick={() => setOpen(false)}
             className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
               Contacto
+            </Link>
+            <Link
+            to="/registro-medico"
+            onClick={() => setOpen(false)}
+            className="px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-brand-blue hover:bg-brand-blue/90 transition-colors text-center mt-1">
+            
+              Registrarme como doctor
             </Link>
             <Link
             to="/admin"
