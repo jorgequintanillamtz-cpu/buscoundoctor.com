@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, FileText, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft } from "lucide-react";
 
 function GoogleIcon(props) {
   return (
@@ -18,19 +18,23 @@ function GoogleIcon(props) {
 
 export default function RegistroMedico() {
   const navigate = useNavigate();
-  // choose | google-checking | cedula-only | form | otp | done
-  const [step, setStep] = useState("choose");
-  const [form, setForm] = useState({ full_name: "", email: "", password: "", cedula: "" });
+  // checking | choose | form | otp | done
+  const [step, setStep] = useState("checking");
+  const [form, setForm] = useState({ full_name: "", email: "", password: "" });
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const createProfile = async (full_name) => {
+    await base44.functions.invoke("createDoctorProfile", { full_name });
+    try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
+  };
+
   // Al cargar: si el usuario ya está autenticado (ej. acaba de volver de Google),
-  // revisa si ya tiene un perfil de médico vinculado o si falta completarlo.
+  // crea su perfil automáticamente (sin pedir nada más) o lo manda a su editor si ya tiene uno.
   useEffect(() => {
     let active = true;
     (async () => {
-      setStep("google-checking");
       const isAuth = await base44.auth.isAuthenticated().catch(() => false);
       if (!active) return;
       if (!isAuth) {
@@ -45,9 +49,12 @@ export default function RegistroMedico() {
         navigate(`/admin/doctores/editar/${own[0].id}`, { replace: true });
         return;
       }
-      // Autenticado (vía Google) pero sin perfil todavía: solo falta la cédula.
-      setForm((f) => ({ ...f, full_name: u.full_name || f.full_name, email: u.email || f.email }));
-      setStep("cedula-only");
+      try {
+        await createProfile(u.full_name || "Médico sin nombre");
+        if (active) setStep("done");
+      } catch (err) {
+        if (active) { setError(err.message || "No se pudo crear tu perfil."); setStep("choose"); }
+      }
     })();
     return () => { active = false; };
   }, [navigate]);
@@ -56,31 +63,10 @@ export default function RegistroMedico() {
     base44.auth.loginWithProvider("google", window.location.href);
   };
 
-  const submitCedulaOnly = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!form.cedula) {
-      setError("Ingresa tu número de cédula profesional");
-      return;
-    }
-    setLoading(true);
-    try {
-      await base44.functions.invoke("createDoctorProfile", {
-        full_name: form.full_name,
-        professional_license_number: form.cedula,
-      });
-      try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
-      setStep("done");
-    } catch (err) {
-      setError(err.message || "No se pudo crear tu perfil. Intenta de nuevo.");
-    }
-    setLoading(false);
-  };
-
   const submitForm = async (e) => {
     e.preventDefault();
     setError("");
-    if (!form.full_name || !form.email || !form.password || !form.cedula) {
+    if (!form.full_name || !form.email || !form.password) {
       setError("Completa todos los campos");
       return;
     }
@@ -109,11 +95,7 @@ export default function RegistroMedico() {
     try {
       await base44.auth.verifyOtp({ email: form.email, otpCode: otp });
       await base44.auth.loginViaEmailPassword(form.email, form.password);
-      await base44.functions.invoke("createDoctorProfile", {
-        full_name: form.full_name,
-        professional_license_number: form.cedula,
-      });
-      try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
+      await createProfile(form.full_name);
       setStep("done");
     } catch (err) {
       setError(err.message || "No se pudo verificar el código");
@@ -128,7 +110,7 @@ export default function RegistroMedico() {
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
         </Link>
 
-        {step === "google-checking" && (
+        {step === "checking" && (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
@@ -141,8 +123,10 @@ export default function RegistroMedico() {
                 <ShieldCheck className="w-6 h-6 text-primary" />
               </div>
               <h1 className="font-heading font-bold text-xl text-foreground">Registro médico</h1>
-              <p className="text-sm text-muted-foreground">Crea tu cuenta de especialista</p>
+              <p className="text-sm text-muted-foreground">Crea tu cuenta en segundos. Completarás tu perfil (incluida tu cédula) después.</p>
             </div>
+
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
             <Button
               type="button"
@@ -167,39 +151,7 @@ export default function RegistroMedico() {
             >
               Registrarme con correo electrónico
             </Button>
-
-            <p className="text-xs text-muted-foreground text-center pt-2">
-              Al registrarte, tu perfil quedará en revisión hasta que verifiquemos tu cédula profesional.
-            </p>
           </div>
-        )}
-
-        {step === "cedula-only" && (
-          <form onSubmit={submitCedulaOnly} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-            <div className="text-center mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-                <FileText className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="font-heading font-bold text-xl text-foreground">Un último paso</h1>
-              <p className="text-sm text-muted-foreground">
-                Hola{form.full_name ? `, ${form.full_name.split(" ")[0]}` : ""}. Solo necesitamos tu cédula profesional para crear tu perfil.
-              </p>
-            </div>
-            <div className="relative">
-              <FileText className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={form.cedula}
-                onChange={(e) => setForm({ ...form, cedula: e.target.value })}
-                placeholder="Número de cédula profesional"
-                className="rounded-xl pl-9"
-              />
-            </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Crear mi perfil
-            </Button>
-          </form>
         )}
 
         {step === "form" && (
@@ -241,15 +193,6 @@ export default function RegistroMedico() {
                 className="rounded-xl pl-9"
               />
             </div>
-            <div className="relative">
-              <FileText className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={form.cedula}
-                onChange={(e) => setForm({ ...form, cedula: e.target.value })}
-                placeholder="Número de cédula profesional"
-                className="rounded-xl pl-9"
-              />
-            </div>
 
             {error && <p className="text-sm text-red-500">{error}</p>}
 
@@ -258,7 +201,7 @@ export default function RegistroMedico() {
               Crear cuenta
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              Te enviaremos un código de verificación a tu correo.
+              Te enviaremos un código de verificación a tu correo. Tu cédula profesional se agrega después, desde tu perfil.
             </p>
             <button type="button" onClick={() => setStep("choose")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
               ← Volver
@@ -300,12 +243,12 @@ export default function RegistroMedico() {
             <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
-            <h1 className="font-heading font-bold text-xl text-foreground">Cuenta creada</h1>
+            <h1 className="font-heading font-bold text-xl text-foreground">¡Cuenta creada!</h1>
             <p className="text-sm text-muted-foreground">
-              Tu cuenta fue creada. Tu perfil está en revisión y será publicado una vez verificada tu cédula profesional.
+              Ahora completa tu perfil — incluida tu cédula profesional — para que podamos verificarte y publicar tu perfil.
             </p>
             <Button onClick={() => navigate("/admin/mi-perfil")} className="min-h-[44px] rounded-xl">
-              Ir a mi perfil
+              Completar mi perfil
             </Button>
           </div>
         )}
