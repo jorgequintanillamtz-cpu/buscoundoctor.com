@@ -32,9 +32,9 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/especialistas" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors">
-              Especialistas
+          <nav className="hidden md:flex items-center gap-3">
+            <Link to="/admin" className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors px-2">
+              Admin
             </Link>
             <Link to="/registro-medico">
               <Button size="sm" className="text-xs bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold">
@@ -57,11 +57,11 @@ export default function Header() {
       <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
           <nav className="flex flex-col px-4 py-3 gap-1">
             <Link
-            to="/especialistas"
+            to="/admin"
             onClick={() => setOpen(false)}
             className="px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
             
-              Especialistas
+              Admin
             </Link>
             <Link
             to="/registro-medico"
