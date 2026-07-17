@@ -76,32 +76,36 @@ Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${for
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg bg-card rounded-t-3xl sm:rounded-3xl border border-border/50 shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* Encabezado con foto del médico */}
-        <div className="sticky top-0 bg-card/95 backdrop-blur-lg z-10 p-5 border-b border-border/50 rounded-t-3xl">
-          <button onClick={onClose} aria-label="Cerrar" className="absolute right-4 top-4 p-2 rounded-xl hover:bg-muted transition-colors">
-            <X className="w-5 h-5 text-muted-foreground" />
+        {/* Foto de portada del médico */}
+        <div className="relative w-full h-44 sm:h-52 rounded-t-3xl overflow-hidden flex-shrink-0">
+          {specialist.profile_photo ? (
+            <img src={specialist.profile_photo} alt={`Foto de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
+              <span className="font-heading font-bold text-4xl text-primary/40">{initials}</span>
+            </div>
+          )}
+
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="absolute right-3 top-3 p-2 rounded-full bg-white/90 backdrop-blur shadow-sm hover:bg-white transition-colors"
+          >
+            <X className="w-4 h-4 text-brand-navy" />
           </button>
-          <div className="flex items-center gap-3 pr-10">
-            <div className="relative flex-shrink-0">
-              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white shadow-sm ring-1 ring-border/50 bg-accent flex items-center justify-center">
-                {specialist.profile_photo ? (
-                  <img src={specialist.profile_photo} alt={`Foto de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
-                ) : (
-                  <span className="font-heading font-bold text-sm text-primary/60">{initials}</span>
-                )}
-              </div>
-              {specialist.rating != null && (
-                <span className="absolute -bottom-1 -right-1 flex items-center gap-0.5 bg-brand-navy text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                  <Star className="w-2.5 h-2.5 fill-current" />
-                  {specialist.rating.toFixed(1)}
-                </span>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h2 className="font-heading font-bold text-base text-foreground truncate">Solicitar cita</h2>
-              <p className="text-sm text-muted-foreground truncate">{specialist.full_name} · {specialist.specialty}</p>
-            </div>
-          </div>
+
+          {specialist.rating != null && (
+            <span className="absolute left-3 top-3 flex items-center gap-1 bg-white/90 backdrop-blur text-brand-navy text-xs font-bold px-2.5 py-1.5 rounded-full shadow-sm">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              {specialist.rating.toFixed(1)} rating
+            </span>
+          )}
+        </div>
+
+        {/* Nombre, especialidad y datos rápidos */}
+        <div className="sticky top-0 bg-card/95 backdrop-blur-lg z-10 p-5 border-b border-border/50">
+          <h2 className="font-heading font-bold text-lg text-foreground">{specialist.full_name}</h2>
+          <p className="text-sm text-muted-foreground">{specialist.specialty}</p>
 
           {/* Datos rápidos */}
           {(specialist.license_verification_status === "verified" || specialist.years_experience) && (
