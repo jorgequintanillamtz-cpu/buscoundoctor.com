@@ -3,23 +3,21 @@ import { Navigate, Outlet } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 // Bloquea el acceso a rutas exclusivas de administrador.
-// - Si nadie ha iniciado sesión: lo manda a iniciar sesión (y regresa aquí después).
-// - Si inició sesión pero no es admin (ej. un médico): lo manda a su propio panel.
+// - Si no hay un usuario real (sin sesión, o sesión anónima de app pública): lo manda a iniciar sesión.
+// - Si hay usuario real pero no es admin (ej. un médico): lo manda a su propio panel.
 export default function RequireAdmin() {
   const [status, setStatus] = useState("loading"); // loading | ok | denied | no-auth
 
   useEffect(() => {
     let active = true;
     (async () => {
-      const isAuth = await base44.auth.isAuthenticated().catch(() => false);
+      const u = await base44.auth.me().catch(() => null);
       if (!active) return;
-      if (!isAuth) {
+      if (!u) {
         setStatus("no-auth");
         return;
       }
-      const u = await base44.auth.me().catch(() => null);
-      if (!active) return;
-      const isAdmin = u && (u.role === "admin" || u.role === "superadmin");
+      const isAdmin = u.role === "admin" || u.role === "superadmin";
       setStatus(isAdmin ? "ok" : "denied");
     })();
     return () => { active = false; };
