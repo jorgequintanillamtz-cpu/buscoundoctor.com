@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import SearchBar from "../components/SearchBar";
+import { useNavigate } from "react-router-dom";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import SpecialtyCard from "../components/SpecialtyCard";
 import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
@@ -43,13 +44,19 @@ function DoctorHeroIllustration({ className = "" }) {
 }
 
 const TRUST_STRIP = [
-  { icon: MessageCircle, label: "Contacto Directo", sub: "Sin intermediarios" },
-  { icon: ShieldCheck, label: "Perfiles Verificados", sub: "Cédula profesional" },
-  { icon: Sparkles, label: "Sin Costo", sub: "100% gratis para pacientes" },
-  { icon: Star, label: "Reseñas Reales", sub: "De pacientes verificados" },
+  { icon: Users, label: "Perfiles para cada especialista", key: "perfiles" },
+  { icon: Star, label: "Reseñas verificadas de pacientes reales", key: "resenas" },
+  { icon: Search, label: "Busca por lo que más te importa: especialidad y zona", key: "busca" },
 ];
 
+const triggerClass =
+  "border-0 shadow-none h-auto p-0 gap-1 focus:ring-0 focus:ring-offset-0 text-sm font-medium text-foreground bg-transparent [&>span]:line-clamp-1";
+const contentClass = "rounded-2xl border-none shadow-xl p-2 bg-white";
+const itemClass =
+  "rounded-xl px-3 py-2 text-sm cursor-pointer focus:bg-brand-bluePale focus:text-brand-navy data-[state=checked]:bg-brand-bluePale data-[state=checked]:text-brand-navy";
+
 export default function Home() {
+  const navigate = useNavigate();
   const [specialties, setSpecialties] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -57,7 +64,16 @@ export default function Home() {
   const [testimonials, setTestimonials] = useState([]);
   const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [heroSpecialty, setHeroSpecialty] = useState("");
+  const [heroZone, setHeroZone] = useState("");
   const blogScrollRef = useRef(null);
+
+  const submitHeroSearch = () => {
+    const params = new URLSearchParams();
+    if (heroSpecialty) params.set("specialty", heroSpecialty);
+    if (heroZone) params.set("zone", heroZone);
+    navigate(`/especialistas?${params.toString()}`);
+  };
 
   const scrollBlog = (dir) => {
     const el = blogScrollRef.current;
