@@ -318,6 +318,24 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Aseguradoras en nuestro sistema */}
+      {insurers.length > 0 && (
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+        <div className="text-center mb-6">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Aseguradoras en nuestro sistema</h2>
+          <p className="text-sm text-muted-foreground mt-1">Cada médico indica en su perfil cuáles acepta — no todos aceptan todas.</p>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          {insurers.map((ins) => (
+            <div key={ins.id} className="flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-2.5">
+              {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-5 h-5 object-contain" />}
+              <span className="text-sm font-medium text-foreground">{ins.name}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+      )}
+
       {/* Featured: carrusel horizontal */}
       <section className="bg-brand-blueLight/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
@@ -333,6 +351,39 @@ export default function Home() {
               <SpecialistCard specialist={s} priority={i === 0} />
             </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Cómo verificamos a nuestros médicos */}
+      <section className="bg-brand-blueLight/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+          <div className="text-center mb-8">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Cómo verificamos a nuestros médicos</h2>
+            <p className="text-sm text-muted-foreground mt-1">Cada perfil pasa por una revisión real antes de publicarse</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
+                <UploadCloud className="w-6 h-6 text-brand-blue" />
+              </div>
+              <h3 className="font-heading font-semibold text-sm text-brand-navy">Sube su cédula profesional</h3>
+              <p className="text-xs text-muted-foreground mt-1">Al registrarse, el médico carga su documento oficial.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
+                <FileText className="w-6 h-6 text-brand-blue" />
+              </div>
+              <h3 className="font-heading font-semibold text-sm text-brand-navy">Revisión manual</h3>
+              <p className="text-xs text-muted-foreground mt-1">Nuestro equipo revisa cada documento antes de aprobar.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
+                <Award className="w-6 h-6 text-brand-blue" />
+              </div>
+              <h3 className="font-heading font-semibold text-sm text-brand-navy">Sello de verificado</h3>
+              <p className="text-xs text-muted-foreground mt-1">Solo entonces aparece el badge de cédula verificada.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -380,6 +431,34 @@ export default function Home() {
           </Link>
         </section>
       }
+
+      {/* Boletín de salud por correo */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
+        <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
+          <div className="w-14 h-14 rounded-2xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+            <Mail className="w-6 h-6 text-brand-blue" />
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="font-heading font-bold text-lg text-foreground">Recibe contenido de salud en tu correo</h3>
+            <p className="text-sm text-muted-foreground mt-1">Artículos y consejos de nuestros especialistas, sin spam.</p>
+          </div>
+          <form onSubmit={submitNewsletter} className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="email"
+              value={newsletterEmail}
+              onChange={(e) => { setNewsletterEmail(e.target.value); setNewsletterStatus("idle"); }}
+              placeholder="tu@correo.com"
+              className="flex-1 sm:w-56 h-11 px-4 rounded-full border border-border/60 text-sm outline-none focus:border-brand-blue"
+            />
+            <button type="submit" disabled={newsletterStatus === "loading"} className="h-11 px-5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold flex items-center gap-1.5 flex-shrink-0">
+              {newsletterStatus === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+              Suscribirme
+            </button>
+          </form>
+        </div>
+        {newsletterStatus === "success" && <p className="text-sm text-emerald-600 text-center sm:text-left mt-3">¡Listo! Ya estás suscrito.</p>}
+        {newsletterStatus === "error" && <p className="text-sm text-red-500 text-center sm:text-left mt-3">Ingresa un correo válido para suscribirte.</p>}
+      </section>
 
       {/* Testimonios */}
       {testimonials.length >= 3 &&
@@ -489,6 +568,53 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Por qué vale la pena registrarte como doctor */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
+        <div className="text-center mb-8">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Por qué vale la pena registrarte como doctor</h2>
+          <p className="text-sm text-muted-foreground mt-1">Así es como BuscoUnDoctor te ayuda a conseguir más pacientes</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            { icon: ShieldCheck, title: "Perfil verificado, gratis", desc: "Creamos y verificamos tu perfil sin ningún costo." },
+            { icon: MessageCircle, title: "Contacto directo, sin comisión", desc: "Los pacientes te escriben por WhatsApp, sin intermediarios ni comisiones por consulta." },
+            { icon: Search, title: "Te encuentran en Google", desc: "Tu perfil aparece en búsquedas por especialidad y zona en Monterrey y San Pedro." },
+            { icon: UserCog, title: "Edítalo cuando quieras", desc: "Actualiza tu información, horarios y consultorios desde tu propio panel." },
+          ].map((item, i) => (
+            <div key={i} className="bg-card border border-border/50 rounded-2xl p-5 text-center">
+              <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center mx-auto mb-3">
+                <item.icon className="w-5 h-5 text-brand-blue" />
+              </div>
+              <h3 className="font-heading font-semibold text-sm text-foreground">{item.title}</h3>
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Preguntas frecuentes para médicos */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-14">
+        <h3 className="font-heading font-bold text-lg text-foreground text-center mb-5">Preguntas frecuentes para médicos</h3>
+        <div className="space-y-2.5">
+          {[
+            { q: "¿Cuánto cuesta registrarme?", a: "Nada. Crear y verificar tu perfil es completamente gratuito." },
+            { q: "¿Cuánto tarda la verificación de mi cédula?", a: "Nuestro equipo revisa los documentos manualmente en unos días hábiles tras tu registro." },
+            { q: "¿Puedo editar mi perfil después de publicarlo?", a: "Sí, desde tu panel puedes actualizar tu información, consultorios y horarios cuando quieras." },
+            { q: "¿Qué pasa si mi cédula no se puede verificar?", a: "Te contactaremos para aclarar cualquier duda o para que reintentes con el documento correcto." },
+          ].map((f, i) => (
+            <details key={i} className="group bg-card border border-border/50 rounded-2xl px-5 py-4">
+              <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-heading font-semibold text-sm text-foreground">
+                {f.q}
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center text-brand-blue group-open:rotate-45 transition-transform">
+                  <Plus className="w-3.5 h-3.5" />
+                </span>
+              </summary>
+              <p className="text-sm text-muted-foreground leading-relaxed mt-3">{f.a}</p>
+            </details>
+          ))}
         </div>
       </section>
 
