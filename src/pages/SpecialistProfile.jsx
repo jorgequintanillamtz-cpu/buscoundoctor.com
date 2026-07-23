@@ -190,47 +190,69 @@ export default function SpecialistProfile() {
         Especialistas
       </Link>
 
-      {/* Header: tarjeta única con avatar circular profesional */}
+      {specialist.license_verification_status === "verified" && specialist.license_verified_at && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Última verificación: {new Date(specialist.license_verified_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })} · Verificamos manualmente cada cédula profesional
+        </p>
+      )}
+
+      {/* Header: foto cuadrada + nombre + tarjeta de calificación, estilo directorio profesional */}
       <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-md ring-1 ring-border/50 flex-shrink-0 bg-card">
+        <div className="flex flex-col sm:flex-row items-start gap-6">
+          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden border border-border/50 shadow-sm flex-shrink-0 bg-muted mx-auto sm:mx-0">
             {specialist.profile_photo ?
             <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
 
             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
-                <span className="font-heading font-bold text-3xl text-primary/40">
+                <span className="font-heading font-bold text-2xl text-primary/40">
                   {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                 </span>
               </div>
             }
           </div>
 
-          <div className="flex-1 text-center sm:text-left min-w-0">
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl text-brand-navy">
+          <div className="flex-1 text-center sm:text-left min-w-0 w-full">
+            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
               {specialist.full_name}
             </h1>
-            <p className="text-brand-blue font-medium text-sm sm:text-base mt-1">
+            <p className="text-muted-foreground font-semibold text-sm sm:text-base mt-1">
               {specialist.specialty}
-              {displayLocation && <span className="text-muted-foreground"> · {displayLocation}</span>}
+              {specialist.years_experience && <> {'\u00b7'} {specialist.years_experience}+ años de experiencia</>}
             </p>
+
+            {/* Tarjeta blanca de calificación */}
+            <div className="mt-4 border border-border/60 rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                {specialist.rating != null ? (
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <span className="font-heading font-bold text-sm text-foreground">{specialist.rating.toFixed(1)} de calificación</span>
+                    <span className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className={`w-4 h-4 ${specialist.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
+                      ))}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Aún sin calificación</span>
+                )}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {allReviews.length > 0 ? `Basado en ${allReviews.length} reseña${allReviews.length !== 1 ? "s" : ""}` : "Sé el primero en dejar una reseña"}
+                </p>
+              </div>
+              <a href="#resenas" className="text-xs font-semibold text-brand-blue hover:underline flex-shrink-0">Ver reseñas</a>
+            </div>
+
             {displayAddress &&
-            <p className="flex items-center justify-center sm:justify-start gap-1.5 text-sm text-muted-foreground mt-2">
+            <p className="flex items-center justify-center sm:justify-start gap-1.5 text-sm text-muted-foreground mt-3">
                 <MapPin className="w-4 h-4 text-brand-blue flex-shrink-0" />
                 {displayAddress}
               </p>
             }
 
             {specialist.license_verification_status === "verified" && (
-              <div className="flex flex-col items-center sm:items-start gap-1 mt-3">
-                <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Cédula profesional verificada
-                </div>
-                {specialist.license_verified_at && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Última verificación: {new Date(specialist.license_verified_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
-                  </p>
-                )}
+              <div className="inline-flex items-center gap-1.5 mt-3 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Cédula profesional verificada
               </div>
             )}
 
