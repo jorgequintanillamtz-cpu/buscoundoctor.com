@@ -151,7 +151,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden pb-24 sm:pb-32">
+      <section className="relative bg-brand-navy overflow-hidden pb-10 sm:pb-14">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -206,9 +206,10 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Tarjeta blanca de búsqueda, superpuesta al borde inferior del hero */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8">
+      {/* Tarjeta blanca de búsqueda, superpuesta al borde entre el hero y la siguiente sección */}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 mb-10 sm:mb-14">
           <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
             <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
@@ -261,7 +262,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
 
       {/* Specialties: estilo "Shop by Category" */}
       <section className="bg-brand-blueLight/40">
