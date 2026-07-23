@@ -486,6 +486,26 @@ export default function SpecialistProfile() {
           }
         </div>
         <ReviewList specialistId={specialist.id} />
+        {allReviews.length > 0 && (
+          <div className="mb-6 space-y-1.5">
+            {[5, 4, 3, 2, 1].map((star) => {
+              const count = allReviews.filter((r) => Math.round(r.rating) === star).length;
+              const pct = Math.round((count / allReviews.length) * 100);
+              return (
+                <div key={star} className="flex items-center gap-2 text-xs">
+                  <span className="flex items-center gap-0.5 w-10 flex-shrink-0 text-muted-foreground">
+                    {star} <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  </span>
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-brand-blue rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="w-9 text-right text-muted-foreground flex-shrink-0">{pct}%</span>
+                </div>
+              );
+            })}
+            <p className="text-xs text-muted-foreground pt-1">Basado en {allReviews.length} reseña{allReviews.length !== 1 ? "s" : ""} verificada{allReviews.length !== 1 ? "s" : ""}</p>
+          </div>
+        )}
         {showReviewForm &&
         <div className="mt-6 pt-6 border-t border-border/50">
             <div className="flex items-center justify-between mb-4">
