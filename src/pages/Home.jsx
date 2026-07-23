@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "../components/SearchBar";
 import SpecialtyCard from "../components/SpecialtyCard";
@@ -57,13 +57,20 @@ export default function Home() {
   const [testimonials, setTestimonials] = useState([]);
   const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
+  const blogScrollRef = useRef(null);
+
+  const scrollBlog = (dir) => {
+    const el = blogScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
+  };
 
   useEffect(() => {
     async function load() {
       const [specs, specialists, blogPosts, zoneList, topReviews, allActive] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
-      base44.entities.BlogPost.filter({ published: true }, "-created_date", 3),
+      base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
       base44.entities.Review.filter({ approved: true }, "-rating", 3),
       base44.entities.Specialist.filter({ active: true })]
@@ -306,20 +313,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Blog */}
+      {/* Blog: slider deslizable con todos los artículos */}
       {posts.length > 0 &&
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Blog de salud</h2>
-            <Link to="/blog" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
-              <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/blog" className="text-sm font-medium text-primary hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
+                <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => scrollBlog(-1)}
+                aria-label="Artículos anteriores"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollBlog(1)}
+                aria-label="Artículos siguientes"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div
+            ref={blogScrollRef}
+            className="flex gap-4 sm:gap-5 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
             {posts.map((p, i) =>
-          <BlogCard key={p.id} post={p} priority={i === 0} />
-          )}
+            <div key={p.id} className="flex-shrink-0 w-[82vw] sm:w-[320px] snap-start">
+              <BlogCard post={p} priority={i === 0} />
+            </div>
+            )}
           </div>
+          <Link to="/blog" className="text-sm font-medium text-primary sm:hidden flex items-center gap-1 mt-4">
+            <span>Ver todos los artículos</span> <ArrowRight className="w-4 h-4" />
+          </Link>
         </section>
       }
 
