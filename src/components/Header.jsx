@@ -6,20 +6,24 @@ import { base44 } from "@/api/base44Client";
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [zones, setZones] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [specialties, setSpecialties] = useState([]);
+  const [searchSpecialty, setSearchSpecialty] = useState("");
   const [searchZone, setSearchZone] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
 
   useEffect(() => {
-    base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
+    Promise.all([
+      base44.entities.Zone.filter({ active: true }).catch(() => []),
+      base44.entities.Specialty.filter({ active: true }).catch(() => []),
+    ]).then(([z, s]) => { setZones(z); setSpecialties(s); });
   }, []);
 
   const submitSearch = (e) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (searchQuery) params.set("q", searchQuery);
+    if (searchSpecialty) params.set("specialty", searchSpecialty);
     if (searchZone) params.set("zone", searchZone);
     navigate(`/especialistas?${params.toString()}`);
   };
@@ -44,13 +48,17 @@ export default function Header() {
               className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden"
             >
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none">Buscar</label>
-                <input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Especialidad, síntoma…"
-                  className="text-sm font-medium text-foreground bg-transparent outline-none leading-tight w-full"
-                />
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none">Especialidad</label>
+                <select
+                  value={searchSpecialty}
+                  onChange={(e) => setSearchSpecialty(e.target.value)}
+                  className="text-sm font-medium text-foreground bg-transparent outline-none leading-tight w-full appearance-none"
+                >
+                  <option value="">Todas las especialidades</option>
+                  {specialties.map((s) => (
+                    <option key={s.id} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="w-px h-8 bg-border flex-shrink-0" />
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
@@ -103,17 +111,31 @@ export default function Header() {
 
         {/* Buscador compacto en móvil: debajo del header, solo si no es Home */}
         {!isHome && (
-          <form onSubmit={submitSearch} className="lg:hidden flex items-center bg-white rounded-full shadow-sm border border-border/50 mb-3 overflow-hidden">
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Especialidad, síntoma…"
-              className="text-sm font-medium text-foreground bg-transparent outline-none leading-tight flex-1 min-w-0 px-4 py-2.5"
-            />
+          <form onSubmit={submitSearch} className="lg:hidden flex items-center gap-2 mb-3">
+            <select
+              value={searchSpecialty}
+              onChange={(e) => setSearchSpecialty(e.target.value)}
+              className="flex-1 min-w-0 text-sm font-medium text-foreground bg-white rounded-full shadow-sm border border-border/50 outline-none px-4 py-2.5 appearance-none"
+            >
+              <option value="">Especialidad</option>
+              {specialties.map((s) => (
+                <option key={s.id} value={s.name}>{s.name}</option>
+              ))}
+            </select>
+            <select
+              value={searchZone}
+              onChange={(e) => setSearchZone(e.target.value)}
+              className="flex-1 min-w-0 text-sm font-medium text-foreground bg-white rounded-full shadow-sm border border-border/50 outline-none px-4 py-2.5 appearance-none"
+            >
+              <option value="">Zona</option>
+              {zones.map((z) => (
+                <option key={z.id} value={z.name}>{z.name}</option>
+              ))}
+            </select>
             <button
               type="submit"
               aria-label="Buscar especialista"
-              className="flex-shrink-0 w-9 h-9 mr-1.5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors"
+              className="flex-shrink-0 w-10 h-10 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors"
             >
               <Search className="w-4 h-4" />
             </button>
