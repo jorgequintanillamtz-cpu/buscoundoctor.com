@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SearchBar from "../components/SearchBar";
 import SpecialtyCard from "../components/SpecialtyCard";
@@ -424,18 +424,47 @@ export default function Home() {
 
       {/* Preguntas frecuentes */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-        <div className="text-center mb-8">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Preguntas frecuentes</h2>
-        </div>
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
-            {HOME_FAQS.map((f, i) =>
-            <AccordionItem key={i} value={`home-faq-${i}`} className="px-5">
-              <AccordionTrigger className="text-left font-heading font-semibold text-sm sm:text-base text-foreground hover:no-underline">{f.question}</AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">{f.answer}</AccordionContent>
-            </AccordionItem>
-            )}
-          </Accordion>
+        <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-14">
+          <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
+          <div className="relative grid md:grid-cols-2 gap-10 lg:gap-16">
+            <div>
+              <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-5">
+                <Sparkles className="w-3 h-3 text-brand-bluePale" />
+                Tus preguntas, respondidas
+              </span>
+              <h2 className="font-heading font-extrabold text-3xl sm:text-4xl leading-tight">
+                <span className="text-white block">Preguntas</span>
+                <span className="text-brand-bluePale block">Frecuentes</span>
+              </h2>
+              <p className="text-white/70 mt-4 leading-relaxed">
+                Reunimos las dudas más comunes sobre cómo funciona BuscoUnDoctor: qué cuesta, cómo verificamos a los médicos y cómo se agenda una cita.
+              </p>
+
+              <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="font-heading font-bold text-lg text-white">¿Sigues con dudas?</h3>
+                <p className="text-sm text-white/70 mt-2 leading-relaxed">
+                  Buscar al especialista correcto puede generar preguntas. Escríbenos y con gusto te ayudamos.
+                </p>
+                <Button className="mt-4 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl" asChild>
+                  <Link to="/contacto">Contactar</Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {HOME_FAQS.map((f, i) => (
+                <details key={i} className="group bg-white/5 border border-white/10 rounded-2xl px-5 py-4 open:bg-white/10 transition-colors">
+                  <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-heading font-semibold text-sm sm:text-base text-white">
+                    {f.question}
+                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-bluePale group-open:rotate-45 transition-transform">
+                      <Plus className="w-3.5 h-3.5" />
+                    </span>
+                  </summary>
+                  <p className="text-sm text-white/70 leading-relaxed mt-3">{f.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
