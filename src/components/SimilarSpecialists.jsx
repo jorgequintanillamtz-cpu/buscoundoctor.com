@@ -25,11 +25,13 @@ export default function SimilarSpecialists({ specialistId, specialty, zone }) {
 
   if (loading || items.length === 0) return null;
 
+  const heading = specialty ? `Compara con otros ${specialty} cerca de ti` : "Especialistas similares";
+
   return (
     <div className="mt-6">
       <div className="flex items-center gap-2 mb-4">
         <Users className="w-5 h-5 text-primary" />
-        <h2 className="font-heading font-bold text-lg text-foreground">Médicos similares</h2>
+        <h2 className="font-heading font-bold text-lg text-foreground">{heading}</h2>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((s, i) => (
