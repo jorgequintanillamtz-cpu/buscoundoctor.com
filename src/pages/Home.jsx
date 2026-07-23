@@ -151,7 +151,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden">
+      <section className="relative bg-brand-navy overflow-hidden pb-24 sm:pb-32">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -164,114 +164,101 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-20 sm:pt-20 sm:pb-28">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20">
           <div className="grid md:grid-cols-2 gap-10 items-center">
-            {/* Left: copy + search */}
+            {/* Left: título + iconos de confianza */}
             <div className="text-left">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-5">
                 <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
                 <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
               </div>
-              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-4">
-                <span className="text-white block">Encuentra al doctor</span>
-                <span className="text-brand-bluePale block">ideal para ti</span>
+              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-8">
+                <span className="text-white block">
+                  Siéntete <span className="border-b-4 border-brand-blue">mejor</span> al
+                </span>
+                <span className="text-white block">encontrar tu especialista</span>
               </h1>
-              <p className="text-white/80 text-base sm:text-lg max-w-lg mb-6">
-                Directorio médico verificado en Monterrey y San Pedro Garza García. Compara perfiles con cédula profesional verificada y contacta directo, sin intermediarios.
-              </p>
 
-              {/* Iconos de confianza en línea */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6">
-                <span className="flex items-center gap-1.5 text-xs sm:text-sm text-white/90">
-                  <ShieldCheck className="w-4 h-4 text-brand-bluePale" /> Cédula profesional verificada
-                </span>
-                <span className="flex items-center gap-1.5 text-xs sm:text-sm text-white/90">
-                  <MessageCircle className="w-4 h-4 text-brand-bluePale" /> Contacto directo sin intermediarios
-                </span>
-                <span className="flex items-center gap-1.5 text-xs sm:text-sm text-white/90">
-                  <Sparkles className="w-4 h-4 text-brand-bluePale" /> Búsqueda 100% gratuita
-                </span>
-              </div>
-
-              {/* Floating white search card */}
-              <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-5 mb-6">
-                <SearchBar />
-              </div>
-
-              {/* Botones */}
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <Button size="lg" className="min-h-[44px] font-heading font-semibold bg-brand-blue hover:bg-brand-blue/90 text-white" asChild>
-                  <Link to="/especialistas">
-                    Buscar especialista <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" className="min-h-[44px] font-heading font-semibold bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white" asChild>
-                  <Link to="/registro-medico">
-                    Soy médico, quiero unirme
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Prueba social */}
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-3">
-                  {[0, 1, 2].map((i) => (
-                    <div key={i} className="w-9 h-9 rounded-full bg-brand-blue/40 border-2 border-brand-navy flex items-center justify-center">
-                      <Users className="w-4 h-4 text-white/80" />
+              {/* Iconos de confianza, estilo referencia */}
+              <div className="flex flex-wrap gap-x-8 gap-y-6">
+                {TRUST_STRIP.map((item) => (
+                  <div key={item.key} className="flex flex-col items-start gap-2 max-w-[160px]">
+                    <div className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center">
+                      <item.icon className="w-5 h-5 text-white" />
                     </div>
-                  ))}
-                </div>
-                <p className="text-xs sm:text-sm text-white/80">
-                  {totalSpecialists > 0
-                    ? <>Más de <span className="font-semibold text-white">{totalSpecialists} especialistas</span> ya forman parte de BuscoUnDoctor</>
-                    : "Especialistas verificados en Monterrey y San Pedro"}
-                </p>
+                    <p className="text-xs sm:text-sm text-white/80 leading-snug">
+                      {item.key === "perfiles" && totalSpecialists > 0
+                        ? `Perfiles verificados de ${totalSpecialists} especialistas`
+                        : item.label}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Right: doctor illustration + tarjetas flotantes */}
+            {/* Right: ilustración */}
             <div className="relative hidden md:flex justify-center items-center">
               <div
                 className="absolute w-[360px] h-[400px] bg-gradient-to-br from-brand-blue/50 to-brand-bluePale/20"
                 style={{ borderRadius: '62% 38% 55% 45% / 50% 60% 40% 50%' }}
               />
               <DoctorHeroIllustration className="relative z-10 w-64 h-72 lg:w-72 lg:h-80 drop-shadow-2xl" />
-
-              {/* Tarjetas flotantes superpuestas */}
-              <div className="absolute -left-4 top-6 z-20 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-brand-blue flex-shrink-0" />
-                <span className="text-xs font-semibold text-brand-navy">Cédula verificada</span>
-              </div>
-              <div className="absolute right-0 top-1/3 z-20 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5">
-                <Users className="w-5 h-5 text-brand-blue flex-shrink-0" />
-                <span className="text-xs font-semibold text-brand-navy">
-                  {totalSpecialists > 0 ? `+${totalSpecialists} especialistas` : "Directorio en crecimiento"}
-                </span>
-              </div>
-              <div className="absolute left-2 bottom-4 z-20 bg-white rounded-2xl shadow-xl px-4 py-3 flex items-center gap-2.5">
-                <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <span className="text-xs font-semibold text-brand-navy">Contacto directo</span>
-              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Tira de confianza (4 tarjetas) */}
-      <section className="relative z-10 -mt-10 sm:-mt-14 mb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="bg-white rounded-3xl shadow-xl border border-border/50 grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-border/50">
-            {TRUST_STRIP.map((item, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-2 px-4 py-5">
-                <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center">
-                  <item.icon className="w-5 h-5 text-brand-blue" />
-                </div>
-                <div>
-                  <p className="text-sm font-heading font-semibold text-brand-navy leading-tight">{item.label}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{item.sub}</p>
-                </div>
+        {/* Tarjeta blanca de búsqueda, superpuesta al borde inferior del hero */}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8">
+          <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
+            <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
+              <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
+                <Select value={heroSpecialty} onValueChange={setHeroSpecialty}>
+                  <SelectTrigger className={triggerClass}>
+                    <SelectValue placeholder="¿Qué especialidad buscas?" />
+                  </SelectTrigger>
+                  <SelectContent className={contentClass}>
+                    {specialties.map((s) => (
+                      <SelectItem key={s.id} value={s.name} className={itemClass}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ))}
+              <div className="hidden sm:block w-px bg-border" />
+              <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Zona</label>
+                <Select value={heroZone} onValueChange={setHeroZone}>
+                  <SelectTrigger className={triggerClass}>
+                    <SelectValue placeholder="Monterrey y San Pedro" />
+                  </SelectTrigger>
+                  <SelectContent className={contentClass}>
+                    {zones.map((z) => (
+                      <SelectItem key={z.id} value={z.name} className={itemClass}>{z.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <button
+                type="button"
+                onClick={submitHeroSearch}
+                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-sm px-6 py-3 rounded-full sm:rounded-none flex-shrink-0"
+              >
+                <Search className="w-4 h-4" />
+                Buscar
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-4 text-xs sm:text-sm">
+              {specialties.slice(0, 5).map((s, i) => (
+                <span key={s.id} className="flex items-center gap-2">
+                  {i > 0 && <span className="text-border">|</span>}
+                  <Link to={`/especialidad/${s.slug}`} className="text-brand-blue font-medium hover:underline">{s.name}</Link>
+                </span>
+              ))}
+              <span className="text-border">|</span>
+              <Link to="/especialistas" className="text-brand-blue font-medium hover:underline">+ Ver más</Link>
+            </div>
           </div>
         </div>
       </section>
