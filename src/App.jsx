@@ -30,6 +30,7 @@ import AdminFaqEditor from './pages/admin/AdminFaqEditor';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import RegistroMedico from './pages/RegistroMedico';
+import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -68,6 +69,7 @@ const AuthenticatedApp = () => {
         <Route path="/nosotros" element={<About />} />
         <Route path="/contacto" element={<Contact />} />
         <Route path="/registro-medico" element={<RegistroMedico />} />
+        <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
       </Route>
       <Route element={<AdminLayout />}>
         <Route path="/admin/mi-perfil" element={<MiPerfil />} />
