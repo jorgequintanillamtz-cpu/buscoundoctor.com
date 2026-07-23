@@ -47,6 +47,7 @@ export default function Footer() {
               <Link to="/blog" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Blog</Link>
               <Link to="/nosotros" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Nosotros</Link>
               <Link to="/contacto" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Contacto</Link>
+              <Link to="/preguntas-frecuentes" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Preguntas Frecuentes</Link>
               <Link to="/registro-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Registro Doctor</Link>
               <Link to="/admin/mi-perfil" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Acceso para médicos</Link>
               <Link to="/admin" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Admin</Link>
