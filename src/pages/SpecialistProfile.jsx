@@ -221,9 +221,39 @@ export default function SpecialistProfile() {
             }
 
             {specialist.license_verification_status === "verified" && (
-              <div className="inline-flex items-center gap-1.5 mt-3 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Cédula profesional verificada
+              <div className="flex flex-col items-center sm:items-start gap-1 mt-3">
+                <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Cédula profesional verificada
+                </div>
+                {specialist.license_verified_at && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Última verificación: {new Date(specialist.license_verified_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {(languageNames.length > 0 || specialist.modality) && (
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-3">
+                {languageNames.length > 0 && (
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
+                    <Languages className="w-3.5 h-3.5" />
+                    {languageNames.join(", ")}
+                  </span>
+                )}
+                {specialist.modality === "online" && (
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
+                    <Monitor className="w-3.5 h-3.5" />
+                    Consulta virtual disponible
+                  </span>
+                )}
+                {specialist.modality === "ambas" && (
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
+                    <Monitor className="w-3.5 h-3.5" />
+                    Presencial y en línea
+                  </span>
+                )}
               </div>
             )}
           </div>
