@@ -2,6 +2,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Search, Stethoscope, UserRound } from "lucide-react";
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+
+const triggerClass =
+  "border-0 shadow-none h-auto p-0 gap-1 focus:ring-0 focus:ring-offset-0 text-sm font-medium text-foreground bg-transparent [&>span]:line-clamp-1";
+const contentClass =
+  "rounded-2xl border-none shadow-xl p-2 bg-white";
+const itemClass =
+  "rounded-xl px-3 py-2 text-sm cursor-pointer focus:bg-brand-bluePale focus:text-brand-navy data-[state=checked]:bg-brand-bluePale data-[state=checked]:text-brand-navy";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -21,7 +29,7 @@ export default function Header() {
   }, []);
 
   const submitSearch = (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
     const params = new URLSearchParams();
     if (searchSpecialty) params.set("specialty", searchSpecialty);
     if (searchZone) params.set("zone", searchZone);
@@ -43,45 +51,43 @@ export default function Header() {
 
           {/* Buscador compacto: solo en páginas que no son el Home */}
           {!isHome && (
-            <form
-              onSubmit={submitSearch}
-              className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden"
-            >
+            <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none">Especialidad</label>
-                <select
-                  value={searchSpecialty}
-                  onChange={(e) => setSearchSpecialty(e.target.value)}
-                  className="text-sm font-medium text-foreground bg-transparent outline-none leading-tight w-full appearance-none"
-                >
-                  <option value="">Todas las especialidades</option>
-                  {specialties.map((s) => (
-                    <option key={s.id} value={s.name}>{s.name}</option>
-                  ))}
-                </select>
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
+                <Select value={searchSpecialty} onValueChange={setSearchSpecialty}>
+                  <SelectTrigger className={triggerClass}>
+                    <SelectValue placeholder="Todas las especialidades" />
+                  </SelectTrigger>
+                  <SelectContent className={contentClass}>
+                    {specialties.map((s) => (
+                      <SelectItem key={s.id} value={s.name} className={itemClass}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="w-px h-8 bg-border flex-shrink-0" />
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none">Zona</label>
-                <select
-                  value={searchZone}
-                  onChange={(e) => setSearchZone(e.target.value)}
-                  className="text-sm font-medium text-foreground bg-transparent outline-none leading-tight w-full appearance-none"
-                >
-                  <option value="">Monterrey y San Pedro</option>
-                  {zones.map((z) => (
-                    <option key={z.id} value={z.name}>{z.name}</option>
-                  ))}
-                </select>
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Zona</label>
+                <Select value={searchZone} onValueChange={setSearchZone}>
+                  <SelectTrigger className={triggerClass}>
+                    <SelectValue placeholder="Monterrey y San Pedro" />
+                  </SelectTrigger>
+                  <SelectContent className={contentClass}>
+                    {zones.map((z) => (
+                      <SelectItem key={z.id} value={z.name} className={itemClass}>{z.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <button
-                type="submit"
+                type="button"
+                onClick={submitSearch}
                 aria-label="Buscar especialista"
                 className="flex-shrink-0 w-10 h-10 mr-1.5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors"
               >
                 <Search className="w-4 h-4" />
               </button>
-            </form>
+            </div>
           )}
 
           <nav className="hidden md:flex items-center gap-6 flex-shrink-0">
@@ -111,35 +117,40 @@ export default function Header() {
 
         {/* Buscador compacto en móvil: debajo del header, solo si no es Home */}
         {!isHome && (
-          <form onSubmit={submitSearch} className="lg:hidden flex items-center gap-2 mb-3">
-            <select
-              value={searchSpecialty}
-              onChange={(e) => setSearchSpecialty(e.target.value)}
-              className="flex-1 min-w-0 text-sm font-medium text-foreground bg-white rounded-full shadow-sm border border-border/50 outline-none px-4 py-2.5 appearance-none"
-            >
-              <option value="">Especialidad</option>
-              {specialties.map((s) => (
-                <option key={s.id} value={s.name}>{s.name}</option>
-              ))}
-            </select>
-            <select
-              value={searchZone}
-              onChange={(e) => setSearchZone(e.target.value)}
-              className="flex-1 min-w-0 text-sm font-medium text-foreground bg-white rounded-full shadow-sm border border-border/50 outline-none px-4 py-2.5 appearance-none"
-            >
-              <option value="">Zona</option>
-              {zones.map((z) => (
-                <option key={z.id} value={z.name}>{z.name}</option>
-              ))}
-            </select>
+          <div className="lg:hidden flex items-center gap-2 mb-3">
+            <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
+              <Select value={searchSpecialty} onValueChange={setSearchSpecialty}>
+                <SelectTrigger className={triggerClass}>
+                  <SelectValue placeholder="Especialidad" />
+                </SelectTrigger>
+                <SelectContent className={contentClass}>
+                  {specialties.map((s) => (
+                    <SelectItem key={s.id} value={s.name} className={itemClass}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
+              <Select value={searchZone} onValueChange={setSearchZone}>
+                <SelectTrigger className={triggerClass}>
+                  <SelectValue placeholder="Zona" />
+                </SelectTrigger>
+                <SelectContent className={contentClass}>
+                  {zones.map((z) => (
+                    <SelectItem key={z.id} value={z.name} className={itemClass}>{z.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <button
-              type="submit"
+              type="button"
+              onClick={submitSearch}
               aria-label="Buscar especialista"
               className="flex-shrink-0 w-10 h-10 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors"
             >
               <Search className="w-4 h-4" />
             </button>
-          </form>
+          </div>
         )}
       </div>
 
