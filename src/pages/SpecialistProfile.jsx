@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram, ShieldCheck, MessageCircle, Phone } from "lucide-react";
+import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram, ShieldCheck, MessageCircle, Phone, Languages, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "../components/AppointmentForm";
 import ReviewList from "../components/ReviewList";
@@ -24,6 +24,8 @@ export default function SpecialistProfile() {
   const [primaryOffice, setPrimaryOffice] = useState(null);
   const [zoneName, setZoneName] = useState("");
   const [descExpanded, setDescExpanded] = useState(false);
+  const [languageNames, setLanguageNames] = useState([]);
+  const [allReviews, setAllReviews] = useState([]);
 
   const getNext8Days = () => {
     const days = [];
@@ -70,6 +72,20 @@ export default function SpecialistProfile() {
               if (zones.length > 0) setZoneName(zones[0].name);
             }
           }
+        } catch {}
+
+        try {
+          const links = await base44.entities.SpecialistLanguage.filter({ specialist_id: specialist.id });
+          if (links.length > 0) {
+            const allLangs = await base44.entities.Language.list('name', 50);
+            const names = links.map(l => allLangs.find(la => la.id === l.language_id)?.name).filter(Boolean);
+            setLanguageNames(names);
+          }
+        } catch {}
+
+        try {
+          const revs = await base44.entities.Review.filter({ specialist_id: specialist.id, approved: true });
+          setAllReviews(revs);
         } catch {}
         
         // Add JSON-LD LocalBusiness schema
