@@ -49,8 +49,8 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* Buscador compacto: solo en páginas que no son el Home */}
-          {!isHome && (
+          {/* Buscador compacto: en todas las páginas, incluido el Home */}
+          {
             <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
@@ -88,7 +88,7 @@ export default function Header() {
                 <Search className="w-4 h-4" />
               </button>
             </div>
-          )}
+          }
 
           <nav className="hidden md:flex items-center gap-6 flex-shrink-0">
             <Link to="/registro-medico" className="flex items-center gap-2 text-brand-navy/80 hover:text-brand-navy transition-colors">
@@ -115,8 +115,8 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Buscador compacto en móvil: debajo del header, solo si no es Home */}
-        {!isHome && (
+        {/* Buscador compacto en móvil: debajo del header, en todas las páginas */}
+        {
           <div className="lg:hidden flex items-center gap-2 mb-3">
             <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
               <Select value={searchSpecialty} onValueChange={setSearchSpecialty}>
@@ -151,7 +151,7 @@ export default function Header() {
               <Search className="w-4 h-4" />
             </button>
           </div>
-        )}
+        }
       </div>
 
       {open &&
