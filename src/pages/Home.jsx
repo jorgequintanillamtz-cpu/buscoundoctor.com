@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, FileText, UploadCloud, Award, Mail, UserCog, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -66,7 +66,26 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
   const [heroZone, setHeroZone] = useState("");
+  const [insurers, setInsurers] = useState([]);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const blogScrollRef = useRef(null);
+
+  const submitNewsletter = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail || !newsletterEmail.includes("@")) {
+      setNewsletterStatus("error");
+      return;
+    }
+    setNewsletterStatus("loading");
+    try {
+      await base44.entities.NewsletterSubscriber.create({ email: newsletterEmail, source: "home" });
+      setNewsletterStatus("success");
+      setNewsletterEmail("");
+    } catch {
+      setNewsletterStatus("error");
+    }
+  };
 
   const submitHeroSearch = () => {
     const params = new URLSearchParams();
@@ -83,19 +102,21 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, topReviews, allActive] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, topReviews, allActive, insurerList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
       base44.entities.Review.filter({ approved: true }, "-rating", 3),
-      base44.entities.Specialist.filter({ active: true })]
+      base44.entities.Specialist.filter({ active: true }),
+      base44.entities.Insurer.list('name', 50).catch(() => [])]
       );
       setSpecialties(specs);
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
       setTotalSpecialists(allActive.length);
+      setInsurers(insurerList);
 
       if (topReviews.length >= 3) {
         const specialistIds = [...new Set(topReviews.map((r) => r.specialist_id).filter(Boolean))];

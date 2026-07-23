@@ -1,0 +1,21 @@
+{
+  "name": "NewsletterSubscriber",
+  "properties": {
+    "email": {
+      "title": "Correo electr\u00f3nico",
+      "type": "string"
+    },
+    "source": {
+      "default": "home",
+      "title": "Origen",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "type": "object",
+  "uniqueFields": [
+    "email"
+  ]
+}
