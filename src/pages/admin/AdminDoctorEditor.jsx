@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, BarChart3 } from "lucide-react";
+import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -12,8 +12,7 @@ import InsurersManager from "@/components/admin/InsurersManager";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
-import DoctorHomeSummary from "@/components/admin/DoctorHomeSummary";
-import DoctorStatsFull from "@/components/admin/DoctorStatsFull";
+import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 
 export const EMPTY_FORM = {
   full_name: "",
@@ -73,6 +72,7 @@ export default function AdminDoctorEditor() {
   const [section, setSection] = useState(isEditing ? "resumen" : "perfil");
 
   const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "superadmin");
+  const isDoctor = currentUser && !isAdmin;
 
   useEffect(() => { formRef.current = form; }, [form]);
 
@@ -265,19 +265,40 @@ export default function AdminDoctorEditor() {
 
   const completitud = form.completeness_score || 0;
 
-  const SECTIONS = [
-    { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
-    { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
-    { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
-    { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
-    { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
-    { key: "consultorios", label: "Consultorios y horarios", icon: MapPin, requiresSaved: true },
-    { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
-    { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
-    { key: "estadisticas", label: "Estadísticas", icon: BarChart3, requiresSaved: true },
-    ...(isAdmin ? [{ key: "publicacion", label: "Publicación (admin)", icon: Globe, requiresSaved: false }] : []),
+  // Menú agrupado por categorías, al estilo del panel de proveedor de referencia.
+  const SECTION_GROUPS = [
+    {
+      group: "Inicio",
+      items: [
+        { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
+      ],
+    },
+    {
+      group: "Mi perfil",
+      items: [
+        { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
+        { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
+        { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
+        { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
+      ],
+    },
+    {
+      group: "Negocio",
+      items: [
+        { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
+        { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
+        { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
+      ],
+    },
+    ...(isAdmin ? [{
+      group: "Cuenta",
+      items: [
+        { key: "publicacion", label: "Publicación (admin)", icon: Globe, requiresSaved: false },
+      ],
+    }] : []),
   ];
 
+  const SECTIONS = SECTION_GROUPS.flatMap((g) => g.items);
   const activeSection = SECTIONS.find(s => s.key === section) || SECTIONS[0];
 
   return (
@@ -322,7 +343,7 @@ export default function AdminDoctorEditor() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
-        {/* Menú lateral de secciones */}
+        {/* Menú lateral de secciones: oscuro y agrupado para médicos, claro para admin */}
         <div className="space-y-4 lg:sticky lg:top-4">
           <div className="bg-card rounded-2xl border border-border/50 p-4">
             <div className="flex justify-between text-xs mb-1.5">
@@ -337,30 +358,41 @@ export default function AdminDoctorEditor() {
             </div>
           </div>
 
-          <nav className="bg-card rounded-2xl border border-border/50 p-2 flex flex-col gap-0.5">
-            {SECTIONS.map((s) => {
-              const locked = s.requiresSaved && !isEditing;
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  disabled={locked}
-                  onClick={() => setSection(s.key)}
-                  title={locked ? "Guarda tu perfil primero para desbloquear esta sección" : undefined}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
-                    section === s.key
-                      ? "bg-primary text-primary-foreground"
-                      : locked
-                      ? "text-muted-foreground/40 cursor-not-allowed"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <s.icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="flex-1">{s.label}</span>
-                  {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
-                </button>
-              );
-            })}
+          <nav className={`rounded-2xl p-3 flex flex-col gap-3 ${isDoctor ? "bg-brand-navy" : "bg-card border border-border/50"}`}>
+            {SECTION_GROUPS.map((g) => (
+              <div key={g.group} className="flex flex-col gap-0.5">
+                <p className={`text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 ${isDoctor ? "text-white/40" : "text-muted-foreground/70"}`}>
+                  {g.group}
+                </p>
+                {g.items.map((s) => {
+                  const locked = s.requiresSaved && !isEditing;
+                  return (
+                    <button
+                      key={s.key}
+                      type="button"
+                      disabled={locked}
+                      onClick={() => setSection(s.key)}
+                      title={locked ? "Guarda tu perfil primero para desbloquear esta sección" : undefined}
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
+                        section === s.key
+                          ? isDoctor
+                            ? "bg-brand-blue text-white"
+                            : "bg-primary text-primary-foreground"
+                          : locked
+                          ? isDoctor ? "text-white/25 cursor-not-allowed" : "text-muted-foreground/40 cursor-not-allowed"
+                          : isDoctor
+                          ? "text-white/70 hover:bg-white/5 hover:text-white"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <s.icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1">{s.label}</span>
+                      {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
         </div>
 
@@ -375,15 +407,7 @@ export default function AdminDoctorEditor() {
             </div>
           ) : (
             <>
-              {section === "resumen" && (
-                <div className="space-y-4">
-                  <div>
-                    <h2 className="font-heading font-bold text-lg text-foreground">Hola, {form.full_name?.split(" ")[0] || "doctor"} 👋</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">Aquí tienes un vistazo rápido de tu actividad reciente.</p>
-                  </div>
-                  <DoctorHomeSummary specialistId={id} />
-                </div>
-              )}
+              {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id }} />}
               {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
               {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
               {section === "formacion" && <EducationManager specialistId={id} />}
@@ -391,7 +415,6 @@ export default function AdminDoctorEditor() {
               {section === "consultorios" && <OfficeManager specialistId={id} />}
               {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
               {section === "documentos" && <DocumentManager specialistId={id} />}
-              {section === "estadisticas" && <DoctorStatsFull specialistId={id} />}
               {section === "publicacion" && isAdmin && (
                 <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveChanges} saving={saving} />
               )}
