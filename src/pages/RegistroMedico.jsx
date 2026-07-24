@@ -32,6 +32,20 @@ const EMPTY_DATA = {
   zone: "",
 };
 
+const StepShell = ({ icon: Icon, title, subtitle, error, children }) => (
+  <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
+    <div className="text-center">
+      <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+        <Icon className="w-6 h-6 text-primary" />
+      </div>
+      <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
+      {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+    </div>
+    {children}
+    {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+  </div>
+);
+
 export default function RegistroMedico() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState("loading"); // loading | wizard | email-form | otp | done
@@ -210,20 +224,6 @@ export default function RegistroMedico() {
   };
 
   const progressPct = Math.round(((stepIndex + 1) / STEP_KEYS.length) * 100);
-
-  const StepShell = ({ icon: Icon, title, subtitle, children }) => (
-    <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
-      <div className="text-center">
-        <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-          <Icon className="w-6 h-6 text-primary" />
-        </div>
-        <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
-        {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
-      </div>
-      {children}
-      {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-    </div>
-  );
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
