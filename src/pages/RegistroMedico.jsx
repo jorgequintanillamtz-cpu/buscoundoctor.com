@@ -18,7 +18,7 @@ function GoogleIcon(props) {
   );
 }
 
-const STEP_KEYS = ["nombre", "whatsapp", "especialidad", "cedula", "modalidad", "idiomas", "ubicacion", "cuenta"];
+const STEP_KEYS = ["nombre", "whatsapp", "especialidad", "modalidad", "idiomas", "ubicacion", "cuenta"];
 
 const EMPTY_DATA = {
   title: "",
@@ -168,9 +168,6 @@ export default function RegistroMedico() {
     if (stepKey === "especialidad" && !data.specialty.trim()) {
       return "Selecciona o escribe tu especialidad";
     }
-    if (stepKey === "cedula") {
-      // Ya no es obligatoria en este paso — se puede completar después desde el panel.
-    }
     if (stepKey === "ubicacion" && !data.zone) {
       return "Selecciona tu zona";
     }
@@ -294,12 +291,6 @@ export default function RegistroMedico() {
                   <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl" />
                 )}
                 <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
-              </StepShell>
-            )}
-
-            {stepKey === "cedula" && (
-              <StepShell icon={FileText} title="Tu cédula profesional" subtitle="Con esto verificamos tu perfil (puedes completarla después si no la tienes a la mano)" error={error}>
-                <Input value={data.cedula} onChange={(e) => update("cedula", e.target.value)} placeholder="Número de cédula profesional (opcional por ahora)" className="rounded-xl" />
               </StepShell>
             )}
 
