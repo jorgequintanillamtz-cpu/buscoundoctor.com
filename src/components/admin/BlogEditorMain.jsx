@@ -49,7 +49,6 @@ function Toolbar({ textareaRef, value, onChange, onInsertImage, uploadingInline 
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 bg-muted/40 border-b border-border/50">
-      <TBtn onClick={() => insertLine("# ")} title="H1">H1</TBtn>
       <TBtn onClick={() => insertLine("## ")} title="H2">H2</TBtn>
       <TBtn onClick={() => insertLine("### ")} title="H3">H3</TBtn>
       <TBtn onClick={() => insertLine("#### ")} title="H4">H4</TBtn>
