@@ -120,12 +120,15 @@ export default function BlogEditor() {
     });
   }, [isEditing]);
 
-  const buildSaveData = (f) => ({
-    ...f,
-    slug: f.slug || generateBlogSlug(f.title),
-    scheduled_at: f.scheduled_at ? new Date(f.scheduled_at).toISOString() : null,
-    published: f.scheduled_at ? false : f.published,
-  });
+  const buildSaveData = (f) => {
+    const { _slugManual, ...rest } = f;
+    return {
+      ...rest,
+      slug: f.slug || generateBlogSlug(f.title),
+      scheduled_at: f.scheduled_at ? new Date(f.scheduled_at).toISOString() : null,
+      published: f.scheduled_at ? false : f.published,
+    };
+  };
 
   const handleSaveDraft = async () => {
     if (!form.title) { toast.error("El título es obligatorio"); return; }
