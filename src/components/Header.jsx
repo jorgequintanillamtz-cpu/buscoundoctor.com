@@ -40,10 +40,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
       <div className="bg-brand-blueLight w-full px-4 sm:px-6">
         <div className="flex items-center justify-between h-20 gap-4">
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-brand-navy flex items-center justify-center shadow-sm">
-              <span className="text-white font-heading font-extrabold text-base">B</span>
-            </div>
+          <Link to="/" className="flex items-center flex-shrink-0">
             <span className="font-heading font-extrabold text-lg sm:text-xl whitespace-nowrap">
               <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
             </span>
