@@ -19,6 +19,21 @@ function slugify(text) {
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+// Extrae preguntas/respuestas del cuerpo del artículo cuando el schema es FAQPage.
+// Reconoce el patrón que ya usa el botón "FAQ" del editor: **¿Pregunta?** seguido de la respuesta.
+function parseFaqFromContent(content) {
+  if (!content) return [];
+  const regex = /\*\*(¿[^*]+\?)\*\*\s*\n+([^\n*][^\n]*(?:\n(?!\*\*)[^\n]*)*)/g;
+  const faqs = [];
+  let m;
+  while ((m = regex.exec(content)) !== null) {
+    const question = m[1].trim();
+    const answer = m[2].trim();
+    if (question && answer) faqs.push({ question, answer });
+  }
+  return faqs;
+}
+
 function childrenToText(children) {
   if (typeof children === 'string') return children;
   if (Array.isArray(children)) return children.map(childrenToText).join('');
@@ -138,16 +153,46 @@ export default function BlogPostPage() {
   const updatedDifferent = !!post && !!post.updated_date
     && moment(post.updated_date).format('YYYY-MM-DD') !== moment(post.created_date).format('YYYY-MM-DD');
 
-  // Datos estructurados JSON-LD (Article / BlogPosting)
-  const jsonLd = post ? {
+  const readWords = (post?.content || '').trim().split(/\s+/).filter(Boolean).length;
+  const readTime = Math.max(1, Math.ceil(readWords / 200));
+
+  // Si el schema elegido es FAQPage, intenta armar el mainEntity real a partir del
+  // contenido. Si no encuentra preguntas, cae de vuelta al schema Article normal
+  // (evita publicar un FAQPage vacío, que Google ignora o penaliza).
+  const faqItems = useMemo(() => (post?.schema_type === 'FAQPage' ? parseFaqFromContent(post.content) : []), [post]);
+
+  const jsonLd = post ? (
+    post.schema_type === 'FAQPage' && faqItems.length > 0 ?
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqItems.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+      })),
+    } :
+    {
+      '@context': 'https://schema.org',
+      '@type': post.schema_type || 'Article',
+      headline: post.title,
+      datePublished: post.created_date,
+      dateModified: post.updated_date || post.created_date,
+      author: { '@type': 'Person', name: post.author || 'BuscoUnDoctor' },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `https://buscoundoctor.com/blog/${post.slug}` },
+      ...(post.image ? { image: post.image } : {}),
+      ...(post.meta_description || post.excerpt ? { description: post.meta_description || post.excerpt } : {}),
+    }
+  ) : null;
+
+  const breadcrumbLd = post ? {
     '@context': 'https://schema.org',
-    '@type': post.schema_type || 'Article',
-    headline: post.title,
-    datePublished: post.created_date,
-    dateModified: post.updated_date || post.created_date,
-    author: { '@type': 'Person', name: post.author || 'BuscounDoctor' },
-    ...(post.image ? { image: post.image } : {}),
-    ...(post.meta_description || post.excerpt ? { description: post.meta_description || post.excerpt } : {}),
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://buscoundoctor.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://buscoundoctor.com/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `https://buscoundoctor.com/blog/${post.slug}` },
+    ],
   } : null;
 
   if (loading) {
@@ -171,6 +216,9 @@ export default function BlogPostPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {jsonLd && (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        )}
+        {breadcrumbLd && (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
         )}
         <Breadcrumb className="mb-4">
           <BreadcrumbList>
@@ -206,7 +254,8 @@ export default function BlogPostPage() {
         {updatedDifferent && (
           <span className="text-xs text-muted-foreground">· Actualizado el {moment(post.updated_date).format("DD MMMM YYYY")}</span>
         )}
-        {post.author && <span className="text-xs text-muted-foreground">· {post.author}</span>}
+        <span className="text-xs text-muted-foreground">· {readTime} min de lectura</span>
+        {post.author && <span className="text-xs text-muted-foreground">· {post.author}{post.author_title ? ` (${post.author_title})` : ""}</span>}
       </div>
 
       {post.tags?.length > 0 && (
@@ -302,6 +351,20 @@ export default function BlogPostPage() {
           >{post.content}</ReactMarkdown>
         )}
       </article>
+
+      {post.author && post.author_bio && (
+        <div className="mt-10 flex items-start gap-4 bg-card border border-border/50 rounded-2xl p-5">
+          {post.author_photo && (
+            <img src={post.author_photo} alt={post.author} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
+          )}
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Sobre el autor</p>
+            <p className="font-heading font-semibold text-sm text-foreground">{post.author}</p>
+            {post.author_title && <p className="text-xs text-primary font-medium">{post.author_title}</p>}
+            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{post.author_bio}</p>
+          </div>
+        </div>
+      )}
 
       {specialists.length > 0 && (
         <div className="mt-8">
