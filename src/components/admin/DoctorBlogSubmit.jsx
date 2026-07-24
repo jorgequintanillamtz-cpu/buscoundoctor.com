@@ -186,6 +186,20 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
           </div>
 
           <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium block">Resumen breve (aparece en las tarjetas del blog y en Google)</label>
+              <span className={`text-xs ${excerpt.length > 160 ? "text-red-500" : "text-muted-foreground"}`}>{excerpt.length}/160</span>
+            </div>
+            <textarea
+              value={excerpt}
+              onChange={(e) => { if (e.target.value.length <= 200) setExcerpt(e.target.value); }}
+              className="w-full min-h-[60px] px-3 py-2 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+              placeholder={`Ej: Te explicamos en qué casos conviene visitar a un ${specialty || "especialista"} y qué esperar en tu primera consulta.`}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Ideal: entre 50 y 160 caracteres. Es lo primero que lee un paciente antes de abrir tu artículo.</p>
+          </div>
+
+          <div>
             <label className="text-xs font-medium mb-1 block">Imagen destacada</label>
             <label className="flex items-center gap-3 border border-dashed border-border rounded-xl p-3 cursor-pointer hover:bg-accent/30 transition-colors">
               {imageUrl ? (
