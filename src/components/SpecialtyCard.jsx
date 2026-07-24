@@ -12,12 +12,12 @@ export default function SpecialtyCard({ specialty, mobile = false }) {
     return (
       <Link
         to={`/especialistas?specialty=${encodeURIComponent(specialty.name)}`}
-        className="group flex-shrink-0 flex flex-col items-center gap-2"
+        className="group flex-shrink-0 w-28 flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-white border border-border/50 shadow-sm hover:shadow-lg hover:border-brand-blue/30 transition-all duration-300"
       >
-        <div className="w-14 h-14 rounded-full bg-brand-bluePale flex items-center justify-center group-hover:bg-brand-blue transition-colors duration-300">
+        <div className="w-14 h-14 rounded-full bg-brand-bluePale flex items-center justify-center group-hover:bg-brand-blue transition-colors duration-300 flex-shrink-0">
           <Icon className="w-6 h-6 text-brand-blue group-hover:text-white transition-colors duration-300" />
         </div>
-        <span className="text-xs font-heading font-medium text-brand-navy text-center leading-tight w-16 line-clamp-2">{specialty.name}</span>
+        <span className="text-xs font-heading font-semibold text-brand-navy text-center leading-snug">{specialty.name}</span>
       </Link>
     );
   }
