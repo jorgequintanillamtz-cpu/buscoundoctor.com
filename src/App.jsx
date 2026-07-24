@@ -25,7 +25,6 @@ import AdminReviews from './pages/admin/AdminReviews';
 import AdminDoctores from './pages/admin/AdminDoctores';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
 import RequireAdmin from './components/RequireAdmin';
-import DoctorPanelLayout from './components/DoctorPanelLayout';
 import DoctorPanel from './pages/DoctorPanel';
 import AdminFaqs from './pages/admin/AdminFaqs';
 import AdminFaqEditor from './pages/admin/AdminFaqEditor';
@@ -76,10 +75,8 @@ const AuthenticatedApp = () => {
         <Route path="/admin/mi-perfil" element={<Navigate to="/panel-medico" replace />} />
       </Route>
 
-      {/* Panel del médico: área completamente separada del panel de administración */}
-      <Route element={<DoctorPanelLayout />}>
-        <Route path="/panel-medico" element={<DoctorPanel />} />
-      </Route>
+      {/* Panel del médico: área completamente separada del panel de administración, con su propio shell completo */}
+      <Route path="/panel-medico" element={<DoctorPanel />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>
