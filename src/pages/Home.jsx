@@ -227,6 +227,13 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Curva ondulada en el borde inferior del hero, en vez de un corte recto */}
+        <div className="absolute bottom-0 left-0 w-full leading-none pointer-events-none">
+          <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-14 sm:h-20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,40 C240,90 480,0 720,25 C960,50 1200,95 1440,35 L1440,100 L0,100 Z" fill="white" />
+          </svg>
+        </div>
       </section>
 
       {/* Tarjeta blanca de búsqueda, superpuesta al borde entre el hero y la siguiente sección */}
