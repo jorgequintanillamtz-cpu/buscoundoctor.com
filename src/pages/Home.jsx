@@ -68,6 +68,15 @@ function sortByPopularity(list) {
   });
 }
 
+const slugify = (s) => (s || "")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9\s-]/g, "")
+  .trim()
+  .replace(/\s+/g, "-")
+  .replace(/-+/g, "-");
+
 const triggerClass =
   "border-0 shadow-none h-auto p-0 gap-1 focus:ring-0 focus:ring-offset-0 text-sm font-medium text-foreground bg-transparent [&>span]:line-clamp-1";
 const contentClass = "rounded-2xl border-none shadow-xl p-2 bg-white";
@@ -114,8 +123,18 @@ export default function Home() {
   };
 
   const submitHeroSearch = () => {
+    // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
+    // filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
+    const specialtyObj = specialties.find((s) => s.name === heroSpecialty);
+    if (specialtyObj) {
+      if (heroZone) {
+        navigate(`/especialidad/${specialtyObj.slug}/${slugify(heroZone)}`);
+      } else {
+        navigate(`/especialidad/${specialtyObj.slug}`);
+      }
+      return;
+    }
     const params = new URLSearchParams();
-    if (heroSpecialty) params.set("specialty", heroSpecialty);
     if (heroZone) params.set("zone", heroZone);
     navigate(`/especialistas?${params.toString()}`);
   };
