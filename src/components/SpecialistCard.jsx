@@ -4,6 +4,7 @@ import { MapPin, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "./AppointmentForm";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
+import { trackDoctorClick } from "@/utils/trackDoctorClick";
 
 const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -15,7 +16,7 @@ function getNext8Days() {
   });
 }
 
-export default function SpecialistCard({ specialist, priority = false }) {
+export default function SpecialistCard({ specialist, priority = false, sourcePage = "otro" }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const cardRef = useRef(null);
@@ -43,7 +44,11 @@ export default function SpecialistCard({ specialist, priority = false }) {
     <>
       <div ref={cardRef} className="group flex bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden">
         {/* Left: main card info (clickable) */}
-        <Link to={`/especialista/${specialist.slug}`} className="flex-1 block p-5 sm:p-6">
+        <Link
+          to={`/especialista/${specialist.slug}`}
+          className="flex-1 block p-5 sm:p-6"
+          onClick={() => trackDoctorClick(specialist, sourcePage)}
+        >
           <div className="flex gap-4">
             <div className="w-24 h-24 sm:w-20 sm:h-20 rounded-2xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist.profile_photo ? (
