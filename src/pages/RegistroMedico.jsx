@@ -252,7 +252,7 @@ export default function RegistroMedico() {
             </div>
 
             {stepKey === "nombre" && (
-              <StepShell icon={User} title="¿Cómo te llamas?" subtitle="Así aparecerás en tu perfil público">
+              <StepShell icon={User} title="¿Cómo te llamas?" subtitle="Así aparecerás en tu perfil público" error={error}>
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => update("title", "Dr.")}
                     className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
@@ -268,13 +268,13 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "whatsapp" && (
-              <StepShell icon={Phone} title="Tu número de WhatsApp" subtitle="Aquí te contactarán tus pacientes directamente">
+              <StepShell icon={Phone} title="Tu número de WhatsApp" subtitle="Aquí te contactarán tus pacientes directamente" error={error}>
                 <Input value={data.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Ej: 8181234567" type="tel" className="rounded-xl" />
               </StepShell>
             )}
 
             {stepKey === "especialidad" && (
-              <StepShell icon={Stethoscope} title="Tu especialidad" subtitle="Y tu subespecialidad, si tienes una">
+              <StepShell icon={Stethoscope} title="Tu especialidad" subtitle="Y tu subespecialidad, si tienes una" error={error}>
                 <select value={data.specialty} onChange={(e) => update("specialty", e.target.value)}
                   className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
                   <option value="">Selecciona tu especialidad</option>
@@ -285,13 +285,13 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "cedula" && (
-              <StepShell icon={FileText} title="Tu cédula profesional" subtitle="Con esto verificamos tu perfil">
+              <StepShell icon={FileText} title="Tu cédula profesional" subtitle="Con esto verificamos tu perfil" error={error}>
                 <Input value={data.cedula} onChange={(e) => update("cedula", e.target.value)} placeholder="Número de cédula profesional" className="rounded-xl" />
               </StepShell>
             )}
 
             {stepKey === "modalidad" && (
-              <StepShell icon={Monitor} title="¿Cómo atiendes?" subtitle="Puedes cambiar esto después">
+              <StepShell icon={Monitor} title="¿Cómo atiendes?" subtitle="Puedes cambiar esto después" error={error}>
                 <div className="grid grid-cols-1 gap-2">
                   {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
                     <button key={val} type="button" onClick={() => update("modality", val)}
@@ -304,7 +304,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "idiomas" && (
-              <StepShell icon={Languages} title="Idiomas en los que atiendes" subtitle="Selecciona todos los que apliquen (opcional)">
+              <StepShell icon={Languages} title="Idiomas en los que atiendes" subtitle="Selecciona todos los que apliquen (opcional)" error={error}>
                 <div className="grid grid-cols-2 gap-1.5 max-h-64 overflow-y-auto pr-1">
                   {languageOptions.map((lang) => (
                     <label key={lang.id} className="flex items-center gap-2 cursor-pointer border border-border/50 rounded-xl px-2.5 py-2 hover:bg-accent/30 transition-colors">
@@ -317,7 +317,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "ubicacion" && (
-              <StepShell icon={MapPin} title="¿Dónde atiendes?" subtitle="Podrás agregar el consultorio completo después">
+              <StepShell icon={MapPin} title="¿Dónde atiendes?" subtitle="Podrás agregar el consultorio completo después" error={error}>
                 <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
                   className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
                   <option value="">Selecciona tu zona</option>
@@ -327,7 +327,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "cuenta" && (
-              <StepShell icon={ShieldCheck} title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil">
+              <StepShell icon={ShieldCheck} title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
                 <Button type="button" onClick={continueWithGoogle} variant="outline" className="w-full min-h-[44px] rounded-xl gap-2 border-border">
                   <GoogleIcon />
                   Continuar con Google
