@@ -295,9 +295,7 @@ export default function Home() {
           </div>
           <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
             {specialties.slice(0, 7).map((s) =>
-            <div key={s.id} className="flex-shrink-0 w-24 sm:w-28">
-              <SpecialtyCard specialty={s} mobile />
-            </div>
+            <SpecialtyCard key={s.id} specialty={s} mobile />
             )}
           </div>
         </div>
