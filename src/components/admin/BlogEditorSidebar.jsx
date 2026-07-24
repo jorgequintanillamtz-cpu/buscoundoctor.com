@@ -97,11 +97,11 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
   const titleLen = (form.meta_title || "").length;
   const descLen = (form.meta_description || "").length;
   const [tagInput, setTagInput] = useState("");
-  const [categories, setCategories] = useState([]);
+  const [specialtyOptions, setSpecialtyOptions] = useState([]);
 
   useEffect(() => {
     base44.entities.Specialty.filter({ active: true }).then((list) => {
-      setCategories(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
+      setSpecialtyOptions([...list].sort((a, b) => a.name.localeCompare(b.name, "es")));
     }).catch(() => {});
   }, []);
 
@@ -264,10 +264,23 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
             <select value={form.category || ""} onChange={e => update("category", e.target.value)}
               className="w-full h-9 pl-3 pr-8 text-sm bg-background border border-input rounded-xl appearance-none focus:outline-none focus:ring-1 focus:ring-ring">
               <option value="">Sin categoría</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              {specialtyOptions.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
             </select>
             <ChevronDown className="absolute right-2.5 top-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
+        </div>
+
+        <div>
+          <SideLabel>Especialidad relacionada (SEO)</SideLabel>
+          <div className="relative">
+            <select value={form.specialty_id || ""} onChange={e => update("specialty_id", e.target.value)}
+              className="w-full h-9 pl-3 pr-8 text-sm bg-background border border-input rounded-xl appearance-none focus:outline-none focus:ring-1 focus:ring-ring">
+              <option value="">Ninguna (artículo general)</option>
+              {specialtyOptions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Activa el bloque “Encuentra un especialista” y los artículos relacionados en la página del artículo.</p>
         </div>
 
         <div>
