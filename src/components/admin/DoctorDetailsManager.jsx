@@ -59,7 +59,22 @@ export default function DoctorDetailsManager({ form, update }) {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Precio de consulta</label>
+            <label className="text-xs font-medium mb-1 block">Precio de consulta desde (MXN)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-2 text-sm text-muted-foreground">$</span>
+              <Input
+                type="number"
+                value={form.price_from || ""}
+                onChange={(e) => update("price_from", e.target.value)}
+                className="rounded-xl text-sm pl-6"
+                placeholder="500"
+                min={0}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Se mostrará como “Desde ${form.price_from || "500"} MXN” en tu perfil.</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Rango de precio</label>
             <SelectBox value={form.price_range} onChange={(v) => update("price_range", v)} options={PRECIOS} />
           </div>
           <div className="col-span-2">
