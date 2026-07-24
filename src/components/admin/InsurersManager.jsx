@@ -1,17 +1,47 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function InsurersManager({ form, update }) {
   const [insurers, setInsurers] = useState([]);
+  const [customName, setCustomName] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    base44.entities.Insurer.list("name", 50).then(setInsurers).catch(() => {});
-  }, []);
+  const load = () => {
+    base44.entities.Insurer.list("name", 100).then(setInsurers).catch(() => {});
+  };
+
+  useEffect(() => { load(); }, []);
 
   const toggleInsurer = (id) => {
     const cur = form.insurers_relation || [];
     update("insurers_relation", cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]);
+  };
+
+  const addCustomInsurer = async () => {
+    const name = customName.trim();
+    if (!name) return;
+    setSaving(true);
+    try {
+      // Si ya existe una aseguradora con ese nombre (sin importar may\u00fasculas), la reutilizamos.
+      let insurer = insurers.find((i) => i.name.toLowerCase() === name.toLowerCase());
+      if (!insurer) {
+        insurer = await base44.entities.Insurer.create({ name });
+        setInsurers((prev) => [...prev, insurer].sort((a, b) => a.name.localeCompare(b.name, "es")));
+      }
+      const cur = form.insurers_relation || [];
+      if (!cur.includes(insurer.id)) {
+        update("insurers_relation", [...cur, insurer.id]);
+      }
+      setCustomName("");
+      toast.success(`"${name}" agregada`);
+    } catch (e) {
+      toast.error("Error al agregar aseguradora: " + e.message);
+    }
+    setSaving(false);
   };
 
   return (
@@ -40,6 +70,22 @@ export default function InsurersManager({ form, update }) {
           ))}
         </div>
       )}
+
+      <div className="pt-3 border-t border-border/40">
+        <label className="text-xs font-medium mb-1.5 block">¿No encuentras tu aseguradora? Escríbela aquí</label>
+        <div className="flex gap-2">
+          <Input
+            value={customName}
+            onChange={(e) => setCustomName(e.target.value)}
+            placeholder="Ej: Seguros Ve por Más"
+            className="rounded-xl text-sm h-9"
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomInsurer())}
+          />
+          <Button type="button" variant="outline" size="sm" className="rounded-xl h-9 px-3 flex-shrink-0" onClick={addCustomInsurer} disabled={saving || !customName.trim()}>
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
