@@ -1,16 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Star, Globe, ChevronDown, Plus, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { base44 } from "@/api/base44Client";
 
 const SCHEMA_OPTIONS = ["Article", "MedicalWebPage", "FAQPage", "Physician", "MedicalClinic"];
-
-const CATEGORIES = [
-  "Cardiología", "Pediatría", "Ginecología", "Dermatología", "Oftalmología",
-  "Neurología", "Ortopedia", "Urología", "Psiquiatría", "Odontología",
-  "Medicina General", "Nutrición", "Salud Mental",
-];
 
 // ---- SEO Score ----
 function calcSEO(form) {
@@ -102,6 +97,13 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
   const titleLen = (form.meta_title || "").length;
   const descLen = (form.meta_description || "").length;
   const [tagInput, setTagInput] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    base44.entities.Specialty.filter({ active: true }).then((list) => {
+      setCategories(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
+    }).catch(() => {});
+  }, []);
 
   const scoreColor = score >= 71 ? "text-green-600" : score >= 41 ? "text-amber-600" : "text-red-500";
   const scoreBar = score >= 71 ? "bg-green-500" : score >= 41 ? "bg-amber-400" : "bg-red-400";
@@ -262,7 +264,7 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
             <select value={form.category || ""} onChange={e => update("category", e.target.value)}
               className="w-full h-9 pl-3 pr-8 text-sm bg-background border border-input rounded-xl appearance-none focus:outline-none focus:ring-1 focus:ring-ring">
               <option value="">Sin categoría</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <ChevronDown className="absolute right-2.5 top-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
           </div>
