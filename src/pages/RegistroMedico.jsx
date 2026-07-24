@@ -16,11 +16,14 @@ function GoogleIcon(props) {
   );
 }
 
+const stripTitle = (name) => (name || "").replace(/^(Dr\.|Dra\.)\s*/i, "").trim();
+
 export default function RegistroMedico() {
   const navigate = useNavigate();
-  // checking | choose | form | otp | done
+  // checking | choose | title | form | otp | done
   const [step, setStep] = useState("checking");
-  const [form, setForm] = useState({ full_name: "", email: "", password: "" });
+  const [form, setForm] = useState({ full_name: "", email: "", password: "", title: "" });
+  const [pendingGoogleName, setPendingGoogleName] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,7 +34,7 @@ export default function RegistroMedico() {
   };
 
   // Al cargar: si el usuario ya está autenticado (ej. acaba de volver de Google),
-  // crea su perfil automáticamente (sin pedir nada más) o lo manda a su editor si ya tiene uno.
+  // pide el título (Dr./Dra.) antes de crear el perfil, o lo manda a su editor si ya tiene uno.
   useEffect(() => {
     let active = true;
     (async () => {
@@ -49,12 +52,8 @@ export default function RegistroMedico() {
         navigate("/panel-medico", { replace: true });
         return;
       }
-      try {
-        await createProfile(u.full_name || "Médico sin nombre");
-        if (active) setStep("done");
-      } catch (err) {
-        if (active) { setError(err.message || "No se pudo crear tu perfil."); setStep("choose"); }
-      }
+      setPendingGoogleName(stripTitle(u.full_name) || "Médico sin nombre");
+      setStep("title");
     })();
     return () => { active = false; };
   }, [navigate]);
@@ -63,9 +62,25 @@ export default function RegistroMedico() {
     base44.auth.loginWithProvider("google", window.location.href);
   };
 
+  const selectGoogleTitle = async (title) => {
+    setLoading(true);
+    setError("");
+    try {
+      await createProfile(`${title} ${pendingGoogleName}`);
+      setStep("done");
+    } catch (err) {
+      setError(err.message || "No se pudo crear tu perfil.");
+    }
+    setLoading(false);
+  };
+
   const submitForm = async (e) => {
     e.preventDefault();
     setError("");
+    if (!form.title) {
+      setError("Selecciona Dr. o Dra.");
+      return;
+    }
     if (!form.full_name || !form.email || !form.password) {
       setError("Completa todos los campos");
       return;
@@ -95,7 +110,7 @@ export default function RegistroMedico() {
     try {
       await base44.auth.verifyOtp({ email: form.email, otpCode: otp });
       await base44.auth.loginViaEmailPassword(form.email, form.password);
-      await createProfile(form.full_name);
+      await createProfile(`${form.title} ${stripTitle(form.full_name)}`);
       setStep("done");
     } catch (err) {
       setError(err.message || "No se pudo verificar el código");
@@ -154,6 +169,41 @@ export default function RegistroMedico() {
           </div>
         )}
 
+        {step === "title" && (
+          <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
+            <div className="text-center mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+                <ShieldCheck className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="font-heading font-bold text-xl text-foreground">Un último detalle</h1>
+              <p className="text-sm text-muted-foreground">
+                ¿Cómo quieres que aparezca tu nombre, {pendingGoogleName}?
+              </p>
+            </div>
+            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                onClick={() => selectGoogleTitle("Dr.")}
+                className="min-h-[52px] rounded-xl text-base font-semibold"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : `Dr. ${pendingGoogleName}`}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                onClick={() => selectGoogleTitle("Dra.")}
+                className="min-h-[52px] rounded-xl text-base font-semibold"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : `Dra. ${pendingGoogleName}`}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {step === "form" && (
           <form onSubmit={submitForm} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
             <div className="text-center mb-2">
@@ -164,12 +214,32 @@ export default function RegistroMedico() {
               <p className="text-sm text-muted-foreground">Crea tu cuenta de especialista</p>
             </div>
 
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Título</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, title: "Dr." })}
+                  className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${form.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}
+                >
+                  Dr.
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, title: "Dra." })}
+                  className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${form.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}
+                >
+                  Dra.
+                </button>
+              </div>
+            </div>
+
             <div className="relative">
               <User className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
               <Input
                 value={form.full_name}
                 onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                placeholder="Nombre completo"
+                placeholder="Nombre completo (sin 'Dr.'/'Dra.')"
                 className="rounded-xl pl-9"
               />
             </div>
