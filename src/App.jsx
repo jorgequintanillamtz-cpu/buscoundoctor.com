@@ -15,6 +15,7 @@ import SpecialtyZonePage from './pages/SpecialtyZonePage';
 import BlogList from './pages/BlogList';
 import BlogPostPage from './pages/BlogPostPage';
 import Dashboard from './pages/admin/Dashboard';
+import AdminDoctorStats from './pages/admin/AdminDoctorStats';
 import AdminSpecialists from './pages/admin/AdminSpecialists';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
 import AdminZones from './pages/admin/AdminZones';
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin/estadisticas" element={<AdminDoctorStats />} />
           <Route path="/admin/especialistas" element={<AdminSpecialists />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />
           <Route path="/admin/zonas" element={<AdminZones />} />
