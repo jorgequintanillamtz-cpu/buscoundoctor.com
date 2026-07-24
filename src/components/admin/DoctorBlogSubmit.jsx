@@ -49,6 +49,7 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
