@@ -119,6 +119,7 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
   const submit = async () => {
     if (!title.trim()) { toast.error("Escribe un título"); return; }
     if (content.trim().length < 200) { toast.error("El contenido debe tener al menos 200 caracteres"); return; }
+    if (!excerpt.trim()) { toast.error("Escribe un resumen breve del artículo"); return; }
     setSaving(true);
     try {
       // Busca el ID de la especialidad del médico, para vincular el artículo autom\u00e1ticamente
@@ -127,16 +128,15 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
         const matches = await base44.entities.Specialty.filter({ name: specialty }).catch(() => []);
         if (matches.length > 0) specialtyId = matches[0].id;
       }
-      const excerpt = content.trim().replace(/[#*_]/g, "").slice(0, 160);
       await base44.entities.BlogPost.create({
         title: title.trim(),
         slug: slugify(title) + "-" + Date.now().toString().slice(-5),
         content: content.trim(),
-        excerpt,
+        excerpt: excerpt.trim(),
         image: imageUrl || "",
         image_alt: imageUrl ? title.trim() : "",
         meta_title: title.trim().slice(0, 60),
-        meta_description: excerpt,
+        meta_description: excerpt.trim(),
         primary_keyword: keyword.trim(),
         category: specialty || "",
         specialty_id: specialtyId,
@@ -148,6 +148,7 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
       });
       setTitle("");
       setKeyword("");
+      setExcerpt("");
       setContent("");
       setImageUrl("");
       toast.success("Artículo enviado para revisión");
