@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -55,7 +55,6 @@ export default function DoctorPanel() {
         return;
       }
       if (u.role === "admin" || u.role === "superadmin") {
-        // Este panel es exclusivo de médicos; un admin administra doctores desde /admin/doctores.
         setStatus("wrong-role");
         return;
       }
@@ -79,7 +78,6 @@ export default function DoctorPanel() {
     return () => { active = false; };
   }, []);
 
-  // Autoguardado cada 30s
   useEffect(() => {
     if (status !== "ready") return;
     autoSaveRef.current = setInterval(async () => {
@@ -105,7 +103,6 @@ export default function DoctorPanel() {
     });
   }, []);
 
-  // Un médico nunca puede tocar estos campos, sin importar desde qué pantalla guarde.
   const buildData = (f) => {
     const data = {
       ...f,
@@ -146,16 +143,50 @@ export default function DoctorPanel() {
     setSaving(false);
   };
 
+  // ---- Estados sin perfil listo: se muestran dentro del mismo shell oscuro ----
+  const renderShell = (content) => (
+    <div className="min-h-screen bg-background flex">
+      <aside className="hidden lg:flex w-64 flex-col bg-brand-navy min-h-screen sticky top-0">
+        <div className="p-5 border-b border-white/10">
+          <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al sitio
+          </Link>
+          <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
+          <p className="text-xs text-white/50 mt-1">Administra tu perfil en BuscoUnDoctor.</p>
+        </div>
+        <div className="flex-1" />
+        <div className="p-3 border-t border-white/10">
+          <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+            <LogOut className="w-4 h-4" />
+            Salir del panel
+          </Link>
+        </div>
+      </aside>
+      <div className="flex-1 min-h-screen">
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
+            <ArrowLeft className="w-4 h-4" />
+            Sitio
+          </Link>
+          <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
+          <div className="w-10" />
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">{content}</div>
+      </div>
+    </div>
+  );
+
   if (status === "loading") {
-    return (
+    return renderShell(
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   if (status === "wrong-role") {
-    return (
+    return renderShell(
       <div className="max-w-md mx-auto text-center py-16">
         <h1 className="font-heading font-bold text-xl text-foreground">Este panel es para médicos</h1>
         <p className="text-sm text-muted-foreground mt-2">Tu cuenta es de administrador. Administra a los médicos desde el panel de administración.</p>
@@ -165,7 +196,7 @@ export default function DoctorPanel() {
   }
 
   if (status === "no-profile") {
-    return (
+    return renderShell(
       <div className="max-w-md mx-auto text-center py-16">
         <h1 className="font-heading font-bold text-xl text-foreground">Aún no tienes un perfil de médico</h1>
         <p className="text-sm text-muted-foreground mt-2">Regístrate para crear tu perfil y aparecer en el directorio.</p>
@@ -177,94 +208,140 @@ export default function DoctorPanel() {
   }
 
   const completitud = form.completeness_score || 0;
-  const activeSection = SECTIONS.find((s) => s.key === section) || SECTIONS[0];
-  const isEditing = true; // en este panel el perfil siempre ya existe
+  const isEditing = true;
 
+  // ---- Panel listo: la barra lateral incluye TODA la navegación ----
   return (
-    <div className="max-w-7xl">
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <div>
-          <h1 className="font-heading font-bold text-2xl text-foreground leading-tight">{form.full_name}</h1>
-          {lastSaved && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-              <Clock className="w-3 h-3" />
-              Guardado a las {lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {form.slug && (
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" asChild>
-              <a href={`/especialista/${form.slug}`} target="_blank" rel="noopener noreferrer">
-                <Eye className="w-4 h-4" />
-                Vista previa
-              </a>
-            </Button>
-          )}
-          <Button variant="outline" size="sm" onClick={handleSaveChanges} disabled={saving} className="rounded-xl gap-1.5">
-            {saving ? <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-            Guardar cambios
-          </Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background flex">
+      <aside className="hidden lg:flex w-72 flex-col bg-brand-navy min-h-screen sticky top-0">
+        <div className="p-5 border-b border-white/10">
+          <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al sitio
+          </Link>
+          <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
+          <p className="text-xs text-white/50 mt-1">Administra tu perfil en BuscoUnDoctor.</p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
-        {/* Menú lateral oscuro, agrupado */}
-        <div className="space-y-4 lg:sticky lg:top-4">
-          <div className="bg-card rounded-2xl border border-border/50 p-4">
+          <div className="mt-4">
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="font-medium text-muted-foreground">Completitud del perfil</span>
-              <span className={`font-semibold ${completitud >= 80 ? "text-green-600" : completitud >= 50 ? "text-amber-600" : "text-red-500"}`}>{completitud}%</span>
+              <span className="font-medium text-white/50">Completitud</span>
+              <span className={`font-semibold ${completitud >= 80 ? "text-emerald-400" : completitud >= 50 ? "text-amber-400" : "text-red-400"}`}>{completitud}%</span>
             </div>
-            <div className="w-full bg-muted rounded-full h-2">
+            <div className="w-full bg-white/10 rounded-full h-1.5">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${completitud >= 80 ? "bg-green-500" : completitud >= 50 ? "bg-amber-400" : "bg-red-400"}`}
+                className={`h-1.5 rounded-full transition-all duration-500 ${completitud >= 80 ? "bg-emerald-400" : completitud >= 50 ? "bg-amber-400" : "bg-red-400"}`}
                 style={{ width: `${completitud}%` }}
               />
             </div>
           </div>
-
-          <nav className="rounded-2xl p-3 flex flex-col gap-3 bg-brand-navy">
-            {SECTION_GROUPS.map((g) => (
-              <div key={g.group} className="flex flex-col gap-0.5">
-                <p className="text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 text-white/40">{g.group}</p>
-                {g.items.map((s) => {
-                  const locked = s.requiresSaved && !isEditing;
-                  return (
-                    <button
-                      key={s.key}
-                      type="button"
-                      disabled={locked}
-                      onClick={() => setSection(s.key)}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
-                        section === s.key
-                          ? "bg-brand-blue text-white"
-                          : locked
-                          ? "text-white/25 cursor-not-allowed"
-                          : "text-white/70 hover:bg-white/5 hover:text-white"
-                      }`}
-                    >
-                      <s.icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="flex-1">{s.label}</span>
-                      {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </nav>
         </div>
 
-        {/* Contenido */}
-        <div>
-          {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} />}
-          {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
-          {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
-          {section === "formacion" && <EducationManager specialistId={specialistId} />}
-          {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
-          {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
-          {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
-          {section === "documentos" && <DocumentManager specialistId={specialistId} />}
+        <nav className="flex-1 p-3 overflow-y-auto">
+          {SECTION_GROUPS.map((g) => (
+            <div key={g.group} className="flex flex-col gap-0.5 mb-3">
+              <p className="text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 text-white/40">{g.group}</p>
+              {g.items.map((s) => {
+                const locked = s.requiresSaved && !isEditing;
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => setSection(s.key)}
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
+                      section === s.key
+                        ? "bg-brand-blue text-white"
+                        : locked
+                        ? "text-white/25 cursor-not-allowed"
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <s.icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1">{s.label}</span>
+                    {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className="p-3 border-t border-white/10">
+          <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+            <LogOut className="w-4 h-4" />
+            Salir del panel
+          </Link>
+        </div>
+      </aside>
+
+      <div className="flex-1 min-h-screen">
+        {/* Barra superior en móvil: título + navegación en píldoras horizontales */}
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
+              <ArrowLeft className="w-4 h-4" />
+              Sitio
+            </Link>
+            <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
+            <div className="w-10" />
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+            {SECTIONS.map((s) => {
+              const locked = s.requiresSaved && !isEditing;
+              return (
+                <button
+                  key={s.key}
+                  disabled={locked}
+                  onClick={() => setSection(s.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                    section === s.key ? "bg-brand-blue text-white" : "bg-white/10 text-white/70"
+                  }`}
+                >
+                  <s.icon className="w-3.5 h-3.5" />
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="max-w-6xl">
+            <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
+              <div>
+                <h1 className="font-heading font-bold text-2xl text-foreground leading-tight">{form.full_name}</h1>
+                {lastSaved && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                    <Clock className="w-3 h-3" />
+                    Guardado a las {lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {form.slug && (
+                  <Button variant="outline" size="sm" className="rounded-xl gap-1.5" asChild>
+                    <a href={`/especialista/${form.slug}`} target="_blank" rel="noopener noreferrer">
+                      <Eye className="w-4 h-4" />
+                      Vista previa
+                    </a>
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" onClick={handleSaveChanges} disabled={saving} className="rounded-xl gap-1.5">
+                  {saving ? <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                  Guardar cambios
+                </Button>
+              </div>
+            </div>
+
+            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} />}
+            {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
+            {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
+            {section === "formacion" && <EducationManager specialistId={specialistId} />}
+            {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
+            {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
+            {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
+            {section === "documentos" && <DocumentManager specialistId={specialistId} />}
+          </div>
         </div>
       </div>
     </div>
