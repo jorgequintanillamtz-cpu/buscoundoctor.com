@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock } from "lucide-react";
+import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -12,6 +12,8 @@ import InsurersManager from "@/components/admin/InsurersManager";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
+import DoctorHomeSummary from "@/components/admin/DoctorHomeSummary";
+import DoctorStatsFull from "@/components/admin/DoctorStatsFull";
 
 export const EMPTY_FORM = {
   full_name: "",
@@ -68,7 +70,7 @@ export default function AdminDoctorEditor() {
   const formRef = useRef(form);
   const [currentUser, setCurrentUser] = useState(null);
   const [blocked, setBlocked] = useState(false);
-  const [section, setSection] = useState("perfil");
+  const [section, setSection] = useState(isEditing ? "resumen" : "perfil");
 
   const isAdmin = currentUser && (currentUser.role === "admin" || currentUser.role === "superadmin");
 
@@ -264,6 +266,7 @@ export default function AdminDoctorEditor() {
   const completitud = form.completeness_score || 0;
 
   const SECTIONS = [
+    { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
     { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
@@ -271,6 +274,7 @@ export default function AdminDoctorEditor() {
     { key: "consultorios", label: "Consultorios y horarios", icon: MapPin, requiresSaved: true },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
+    { key: "estadisticas", label: "Estadísticas", icon: BarChart3, requiresSaved: true },
     ...(isAdmin ? [{ key: "publicacion", label: "Publicación (admin)", icon: Globe, requiresSaved: false }] : []),
   ];
 
@@ -371,6 +375,15 @@ export default function AdminDoctorEditor() {
             </div>
           ) : (
             <>
+              {section === "resumen" && (
+                <div className="space-y-4">
+                  <div>
+                    <h2 className="font-heading font-bold text-lg text-foreground">Hola, {form.full_name?.split(" ")[0] || "doctor"} 👋</h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Aquí tienes un vistazo rápido de tu actividad reciente.</p>
+                  </div>
+                  <DoctorHomeSummary specialistId={id} />
+                </div>
+              )}
               {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
               {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
               {section === "formacion" && <EducationManager specialistId={id} />}
@@ -378,6 +391,7 @@ export default function AdminDoctorEditor() {
               {section === "consultorios" && <OfficeManager specialistId={id} />}
               {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
               {section === "documentos" && <DocumentManager specialistId={id} />}
+              {section === "estadisticas" && <DoctorStatsFull specialistId={id} />}
               {section === "publicacion" && isAdmin && (
                 <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveChanges} saving={saving} />
               )}
