@@ -12,6 +12,7 @@ import EducationTimeline from "../components/EducationTimeline";
 import LanguagesChips from "../components/LanguagesChips";
 import SimilarSpecialists from "../components/SimilarSpecialists";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
+import { trackDoctorContact } from "@/utils/trackDoctorStats";
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -49,6 +50,7 @@ export default function SpecialistProfile() {
   const handleDateSelect = (date) => {
     setSelectedDate(date);
     setShowForm(true);
+    trackDoctorContact(specialist);
   };
 
   useEffect(() => {
@@ -304,7 +306,7 @@ export default function SpecialistProfile() {
             </a>
           }
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
             className="inline-flex items-center gap-2 bg-brand-bluePale hover:bg-brand-bluePale/70 text-brand-navy text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
             
             <Calendar className="w-4 h-4" />
@@ -567,7 +569,7 @@ export default function SpecialistProfile() {
               </a>
             }
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
               className="inline-flex items-center justify-center gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
               
               <Calendar className="w-4 h-4" />
