@@ -100,6 +100,13 @@ export default function PublicOfficeList({ specialistId }) {
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
+            {office.photos?.length > 0 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {office.photos.map((url, i) => (
+                  <img key={i} src={url} alt={`Foto ${i + 1} del consultorio en ${office.address_line}`} className="w-24 h-24 rounded-xl object-cover flex-shrink-0 border border-border/50" />
+                ))}
+              </div>
+            )}
             <div className="ml-8">
               <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Horarios
