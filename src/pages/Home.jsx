@@ -304,7 +304,7 @@ export default function Home() {
       </section>
 
       {/* Zonas destacadas */}
-      <section className="bg-brand-blueLight/70">
+      <section className="bg-gradient-to-b from-white via-brand-blueLight/70 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Zonas destacadas</h2>
@@ -339,7 +339,7 @@ export default function Home() {
       )}
 
       {/* Featured: carrusel horizontal */}
-      <section className="bg-brand-blueLight/70">
+      <section className="bg-gradient-to-b from-white via-brand-blueLight/70 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialistas destacados</h2>
@@ -392,7 +392,7 @@ export default function Home() {
 
       {/* Blog: slider deslizable con todos los artículos */}
       {posts.length > 0 &&
-      <section className="bg-brand-blueLight/70">
+      <section className="bg-gradient-to-b from-white via-brand-blueLight/70 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Blog de salud</h2>
@@ -576,7 +576,7 @@ export default function Home() {
       </section>
 
       {/* Por qué vale la pena registrarte como doctor */}
-      <section className="bg-brand-blueLight/70">
+      <section className="bg-gradient-to-b from-white via-brand-blueLight/70 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
         <div className="text-center mb-8">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Por qué vale la pena registrarte como doctor</h2>
