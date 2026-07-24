@@ -382,8 +382,7 @@ export default function Home() {
 
       {/* Aseguradoras en nuestro sistema */}
       {insurers.length > 0 && (
-      <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
         <div className="text-center mb-6">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Aseguradoras en nuestro sistema</h2>
           <p className="text-sm text-muted-foreground mt-1">Cada médico indica en su perfil cuáles acepta — no todos aceptan todas.</p>
