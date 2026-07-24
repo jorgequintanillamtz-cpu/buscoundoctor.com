@@ -285,7 +285,7 @@ export default function Home() {
         </div>
 
       {/* Specialties: estilo "Shop by Category" */}
-      <section className="bg-brand-blueLight/40">
+      <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialidades</h2>
@@ -304,10 +304,11 @@ export default function Home() {
       </section>
 
       {/* Zonas destacadas */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+      <section className="bg-brand-blueLight/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Zonas destacadas</h2>
-          <Link to="/especialistas" className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Zonas destacadas</h2>
+          <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
             <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -315,6 +316,7 @@ export default function Home() {
           {zones.slice(0, 6).map((z) =>
           <ZoneCard key={z.id} zone={z} />
           )}
+        </div>
         </div>
       </section>
 
@@ -337,7 +339,7 @@ export default function Home() {
       )}
 
       {/* Featured: carrusel horizontal */}
-      <section className="bg-brand-blueLight/40">
+      <section className="bg-brand-blueLight/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialistas destacados</h2>
@@ -356,7 +358,7 @@ export default function Home() {
       </section>
 
       {/* Cómo verificamos a nuestros médicos */}
-      <section className="bg-brand-blueLight/40">
+      <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="text-center mb-8">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Cómo verificamos a nuestros médicos</h2>
@@ -390,9 +392,10 @@ export default function Home() {
 
       {/* Blog: slider deslizable con todos los artículos */}
       {posts.length > 0 &&
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+      <section className="bg-brand-blueLight/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Blog de salud</h2>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Blog de salud</h2>
             <div className="flex items-center gap-2">
               <Link to="/blog" className="text-sm font-medium text-primary hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
                 <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
@@ -429,6 +432,7 @@ export default function Home() {
           <Link to="/blog" className="text-sm font-medium text-primary sm:hidden flex items-center gap-1 mt-4">
             <span>Ver todos los artículos</span> <ArrowRight className="w-4 h-4" />
           </Link>
+        </div>
         </section>
       }
 
@@ -490,7 +494,7 @@ export default function Home() {
       }
 
       {/* Cómo funciona */}
-      <section className="bg-brand-blueLight/40">
+      <section className="bg-brand-blueLight/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
           <div className="text-center mb-8">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Cómo funciona?</h2>
@@ -572,9 +576,10 @@ export default function Home() {
       </section>
 
       {/* Por qué vale la pena registrarte como doctor */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
+      <section className="bg-brand-blueLight/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
         <div className="text-center mb-8">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Por qué vale la pena registrarte como doctor</h2>
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Por qué vale la pena registrarte como doctor</h2>
           <p className="text-sm text-muted-foreground mt-1">Así es como BuscoUnDoctor te ayuda a conseguir más pacientes</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -592,6 +597,7 @@ export default function Home() {
               <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{item.desc}</p>
             </div>
           ))}
+        </div>
         </div>
       </section>
 
