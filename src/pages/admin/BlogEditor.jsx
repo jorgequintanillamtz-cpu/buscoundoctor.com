@@ -153,6 +153,20 @@ export default function BlogEditor() {
   const handlePublish = async () => {
     if (!form.title) { toast.error("El título es obligatorio"); return; }
     if (form.image && !form.image_alt) { toast.error("Agrega el Alt Text de la imagen destacada antes de publicar"); return; }
+
+    // Evita canibalización de keywords: revisa si otro artículo publicado
+    // ya usa el mismo meta_title, meta_description o primary_keyword.
+    try {
+      const others = (await base44.entities.BlogPost.filter({ published: true })).filter(p => p.id !== id);
+      const dupField = (val, getter) => val && others.find(p => getter(p) && getter(p).trim().toLowerCase() === val.trim().toLowerCase());
+      const dupTitle = dupField(form.meta_title, p => p.meta_title);
+      const dupDesc = dupField(form.meta_description, p => p.meta_description);
+      const dupKw = dupField(form.primary_keyword, p => p.primary_keyword);
+      if (dupTitle) { toast.error(`El meta título ya lo usa "${dupTitle.title}". Cámbialo para evitar canibalización de SEO.`); return; }
+      if (dupDesc) { toast.error(`La meta descripción ya la usa "${dupDesc.title}". Cámbiala para evitar canibalización de SEO.`); return; }
+      if (dupKw) { toast.error(`La keyword principal ya la usa "${dupKw.title}". Elige otra para evitar canibalización de SEO.`); return; }
+    } catch {}
+
     setSaving(true);
     try {
       const data = { ...buildSaveData(formRef.current), published: true };
