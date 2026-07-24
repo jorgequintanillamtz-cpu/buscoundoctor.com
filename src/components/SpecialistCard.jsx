@@ -92,9 +92,9 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
                   {specialist.modality}
                 </span>
               )}
-              {specialist.price_range && (
+              {specialist.price_from && (
                 <span className="text-xs text-muted-foreground">
-                  {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+                  Desde ${specialist.price_from} MXN
                 </span>
               )}
             </div>
