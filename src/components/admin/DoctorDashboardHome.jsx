@@ -35,7 +35,7 @@ function KpiCard({ icon: Icon, value, label, sub, color }) {
   );
 }
 
-export default function DoctorDashboardHome({ specialist }) {
+export default function DoctorDashboardHome({ specialist, isOwnProfile = true }) {
   const specialistId = specialist?.id;
   const [range, setRange] = useState("30d"); // "7d" | "30d" | "12m"
 
@@ -128,8 +128,17 @@ export default function DoctorDashboardHome({ specialist }) {
       {/* Encabezado de bienvenida + acciones */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading font-bold text-xl text-foreground">Hola, {specialist?.full_name?.split(" ")[0] || "doctor"} 👋</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Así va tu perfil en BuscoUnDoctor</p>
+          {isOwnProfile ? (
+            <>
+              <h1 className="font-heading font-bold text-xl text-foreground">Hola, {specialist?.full_name?.split(" ")[0] || "doctor"} 👋</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Así va tu perfil en BuscoUnDoctor</p>
+            </>
+          ) : (
+            <>
+              <h1 className="font-heading font-bold text-xl text-foreground">Resumen de actividad</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Estadísticas del perfil de {specialist?.full_name || "este médico"} (vista de administrador)</p>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {specialist?.slug && (
@@ -145,8 +154,8 @@ export default function DoctorDashboardHome({ specialist }) {
 
       {/* 4 KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard icon={Eye} value={kpis.impressions30} label="Impresiones este mes" sub="Veces que tu perfil apareció" color="text-brand-blue" />
-        <KpiCard icon={MousePointerClick} value={kpis.clicks30} label="Clicks este mes" sub="Le dieron clic a tu perfil" color="text-brand-navy" />
+        <KpiCard icon={Eye} value={kpis.impressions30} label="Impresiones este mes" sub={isOwnProfile ? "Veces que tu perfil apareció" : "Veces que apareció en el directorio"} color="text-brand-blue" />
+        <KpiCard icon={MousePointerClick} value={kpis.clicks30} label="Clicks este mes" sub={isOwnProfile ? "Le dieron clic a tu perfil" : "Clicks al perfil"} color="text-brand-navy" />
         <KpiCard icon={CalendarCheck} value={kpis.contacts30} label="Citas agendadas este mes" sub="Solicitudes de cita" color="text-emerald-600" />
         <KpiCard icon={Star} value={`${kpis.contactRate}%`} label="Tasa de contacto" sub="Clicks que se volvieron cita" color="text-amber-500" />
       </div>
@@ -218,7 +227,7 @@ export default function DoctorDashboardHome({ specialist }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tu card en el directorio */}
         <div className="bg-card rounded-2xl border border-border/50 p-5">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">Tu card en el directorio</h2>
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">{isOwnProfile ? "Tu card en el directorio" : "Card en el directorio"}</h2>
           <div className="flex items-start gap-4 p-4 rounded-xl border border-border/50">
             <div className="w-16 h-16 rounded-2xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist?.profile_photo ? (
@@ -239,7 +248,7 @@ export default function DoctorDashboardHome({ specialist }) {
             <Button variant="outline" size="sm" className="rounded-xl gap-1.5 w-full mt-3" asChild>
               <a href={`/especialista/${specialist.slug}`} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-3.5 h-3.5" />
-                Ver cómo se ve tu perfil
+                {isOwnProfile ? "Ver cómo se ve tu perfil" : "Ver perfil público"}
               </a>
             </Button>
           )}
@@ -247,7 +256,7 @@ export default function DoctorDashboardHome({ specialist }) {
 
         {/* De dónde vienen los clicks */}
         <div className="bg-card rounded-2xl border border-border/50 p-5">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">De dónde vienen tus clicks (30 días)</h2>
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">{isOwnProfile ? "De dónde vienen tus clicks (30 días)" : "De dónde vienen los clicks (30 días)"}</h2>
           {clicksBySource.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">Aún no hay clicks este mes.</p>
           ) : (
