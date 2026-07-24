@@ -106,12 +106,19 @@ export default function BlogEditor() {
   const update = useCallback((field, value) => {
     setForm(prev => {
       const next = { ...prev, [field]: value };
-      if (field === "title" && !prev._slugManual) {
+      // Solo autogeneramos el slug a partir del título mientras el artículo
+      // todavía no se ha guardado por primera vez (isEditing === false).
+      // Una vez que ya tiene una URL real publicada, el título puede cambiar
+      // sin que el slug se mueva solo debajo del artículo.
+      if (field === "title" && !prev._slugManual && !isEditing) {
         next.slug = generateBlogSlug(value);
+      }
+      if (field === "slug") {
+        next._slugManual = true;
       }
       return next;
     });
-  }, []);
+  }, [isEditing]);
 
   const buildSaveData = (f) => ({
     ...f,
