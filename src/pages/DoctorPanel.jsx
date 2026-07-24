@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -12,6 +12,9 @@ import InsurersManager from "@/components/admin/InsurersManager";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
+import CasesManager from "@/components/admin/CasesManager";
+import PostsManager from "@/components/admin/PostsManager";
+import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import { EMPTY_FORM, generateSlug } from "@/pages/admin/AdminDoctorEditor";
 
 const SECTION_GROUPS = [
@@ -28,6 +31,11 @@ const SECTION_GROUPS = [
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
+  ]},
+  { group: "Contenido", items: [
+    { key: "casos", label: "Casos de éxito", icon: Sparkles, requiresSaved: true },
+    { key: "publicaciones", label: "Publicaciones", icon: ImageIcon, requiresSaved: true },
+    { key: "blog", label: "Escribir blog", icon: PenLine, requiresSaved: true },
   ]},
 ];
 const SECTIONS = SECTION_GROUPS.flatMap((g) => g.items);
@@ -341,6 +349,9 @@ export default function DoctorPanel() {
             {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
             {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
             {section === "documentos" && <DocumentManager specialistId={specialistId} />}
+            {section === "casos" && <CasesManager specialistId={specialistId} />}
+            {section === "publicaciones" && <PostsManager specialistId={specialistId} />}
+            {section === "blog" && <DoctorBlogSubmit specialistId={specialistId} specialistName={form.full_name} specialty={form.specialty} />}
           </div>
         </div>
       </div>
