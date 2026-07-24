@@ -43,18 +43,26 @@ export default function AdminLayout() {
     return location.pathname.startsWith(item.path);
   };
 
+  // El panel del médico usa un tema oscuro (navy); el de admin conserva el tema claro.
+  const asideClass = isDoctor
+    ? "hidden lg:flex w-64 flex-col bg-brand-navy min-h-screen sticky top-0"
+    : "hidden lg:flex w-64 flex-col border-r border-border/50 bg-card min-h-screen sticky top-0";
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
-        <aside className="hidden lg:flex w-64 flex-col border-r border-border/50 bg-card min-h-screen sticky top-0">
-          <div className="p-5 border-b border-border/50">
-            <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+        <aside className={asideClass}>
+          <div className={`p-5 ${isDoctor ? "border-b border-white/10" : "border-b border-border/50"}`}>
+            <Link
+              to="/"
+              className={`flex items-center gap-2 text-sm transition-colors mb-4 ${isDoctor ? "text-white/60 hover:text-white" : "text-muted-foreground hover:text-foreground"}`}
+            >
               <ArrowLeft className="w-4 h-4" />
               Volver al sitio
             </Link>
-            <h2 className="font-heading font-bold text-lg text-foreground">{panelTitle}</h2>
+            <h2 className={`font-heading font-bold text-lg ${isDoctor ? "text-white" : "text-foreground"}`}>{panelTitle}</h2>
             {isDoctor && (
-              <p className="text-xs text-muted-foreground mt-1">Edita la información de tu perfil médico.</p>
+              <p className="text-xs text-white/50 mt-1">Edita la información de tu perfil médico.</p>
             )}
           </div>
           <nav className="flex-1 p-3">
@@ -65,7 +73,11 @@ export default function AdminLayout() {
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive(item)
-                      ? "bg-primary text-primary-foreground"
+                      ? isDoctor
+                        ? "bg-brand-blue text-white"
+                        : "bg-primary text-primary-foreground"
+                      : isDoctor
+                      ? "text-white/70 hover:bg-white/5 hover:text-white"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
@@ -76,10 +88,10 @@ export default function AdminLayout() {
             </div>
           </nav>
           {isDoctor && (
-            <div className="p-3 border-t border-border/50">
+            <div className="p-3 border-t border-white/10">
               <Link
                 to="/"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Salir del panel
