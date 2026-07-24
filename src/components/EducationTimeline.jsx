@@ -56,6 +56,7 @@ export default function EducationTimeline({ specialistId }) {
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">{it.institution_name}</p>
             {formatYears(it) && <p className="text-xs text-muted-foreground mt-0.5">{formatYears(it)}</p>}
+            {it.comment && <p className="text-sm text-foreground/80 mt-1.5 italic">“{it.comment}”</p>}
           </li>
         ))}
       </ol>
