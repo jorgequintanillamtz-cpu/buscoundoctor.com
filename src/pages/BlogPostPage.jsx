@@ -265,7 +265,10 @@ export default function BlogPostPage() {
             remarkPlugins={[remarkGfm]}
 
             components={{
-              h1: ({children}) => <h1 className="text-3xl font-heading font-bold mt-8 mb-4 leading-snug">{children}</h1>,
+              // Nunca renderizamos un segundo <h1> real en la página (el título del artículo
+              // ya es el único H1). Si el contenido trae un "# " suelto, se muestra
+              // visualmente igual pero como H2 semántico, para no duplicar el H1.
+              h1: ({children}) => <h2 className="text-3xl font-heading font-bold mt-8 mb-4 leading-snug">{children}</h2>,
               h2: ({children}) => {
                 const id = slugify(childrenToText(children));
                 return <h2 id={id} className="text-2xl font-heading font-bold mt-7 mb-3 leading-snug scroll-mt-24">{children}</h2>;
