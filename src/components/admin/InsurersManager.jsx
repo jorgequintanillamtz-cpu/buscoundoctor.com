@@ -11,7 +11,15 @@ export default function InsurersManager({ form, update }) {
   const [saving, setSaving] = useState(false);
 
   const load = () => {
-    base44.entities.Insurer.list("name", 100).then(setInsurers).catch(() => {});
+    base44.entities.Insurer.list("name", 100).then((list) => {
+      // "Particular/Sin seguro" siempre al final, no es una aseguradora real
+      const sorted = [...list].sort((a, b) => {
+        if (a.name === "Particular/Sin seguro") return 1;
+        if (b.name === "Particular/Sin seguro") return -1;
+        return 0;
+      });
+      setInsurers(sorted);
+    }).catch(() => {});
   };
 
   useEffect(() => { load(); }, []);
