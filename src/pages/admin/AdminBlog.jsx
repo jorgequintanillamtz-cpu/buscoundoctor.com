@@ -19,7 +19,12 @@ export default function AdminBlog() {
   useEffect(() => { load(); }, []);
 
   const togglePublish = async (post) => {
-    await base44.entities.BlogPost.update(post.id, { published: !post.published });
+    const newPublished = !post.published;
+    const updates = { published: newPublished };
+    if (post.submitted_by_specialist_id) {
+      updates.review_status = newPublished ? "approved" : "pending_review";
+    }
+    await base44.entities.BlogPost.update(post.id, updates);
     toast.success(post.published ? "Artículo despublicado" : "Artículo publicado");
     load();
   };
