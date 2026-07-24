@@ -51,6 +51,15 @@ export default function BlogPostPage() {
           description: p.meta_description || p.excerpt || '',
           image: p.image || SITE_OG.image,
         });
+
+        // Canonical: cada artículo apunta a su propia URL (evita contenido duplicado)
+        let canonicalEl = document.querySelector('link[rel="canonical"]');
+        if (!canonicalEl) {
+          canonicalEl = document.createElement('link');
+          canonicalEl.setAttribute('rel', 'canonical');
+          document.head.appendChild(canonicalEl);
+        }
+        canonicalEl.setAttribute('href', `https://buscoundoctor.com/blog/${p.slug}`);
         
         if (p.featured_specialists?.length > 0) {
           const all = await base44.entities.Specialist.filter({ active: true });
