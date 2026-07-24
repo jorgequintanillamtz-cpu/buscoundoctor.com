@@ -152,6 +152,7 @@ export default function BlogEditor() {
 
   const handlePublish = async () => {
     if (!form.title) { toast.error("El título es obligatorio"); return; }
+    if (form.image && !form.image_alt) { toast.error("Agrega el Alt Text de la imagen destacada antes de publicar"); return; }
     setSaving(true);
     try {
       const data = { ...buildSaveData(formRef.current), published: true };
