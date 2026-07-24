@@ -22,6 +22,7 @@ const emptyEducation = () => ({
   field_of_study: "",
   start_year: "",
   end_year: "",
+  comment: "",
 });
 
 function EducationForm({ initial, onCancel, onSave, saving }) {
@@ -90,6 +91,18 @@ function EducationForm({ initial, onCancel, onSave, saving }) {
             max={2035}
           />
         </div>
+        <div className="sm:col-span-2">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs font-medium block">Comentario o logro destacado (opcional)</label>
+            <span className="text-xs text-muted-foreground">{(edu.comment || "").length}/500</span>
+          </div>
+          <textarea
+            value={edu.comment || ""}
+            onChange={(e) => { if (e.target.value.length <= 500) setEdu({ ...edu, comment: e.target.value }); }}
+            className="w-full min-h-[70px] px-3 py-2 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+            placeholder="Ej: Mejor promedio de mi generación, publicación destacada, reconocimiento académico..."
+          />
+        </div>
       </div>
       <div className="flex justify-end gap-2">
         <Button variant="outline" size="sm" onClick={onCancel} className="rounded-xl">Cancelar</Button>
@@ -131,6 +144,7 @@ export default function EducationManager({ specialistId }) {
         field_of_study: data.field_of_study || "",
         start_year: data.start_year ? Number(data.start_year) : undefined,
         end_year: data.end_year ? Number(data.end_year) : undefined,
+        comment: data.comment || "",
       };
       if (data.id) {
         await base44.entities.SpecialistEducation.update(data.id, payload);
@@ -199,6 +213,9 @@ export default function EducationManager({ specialistId }) {
                       {DEGREE_LABEL(edu.degree_type)}{edu.field_of_study ? ` · ${edu.field_of_study}` : ""}
                       {(edu.start_year || edu.end_year) ? ` · ${edu.start_year || ""}${edu.end_year ? `–${edu.end_year}` : ""}` : ""}
                     </p>
+                    {edu.comment && (
+                      <p className="text-xs text-foreground/80 mt-1 italic">“{edu.comment}”</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Button size="icon" variant="ghost" onClick={() => setEditingId(edu.id)} className="h-8 w-8">
