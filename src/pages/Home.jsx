@@ -427,7 +427,7 @@ export default function Home() {
           <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible" style={{ scrollbarWidth: 'none' }}>
             {featured.map((s, i) =>
             <div key={s.id} className="flex-shrink-0 w-[85vw] sm:w-auto">
-              <SpecialistCard specialist={s} priority={i === 0} />
+              <SpecialistCard specialist={s} priority={i === 0} sourcePage="home" />
             </div>
             )}
           </div>
