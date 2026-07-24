@@ -407,7 +407,7 @@ export default function AdminDoctorEditor() {
             </div>
           ) : (
             <>
-              {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id }} />}
+              {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id }} isOwnProfile={!isAdmin} />}
               {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
               {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
               {section === "formacion" && <EducationManager specialistId={id} />}
