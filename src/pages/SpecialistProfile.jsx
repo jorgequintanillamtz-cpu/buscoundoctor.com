@@ -312,9 +312,9 @@ export default function SpecialistProfile() {
             <Calendar className="w-4 h-4" />
             Agendar cita
           </button>
-          {specialist.price_range && (
+          {specialist.price_from && (
             <span className="text-sm font-medium text-primary bg-accent px-3 py-2 rounded-full">
-              {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
+              Desde ${specialist.price_from} MXN
             </span>
           )}
         </div>
@@ -576,10 +576,8 @@ export default function SpecialistProfile() {
               Agendar cita
             </button>
           </div>
-          {specialist.price_range && (
-            <p className="text-xs text-muted-foreground">Precio de consulta: <span className="font-semibold text-foreground">
-              {specialist.price_range === "$" ? "$800 - $900" : specialist.price_range === "$$" ? "$900 - $1,200" : specialist.price_range === "$$$" ? "$1,200 - $1,600" : "$1,600 - $2,000"}
-            </span></p>
+          {specialist.price_from && (
+            <p className="text-xs text-muted-foreground">Precio de consulta: <span className="font-semibold text-foreground">Desde ${specialist.price_from} MXN</span></p>
           )}
           <p className="text-[11px] text-muted-foreground border-t border-border/50 pt-3">La reserva y el contacto son gratuitos.</p>
         </div>
