@@ -380,26 +380,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Zonas destacadas */}
-      <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Zonas destacadas</h2>
-          <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
-            <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {zones.slice(0, 6).map((z) =>
-          <ZoneCard key={z.id} zone={z} />
-          )}
-        </div>
-        </div>
-      </section>
-
       {/* Aseguradoras en nuestro sistema */}
       {insurers.length > 0 && (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+      <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
         <div className="text-center mb-6">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Aseguradoras en nuestro sistema</h2>
           <p className="text-sm text-muted-foreground mt-1">Cada médico indica en su perfil cuáles acepta — no todos aceptan todas.</p>
