@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Pencil, MapPin, Star, Clock } from "lucide-react";
+import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -25,11 +25,30 @@ const emptyHours = () =>
     is_closed: d.v === 0 || d.v === 6,
   }));
 
-const emptyOffice = () => ({ zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false });
+const emptyOffice = () => ({ zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false, photos: [] });
 
 function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, saving }) {
   const [office, setOffice] = useState(initial || emptyOffice());
   const [hours, setHours] = useState(initialHours ? initialHours.map((h) => ({ ...h })) : emptyHours());
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setOffice((prev) => ({ ...prev, photos: [...(prev.photos || []), file_url] }));
+    } catch {
+      toast.error("Error al subir la foto");
+    }
+    setUploadingPhoto(false);
+    e.target.value = "";
+  };
+
+  const removePhoto = (idx) => {
+    setOffice((prev) => ({ ...prev, photos: prev.photos.filter((_, i) => i !== idx) }));
+  };
 
   const setH = (idx, field, val) =>
     setHours((prev) => prev.map((h, i) => (i === idx ? { ...h, [field]: val } : h)));
@@ -93,6 +112,28 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
           />
           <Star className="w-4 h-4 text-amber-400" /> Consultorio principal
         </label>
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Fotos del consultorio</p>
+        <div className="flex flex-wrap gap-2">
+          {(office.photos || []).map((url, i) => (
+            <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/50 group">
+              <img src={url} alt={`Foto ${i + 1} del consultorio`} className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removePhoto(i)}
+                className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </div>
+          ))}
+          <label className="w-16 h-16 rounded-lg border border-dashed border-border flex items-center justify-center cursor-pointer hover:bg-accent/30 transition-colors flex-shrink-0">
+            {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /> : <ImageIcon className="w-4 h-4 text-muted-foreground" />}
+            <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" disabled={uploadingPhoto} />
+          </label>
+        </div>
       </div>
 
       <div className="space-y-1.5">
@@ -186,6 +227,7 @@ export default function OfficeManager({ specialistId }) {
           phone: data.phone,
           maps_url: data.maps_url,
           is_primary: data.is_primary,
+          photos: data.photos || [],
         });
         officeId = data.id;
         await base44.entities.OfficeHours.deleteMany({ office_id: officeId });
@@ -197,6 +239,7 @@ export default function OfficeManager({ specialistId }) {
           phone: data.phone,
           maps_url: data.maps_url,
           is_primary: data.is_primary,
+          photos: data.photos || [],
         });
         officeId = created.id;
       }

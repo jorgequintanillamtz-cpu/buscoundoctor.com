@@ -1,0 +1,42 @@
+{
+  "name": "SpecialistCase",
+  "properties": {
+    "after_photo": {
+      "format": "file",
+      "title": "Foto despu\u00e9s",
+      "type": "string"
+    },
+    "before_photo": {
+      "format": "file",
+      "title": "Foto antes",
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 800,
+      "title": "Descripci\u00f3n",
+      "type": "string"
+    },
+    "display_order": {
+      "default": 0,
+      "multipleOf": 1,
+      "title": "Orden de visualizaci\u00f3n",
+      "type": "number"
+    },
+    "specialist_id": {
+      "description": "ID de registro de la entidad Specialist",
+      "title": "Especialista (relaci\u00f3n)",
+      "type": "string"
+    },
+    "title": {
+      "title": "T\u00edtulo del caso",
+      "type": "string"
+    }
+  },
+  "required": [
+    "specialist_id",
+    "title",
+    "before_photo",
+    "after_photo"
+  ],
+  "type": "object"
+}
