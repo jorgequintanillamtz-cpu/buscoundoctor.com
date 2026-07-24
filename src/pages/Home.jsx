@@ -161,7 +161,12 @@ export default function Home() {
       setPosts(blogPosts);
       setZones(zoneList);
       setTotalSpecialists(allActive.length);
-      setInsurers(insurerList);
+      // "Particular/Sin seguro" siempre al final, no es una aseguradora real
+      setInsurers([...insurerList].sort((a, b) => {
+        if (a.name === "Particular/Sin seguro") return 1;
+        if (b.name === "Particular/Sin seguro") return -1;
+        return 0;
+      }));
 
       if (topReviews.length >= 3) {
         const specialistIds = [...new Set(topReviews.map((r) => r.specialist_id).filter(Boolean))];
