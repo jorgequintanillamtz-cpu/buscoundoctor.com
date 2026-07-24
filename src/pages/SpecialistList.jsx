@@ -295,7 +295,7 @@ export default function SpecialistList() {
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {filtered.map((s, i) => (
-                <SpecialistCard key={s.id} specialist={s} priority={i === 0} />
+                <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="directorio" />
               ))}
             </div>
           )}
