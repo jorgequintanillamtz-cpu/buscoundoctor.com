@@ -89,6 +89,13 @@ export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const blogScrollRef = useRef(null);
+  const specialtiesScrollRef = useRef(null);
+
+  const scrollSpecialties = (dir) => {
+    const el = specialtiesScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.9), behavior: "smooth" });
+  };
 
   const submitNewsletter = async (e) => {
     e.preventDefault();
@@ -310,20 +317,47 @@ export default function Home() {
           </div>
         </div>
 
-      {/* Specialties: las más buscadas, sin scroll — se ajustan al ancho disponible */}
+      {/* Specialties: las más buscadas, carrusel deslizable de una sola fila */}
       <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialidades más buscadas</h2>
-            <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
-              <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/especialistas" className="text-sm font-medium text-brand-blue hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
+                <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => scrollSpecialties(-1)}
+                aria-label="Especialidades anteriores"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollSpecialties(1)}
+                aria-label="Especialidades siguientes"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            {sortByPopularity(specialties).slice(0, 12).map((s) =>
-            <SpecialtyCard key={s.id} specialty={s} mobile />
+          <div
+            ref={specialtiesScrollRef}
+            className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {sortByPopularity(specialties).map((s) =>
+            <div key={s.id} className="snap-start">
+              <SpecialtyCard specialty={s} mobile />
+            </div>
             )}
           </div>
+          <Link to="/especialistas" className="text-sm font-medium text-brand-blue sm:hidden flex items-center gap-1 mt-4">
+            <span>Ver todas las especialidades</span> <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
