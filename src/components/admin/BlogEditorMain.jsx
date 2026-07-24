@@ -87,6 +87,9 @@ export default function BlogEditorMain({ form, update }) {
 
   const uploadFeatured = async (file) => {
     if (!file || !file.type.startsWith("image/")) { toast.error("Solo imágenes JPG, PNG o WEBP"); return; }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.warning("La imagen pesa más de 2MB — puede hacer más lenta la carga de la página. Considera comprimirla antes de subirla.");
+    }
     setUploadingFeatured(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -105,13 +108,17 @@ export default function BlogEditorMain({ form, update }) {
   const handleInlineImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.warning("Esta imagen pesa más de 2MB — puede hacer más lenta la carga del artículo. Considera comprimirla.");
+    }
     setUploadingInline(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const suggestedAlt = window.prompt("Describe brevemente esta imagen (alt text para SEO y accesibilidad):", file.name.split(".")[0]) || file.name.split(".")[0];
       const el = contentRef.current;
       const s = el ? el.selectionStart : (form.content || "").length;
       const end = el ? el.selectionEnd : s;
-      const md = `![${file.name.split(".")[0]}](${file_url})\n`;
+      const md = `![${suggestedAlt}](${file_url})\n`;
       const content = form.content || "";
       update("content", content.slice(0, s) + md + content.slice(end));
       toast.success("Imagen insertada");
