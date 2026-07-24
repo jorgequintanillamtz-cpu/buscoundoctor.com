@@ -11,6 +11,8 @@ import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
 import LanguagesChips from "../components/LanguagesChips";
 import SimilarSpecialists from "../components/SimilarSpecialists";
+import SpecialistCases from "../components/SpecialistCases";
+import SpecialistPosts from "../components/SpecialistPosts";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 import { trackDoctorContact } from "@/utils/trackDoctorStats";
 
@@ -461,6 +463,9 @@ export default function SpecialistProfile() {
       <div id="consultorios" className="scroll-mt-32">
         <PublicOfficeList specialistId={specialist.id} />
       </div>
+
+      <SpecialistCases specialistId={specialist.id} />
+      <SpecialistPosts specialistId={specialist.id} />
 
       {/* Tipos de consulta */}
       {specialist.modality &&
