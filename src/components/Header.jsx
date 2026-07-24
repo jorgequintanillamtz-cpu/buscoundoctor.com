@@ -41,7 +41,7 @@ export default function Header() {
       <div className="bg-brand-blueLight w-full px-4 sm:px-6">
         <div className="flex items-center justify-between h-20 gap-4">
           <Link to="/" className="flex items-center flex-shrink-0">
-            <span className="font-heading font-extrabold text-lg sm:text-xl whitespace-nowrap">
+            <span className="font-heading font-extrabold text-[23px] sm:text-[26px] whitespace-nowrap">
               <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
             </span>
           </Link>
