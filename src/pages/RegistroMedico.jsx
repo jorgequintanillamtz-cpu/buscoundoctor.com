@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Phone, Stethoscope, FileText, Monitor, Languages, MapPin } from "lucide-react";
+
+const PENDING_KEY = "buscoundoctor_pending_registro";
 
 function GoogleIcon(props) {
   return (
@@ -16,83 +18,168 @@ function GoogleIcon(props) {
   );
 }
 
-const stripTitle = (name) => (name || "").replace(/^(Dr\.|Dra\.)\s*/i, "").trim();
+const STEP_KEYS = ["nombre", "whatsapp", "especialidad", "cedula", "modalidad", "idiomas", "ubicacion", "cuenta"];
+
+const EMPTY_DATA = {
+  title: "",
+  full_name: "",
+  whatsapp: "",
+  specialty: "",
+  subspecialty: "",
+  cedula: "",
+  modality: "presencial",
+  languages: [], // array de Language IDs
+  zone: "",
+};
 
 export default function RegistroMedico() {
   const navigate = useNavigate();
-  // checking | choose | title | form | otp | done
-  const [step, setStep] = useState("checking");
-  const [form, setForm] = useState({ full_name: "", email: "", password: "", title: "" });
-  const [pendingGoogleName, setPendingGoogleName] = useState("");
+  const [phase, setPhase] = useState("loading"); // loading | wizard | email-form | otp | done
+  const [stepIndex, setStepIndex] = useState(0);
+  const [data, setData] = useState(EMPTY_DATA);
+  const [emailForm, setEmailForm] = useState({ email: "", password: "" });
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const createProfile = async (full_name) => {
-    await base44.functions.invoke("createDoctorProfile", { full_name });
+  const [specialties, setSpecialties] = useState([]);
+  const [zones, setZones] = useState([]);
+  const [languageOptions, setLanguageOptions] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.Specialty.filter({ active: true }).catch(() => []),
+      base44.entities.Zone.filter({ active: true }).catch(() => []),
+      base44.entities.Language.list().catch(() => []),
+    ]).then(([specs, zoneList, langs]) => {
+      setSpecialties([...specs].sort((a, b) => a.name.localeCompare(b.name, "es")));
+      setZones([...zoneList].sort((a, b) => a.name.localeCompare(b.name, "es")));
+      setLanguageOptions([...langs].sort((a, b) => a.name.localeCompare(b.name, "es")));
+    });
+  }, []);
+
+  const update = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
+
+  const buildFullNameWithTitle = () => `${data.title} ${data.full_name.trim()}`.trim();
+
+  // Crea el perfil (Specialist) con toda la información recabada en el wizard,
+  // vincula los idiomas seleccionados, y marca el rol del usuario como "doctor".
+  const createProfileFromData = async (finalData) => {
+    const res = await base44.functions.invoke("createDoctorProfile", {
+      full_name: `${finalData.title} ${finalData.full_name.trim()}`.trim(),
+      specialty: finalData.specialty,
+      subspecialty: finalData.subspecialty,
+      whatsapp: finalData.whatsapp,
+      professional_license_number: finalData.cedula,
+      modality: finalData.modality,
+      zone: finalData.zone,
+    });
+    const specialist = res?.data?.specialist || res?.specialist;
+    if (specialist?.id && finalData.languages?.length > 0) {
+      await Promise.all(
+        finalData.languages.map((languageId) =>
+          base44.entities.SpecialistLanguage.create({
+            specialist_id: specialist.id,
+            language_id: languageId,
+            level: "avanzado",
+          }).catch(() => {})
+        )
+      );
+    }
     try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
   };
 
-  // Al cargar: si el usuario ya está autenticado (ej. acaba de volver de Google),
-  // pide el título (Dr./Dra.) antes de crear el perfil, o lo manda a su editor si ya tiene uno.
+  // Al cargar: si ya viene autenticado (regres\u00f3 de Google), usa los datos guardados
+  // en localStorage para crear el perfil de inmediato, sin volver a pedir nada.
   useEffect(() => {
     let active = true;
     (async () => {
       const isAuth = await base44.auth.isAuthenticated().catch(() => false);
       if (!active) return;
       if (!isAuth) {
-        setStep("choose");
+        setPhase("wizard");
         return;
       }
       const u = await base44.auth.me().catch(() => null);
-      if (!active || !u) { setStep("choose"); return; }
+      if (!active || !u) { setPhase("wizard"); return; }
+
       const own = await base44.entities.Specialist.filter({ owner_user_id: u.id }).catch(() => []);
       if (!active) return;
       if (own.length > 0) {
         navigate("/panel-medico", { replace: true });
         return;
       }
-      setPendingGoogleName(stripTitle(u.full_name) || "Médico sin nombre");
-      setStep("title");
+
+      const pendingRaw = localStorage.getItem(PENDING_KEY);
+      if (pendingRaw) {
+        try {
+          const pending = JSON.parse(pendingRaw);
+          await createProfileFromData(pending);
+          localStorage.removeItem(PENDING_KEY);
+          if (active) setPhase("done");
+        } catch (err) {
+          localStorage.removeItem(PENDING_KEY);
+          if (active) { setError(err.message || "No se pudo crear tu perfil."); setPhase("wizard"); }
+        }
+        return;
+      }
+
+      // Autenticado pero sin datos guardados (caso raro, ej. enlace directo):
+      // arranca el wizard con lo que Google ya sabe.
+      setData((prev) => ({ ...prev, full_name: u.full_name || prev.full_name }));
+      setPhase("wizard");
     })();
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
+  const stepKey = STEP_KEYS[stepIndex];
+
+  const validateStep = () => {
+    if (stepKey === "nombre") {
+      if (!data.title) return "Selecciona Dr. o Dra.";
+      if (!data.full_name.trim()) return "Escribe tu nombre completo";
+    }
+    if (stepKey === "whatsapp" && data.whatsapp.replace(/\D/g, "").length < 10) {
+      return "Ingresa un número de WhatsApp válido (10 dígitos)";
+    }
+    if (stepKey === "especialidad" && !data.specialty) {
+      return "Selecciona tu especialidad";
+    }
+    if (stepKey === "cedula" && !data.cedula.trim()) {
+      return "Ingresa tu número de cédula profesional";
+    }
+    if (stepKey === "ubicacion" && !data.zone) {
+      return "Selecciona tu zona";
+    }
+    return "";
+  };
+
+  const goNext = () => {
+    const err = validateStep();
+    if (err) { setError(err); return; }
+    setError("");
+    setStepIndex((i) => Math.min(i + 1, STEP_KEYS.length - 1));
+  };
+  const goBack = () => {
+    setError("");
+    setStepIndex((i) => Math.max(i - 1, 0));
+  };
+
   const continueWithGoogle = () => {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(data));
     base44.auth.loginWithProvider("google", window.location.href);
   };
 
-  const selectGoogleTitle = async (title) => {
-    setLoading(true);
-    setError("");
-    try {
-      await createProfile(`${title} ${pendingGoogleName}`);
-      setStep("done");
-    } catch (err) {
-      setError(err.message || "No se pudo crear tu perfil.");
-    }
-    setLoading(false);
-  };
-
-  const submitForm = async (e) => {
+  const submitEmailForm = async (e) => {
     e.preventDefault();
     setError("");
-    if (!form.title) {
-      setError("Selecciona Dr. o Dra.");
-      return;
-    }
-    if (!form.full_name || !form.email || !form.password) {
-      setError("Completa todos los campos");
-      return;
-    }
-    if (form.password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
-      return;
-    }
+    if (!emailForm.email || !emailForm.password) { setError("Completa correo y contraseña"); return; }
+    if (emailForm.password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return; }
     setLoading(true);
     try {
-      await base44.auth.register({ email: form.email, password: form.password });
-      setStep("otp");
+      await base44.auth.register({ email: emailForm.email, password: emailForm.password });
+      setPhase("otp");
     } catch (err) {
       setError(err.message || "No se pudo registrar la cuenta. ¿El correo ya está registrado?");
     }
@@ -102,21 +189,41 @@ export default function RegistroMedico() {
   const submitOtp = async (e) => {
     e.preventDefault();
     setError("");
-    if (!otp) {
-      setError("Ingresa el código de verificación");
-      return;
-    }
+    if (!otp) { setError("Ingresa el código de verificación"); return; }
     setLoading(true);
     try {
-      await base44.auth.verifyOtp({ email: form.email, otpCode: otp });
-      await base44.auth.loginViaEmailPassword(form.email, form.password);
-      await createProfile(`${form.title} ${stripTitle(form.full_name)}`);
-      setStep("done");
+      await base44.auth.verifyOtp({ email: emailForm.email, otpCode: otp });
+      await base44.auth.loginViaEmailPassword(emailForm.email, emailForm.password);
+      await createProfileFromData(data);
+      setPhase("done");
     } catch (err) {
       setError(err.message || "No se pudo verificar el código");
     }
     setLoading(false);
   };
+
+  const toggleLanguage = (id) => {
+    setData((prev) => ({
+      ...prev,
+      languages: prev.languages.includes(id) ? prev.languages.filter((l) => l !== id) : [...prev.languages, id],
+    }));
+  };
+
+  const progressPct = Math.round(((stepIndex + 1) / STEP_KEYS.length) * 100);
+
+  const StepShell = ({ icon: Icon, title, subtitle, children }) => (
+    <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+          <Icon className="w-6 h-6 text-primary" />
+        </div>
+        <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
+        {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+      </div>
+      {children}
+      {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+    </div>
+  );
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
@@ -125,161 +232,165 @@ export default function RegistroMedico() {
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
         </Link>
 
-        {step === "checking" && (
+        {phase === "loading" && (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
           </div>
         )}
 
-        {step === "choose" && (
-          <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-            <div className="text-center mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="font-heading font-bold text-xl text-foreground">Registro médico</h1>
-              <p className="text-sm text-muted-foreground">Crea tu cuenta en segundos. Completarás tu perfil (incluida tu cédula) después.</p>
-            </div>
-
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-
-            <Button
-              type="button"
-              onClick={continueWithGoogle}
-              variant="outline"
-              className="w-full min-h-[44px] rounded-xl gap-2 border-border"
-            >
-              <GoogleIcon />
-              Continuar con Google
-            </Button>
-
-            <div className="flex items-center gap-3 py-1">
-              <div className="h-px bg-border flex-1" />
-              <span className="text-xs text-muted-foreground">o con tu correo</span>
-              <div className="h-px bg-border flex-1" />
-            </div>
-
-            <Button
-              type="button"
-              onClick={() => setStep("form")}
-              className="w-full min-h-[44px] rounded-xl"
-            >
-              Registrarme con correo electrónico
-            </Button>
-          </div>
-        )}
-
-        {step === "title" && (
-          <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-            <div className="text-center mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="font-heading font-bold text-xl text-foreground">Un último detalle</h1>
-              <p className="text-sm text-muted-foreground">
-                ¿Cómo quieres que aparezca tu nombre, {pendingGoogleName}?
-              </p>
-            </div>
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={() => selectGoogleTitle("Dr.")}
-                className="min-h-[52px] rounded-xl text-base font-semibold"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : `Dr. ${pendingGoogleName}`}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={loading}
-                onClick={() => selectGoogleTitle("Dra.")}
-                className="min-h-[52px] rounded-xl text-base font-semibold"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : `Dra. ${pendingGoogleName}`}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === "form" && (
-          <form onSubmit={submitForm} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-            <div className="text-center mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-                <ShieldCheck className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="font-heading font-bold text-xl text-foreground">Registro médico</h1>
-              <p className="text-sm text-muted-foreground">Crea tu cuenta de especialista</p>
-            </div>
-
+        {phase === "wizard" && (
+          <div className="space-y-4">
+            {/* Barra de progreso */}
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Título</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, title: "Dr." })}
-                  className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${form.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}
-                >
-                  Dr.
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, title: "Dra." })}
-                  className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${form.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}
-                >
-                  Dra.
-                </button>
+              <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                <span>Paso {stepIndex + 1} de {STEP_KEYS.length}</span>
+                <span>{progressPct}%</span>
+              </div>
+              <div className="w-full bg-muted rounded-full h-1.5">
+                <div className="h-1.5 bg-brand-blue rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
               </div>
             </div>
 
-            <div className="relative">
-              <User className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={form.full_name}
-                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                placeholder="Nombre completo (sin 'Dr.'/'Dra.')"
-                className="rounded-xl pl-9"
-              />
+            {stepKey === "nombre" && (
+              <StepShell icon={User} title="¿Cómo te llamas?" subtitle="Así aparecerás en tu perfil público">
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => update("title", "Dr.")}
+                    className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                    Dr.
+                  </button>
+                  <button type="button" onClick={() => update("title", "Dra.")}
+                    className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                    Dra.
+                  </button>
+                </div>
+                <Input value={data.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Nombre completo" className="rounded-xl" />
+              </StepShell>
+            )}
+
+            {stepKey === "whatsapp" && (
+              <StepShell icon={Phone} title="Tu número de WhatsApp" subtitle="Aquí te contactarán tus pacientes directamente">
+                <Input value={data.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Ej: 8181234567" type="tel" className="rounded-xl" />
+              </StepShell>
+            )}
+
+            {stepKey === "especialidad" && (
+              <StepShell icon={Stethoscope} title="Tu especialidad" subtitle="Y tu subespecialidad, si tienes una">
+                <select value={data.specialty} onChange={(e) => update("specialty", e.target.value)}
+                  className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
+                  <option value="">Selecciona tu especialidad</option>
+                  {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                </select>
+                <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
+              </StepShell>
+            )}
+
+            {stepKey === "cedula" && (
+              <StepShell icon={FileText} title="Tu cédula profesional" subtitle="Con esto verificamos tu perfil">
+                <Input value={data.cedula} onChange={(e) => update("cedula", e.target.value)} placeholder="Número de cédula profesional" className="rounded-xl" />
+              </StepShell>
+            )}
+
+            {stepKey === "modalidad" && (
+              <StepShell icon={Monitor} title="¿Cómo atiendes?" subtitle="Puedes cambiar esto después">
+                <div className="grid grid-cols-1 gap-2">
+                  {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
+                    <button key={val} type="button" onClick={() => update("modality", val)}
+                      className={`h-11 rounded-xl border text-sm font-semibold transition-colors ${data.modality === val ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </StepShell>
+            )}
+
+            {stepKey === "idiomas" && (
+              <StepShell icon={Languages} title="Idiomas en los que atiendes" subtitle="Selecciona todos los que apliquen (opcional)">
+                <div className="grid grid-cols-2 gap-1.5 max-h-64 overflow-y-auto pr-1">
+                  {languageOptions.map((lang) => (
+                    <label key={lang.id} className="flex items-center gap-2 cursor-pointer border border-border/50 rounded-xl px-2.5 py-2 hover:bg-accent/30 transition-colors">
+                      <input type="checkbox" checked={data.languages.includes(lang.id)} onChange={() => toggleLanguage(lang.id)} className="w-3.5 h-3.5 accent-primary flex-shrink-0" />
+                      <span className="text-xs text-foreground truncate">{lang.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </StepShell>
+            )}
+
+            {stepKey === "ubicacion" && (
+              <StepShell icon={MapPin} title="¿Dónde atiendes?" subtitle="Podrás agregar el consultorio completo después">
+                <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
+                  className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
+                  <option value="">Selecciona tu zona</option>
+                  {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
+                </select>
+              </StepShell>
+            )}
+
+            {stepKey === "cuenta" && (
+              <StepShell icon={ShieldCheck} title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil">
+                <Button type="button" onClick={continueWithGoogle} variant="outline" className="w-full min-h-[44px] rounded-xl gap-2 border-border">
+                  <GoogleIcon />
+                  Continuar con Google
+                </Button>
+                <div className="flex items-center gap-3 py-1">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-xs text-muted-foreground">o con tu correo</span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+                <Button type="button" onClick={() => setPhase("email-form")} className="w-full min-h-[44px] rounded-xl">
+                  Registrarme con correo electrónico
+                </Button>
+              </StepShell>
+            )}
+
+            {/* Navegación entre pasos */}
+            {stepKey !== "cuenta" && (
+              <div className="flex items-center justify-between gap-3">
+                <Button type="button" variant="ghost" onClick={goBack} disabled={stepIndex === 0} className="rounded-xl gap-1.5">
+                  <ArrowLeft className="w-4 h-4" /> Atrás
+                </Button>
+                <Button type="button" onClick={goNext} className="rounded-xl gap-1.5">
+                  Siguiente <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+            {stepKey === "cuenta" && stepIndex > 0 && (
+              <button type="button" onClick={goBack} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
+                ← Volver a editar mis datos
+              </button>
+            )}
+          </div>
+        )}
+
+        {phase === "email-form" && (
+          <form onSubmit={submitEmailForm} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
+            <div className="text-center mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
+                <Mail className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="font-heading font-bold text-xl text-foreground">Crea tu contraseña</h1>
+              <p className="text-sm text-muted-foreground">Ya casi termina, {data.title} {data.full_name}</p>
             </div>
             <div className="relative">
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="Correo electrónico"
-                className="rounded-xl pl-9"
-              />
+              <Input type="email" value={emailForm.email} onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })} placeholder="Correo electrónico" className="rounded-xl pl-9" />
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="Contraseña (mín. 8 caracteres)"
-                className="rounded-xl pl-9"
-              />
+              <Input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })} placeholder="Contraseña (mín. 8 caracteres)" className="rounded-xl pl-9" />
             </div>
-
             {error && <p className="text-sm text-red-500">{error}</p>}
-
             <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Crear cuenta
             </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Te enviaremos un código de verificación a tu correo. Tu cédula profesional se agrega después, desde tu perfil.
-            </p>
-            <button type="button" onClick={() => setStep("choose")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
+            <button type="button" onClick={() => setPhase("wizard")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
               ← Volver
             </button>
           </form>
         )}
 
-        {step === "otp" && (
+        {phase === "otp" && (
           <form onSubmit={submitOtp} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
             <div className="text-center mb-2">
               <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
@@ -287,38 +398,29 @@ export default function RegistroMedico() {
               </div>
               <h1 className="font-heading font-bold text-xl text-foreground">Verifica tu correo</h1>
               <p className="text-sm text-muted-foreground">
-                Ingresa el código de 6 dígitos que enviamos a <span className="font-medium text-foreground">{form.email}</span>
+                Ingresa el código de 6 dígitos que enviamos a <span className="font-medium text-foreground">{emailForm.email}</span>
               </p>
             </div>
-            <Input
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Código de verificación"
-              className="rounded-xl text-center tracking-widest text-lg"
-              maxLength={6}
-            />
+            <Input value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Código de verificación" className="rounded-xl text-center tracking-widest text-lg" maxLength={6} />
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Verificar y crear perfil
             </Button>
-            <button type="button" onClick={() => setStep("form")} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
-              ← Volver
-            </button>
           </form>
         )}
 
-        {step === "done" && (
+        {phase === "done" && (
           <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-sm">
             <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
             <h1 className="font-heading font-bold text-xl text-foreground">¡Cuenta creada!</h1>
             <p className="text-sm text-muted-foreground">
-              Ahora completa tu perfil — incluida tu cédula profesional — para que podamos verificarte y publicar tu perfil.
+              Tu perfil ya tiene tu información básica. Termina de completarlo (fotos, consultorios, documentos) para que podamos verificarte y publicarlo.
             </p>
             <Button onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl">
-              Completar mi perfil
+              Ir a mi panel
             </Button>
           </div>
         )}
