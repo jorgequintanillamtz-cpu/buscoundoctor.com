@@ -26,3 +26,25 @@ export const trackDoctorImpression = async (specialist) => {
     // fallo silencioso — el tracking nunca debe romper la UI
   }
 };
+
+// Contador agregado por día: clicks en el CTA "Agendar cita". A diferencia de
+// trackDoctorImpression, este SI cuenta cada click (no se deduplica por sesión),
+// porque cada intento real de agendar es una señal de negocio valiosa.
+export const trackDoctorContact = async (specialist) => {
+  const today = new Date().toISOString().split("T")[0];
+  try {
+    const existing = await base44.entities.DoctorContact.filter({ doctor_id: specialist.id, date: today });
+    if (existing.length > 0) {
+      await base44.entities.DoctorContact.update(existing[0].id, { count: (existing[0].count || 0) + 1 });
+    } else {
+      await base44.entities.DoctorContact.create({
+        doctor_id: specialist.id,
+        doctor_name: specialist.full_name,
+        date: today,
+        count: 1,
+      });
+    }
+  } catch (e) {
+    // fallo silencioso
+  }
+};

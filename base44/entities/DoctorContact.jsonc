@@ -1,0 +1,27 @@
+{
+  "name": "DoctorContact",
+  "properties": {
+    "count": {
+      "title": "Clicks ese d\u00eda",
+      "type": "number"
+    },
+    "date": {
+      "title": "Fecha (YYYY-MM-DD)",
+      "type": "string"
+    },
+    "doctor_id": {
+      "title": "ID del m\u00e9dico",
+      "type": "string"
+    },
+    "doctor_name": {
+      "title": "Nombre del m\u00e9dico",
+      "type": "string"
+    }
+  },
+  "required": [
+    "doctor_id",
+    "date",
+    "count"
+  ],
+  "type": "object"
+}
