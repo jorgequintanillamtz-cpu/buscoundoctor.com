@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Brain, Smile, Heart, Baby, Stethoscope, Sparkles } from "lucide-react";
+import { Brain, Smile, Heart, Baby, Stethoscope, Sparkles, Bone, Eye, Ear, Droplet, Activity, Scissors, Pill, Wind, Dumbbell, Syringe, Microscope, Users, Utensils } from "lucide-react";
 
 const iconMap = {
-  Brain, Smile, Heart, Baby, Stethoscope, Sparkles,
+  Brain, Smile, Heart, Baby, Stethoscope, Sparkles, Bone, Eye, Ear, Droplet, Activity, Scissors, Pill, Wind, Dumbbell, Syringe, Microscope, Users, Utensils,
 };
 
 export default function SpecialtyCard({ specialty, mobile = false }) {
