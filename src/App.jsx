@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -24,8 +24,9 @@ import BlogEditor from './pages/admin/BlogEditor.jsx';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminDoctores from './pages/admin/AdminDoctores';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
-import MiPerfil from './pages/admin/MiPerfil';
 import RequireAdmin from './components/RequireAdmin';
+import DoctorPanelLayout from './components/DoctorPanelLayout';
+import DoctorPanel from './pages/DoctorPanel';
 import AdminFaqs from './pages/admin/AdminFaqs';
 import AdminFaqEditor from './pages/admin/AdminFaqEditor';
 import About from './pages/About';
@@ -71,10 +72,16 @@ const AuthenticatedApp = () => {
         <Route path="/contacto" element={<Contact />} />
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
+        {/* Redirección de la URL vieja, por si alguien la tiene guardada */}
+        <Route path="/admin/mi-perfil" element={<Navigate to="/panel-medico" replace />} />
       </Route>
+
+      {/* Panel del médico: área completamente separada del panel de administración */}
+      <Route element={<DoctorPanelLayout />}>
+        <Route path="/panel-medico" element={<DoctorPanel />} />
+      </Route>
+
       <Route element={<AdminLayout />}>
-        <Route path="/admin/mi-perfil" element={<MiPerfil />} />
-        <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/estadisticas" element={<AdminDoctorStats />} />
@@ -87,6 +94,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/resenas" element={<AdminReviews />} />
           <Route path="/admin/doctores" element={<AdminDoctores />} />
           <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
+          <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
           <Route path="/admin/faqs" element={<AdminFaqs />} />
           <Route path="/admin/faqs/editar/:id" element={<AdminFaqEditor />} />
         </Route>
