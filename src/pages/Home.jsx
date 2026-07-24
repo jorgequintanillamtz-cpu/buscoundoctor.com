@@ -49,6 +49,25 @@ const TRUST_STRIP = [
   { icon: Search, label: "Busca por lo que más te importa: especialidad y zona", key: "busca" },
 ];
 
+// Orden por demanda típica en un directorio médico (no por fecha de creación en la base de datos)
+const POPULAR_SPECIALTY_ORDER = [
+  "Dentista", "Ginecología", "Pediatría", "Dermatología", "Psicología",
+  "Nutrición", "Ortopedia y Traumatología", "Oftalmología", "Cardiología",
+  "Otorrinolaringología", "Medicina General", "Urología", "Psiquiatría",
+  "Gastroenterología", "Endocrinología",
+];
+
+function sortByPopularity(list) {
+  return [...list].sort((a, b) => {
+    const ia = POPULAR_SPECIALTY_ORDER.indexOf(a.name);
+    const ib = POPULAR_SPECIALTY_ORDER.indexOf(b.name);
+    if (ia === -1 && ib === -1) return 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+}
+
 const triggerClass =
   "border-0 shadow-none h-auto p-0 gap-1 focus:ring-0 focus:ring-offset-0 text-sm font-medium text-foreground bg-transparent [&>span]:line-clamp-1";
 const contentClass = "rounded-2xl border-none shadow-xl p-2 bg-white";
@@ -279,7 +298,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-4 text-xs sm:text-sm">
-              {specialties.slice(0, 5).map((s, i) => (
+              {sortByPopularity(specialties).slice(0, 5).map((s, i) => (
                 <span key={s.id} className="flex items-center gap-2">
                   {i > 0 && <span className="text-border">|</span>}
                   <Link to={`/especialidad/${s.slug}`} className="text-brand-blue font-medium hover:underline">{s.name}</Link>
@@ -291,17 +310,17 @@ export default function Home() {
           </div>
         </div>
 
-      {/* Specialties: estilo "Shop by Category" */}
+      {/* Specialties: las más buscadas, sin scroll — se ajustan al ancho disponible */}
       <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialidades</h2>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialidades más buscadas</h2>
             <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
               <span>Ver todas</span> <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-            {specialties.slice(0, 7).map((s) =>
+          <div className="flex flex-wrap justify-center gap-4">
+            {sortByPopularity(specialties).slice(0, 12).map((s) =>
             <SpecialtyCard key={s.id} specialty={s} mobile />
             )}
           </div>
