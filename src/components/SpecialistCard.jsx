@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "./AppointmentForm";
+import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 
 const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -17,6 +18,21 @@ function getNext8Days() {
 export default function SpecialistCard({ specialist, priority = false }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (!specialist?.id) return;
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        trackDoctorImpression(specialist);
+        observer.disconnect();
+      }
+    }, { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [specialist?.id]);
 
   const handleDateClick = (e, date) => {
     e.preventDefault();
@@ -25,7 +41,7 @@ export default function SpecialistCard({ specialist, priority = false }) {
   };
   return (
     <>
-      <div className="group flex bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden">
+      <div ref={cardRef} className="group flex bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden">
         {/* Left: main card info (clickable) */}
         <Link to={`/especialista/${specialist.slug}`} className="flex-1 block p-5 sm:p-6">
           <div className="flex gap-4">
