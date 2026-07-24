@@ -7,10 +7,17 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const full_name = body.full_name;
+    let full_name = body.full_name;
     const cedula = body.professional_license_number || null;
     if (!full_name) {
       return Response.json({ error: 'Falta el nombre completo (full_name)' }, { status: 400 });
+    }
+
+    // Siempre se registra con el prefijo "Dr." salvo que la persona ya haya
+    // puesto su propio prefijo (Dr., Dra., Doctor, Doctora), para no duplicarlo.
+    const yaTienePrefijo = /^(dr\.?|dra\.?|doctor|doctora)\s+/i.test(full_name.trim());
+    if (!yaTienePrefijo) {
+      full_name = `Dr. ${full_name.trim()}`;
     }
 
     // Si el usuario ya tiene un perfil, devolverlo (evita duplicados)
