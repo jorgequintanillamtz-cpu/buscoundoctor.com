@@ -1,0 +1,37 @@
+{
+  "name": "DoctorClick",
+  "properties": {
+    "description": {
+      "title": "Descripci\u00f3n",
+      "type": "string"
+    },
+    "doctor_id": {
+      "title": "ID del m\u00e9dico",
+      "type": "string"
+    },
+    "doctor_name": {
+      "title": "Nombre del m\u00e9dico",
+      "type": "string"
+    },
+    "source_page": {
+      "enum": [
+        "home",
+        "directorio",
+        "especialidad",
+        "especialidad_zona",
+        "similares"
+      ],
+      "title": "P\u00e1gina de origen",
+      "type": "string"
+    },
+    "specialty": {
+      "title": "Especialidad",
+      "type": "string"
+    }
+  },
+  "required": [
+    "doctor_id",
+    "doctor_name"
+  ],
+  "type": "object"
+}
