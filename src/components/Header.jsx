@@ -11,6 +11,15 @@ const contentClass =
 const itemClass =
   "rounded-xl px-3 py-2 text-sm cursor-pointer focus:bg-brand-bluePale focus:text-brand-navy data-[state=checked]:bg-brand-bluePale data-[state=checked]:text-brand-navy";
 
+const slugify = (s) => (s || "")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9\s-]/g, "")
+  .trim()
+  .replace(/\s+/g, "-")
+  .replace(/-+/g, "-");
+
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [zones, setZones] = useState([]);
@@ -30,8 +39,20 @@ export default function Header() {
 
   const submitSearch = (e) => {
     e?.preventDefault?.();
+    // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
+    // filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
+    const specialtyObj = specialties.find((s) => s.name === searchSpecialty);
+    if (specialtyObj) {
+      if (searchZone) {
+        navigate(`/especialidad/${specialtyObj.slug}/${slugify(searchZone)}`);
+      } else {
+        navigate(`/especialidad/${specialtyObj.slug}`);
+      }
+      return;
+    }
+    // Sin especialidad seleccionada: no hay página dedicada solo-por-zona todavía,
+    // así que caemos al listado general filtrado.
     const params = new URLSearchParams();
-    if (searchSpecialty) params.set("specialty", searchSpecialty);
     if (searchZone) params.set("zone", searchZone);
     navigate(`/especialistas?${params.toString()}`);
   };
