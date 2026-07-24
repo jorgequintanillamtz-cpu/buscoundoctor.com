@@ -68,7 +68,15 @@ export default function RegistroMedico() {
     ]).then(([specs, zoneList, langs]) => {
       setSpecialties([...specs].sort((a, b) => a.name.localeCompare(b.name, "es")));
       setZones([...zoneList].sort((a, b) => a.name.localeCompare(b.name, "es")));
-      setLanguageOptions([...langs].sort((a, b) => a.name.localeCompare(b.name, "es")));
+      // Español e Inglés siempre primero, el resto en orden alfabético
+      const priority = ["Español", "Inglés"];
+      const sortedLangs = [...langs].sort((a, b) => {
+        const ia = priority.indexOf(a.name);
+        const ib = priority.indexOf(b.name);
+        if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        return a.name.localeCompare(b.name, "es");
+      });
+      setLanguageOptions(sortedLangs);
     });
   }, []);
 
@@ -157,11 +165,11 @@ export default function RegistroMedico() {
     if (stepKey === "whatsapp" && data.whatsapp.replace(/\D/g, "").length < 10) {
       return "Ingresa un número de WhatsApp válido (10 dígitos)";
     }
-    if (stepKey === "especialidad" && !data.specialty) {
-      return "Selecciona tu especialidad";
+    if (stepKey === "especialidad" && !data.specialty.trim()) {
+      return "Selecciona o escribe tu especialidad";
     }
-    if (stepKey === "cedula" && !data.cedula.trim()) {
-      return "Ingresa tu número de cédula profesional";
+    if (stepKey === "cedula") {
+      // Ya no es obligatoria en este paso — se puede completar después desde el panel.
     }
     if (stepKey === "ubicacion" && !data.zone) {
       return "Selecciona tu zona";
@@ -275,18 +283,23 @@ export default function RegistroMedico() {
 
             {stepKey === "especialidad" && (
               <StepShell icon={Stethoscope} title="Tu especialidad" subtitle="Y tu subespecialidad, si tienes una" error={error}>
-                <select value={data.specialty} onChange={(e) => update("specialty", e.target.value)}
+                <select value={specialties.some((s) => s.name === data.specialty) ? data.specialty : (data.specialty ? "__otra__" : "")}
+                  onChange={(e) => update("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
                   className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
                   <option value="">Selecciona tu especialidad</option>
                   {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  <option value="__otra__">Otra (no está en la lista)</option>
                 </select>
+                {(data.specialty === " " || (!specialties.some((s) => s.name === data.specialty) && data.specialty)) && (
+                  <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl" />
+                )}
                 <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
               </StepShell>
             )}
 
             {stepKey === "cedula" && (
-              <StepShell icon={FileText} title="Tu cédula profesional" subtitle="Con esto verificamos tu perfil" error={error}>
-                <Input value={data.cedula} onChange={(e) => update("cedula", e.target.value)} placeholder="Número de cédula profesional" className="rounded-xl" />
+              <StepShell icon={FileText} title="Tu cédula profesional" subtitle="Con esto verificamos tu perfil (puedes completarla después si no la tienes a la mano)" error={error}>
+                <Input value={data.cedula} onChange={(e) => update("cedula", e.target.value)} placeholder="Número de cédula profesional (opcional por ahora)" className="rounded-xl" />
               </StepShell>
             )}
 
