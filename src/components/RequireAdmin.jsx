@@ -41,7 +41,7 @@ export default function RequireAdmin() {
   }
 
   if (status === "denied") {
-    return <Navigate to="/admin/mi-perfil" replace />;
+    return <Navigate to="/panel-medico" replace />;
   }
 
   return <Outlet />;
