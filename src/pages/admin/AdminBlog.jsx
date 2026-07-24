@@ -55,7 +55,10 @@ export default function AdminBlog() {
           <div key={post.id} className="bg-card rounded-2xl border border-border/50 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="font-heading font-semibold text-foreground line-clamp-1">{post.title}</h3>
-              <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
+                {post.submitted_by_specialist_id && (
+                  <span className="bg-brand-bluePale text-brand-navy px-2 py-0.5 rounded-full font-medium">Enviado por médico</span>
+                )}
                 {post.category && <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded-full">{post.category}</span>}
                 <span>{moment(post.created_date).format("DD MMM YYYY")}</span>
                 {post.scheduled_at && !post.published ? (
