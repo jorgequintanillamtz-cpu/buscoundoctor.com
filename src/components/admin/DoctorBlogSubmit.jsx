@@ -108,14 +108,16 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
     const imageOk = !!imageUrl;
     const keywordOk = keyword.trim().length > 0;
     const keywordInTitle = keywordOk && title.toLowerCase().includes(keyword.trim().toLowerCase());
+    const excerptOk = excerpt.trim().length >= 50 && excerpt.trim().length <= 160;
     return [
       { ok: titleOk, label: "El título tiene al menos 10 caracteres" },
       { ok: keywordOk, label: "Escribiste sobre qué tema es el artículo" },
       { ok: keywordInTitle, label: "El tema aparece también en el título" },
+      { ok: excerptOk, label: "El resumen tiene un buen largo (50 a 160 caracteres)" },
       { ok: contentOk, label: `El artículo tiene al menos 300 palabras (llevas ${wordCount})` },
       { ok: imageOk, label: "Tiene una imagen destacada" },
     ];
-  }, [title, content, imageUrl, keyword, wordCount]);
+  }, [title, content, imageUrl, keyword, excerpt, wordCount]);
 
   const submit = async () => {
     if (!title.trim()) { toast.error("Escribe un título"); return; }
