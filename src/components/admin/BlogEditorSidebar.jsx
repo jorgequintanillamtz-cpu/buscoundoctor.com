@@ -8,7 +8,7 @@ import { base44 } from "@/api/base44Client";
 const SCHEMA_OPTIONS = ["Article", "MedicalWebPage", "FAQPage", "Physician", "MedicalClinic"];
 
 // ---- SEO Score ----
-function calcSEO(form) {
+function calcSEO(form, specialtyOptions = []) {
   const kw = (form.primary_keyword || "").toLowerCase().trim();
   const content = (form.content || "").toLowerCase();
   const title = (form.title || "").toLowerCase();
@@ -19,9 +19,9 @@ function calcSEO(form) {
 
   const kwInTitle = kw && title.includes(kw);
   const kwInUrl = kw && slug.includes(kw.replace(/\s+/g, "-"));
-  const kwInFirstParagraph = kw && (() => {
-    const firstPara = content.split("\n\n")[0] || "";
-    return firstPara.includes(kw);
+  const kwInFirst100Words = kw && (() => {
+    const first100 = content.trim().split(/\s+/).filter(Boolean).slice(0, 100).join(" ");
+    return first100.includes(kw);
   })();
   const kwInH2 = kw && (() => {
     const h2s = content.match(/^## .+$/gm) || [];
@@ -42,13 +42,21 @@ function calcSEO(form) {
   const hasExternalLink = content.match(/\[.+\]\(https?:\/\/[^)]+\)/);
   const hasExcerpt = (form.excerpt || "").length > 20;
 
+  // Enlaces internos a /especialidad/:slug deben apuntar a especialidades reales
+  const specialtyLinkMatches = [...(form.content || "").matchAll(/\/especialidad\/([a-z0-9-]+)/g)];
+  const knownSlugs = new Set(specialtyOptions.map(s => s.slug));
+  const brokenSpecialtyLinks = specialtyLinkMatches
+    .map(m => m[1])
+    .filter(s => !knownSlugs.has(s));
+  const internalLinksValid = specialtyLinkMatches.length === 0 || brokenSpecialtyLinks.length === 0;
+
   const checks = [
     { label: "Título contiene la keyword principal", ok: !!kwInTitle },
     { label: "Meta descripción contiene la keyword", ok: !!kwInMetaDesc },
     { label: "URL slug contiene keyword", ok: !!kwInUrl },
     { label: "Artículo tiene más de 800 palabras", ok: over800 },
     { label: "Artículo tiene más de 1,500 palabras (ideal)", ok: over1500 },
-    { label: "Primer párrafo contiene la keyword", ok: !!kwInFirstParagraph },
+    { label: "Keyword aparece en las primeras 100 palabras", ok: !!kwInFirst100Words },
     { label: "Un H2 contiene la keyword", ok: !!kwInH2 },
     { label: "Imagen destacada tiene alt text", ok: hasAltText },
     { label: "Meta título configurado", ok: hasMetaTitle },
@@ -58,6 +66,12 @@ function calcSEO(form) {
     { label: "Enlace interno incluido", ok: !!hasInternalLink },
     { label: "Enlace externo incluido", ok: !!hasExternalLink },
     { label: "Artículo tiene extracto/resumen", ok: hasExcerpt },
+    {
+      label: brokenSpecialtyLinks.length > 0
+        ? `Enlaces a especialidades válidos (roto: /especialidad/${brokenSpecialtyLinks[0]})`
+        : "Enlaces a especialidades válidos",
+      ok: internalLinksValid,
+    },
   ];
 
   const score = Math.round((checks.filter(c => c.ok).length / checks.length) * 100);
@@ -93,7 +107,7 @@ const SideTitle = ({ children }) => (
 );
 
 export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish, saving }) {
-  const { checks, score } = calcSEO(form);
+  const { checks, score } = calcSEO(form, specialtyOptions);
   const titleLen = (form.meta_title || "").length;
   const descLen = (form.meta_description || "").length;
   const [tagInput, setTagInput] = useState("");
