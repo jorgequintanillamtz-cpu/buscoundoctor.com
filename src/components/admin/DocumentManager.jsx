@@ -7,9 +7,11 @@ import { toast } from "sonner";
 
 const DOC_TYPES = [
   { value: "cedula_profesional", label: "Cédula profesional" },
-  { value: "identificacion_oficial", label: "Identificación oficial" },
-  { value: "titulo", label: "Título" },
-  { value: "certificado_especialidad", label: "Certificado de especialidad" },
+  { value: "cedula_especialidad", label: "Cédula de especialidad" },
+  { value: "certificado_especialidad", label: "Certificado del consejo de especialidad" },
+  { value: "titulo", label: "Título profesional" },
+  { value: "identificacion_oficial", label: "Identificación oficial (INE/pasaporte)" },
+  { value: "foto_verificacion", label: "Foto reciente de verificación" },
 ];
 
 const STATUS = {
