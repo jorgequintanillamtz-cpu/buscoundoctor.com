@@ -35,7 +35,7 @@ export default function SimilarSpecialists({ specialistId, specialty, zone }) {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {items.map((s, i) => (
-          <SpecialistCard key={s.id} specialist={s} priority={i === 0} />
+          <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="similares" />
         ))}
       </div>
     </div>
