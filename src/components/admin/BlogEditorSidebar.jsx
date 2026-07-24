@@ -302,6 +302,29 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
           <Input value={form.author || ""} onChange={e => update("author", e.target.value)}
             className="rounded-xl text-sm h-9" placeholder="Sin autor" />
         </div>
+
+        <div>
+          <SideLabel>Credencial/puesto del autor</SideLabel>
+          <Input value={form.author_title || ""} onChange={e => update("author_title", e.target.value)}
+            className="rounded-xl text-sm h-9" placeholder="Ej: Médico General, Cédula 12345678" />
+        </div>
+
+        <div>
+          <SideLabel>Foto del autor (URL)</SideLabel>
+          <Input value={form.author_photo || ""} onChange={e => update("author_photo", e.target.value)}
+            className="rounded-xl text-sm h-9" placeholder="https://..." />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <SideLabel>Biografía breve del autor</SideLabel>
+            <span className="text-xs text-muted-foreground">{(form.author_bio || "").length}/500</span>
+          </div>
+          <textarea value={form.author_bio || ""} onChange={e => { if (e.target.value.length <= 500) update("author_bio", e.target.value); }}
+            className="w-full min-h-[70px] px-3 py-2 text-sm border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+            placeholder="Experiencia y credenciales del autor (refuerza confianza YMYL ante Google)" />
+          <p className="text-xs text-muted-foreground mt-1">Se muestra al final del artículo en una caja “Sobre el autor”.</p>
+        </div>
       </SideCard>
 
       {/* Schema Markup */}
