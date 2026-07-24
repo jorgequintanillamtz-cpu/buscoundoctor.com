@@ -46,7 +46,7 @@ export default function RegistroMedico() {
       const own = await base44.entities.Specialist.filter({ owner_user_id: u.id }).catch(() => []);
       if (!active) return;
       if (own.length > 0) {
-        navigate(`/admin/doctores/editar/${own[0].id}`, { replace: true });
+        navigate("/panel-medico", { replace: true });
         return;
       }
       try {
@@ -247,7 +247,7 @@ export default function RegistroMedico() {
             <p className="text-sm text-muted-foreground">
               Ahora completa tu perfil — incluida tu cédula profesional — para que podamos verificarte y publicar tu perfil.
             </p>
-            <Button onClick={() => navigate("/admin/mi-perfil")} className="min-h-[44px] rounded-xl">
+            <Button onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl">
               Completar mi perfil
             </Button>
           </div>
