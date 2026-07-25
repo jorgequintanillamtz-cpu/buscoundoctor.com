@@ -107,11 +107,11 @@ const SideTitle = ({ children }) => (
 );
 
 export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish, saving }) {
+  const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const { checks, score } = calcSEO(form, specialtyOptions);
   const titleLen = (form.meta_title || "").length;
   const descLen = (form.meta_description || "").length;
   const [tagInput, setTagInput] = useState("");
-  const [specialtyOptions, setSpecialtyOptions] = useState([]);
 
   useEffect(() => {
     base44.entities.Specialty.filter({ active: true }).then((list) => {
