@@ -15,7 +15,6 @@ import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
-import ServicesManager from "@/components/admin/ServicesManager";
 import { EMPTY_FORM, generateSlug } from "@/pages/admin/AdminDoctorEditor";
 
 const SECTION_GROUPS = [
@@ -30,7 +29,6 @@ const SECTION_GROUPS = [
   ]},
   { group: "Negocio", items: [
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
-    { key: "servicios", label: "Servicios y precios", icon: DollarSign, requiresSaved: true },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
   ]},
@@ -345,8 +343,7 @@ export default function DoctorPanel() {
 
             {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
-            {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
-            {section === "servicios" && <ServicesManager specialistId={specialistId} />}
+            {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={specialistId} />}
             {section === "formacion" && <EducationManager specialistId={specialistId} />}
             {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
             {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
