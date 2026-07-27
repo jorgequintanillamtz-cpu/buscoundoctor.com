@@ -20,7 +20,7 @@ function getNext8Days() {
 export default function SpecialistCard({ specialist, priority = false, sourcePage = "otro" }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [firstConsultPrice, setFirstConsultPrice] = useState(null);
+  const [firstConsult, setFirstConsult] = useState(null);
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -29,8 +29,13 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
     base44.entities.SpecialistService.filter({ specialist_id: specialist.id })
       .then((services) => {
         if (!active || services.length === 0) return;
-        const firstConsult = services.find((s) => (s.name || "").trim().toLowerCase() === "consulta por primera vez");
-        setFirstConsultPrice(firstConsult ? firstConsult.price : Math.min(...services.map((s) => s.price || Infinity)));
+        const match = services.find((s) => (s.name || "").trim().toLowerCase() === "consulta por primera vez");
+        if (match) {
+          setFirstConsult({ name: match.name, price: match.price });
+        } else {
+          const cheapest = services.reduce((min, s) => (s.price < (min?.price ?? Infinity) ? s : min), null);
+          if (cheapest) setFirstConsult({ name: cheapest.name, price: cheapest.price });
+        }
       })
       .catch(() => {});
     return () => { active = false; };
@@ -107,9 +112,9 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
                   {specialist.modality}
                 </span>
               )}
-              {firstConsultPrice != null && (
+              {firstConsult && (
                 <span className="text-xs text-muted-foreground">
-                  Desde ${firstConsultPrice.toLocaleString("es-MX")} MXN
+                  {firstConsult.name}: <span className="font-medium text-foreground">${firstConsult.price.toLocaleString("es-MX")} MXN</span>
                 </span>
               )}
             </div>
