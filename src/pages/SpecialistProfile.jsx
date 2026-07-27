@@ -97,7 +97,8 @@ export default function SpecialistProfile() {
         try {
           const services = await base44.entities.SpecialistService.filter({ specialist_id: specialist.id });
           if (services.length > 0) {
-            setMinServicePrice(Math.min(...services.map((s) => s.price || Infinity)));
+            const firstConsult = services.find((s) => (s.name || "").trim().toLowerCase() === "consulta por primera vez");
+            setMinServicePrice(firstConsult ? firstConsult.price : Math.min(...services.map((s) => s.price || Infinity)));
           }
         } catch {}
         
