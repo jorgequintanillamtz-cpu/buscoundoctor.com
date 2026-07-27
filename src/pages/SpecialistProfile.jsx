@@ -13,6 +13,7 @@ import LanguagesChips from "../components/LanguagesChips";
 import SimilarSpecialists from "../components/SimilarSpecialists";
 import SpecialistCases from "../components/SpecialistCases";
 import SpecialistPosts from "../components/SpecialistPosts";
+import SpecialistServices from "../components/SpecialistServices";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 import { trackDoctorContact } from "@/utils/trackDoctorStats";
 
@@ -466,6 +467,7 @@ export default function SpecialistProfile() {
 
       <SpecialistCases specialistId={specialist.id} />
       <SpecialistPosts specialistId={specialist.id} />
+      <SpecialistServices specialistId={specialist.id} />
 
       {/* Tipos de consulta */}
       {specialist.modality &&
