@@ -211,31 +211,31 @@ export default function SpecialistProfile() {
       )}
 
       {/* Hero: presentación principal, estilo landing para enganchar al paciente */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-navy via-brand-navy to-brand-blue shadow-xl p-6 sm:p-10">
-        <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-1/3 w-64 h-64 rounded-full bg-brand-blue/40 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-bluePale to-brand-blueLight shadow-xl p-6 sm:p-10">
+        <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/60 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 left-1/3 w-64 h-64 rounded-full bg-brand-blue/15 blur-3xl" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
           {/* Columna de texto */}
           <div className="text-center lg:text-left order-2 lg:order-1">
             {specialist.license_verification_status === "verified" && (
-              <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Cédula profesional verificada
               </div>
             )}
 
-            <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-white">
+            <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-brand-navy">
               {specialist.full_name}
             </h1>
-            <p className="text-white/80 font-semibold text-base sm:text-lg mt-2">
+            <p className="text-brand-navy/70 font-semibold text-base sm:text-lg mt-2">
               {specialist.specialty}
               {specialist.subspecialty && <> {'\u00b7'} {specialist.subspecialty}</>}
             </p>
 
             {displayAddress &&
-            <p className="flex items-center justify-center lg:justify-start gap-1.5 text-sm text-white/70 mt-3">
-                <MapPin className="w-4 h-4 flex-shrink-0" />
+            <p className="flex items-center justify-center lg:justify-start gap-1.5 text-sm text-brand-navy/70 mt-3">
+                <MapPin className="w-4 h-4 text-brand-blue flex-shrink-0" />
                 {displayAddress}
               </p>
             }
@@ -243,19 +243,19 @@ export default function SpecialistProfile() {
             {(languageNames.length > 0 || specialist.modality) && (
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-4">
                 {languageNames.length > 0 && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
                     <Languages className="w-3.5 h-3.5" />
                     {languageNames.join(", ")}
                   </span>
                 )}
                 {specialist.modality === "online" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
                     <Monitor className="w-3.5 h-3.5" />
                     Consulta virtual disponible
                   </span>
                 )}
                 {specialist.modality === "ambas" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
                     <Monitor className="w-3.5 h-3.5" />
                     Presencial y en línea
                   </span>
@@ -267,7 +267,7 @@ export default function SpecialistProfile() {
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 mt-6">
               <button
                 onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
-                className="inline-flex items-center gap-2 bg-white hover:bg-white/90 text-brand-navy text-sm font-bold px-5 py-3 min-h-[44px] rounded-full shadow-lg transition-colors">
+                className="inline-flex items-center gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-bold px-5 py-3 min-h-[44px] rounded-full shadow-lg transition-colors">
                 <Calendar className="w-4 h-4" />
                 Agendar cita
               </button>
@@ -284,55 +284,55 @@ export default function SpecialistProfile() {
               {displayPhone &&
               <a
                 href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
+                className="inline-flex items-center gap-2 bg-white hover:bg-white/80 border border-brand-navy/15 text-brand-navy text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
                 <Phone className="w-4 h-4" />
                 Llamar
               </a>
               }
               {minServicePrice != null && (
-                <span className="text-sm font-semibold text-white bg-white/10 border border-white/20 px-3 py-2 rounded-full">
+                <span className="text-sm font-semibold text-brand-navy bg-white border border-brand-navy/10 px-3 py-2 rounded-full">
                   Desde ${minServicePrice.toLocaleString("es-MX")} MXN
                 </span>
               )}
             </div>
 
             {/* Estadísticas rápidas, tipo hero */}
-            <div className="flex items-center justify-center lg:justify-start gap-6 sm:gap-8 mt-8 pt-6 border-t border-white/15">
+            <div className="flex items-center justify-center lg:justify-start gap-6 sm:gap-8 mt-8 pt-6 border-t border-brand-navy/10">
               {specialist.years_experience &&
               <div className="text-center lg:text-left">
-                  <p className="font-heading font-extrabold text-2xl sm:text-3xl text-white">{specialist.years_experience}+</p>
-                  <p className="text-xs text-white/70 mt-0.5">Años de experiencia</p>
+                  <p className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">{specialist.years_experience}+</p>
+                  <p className="text-xs text-brand-navy/60 mt-0.5">Años de experiencia</p>
                 </div>
               }
               <div className="text-center lg:text-left">
-                <p className="font-heading font-extrabold text-2xl sm:text-3xl text-white flex items-center justify-center lg:justify-start gap-1">
+                <p className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy flex items-center justify-center lg:justify-start gap-1">
                   {specialist.rating != null ? specialist.rating.toFixed(1) : "—"}
                   <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
                 </p>
-                <p className="text-xs text-white/70 mt-0.5">
+                <p className="text-xs text-brand-navy/60 mt-0.5">
                   {allReviews.length > 0 ? `${allReviews.length} reseña${allReviews.length !== 1 ? "s" : ""}` : "Sin reseñas aún"}
                 </p>
               </div>
               {specialist.certifications &&
               <div className="text-center lg:text-left">
-                  <p className="font-heading font-extrabold text-lg sm:text-xl text-white">
+                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">
                     {specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}
                   </p>
-                  <p className="text-xs text-white/70 mt-0.5">Cédula profesional</p>
+                  <p className="text-xs text-brand-navy/60 mt-0.5">Cédula profesional</p>
                 </div>
               }
             </div>
-            <a href="#resenas" className="inline-block text-xs font-semibold text-white/80 hover:text-white hover:underline mt-3">Ver todas las reseñas →</a>
+            <a href="#resenas" className="inline-block text-xs font-semibold text-brand-blue hover:underline mt-3">Ver todas las reseñas →</a>
           </div>
 
           {/* Columna de foto */}
           <div className="relative flex justify-center order-1 lg:order-2">
-            <div className="pointer-events-none absolute w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-emerald-400/20 blur-2xl" />
-            <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border-4 border-white/15 shadow-2xl bg-white/5">
+            <div className="pointer-events-none absolute w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-white/70 blur-2xl" />
+            <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-white/40">
               {specialist.profile_photo ?
               <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
-              <div className="w-full h-full bg-white/10 flex items-center justify-center">
-                <span className="font-heading font-bold text-4xl text-white/50">
+              <div className="w-full h-full bg-white/60 flex items-center justify-center">
+                <span className="font-heading font-bold text-4xl text-brand-navy/30">
                   {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                 </span>
               </div>
