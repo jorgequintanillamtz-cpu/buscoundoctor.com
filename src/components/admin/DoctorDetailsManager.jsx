@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { Plus, X, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 const MODALIDADES = [
   { value: "presencial", label: "Presencial" },
@@ -33,14 +31,6 @@ const SelectBox = ({ value, onChange, options, placeholder }) => (
 );
 
 export default function DoctorDetailsManager({ form, update }) {
-  const [serviceInput, setServiceInput] = useState("");
-
-  const addService = () => {
-    const v = serviceInput.trim();
-    if (v && !(form.services || []).includes(v)) update("services", [...(form.services || []), v]);
-    setServiceInput("");
-  };
-
   return (
     <div className="space-y-5">
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
@@ -82,32 +72,9 @@ export default function DoctorDetailsManager({ form, update }) {
             <SelectBox value={form.modality} onChange={(v) => update("modality", v)} options={MODALIDADES} />
           </div>
         </div>
-      </div>
-
-      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
-        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Servicios que ofreces</h2>
-        <div className="flex flex-wrap gap-1.5">
-          {(form.services || []).map((s, i) => (
-            <span key={i} className="text-xs bg-accent text-accent-foreground px-2 py-0.5 rounded-full flex items-center gap-1">
-              {s}
-              <button type="button" onClick={() => update("services", form.services.filter((_, j) => j !== i))}>
-                <X className="w-2.5 h-2.5" />
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <Input
-            value={serviceInput}
-            onChange={(e) => setServiceInput(e.target.value)}
-            className="rounded-xl text-sm h-8"
-            placeholder="Ej: Ortodoncia"
-            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addService())}
-          />
-          <Button type="button" variant="outline" size="sm" className="rounded-xl h-8 px-2" onClick={addService}>
-            <Plus className="w-3.5 h-3.5" />
-          </Button>
-        </div>
+        <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">
+          Para listar tus servicios con precios específicos, usa la sección "Servicios y precios".
+        </p>
       </div>
     </div>
   );
