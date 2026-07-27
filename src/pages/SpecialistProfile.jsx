@@ -210,171 +210,170 @@ export default function SpecialistProfile() {
         </p>
       )}
 
-      {/* Header: foto cuadrada + nombre + tarjeta de calificación, estilo directorio profesional */}
-      <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row items-start gap-6">
-          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden border border-border/50 shadow-sm flex-shrink-0 bg-muted mx-auto sm:mx-0">
-            {specialist.profile_photo ?
-            <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
+      {/* Hero: presentación principal, estilo landing para enganchar al paciente */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-navy via-brand-navy to-brand-blue shadow-xl p-6 sm:p-10">
+        <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 left-1/3 w-64 h-64 rounded-full bg-brand-blue/40 blur-3xl" />
 
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
-                <span className="font-heading font-bold text-2xl text-primary/40">
-                  {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                </span>
-              </div>
-            }
-          </div>
-
-          <div className="flex-1 text-center sm:text-left min-w-0 w-full">
-            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
-              {specialist.full_name}
-            </h1>
-            <p className="text-muted-foreground font-semibold text-sm sm:text-base mt-1">
-              {specialist.specialty}
-              {specialist.years_experience && <> {'\u00b7'} {specialist.years_experience}+ años de experiencia</>}
-            </p>
-
-            {/* Tarjeta blanca de calificación */}
-            <div className="mt-4 border border-border/60 rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3 flex-wrap">
-              <div>
-                {specialist.rating != null ? (
-                  <div className="flex items-center justify-center sm:justify-start gap-2">
-                    <span className="font-heading font-bold text-sm text-foreground">{specialist.rating.toFixed(1)} de calificación</span>
-                    <span className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={`w-4 h-4 ${specialist.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
-                      ))}
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Aún sin calificación</span>
-                )}
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {allReviews.length > 0 ? `Basado en ${allReviews.length} reseña${allReviews.length !== 1 ? "s" : ""}` : "Sé el primero en dejar una reseña"}
-                </p>
-              </div>
-              <a href="#resenas" className="text-xs font-semibold text-brand-blue hover:underline flex-shrink-0">Ver reseñas</a>
-            </div>
-
-            {displayAddress &&
-            <p className="flex items-center justify-center sm:justify-start gap-1.5 text-sm text-muted-foreground mt-3">
-                <MapPin className="w-4 h-4 text-brand-blue flex-shrink-0" />
-                {displayAddress}
-              </p>
-            }
-
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
+          {/* Columna de texto */}
+          <div className="text-center lg:text-left order-2 lg:order-1">
             {specialist.license_verification_status === "verified" && (
-              <div className="inline-flex items-center gap-1.5 mt-3 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
+              <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Cédula profesional verificada
               </div>
             )}
 
+            <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-white">
+              {specialist.full_name}
+            </h1>
+            <p className="text-white/80 font-semibold text-base sm:text-lg mt-2">
+              {specialist.specialty}
+              {specialist.subspecialty && <> {'\u00b7'} {specialist.subspecialty}</>}
+            </p>
+
+            {displayAddress &&
+            <p className="flex items-center justify-center lg:justify-start gap-1.5 text-sm text-white/70 mt-3">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                {displayAddress}
+              </p>
+            }
+
             {(languageNames.length > 0 || specialist.modality) && (
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-3">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-4">
                 {languageNames.length > 0 && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5">
                     <Languages className="w-3.5 h-3.5" />
                     {languageNames.join(", ")}
                   </span>
                 )}
                 {specialist.modality === "online" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5">
                     <Monitor className="w-3.5 h-3.5" />
                     Consulta virtual disponible
                   </span>
                 )}
                 {specialist.modality === "ambas" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/10 border border-white/20 text-white rounded-full px-3 py-1.5">
                     <Monitor className="w-3.5 h-3.5" />
                     Presencial y en línea
                   </span>
                 )}
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Botones de acción tipo píldora */}
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mt-6">
-          {whatsappHref &&
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
-            
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </a>
-          }
-          {displayPhone &&
-          <a
-            href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
-            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
-            
-              <Phone className="w-4 h-4" />
-              Llamar
-            </a>
-          }
-          <button
-            onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
-            className="inline-flex items-center gap-2 bg-brand-bluePale hover:bg-brand-bluePale/70 text-brand-navy text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
-            
-            <Calendar className="w-4 h-4" />
-            Agendar cita
-          </button>
-          {minServicePrice != null && (
-            <span className="text-sm font-medium text-primary bg-accent px-3 py-2 rounded-full">
-              Desde ${minServicePrice.toLocaleString("es-MX")} MXN
-            </span>
-          )}
-        </div>
-
-        {/* Info: experiencia, cedula, estrellas */}
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-5 pt-5 border-t border-border/50 text-sm text-muted-foreground">
-          {specialist.years_experience &&
-          <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              {specialist.years_experience} años de experiencia
-            </span>
-          }
-          {specialist.certifications &&
-          <span className="flex items-center gap-1.5">
-              <CheckCircle className="w-3.5 h-3.5 text-primary" />
-              Cédula: <span className="font-medium text-foreground">{specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}</span>
-            </span>
-          }
-          {specialist.rating != null &&
-          <span className="flex items-center gap-1.5">
-              <span className="text-brand-blue text-base leading-none">
-                {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
-              </span>
-              <span className="text-sm font-semibold text-foreground">{specialist.rating.toFixed(1)}</span>
-            </span>
-          }
-        </div>
-
-        {/* Date picker mobile - selección de fecha para agendar */}
-        <div className="mt-5 lg:hidden">
-          <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
-          <p className="text-xs text-muted-foreground mb-3">para agendar tu cita</p>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-            {getNext8Days().map((date, i) =>
+            {/* Botones de acción */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 mt-6">
               <button
-                key={i}
-                onClick={() => handleDateSelect(date)}
-                className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group">
-                
-                <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
-                  {formatDayLabel(date).split(' ')[0]}
-                </span>
-                <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
-                  {date.getDate()}
-                </span>
+                onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
+                className="inline-flex items-center gap-2 bg-white hover:bg-white/90 text-brand-navy text-sm font-bold px-5 py-3 min-h-[44px] rounded-full shadow-lg transition-colors">
+                <Calendar className="w-4 h-4" />
+                Agendar cita
               </button>
+              {whatsappHref &&
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </a>
+              }
+              {displayPhone &&
+              <a
+                href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
+                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
+                <Phone className="w-4 h-4" />
+                Llamar
+              </a>
+              }
+              {minServicePrice != null && (
+                <span className="text-sm font-semibold text-white bg-white/10 border border-white/20 px-3 py-2 rounded-full">
+                  Desde ${minServicePrice.toLocaleString("es-MX")} MXN
+                </span>
               )}
+            </div>
+
+            {/* Estadísticas rápidas, tipo hero */}
+            <div className="flex items-center justify-center lg:justify-start gap-6 sm:gap-8 mt-8 pt-6 border-t border-white/15">
+              {specialist.years_experience &&
+              <div className="text-center lg:text-left">
+                  <p className="font-heading font-extrabold text-2xl sm:text-3xl text-white">{specialist.years_experience}+</p>
+                  <p className="text-xs text-white/70 mt-0.5">Años de experiencia</p>
+                </div>
+              }
+              <div className="text-center lg:text-left">
+                <p className="font-heading font-extrabold text-2xl sm:text-3xl text-white flex items-center justify-center lg:justify-start gap-1">
+                  {specialist.rating != null ? specialist.rating.toFixed(1) : "—"}
+                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                </p>
+                <p className="text-xs text-white/70 mt-0.5">
+                  {allReviews.length > 0 ? `${allReviews.length} reseña${allReviews.length !== 1 ? "s" : ""}` : "Sin reseñas aún"}
+                </p>
+              </div>
+              {specialist.certifications &&
+              <div className="text-center lg:text-left">
+                  <p className="font-heading font-extrabold text-lg sm:text-xl text-white">
+                    {specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}
+                  </p>
+                  <p className="text-xs text-white/70 mt-0.5">Cédula profesional</p>
+                </div>
+              }
+            </div>
+            <a href="#resenas" className="inline-block text-xs font-semibold text-white/80 hover:text-white hover:underline mt-3">Ver todas las reseñas →</a>
           </div>
+
+          {/* Columna de foto */}
+          <div className="relative flex justify-center order-1 lg:order-2">
+            <div className="pointer-events-none absolute w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-emerald-400/20 blur-2xl" />
+            <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border-4 border-white/15 shadow-2xl bg-white/5">
+              {specialist.profile_photo ?
+              <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
+              <div className="w-full h-full bg-white/10 flex items-center justify-center">
+                <span className="font-heading font-bold text-4xl text-white/50">
+                  {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                </span>
+              </div>
+              }
+            </div>
+            {/* Tarjeta flotante de calificación, estilo referencia */}
+            <div className="hidden sm:flex absolute -bottom-5 -left-4 items-center gap-2.5 bg-white rounded-2xl shadow-xl px-4 py-3 border border-border/50">
+              <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              </div>
+              <div>
+                <p className="font-heading font-bold text-sm text-foreground leading-tight">
+                  {specialist.rating != null ? `${specialist.rating.toFixed(1)} / 5` : "Nuevo en la plataforma"}
+                </p>
+                <p className="text-[11px] text-muted-foreground leading-tight">
+                  {allReviews.length > 0 ? `${allReviews.length} pacientes atendidos` : "Sé el primero en calificar"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Selección de fecha para agendar (móvil) */}
+      <div className="mt-4 bg-card rounded-3xl border border-border/50 shadow-sm p-5 sm:p-6 lg:hidden">
+        <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
+        <p className="text-xs text-muted-foreground mb-3">para agendar tu cita con {specialist.full_name?.split(' ')[0]}</p>
+        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+          {getNext8Days().map((date, i) =>
+            <button
+              key={i}
+              onClick={() => handleDateSelect(date)}
+              className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group">
+              <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
+                {formatDayLabel(date).split(' ')[0]}
+              </span>
+              <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
+                {date.getDate()}
+              </span>
+            </button>
+            )}
         </div>
       </div>
 
