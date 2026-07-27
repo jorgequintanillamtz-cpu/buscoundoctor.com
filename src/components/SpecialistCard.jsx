@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import AppointmentForm from "./AppointmentForm";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
+import { base44 } from "@/api/base44Client";
 
 const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -19,7 +20,21 @@ function getNext8Days() {
 export default function SpecialistCard({ specialist, priority = false, sourcePage = "otro" }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [firstConsultPrice, setFirstConsultPrice] = useState(null);
   const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (!specialist?.id) return;
+    let active = true;
+    base44.entities.SpecialistService.filter({ specialist_id: specialist.id })
+      .then((services) => {
+        if (!active || services.length === 0) return;
+        const firstConsult = services.find((s) => (s.name || "").trim().toLowerCase() === "consulta por primera vez");
+        setFirstConsultPrice(firstConsult ? firstConsult.price : Math.min(...services.map((s) => s.price || Infinity)));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [specialist?.id]);
 
   useEffect(() => {
     if (!specialist?.id) return;
@@ -90,6 +105,11 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
               {specialist.modality && (
                 <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full capitalize">
                   {specialist.modality}
+                </span>
+              )}
+              {firstConsultPrice != null && (
+                <span className="text-xs text-muted-foreground">
+                  Desde ${firstConsultPrice.toLocaleString("es-MX")} MXN
                 </span>
               )}
             </div>
