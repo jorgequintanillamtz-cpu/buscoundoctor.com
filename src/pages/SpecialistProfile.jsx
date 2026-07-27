@@ -30,6 +30,7 @@ export default function SpecialistProfile() {
   const [descExpanded, setDescExpanded] = useState(false);
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
+  const [minServicePrice, setMinServicePrice] = useState(null);
 
   const getNext8Days = () => {
     const days = [];
@@ -91,6 +92,13 @@ export default function SpecialistProfile() {
         try {
           const revs = await base44.entities.Review.filter({ specialist_id: specialist.id, approved: true });
           setAllReviews(revs);
+        } catch {}
+
+        try {
+          const services = await base44.entities.SpecialistService.filter({ specialist_id: specialist.id });
+          if (services.length > 0) {
+            setMinServicePrice(Math.min(...services.map((s) => s.price || Infinity)));
+          }
         } catch {}
         
         // Add JSON-LD LocalBusiness schema
@@ -315,9 +323,9 @@ export default function SpecialistProfile() {
             <Calendar className="w-4 h-4" />
             Agendar cita
           </button>
-          {specialist.price_from && (
+          {minServicePrice != null && (
             <span className="text-sm font-medium text-primary bg-accent px-3 py-2 rounded-full">
-              Desde ${specialist.price_from} MXN
+              Desde ${minServicePrice.toLocaleString("es-MX")} MXN
             </span>
           )}
         </div>
@@ -570,8 +578,8 @@ export default function SpecialistProfile() {
               Agendar cita
             </button>
           </div>
-          {specialist.price_from && (
-            <p className="text-xs text-muted-foreground">Precio de consulta: <span className="font-semibold text-foreground">Desde ${specialist.price_from} MXN</span></p>
+          {minServicePrice != null && (
+            <p className="text-xs text-muted-foreground">Precio de consulta: <span className="font-semibold text-foreground">Desde ${minServicePrice.toLocaleString("es-MX")} MXN</span></p>
           )}
           <p className="text-[11px] text-muted-foreground border-t border-border/50 pt-3">La reserva y el contacto son gratuitos.</p>
         </div>
