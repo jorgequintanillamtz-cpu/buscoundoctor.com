@@ -1,0 +1,34 @@
+{
+  "name": "SpecialistService",
+  "properties": {
+    "details": {
+      "title": "Detalles (opcional)",
+      "type": "string"
+    },
+    "display_order": {
+      "default": 0,
+      "multipleOf": 1,
+      "title": "Orden de visualizaci\u00f3n",
+      "type": "number"
+    },
+    "name": {
+      "title": "Nombre del servicio",
+      "type": "string"
+    },
+    "price": {
+      "title": "Precio (MXN)",
+      "type": "number"
+    },
+    "specialist_id": {
+      "description": "ID de registro de la entidad Specialist",
+      "title": "Especialista (relaci\u00f3n)",
+      "type": "string"
+    }
+  },
+  "required": [
+    "specialist_id",
+    "name",
+    "price"
+  ],
+  "type": "object"
+}
