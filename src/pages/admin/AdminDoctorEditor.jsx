@@ -325,7 +325,7 @@ export default function AdminDoctorEditor() {
             <>
               {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id }} isOwnProfile={false} />}
               {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
-              {section === "detalles" && <DoctorDetailsManager form={form} update={update} />}
+              {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={id} />}
               {section === "formacion" && <EducationManager specialistId={id} />}
               {section === "idiomas" && <LanguagesManager specialistId={id} />}
               {section === "consultorios" && <OfficeManager specialistId={id} />}
