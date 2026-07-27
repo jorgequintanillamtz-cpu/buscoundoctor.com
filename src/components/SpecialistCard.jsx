@@ -92,11 +92,6 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
                   {specialist.modality}
                 </span>
               )}
-              {specialist.price_from && (
-                <span className="text-xs text-muted-foreground">
-                  Desde ${specialist.price_from} MXN
-                </span>
-              )}
             </div>
             <Button
               size="sm"
