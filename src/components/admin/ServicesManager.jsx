@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+const FIRST_CONSULT_NAME = "Consulta por primera vez";
 const emptyService = () => ({ name: "", price: "", details: "" });
 
 function ServiceForm({ initial, onCancel, onSave, saving }) {
@@ -120,7 +121,20 @@ export default function ServicesManager({ specialistId }) {
         <div className="space-y-3">
           {editingId === "new" && <ServiceForm onCancel={() => setEditingId(null)} onSave={save} saving={saving} />}
           {items.length === 0 && editingId !== "new" && (
-            <p className="text-sm text-muted-foreground py-4 text-center">Sin servicios cargados. Agrega el primero.</p>
+            <div className="border border-dashed border-primary/40 rounded-xl p-4 bg-accent/10 text-center space-y-2">
+              <p className="text-sm text-foreground font-medium">Empieza con tu "{FIRST_CONSULT_NAME}"</p>
+              <p className="text-xs text-muted-foreground">Este precio es el que se muestra en tu tarjeta cuando los pacientes navegan el directorio.</p>
+              <Button
+                size="sm"
+                onClick={() => setEditingId("new-first")}
+                className="rounded-xl gap-1.5"
+              >
+                <Plus className="w-4 h-4" /> Agregar "{FIRST_CONSULT_NAME}"
+              </Button>
+            </div>
+          )}
+          {editingId === "new-first" && (
+            <ServiceForm initial={{ name: FIRST_CONSULT_NAME, price: "", details: "" }} onCancel={() => setEditingId(null)} onSave={save} saving={saving} />
           )}
           {items.map((s) => (
             <div key={s.id} className="border border-border/60 rounded-xl p-4 space-y-2">
