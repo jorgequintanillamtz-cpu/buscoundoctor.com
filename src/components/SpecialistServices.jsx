@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { DollarSign, ChevronDown } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 export default function SpecialistServices({ specialistId }) {
   const [items, setItems] = useState([]);
@@ -33,20 +33,20 @@ export default function SpecialistServices({ specialistId }) {
           const isOpen = openId === s.id;
           return (
             <div key={s.id} className={`py-4 ${i > 0 ? "border-t border-border/50" : ""}`}>
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{s.name}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">${s.price?.toLocaleString("es-MX")}</p>
-                </div>
+              <p className="text-sm font-semibold text-foreground">{s.name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm font-medium text-brand-blue">${s.price?.toLocaleString("es-MX")}</span>
                 {s.details && (
-                  <button
-                    type="button"
-                    onClick={() => setOpenId(isOpen ? null : s.id)}
-                    className="flex items-center gap-1 text-xs font-medium text-primary hover:underline flex-shrink-0"
-                  >
-                    Detalles
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
-                  </button>
+                  <>
+                    <span className="text-border">·</span>
+                    <button
+                      type="button"
+                      onClick={() => setOpenId(isOpen ? null : s.id)}
+                      className="text-sm font-medium text-brand-blue underline decoration-brand-blue/40 underline-offset-2 hover:decoration-brand-blue"
+                    >
+                      Detalles
+                    </button>
+                  </>
                 )}
               </div>
               {isOpen && s.details && (
