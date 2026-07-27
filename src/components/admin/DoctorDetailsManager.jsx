@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import ServicesManager from "./ServicesManager";
 
 const MODALIDADES = [
   { value: "presencial", label: "Presencial" },
@@ -6,7 +7,7 @@ const MODALIDADES = [
   { value: "ambas", label: "Ambas" },
 ];
 
-export default function DoctorDetailsManager({ form, update }) {
+export default function DoctorDetailsManager({ form, update, specialistId }) {
   return (
     <div className="space-y-5">
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
@@ -37,10 +38,15 @@ export default function DoctorDetailsManager({ form, update }) {
             </select>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground pt-1 border-t border-border/40">
-          Los precios de tus consultas ahora se cargan en la sección "Servicios y precios" — el precio más bajo que registres ahí se mostrará automáticamente como "Desde $X" en tu perfil.
-        </p>
       </div>
+
+      {specialistId ? (
+        <ServicesManager specialistId={specialistId} />
+      ) : (
+        <div className="bg-card rounded-2xl border border-border/50 p-5">
+          <p className="text-sm text-muted-foreground text-center py-4">Guarda tu perfil primero para poder agregar tus servicios y precios.</p>
+        </div>
+      )}
     </div>
   );
 }
