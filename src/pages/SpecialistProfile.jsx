@@ -418,35 +418,22 @@ export default function SpecialistProfile() {
         <EducationTimeline specialistId={specialist.id} />
       </div>
 
-      {/* Servicios / Especialidades */}
-      {specialist.services?.length > 0 &&
-      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Especialidades y enfoques</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {specialist.services.map((service, i) =>
-          <div key={i} className="flex items-center gap-2.5 text-sm text-foreground">
-                <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                {service}
-              </div>
-          )}
-          </div>
-          <div id="aseguradoras" className="mt-5 pt-5 border-t border-border/50 scroll-mt-32">
-              <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Aseguradoras aceptadas</h3>
-              {resolvedInsurers.length > 0 ?
-              <div className="flex flex-wrap gap-2">
-                  {resolvedInsurers.map((ins, i) =>
-              <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                     {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
-                     {ins.name}
-                   </span>
-              )}
-               </div> :
+      {/* Aseguradoras aceptadas */}
+      <div id="aseguradoras" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+        <h2 className="font-heading font-bold text-lg text-foreground mb-4">Aseguradoras aceptadas</h2>
+        {resolvedInsurers.length > 0 ?
+        <div className="flex flex-wrap gap-2">
+            {resolvedInsurers.map((ins, i) =>
+        <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
+               {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
+               {ins.name}
+             </span>
+        )}
+         </div> :
 
-              <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
-              }
-            </div>
-          </div>
-      }
+        <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
+        }
+      </div>
 
       {specialist.gallery?.length > 0 &&
       <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
