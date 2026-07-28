@@ -416,9 +416,9 @@ export default function Home() {
             <Link
               key={s.id}
               to={`/especialista/${s.slug}`}
-              className="group flex-shrink-0 w-32 sm:w-36 snap-start px-3 sm:px-4 first:pl-0"
+              className="group flex-shrink-0 snap-start flex flex-col items-center px-3 sm:px-4"
             >
-              <div className="w-full aspect-square rounded-xl bg-muted overflow-hidden">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl bg-muted overflow-hidden flex-shrink-0">
                 {s.profile_photo ? (
                   <img src={s.profile_photo} alt={s.full_name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
                 ) : (
@@ -429,7 +429,7 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="pt-3 text-center">
+              <div className="pt-3 text-center w-28 sm:w-32">
                 <h3 className="font-heading font-bold text-sm text-foreground leading-tight group-hover:text-brand-blue transition-colors">{s.full_name}</h3>
                 <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
                 {s.years_experience &&
