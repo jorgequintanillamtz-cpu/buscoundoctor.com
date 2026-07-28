@@ -129,6 +129,18 @@ export default function AdminSpecialists() {
     load();
   };
 
+  const toggleFeatured = async (id, nombre, current) => {
+    const next = !current;
+    setSpecialists((prev) => prev.map((s) => (s.id === id ? { ...s, featured: next } : s)));
+    try {
+      await base44.entities.Specialist.update(id, { featured: next });
+      toast.success(next ? `${nombre} ahora aparece en la página principal` : `${nombre} ya no aparece en la página principal`);
+    } catch (e) {
+      setSpecialists((prev) => prev.map((s) => (s.id === id ? { ...s, featured: current } : s)));
+      toast.error("No se pudo actualizar: " + e.message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
