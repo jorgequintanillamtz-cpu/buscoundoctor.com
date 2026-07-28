@@ -647,34 +647,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Boletín de salud por correo */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
-        <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-          <div className="w-14 h-14 rounded-2xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-            <Mail className="w-6 h-6 text-brand-blue" />
-          </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="font-heading font-bold text-lg text-foreground">Recibe contenido de salud en tu correo</h3>
-            <p className="text-sm text-muted-foreground mt-1">Artículos y consejos de nuestros especialistas, sin spam.</p>
-          </div>
-          <form onSubmit={submitNewsletter} className="flex items-center gap-2 w-full sm:w-auto">
-            <input
-              type="email"
-              value={newsletterEmail}
-              onChange={(e) => { setNewsletterEmail(e.target.value); setNewsletterStatus("idle"); }}
-              placeholder="tu@correo.com"
-              className="flex-1 sm:w-56 h-11 px-4 rounded-full border border-border/60 text-sm outline-none focus:border-brand-blue"
-            />
-            <button type="submit" disabled={newsletterStatus === "loading"} className="h-11 px-5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold flex items-center gap-1.5 flex-shrink-0">
-              {newsletterStatus === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-              Suscribirme
-            </button>
-          </form>
-        </div>
-        {newsletterStatus === "success" && <p className="text-sm text-emerald-600 text-center sm:text-left mt-3">¡Listo! Ya estás suscrito.</p>}
-        {newsletterStatus === "error" && <p className="text-sm text-red-500 text-center sm:text-left mt-3">Ingresa un correo válido para suscribirte.</p>}
-      </section>
-
       {/* Blog: última sección antes del footer, slider deslizable con todos los artículos */}
       {posts.length > 0 &&
       <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
