@@ -21,6 +21,18 @@ export default function AdminDoctores() {
     toast.success("Doctor eliminado");
   };
 
+  const toggleFeatured = async (id, nombre, current) => {
+    const next = !current;
+    setDoctors(prev => prev.map(d => d.id === id ? { ...d, featured: next } : d));
+    try {
+      await base44.entities.Specialist.update(id, { featured: next });
+      toast.success(next ? `${nombre} ahora aparece en la página principal` : `${nombre} ya no aparece en la página principal`);
+    } catch (e) {
+      setDoctors(prev => prev.map(d => d.id === id ? { ...d, featured: current } : d));
+      toast.error("No se pudo actualizar: " + e.message);
+    }
+  };
+
   // Perfiles registrados vía /registro-medico: pendientes de revisión o borradores con dueño asignado
   const pendientes = useMemo(
     () => doctors.filter(s => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)),
