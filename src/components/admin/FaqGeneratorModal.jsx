@@ -1,14 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Sparkles, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-const ESPECIALIDADES = [
-  "Cardiología", "Dermatología", "Pediatría", "Ginecología", "Oftalmología",
-  "Ortopedia", "Urología", "Neurología", "Psiquiatría", "Gastroenterología",
-  "Endocrinología", "Oncología", "Reumatología", "Otorrinolaringología", "Medicina General",
-];
 
 const CIUDADES = [
   "Monterrey", "San Pedro Garza García", "San Nicolás de los Garza",
@@ -48,12 +42,21 @@ const STEPS = [
 ];
 
 export default function FaqGeneratorModal({ onClose, onSuccess }) {
-  const [specialty, setSpecialty] = useState(ESPECIALIDADES[0]);
+  const [especialidades, setEspecialidades] = useState([]);
+  const [specialty, setSpecialty] = useState("");
   const [city, setCity] = useState(CIUDADES[0]);
   const [cantidad, setCantidad] = useState(20);
   const [tipos, setTipos] = useState({ costos: true, tratamientos: true, sintomas: true, procedimientos: true, seguros: false, estudios: false, prevencion: true, comparativas: false, ubicacion: true, urgencias: false });
   const [generating, setGenerating] = useState(false);
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    base44.entities.Specialty.filter({ active: true }).then((list) => {
+      const names = list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es"));
+      setEspecialidades(names);
+      if (names.length) setSpecialty((prev) => prev || names[0]);
+    }).catch(() => {});
+  }, []);
 
   const toggleTipo = (key) => setTipos(p => ({ ...p, [key]: !p[key] }));
   const selectedTypes = TIPOS.filter(t => tipos[t.key]).map(t => t.label);
@@ -226,7 +229,7 @@ Devuelve JSON con array "faqs" donde cada item tiene:
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1.5 block">Especialidad</label>
                 <select value={specialty} onChange={e => setSpecialty(e.target.value)}
                   className="w-full text-sm border border-input rounded-xl px-3 py-2.5 bg-background focus:outline-none focus:ring-1 focus:ring-ring">
-                  {ESPECIALIDADES.map(e => <option key={e}>{e}</option>)}
+                  {especialidades.map(e => <option key={e}>{e}</option>)}
                 </select>
               </div>
               <div>
