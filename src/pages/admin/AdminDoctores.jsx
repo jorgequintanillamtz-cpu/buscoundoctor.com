@@ -66,7 +66,7 @@ export default function AdminDoctores() {
 
   return (
     <div className="max-w-5xl">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="font-heading font-bold text-2xl text-foreground">Doctores</h1>
         <Button asChild className="rounded-xl gap-2">
           <Link to="/admin/doctores/nuevo">
@@ -74,6 +74,14 @@ export default function AdminDoctores() {
             Nuevo doctor
           </Link>
         </Button>
+      </div>
+
+      <div className="flex items-center gap-2 mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 w-fit">
+        <Star className="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" />
+        <p className="text-sm text-amber-800">
+          <span className="font-semibold">{featuredCount}</span> destacado{featuredCount !== 1 ? "s" : ""} para la página principal
+          {featuredCount > 6 && <span className="text-amber-600"> — solo se muestran los primeros 6</span>}
+        </p>
       </div>
 
       {/* Pestañas */}
@@ -118,11 +126,23 @@ export default function AdminDoctores() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                    {doc.featured && <Star className="w-4 h-4 text-amber-400 flex-shrink-0" fill="currentColor" />}
                   </div>
                   <p className="text-sm text-muted-foreground">{doc.specialty} {doc.city ? `· ${doc.city}` : ""}</p>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => toggleFeatured(doc.id, doc.full_name, !!doc.featured)}
+                    title={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
+                    aria-label={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors flex-shrink-0 ${
+                      doc.featured
+                        ? "bg-amber-100 border-amber-200 text-amber-500 hover:bg-amber-200"
+                        : "bg-transparent border-border text-muted-foreground hover:border-amber-300 hover:text-amber-400"
+                    }`}
+                  >
+                    <Star className="w-4 h-4" fill={doc.featured ? "currentColor" : "none"} />
+                  </button>
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${doc.active !== false ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
                     {doc.active !== false ? "Activo" : "Inactivo"}
                   </span>
