@@ -9,6 +9,19 @@ import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
+const COMPARISON_ROWS = [
+  { us: "Cédula profesional verificada", them: "Confías sin comprobar nada" },
+  { us: "Varios especialistas para comparar", them: "Normalmente solo 1 o 2 nombres" },
+  { us: "Experiencia, precios y horarios en un lugar", them: "Depende de lo que recuerden" },
+  { us: "Reseñas de varios pacientes reales", them: "La opinión de una sola persona" },
+  { us: "Encuentras opciones en minutos", them: "Esperas días a que te recomienden" },
+  { us: "Precio visible antes de agendar", them: "No lo sabes hasta llegar" },
+  { us: "Filtras por tu zona exacta", them: "Puede estar lejos sin saberlo" },
+  { us: "Contacto directo por WhatsApp", them: "Depende de que te compartan el contacto" },
+  { us: "Perfil actualizado por el médico", them: "Información desactualizada" },
+  { us: "Filtras por tu necesidad específica", them: "La recomendación era para alguien más" },
+];
+
 const HOME_FAQS = [
   { question: "¿Cuesta usar BuscoUnDoctor?", answer: "No, usar BuscoUnDoctor es completamente gratuito para pacientes. Puedes buscar especialistas, revisar perfiles verificados y contactar directamente a cualquier médico sin costo ni necesidad de registrarte." },
   { question: "¿Cómo se verifica a los médicos?", answer: "Cada médico debe subir su cédula profesional al crear su perfil. Un administrador de BuscoUnDoctor revisa ese documento manualmente antes de aprobar la publicación, y el sello de ‘Cédula profesional verificada’ solo aparece una vez confirmada la revisión." },
