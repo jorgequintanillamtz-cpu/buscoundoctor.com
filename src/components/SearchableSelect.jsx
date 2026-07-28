@@ -43,7 +43,7 @@ export default function SearchableSelect({
       <PopoverContent
         align="start"
         className={cn(
-          "p-0 rounded-2xl border-none shadow-xl bg-white w-[var(--radix-popover-trigger-width)] min-w-[240px]",
+          "p-0 rounded-2xl border-none shadow-2xl bg-white w-[min(90vw,420px)]",
           contentClassName
         )}
       >
@@ -67,7 +67,7 @@ export default function SearchableSelect({
                       <Icon className="w-3.5 h-3.5 text-brand-blue" />
                     </span>
                   )}
-                  <span className="flex-1 min-w-0 truncate">{o.name}</span>
+                  <span className="flex-1 min-w-0">{o.name}</span>
                   {hint && <span className="text-xs text-muted-foreground flex-shrink-0">{hint}</span>}
                 </CommandItem>
               ))}
