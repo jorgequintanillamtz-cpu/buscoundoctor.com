@@ -1,15 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Search, Stethoscope, MapPin } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const triggerClass =
-  "border-0 shadow-none h-auto p-0 gap-1 focus:ring-0 focus:ring-offset-0 text-sm font-medium text-foreground bg-transparent [&>span]:line-clamp-1";
-const contentClass =
-  "rounded-2xl border-none shadow-xl p-2 bg-white";
-const itemClass =
-  "rounded-xl px-3 py-2 text-sm cursor-pointer focus:bg-brand-bluePale focus:text-brand-navy data-[state=checked]:bg-brand-bluePale data-[state=checked]:text-brand-navy";
+  "h-auto text-sm font-medium text-foreground bg-transparent";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -36,6 +32,11 @@ export default function Header() {
       base44.entities.Specialty.filter({ active: true }).catch(() => []),
     ]).then(([z, s]) => { setZones(z); setSpecialties(s); });
   }, []);
+
+  // El combobox trabaja con "id" como valor; aquí usamos el nombre como id
+  // porque el resto de la lógica de búsqueda ya trabaja con nombres.
+  const specialtyOptions = useMemo(() => specialties.map((s) => ({ id: s.name, name: s.name })), [specialties]);
+  const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
 
   const submitSearch = (e) => {
     e?.preventDefault?.();
@@ -72,30 +73,30 @@ export default function Header() {
             <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
-                <Select value={searchSpecialty} onValueChange={setSearchSpecialty}>
-                  <SelectTrigger className={triggerClass}>
-                    <SelectValue placeholder="Todas las especialidades" />
-                  </SelectTrigger>
-                  <SelectContent className={contentClass}>
-                    {specialties.map((s) => (
-                      <SelectItem key={s.id} value={s.name} className={itemClass} icon={Stethoscope} hint="Especialidad">{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  options={specialtyOptions}
+                  value={searchSpecialty}
+                  onChange={setSearchSpecialty}
+                  placeholder="Todas las especialidades"
+                  searchPlaceholder="Buscar especialidad..."
+                  icon={Stethoscope}
+                  hint="Especialidad"
+                  triggerClassName={triggerClass}
+                />
               </div>
               <div className="w-px h-8 bg-border flex-shrink-0" />
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Zona</label>
-                <Select value={searchZone} onValueChange={setSearchZone}>
-                  <SelectTrigger className={triggerClass}>
-                    <SelectValue placeholder="Monterrey y San Pedro" />
-                  </SelectTrigger>
-                  <SelectContent className={contentClass}>
-                    {zones.map((z) => (
-                      <SelectItem key={z.id} value={z.name} className={itemClass} icon={MapPin} hint="Zona">{z.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  options={zoneOptions}
+                  value={searchZone}
+                  onChange={setSearchZone}
+                  placeholder="Monterrey y San Pedro"
+                  searchPlaceholder="Buscar zona..."
+                  icon={MapPin}
+                  hint="Zona"
+                  triggerClassName={triggerClass}
+                />
               </div>
               <button
                 type="button"
@@ -130,28 +131,28 @@ export default function Header() {
         {
           <div className="lg:hidden flex items-center gap-2 mb-3">
             <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
-              <Select value={searchSpecialty} onValueChange={setSearchSpecialty}>
-                <SelectTrigger className={triggerClass}>
-                  <SelectValue placeholder="Especialidad" />
-                </SelectTrigger>
-                <SelectContent className={contentClass}>
-                  {specialties.map((s) => (
-                    <SelectItem key={s.id} value={s.name} className={itemClass} icon={Stethoscope} hint="Especialidad">{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                options={specialtyOptions}
+                value={searchSpecialty}
+                onChange={setSearchSpecialty}
+                placeholder="Especialidad"
+                searchPlaceholder="Buscar especialidad..."
+                icon={Stethoscope}
+                hint="Especialidad"
+                triggerClassName={triggerClass}
+              />
             </div>
             <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
-              <Select value={searchZone} onValueChange={setSearchZone}>
-                <SelectTrigger className={triggerClass}>
-                  <SelectValue placeholder="Zona" />
-                </SelectTrigger>
-                <SelectContent className={contentClass}>
-                  {zones.map((z) => (
-                    <SelectItem key={z.id} value={z.name} className={itemClass} icon={MapPin} hint="Zona">{z.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                options={zoneOptions}
+                value={searchZone}
+                onChange={setSearchZone}
+                placeholder="Zona"
+                searchPlaceholder="Buscar zona..."
+                icon={MapPin}
+                hint="Zona"
+                triggerClassName={triggerClass}
+              />
             </div>
             <button
               type="button"
