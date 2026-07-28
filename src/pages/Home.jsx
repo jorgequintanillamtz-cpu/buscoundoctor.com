@@ -461,52 +461,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Blog: slider deslizable con todos los artículos */}
-      {posts.length > 0 &&
-      <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Blog de salud</h2>
-            <div className="flex items-center gap-2">
-              <Link to="/blog" className="text-sm font-medium text-primary hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
-                <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => scrollBlog(-1)}
-                aria-label="Artículos anteriores"
-                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollBlog(1)}
-                aria-label="Artículos siguientes"
-                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-          <div
-            ref={blogScrollRef}
-            className="flex gap-4 sm:gap-5 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {posts.map((p, i) =>
-            <div key={p.id} className="flex-shrink-0 w-[82vw] sm:w-[320px] snap-start">
-              <BlogCard post={p} priority={i === 0} />
-            </div>
-            )}
-          </div>
-          <Link to="/blog" className="text-sm font-medium text-primary sm:hidden flex items-center gap-1 mt-4">
-            <span>Ver todos los artículos</span> <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        </section>
-      }
-
       {/* Boletín de salud por correo */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
         <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
@@ -726,6 +680,52 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Blog: última sección antes del footer, slider deslizable con todos los artículos */}
+      {posts.length > 0 &&
+      <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Blog de salud</h2>
+            <div className="flex items-center gap-2">
+              <Link to="/blog" className="text-sm font-medium text-primary hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
+                <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => scrollBlog(-1)}
+                aria-label="Artículos anteriores"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollBlog(1)}
+                aria-label="Artículos siguientes"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div
+            ref={blogScrollRef}
+            className="flex gap-4 sm:gap-5 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {posts.map((p, i) =>
+            <div key={p.id} className="flex-shrink-0 w-[82vw] sm:w-[320px] snap-start">
+              <BlogCard post={p} priority={i === 0} />
+            </div>
+            )}
+          </div>
+          <Link to="/blog" className="text-sm font-medium text-primary sm:hidden flex items-center gap-1 mt-4">
+            <span>Ver todos los artículos</span> <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+        </section>
+      }
     </div>);
 
 }
