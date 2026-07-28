@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import SpecialistCard from "@/components/SpecialistCard";
+import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -131,8 +132,16 @@ export default function SpecialtyZonePage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {filtered.map((s, i) => <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="especialidad_zona" />)}
+        <div className="flex flex-col xl:flex-row gap-6">
+          <div className="flex-1 grid grid-cols-1 gap-4">
+            {filtered.map((s, i) => <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="especialidad_zona" />)}
+          </div>
+          {/* Mapa lateral (solo escritorio grande) con los especialistas visibles */}
+          <div className="hidden xl:block xl:w-[380px] flex-shrink-0">
+            <div className="sticky top-20">
+              <SpecialistsMapPanel specialists={filtered} />
+            </div>
+          </div>
         </div>
       )}
     </div>
