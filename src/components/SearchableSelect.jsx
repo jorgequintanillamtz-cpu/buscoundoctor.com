@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -6,6 +7,11 @@ import { cn } from "@/lib/utils";
  * Campo de texto con autocompletado: escribes directo en el recuadro y la
  * lista se filtra en vivo, desplegándose debajo (igual que el buscador de
  * Doctoralia). Se usa en todos los buscadores del sitio.
+ *
+ * La lista se renderiza en un portal (fuera del árbol del contenedor) porque
+ * varios buscadores viven dentro de una "píldora" con overflow-hidden para
+ * lograr las esquinas redondeadas — si la lista se quedara adentro, ese
+ * overflow-hidden la recortaría y nunca se vería, aunque sí esté abierta.
  */
 export default function SearchableSelect({
   options,
@@ -20,7 +26,9 @@ export default function SearchableSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [rect, setRect] = useState(null);
   const wrapperRef = useRef(null);
+  const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
   const selected = options.find((o) => o.id === value);
@@ -31,11 +39,25 @@ export default function SearchableSelect({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, open]);
 
+  // Recalcula la posición del recuadro cada vez que se abre (y si la
+  // ventana hace scroll o cambia de tamaño mientras está abierto).
+  useEffect(() => {
+    if (!open || !wrapperRef.current) return;
+    const update = () => setRect(wrapperRef.current.getBoundingClientRect());
+    update();
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [open]);
+
   useEffect(() => {
     function handleClickOutside(e) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-        setOpen(false);
-      }
+      const inWrapper = wrapperRef.current?.contains(e.target);
+      const inDropdown = dropdownRef.current?.contains(e.target);
+      if (!inWrapper && !inDropdown) setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -51,6 +73,11 @@ export default function SearchableSelect({
     inputRef.current?.blur();
   };
 
+  const openList = () => {
+    setOpen(true);
+    inputRef.current?.select();
+  };
+
   return (
     <div ref={wrapperRef} className="relative">
       <div className={cn("flex items-center gap-1", triggerClassName)}>
@@ -59,32 +86,32 @@ export default function SearchableSelect({
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
-          onFocus={(e) => { setOpen(true); e.target.select(); }}
-          onClick={(e) => { setOpen(true); e.target.select(); }}
+          onFocus={openList}
+          onClick={openList}
           placeholder={placeholder}
           className="w-full min-w-0 bg-transparent outline-none placeholder:text-muted-foreground truncate"
         />
         <button
           type="button"
           tabIndex={-1}
-          onClick={() => {
-            setOpen((o) => {
-              const next = !o;
-              if (next) inputRef.current?.select();
-              return next;
-            });
-            inputRef.current?.focus();
-          }}
+          onClick={() => (open ? setOpen(false) : openList())}
           className="flex-shrink-0"
         >
           <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform", open && "rotate-180")} />
         </button>
       </div>
 
-      {open && (
+      {open && rect && createPortal(
         <div
+          ref={dropdownRef}
+          style={{
+            position: "fixed",
+            top: rect.bottom + 8,
+            left: rect.left,
+            width: rect.width,
+          }}
           className={cn(
-            "absolute left-0 right-0 top-full mt-2 z-50 max-h-80 overflow-y-auto rounded-2xl border-none shadow-xl bg-white p-2",
+            "z-[999] max-h-80 overflow-y-auto rounded-2xl border-none shadow-xl bg-white p-2",
             contentClassName
           )}
         >
@@ -111,7 +138,8 @@ export default function SearchableSelect({
               </button>
             ))
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
