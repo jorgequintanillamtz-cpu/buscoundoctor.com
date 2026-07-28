@@ -21,6 +21,7 @@ const CIUDADES = [
 
 export default function AdminFaqs() {
   const [pages, setPages] = useState([]);
+  const [especialidades, setEspecialidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterEspecialidad, setFilterEspecialidad] = useState("");
@@ -38,6 +39,12 @@ export default function AdminFaqs() {
   };
 
   useEffect(() => { loadPages(); }, []);
+  useEffect(() => {
+    base44.entities.Specialty.filter({ active: true }).then((list) => {
+      setEspecialidades(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
+    }).catch(() => {});
+  }, []);
+
 
   const handleDelete = async (id) => {
     if (!confirm("¿Eliminar esta página de FAQs y todas sus preguntas?")) return;
