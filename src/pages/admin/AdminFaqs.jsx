@@ -132,7 +132,7 @@ export default function AdminFaqs() {
         <select value={filterEspecialidad} onChange={e => setFilterEspecialidad(e.target.value)}
           className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring">
           <option value="">Todas las especialidades</option>
-          {ESPECIALIDADES.map(e => <option key={e}>{e}</option>)}
+          {especialidades.map(e => <option key={e}>{e}</option>)}
         </select>
         <select value={filterCiudad} onChange={e => setFilterCiudad(e.target.value)}
           className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring">
