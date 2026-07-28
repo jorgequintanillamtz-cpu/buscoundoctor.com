@@ -307,29 +307,31 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
-                <Select value={heroSpecialty} onValueChange={setHeroSpecialty}>
-                  <SelectTrigger className={triggerClass}>
-                    <SelectValue placeholder="¿Qué especialidad buscas?" />
-                  </SelectTrigger>
-                  <SelectContent className={contentClass}>
-                    {specialties.map((s) => (
-                      <SelectItem key={s.id} value={s.name} className={itemClass} icon={Stethoscope} hint="Especialidad">{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  options={specialtyOptions}
+                  value={heroSpecialty}
+                  onChange={setHeroSpecialty}
+                  placeholder="¿Qué especialidad buscas?"
+                  searchPlaceholder="Buscar especialidad..."
+                  icon={Stethoscope}
+                  hint="Especialidad"
+                  triggerClassName={triggerClass}
+                />
               </div>
               <div className="hidden sm:block w-px bg-border" />
               <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Zona</label>
-                <Select value={heroZone} onValueChange={setHeroZone}>
-                  <SelectTrigger className={triggerClass}>
-                    <SelectValue placeholder="Monterrey y San Pedro" />
-                  </SelectTrigger>
-                  <SelectContent className={contentClass}>
-                    {zones.map((z) => (
-                      <SelectItem key={z.id} value={z.name} className={itemClass} icon={MapPin} hint="Zona">{z.name}</SelectItem>
-                    ))}
-                  </SelectContent>
+                <SearchableSelect
+                  options={zoneOptions}
+                  value={heroZone}
+                  onChange={setHeroZone}
+                  placeholder="Monterrey y San Pedro"
+                  searchPlaceholder="Buscar zona..."
+                  icon={MapPin}
+                  hint="Zona"
+                  triggerClassName={triggerClass}
+                />
+              </div>
                 </Select>
               </div>
               <button
