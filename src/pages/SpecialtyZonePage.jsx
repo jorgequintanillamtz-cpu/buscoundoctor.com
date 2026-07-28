@@ -89,8 +89,8 @@ export default function SpecialtyZonePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <Breadcrumb className="mb-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <Breadcrumb className="mb-3">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild><Link to="/">Inicio</Link></BreadcrumbLink>
@@ -110,11 +110,11 @@ export default function SpecialtyZonePage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="mb-8">
+      <div className="mb-5">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
           {pluralize(specialty.name)} en {zone.name}
         </h1>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="text-sm text-muted-foreground mt-1.5">
           {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
         </p>
       </div>
