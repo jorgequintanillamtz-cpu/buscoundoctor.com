@@ -474,34 +474,33 @@ export default function Home() {
       </section>
       }
 
-      {/* Cómo verificamos a nuestros médicos */}
+      {/* Cómo verificamos a nuestros médicos: rápido de leer, directo a la confianza */}
       <section>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-          <div className="text-center mb-8">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Cómo verificamos a nuestros médicos</h2>
-            <p className="text-sm text-muted-foreground mt-1">Cada perfil pasa por una revisión real antes de publicarse</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
-                <UploadCloud className="w-6 h-6 text-brand-blue" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+          <div className="bg-brand-navy rounded-3xl overflow-hidden relative p-7 sm:p-10">
+            <div className="absolute -top-12 -right-12 w-56 h-56 bg-brand-blue/20 rounded-full pointer-events-none" />
+            <div className="relative flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 border-2 border-brand-bluePale flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-10 h-10 sm:w-12 sm:h-12 text-brand-bluePale" />
               </div>
-              <h3 className="font-heading font-semibold text-sm text-brand-navy">Sube su cédula profesional</h3>
-              <p className="text-xs text-muted-foreground mt-1">Al registrarse, el médico carga su documento oficial.</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
-                <FileText className="w-6 h-6 text-brand-blue" />
+              <div className="text-center md:text-left">
+                <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white">Cada médico, verificado a mano</h2>
+                <p className="text-white/70 mt-2 max-w-lg">Nada de perfiles falsos: revisamos la cédula profesional de cada doctor antes de publicarlo.</p>
+                <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2.5 mt-5">
+                  <span className="flex items-center gap-2 text-sm text-white/90">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    Cédula subida y revisada
+                  </span>
+                  <span className="flex items-center gap-2 text-sm text-white/90">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    Revisión manual, no automática
+                  </span>
+                  <span className="flex items-center gap-2 text-sm text-white/90">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    Sello visible en su perfil
+                  </span>
+                </div>
               </div>
-              <h3 className="font-heading font-semibold text-sm text-brand-navy">Revisión manual</h3>
-              <p className="text-xs text-muted-foreground mt-1">Nuestro equipo revisa cada documento antes de aprobar.</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-border/50 flex items-center justify-center mb-3">
-                <Award className="w-6 h-6 text-brand-blue" />
-              </div>
-              <h3 className="font-heading font-semibold text-sm text-brand-navy">Sello de verificado</h3>
-              <p className="text-xs text-muted-foreground mt-1">Solo entonces aparece el badge de cédula verificada.</p>
             </div>
           </div>
         </div>
