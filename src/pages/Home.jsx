@@ -488,29 +488,19 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por qué BuscoUnDoctor: diferenciador corto y directo */}
+      {/* Por qué BuscoUnDoctor: mensaje único y directo sobre precio */}
       <section className="bg-brand-blueLight/60">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 text-center">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
-            Nunca pagas de más por usar BuscoUnDoctor
-          </h2>
-          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
-            El precio de tu consulta lo pone el médico, no nosotros. No cobramos comisión ni agregamos ningún cargo — pagas exactamente lo mismo que si lo contactaras por tu cuenta.
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 mt-8">
-            <div>
-              <p className="font-heading font-extrabold text-2xl text-brand-blue">$0</p>
-              <p className="text-xs text-muted-foreground mt-1">Cargos extra por usar la plataforma</p>
-            </div>
-            <div>
-              <p className="font-heading font-extrabold text-2xl text-brand-blue">100%</p>
-              <p className="text-xs text-muted-foreground mt-1">De tu pago es para el médico</p>
-            </div>
-            <div>
-              <p className="font-heading font-extrabold text-2xl text-brand-blue">Mismo precio</p>
-              <p className="text-xs text-muted-foreground mt-1">Que si agendas directo, sin la plataforma</p>
-            </div>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 text-center">
+          <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
+            <CheckCircle className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
           </div>
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
+            Sin sobreprecio por agendar aquí
+          </h2>
+          <p className="text-muted-foreground mt-2 max-w-lg mx-auto">
+            Pagas exactamente lo mismo que si agendaras directo con el médico. BuscoUnDoctor no le suma ni un peso a tu consulta.
+          </p>
         </div>
       </section>
 
