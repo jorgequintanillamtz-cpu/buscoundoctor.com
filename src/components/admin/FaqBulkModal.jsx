@@ -190,13 +190,13 @@ Devuelve JSON con array "faqs": [{question, answer, category, primary_keyword, s
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Especialidades</label>
-                <button onClick={() => setSelectedEsp(allEsp ? new Set() : new Set(ESPECIALIDADES))}
+                <button onClick={() => setSelectedEsp(allEsp ? new Set() : new Set(especialidades))}
                   className="text-xs text-primary hover:underline">
                   {allEsp ? "Deseleccionar todas" : "Seleccionar todas"}
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {ESPECIALIDADES.map(e => (
+                {especialidades.map(e => (
                   <button key={e} onClick={() => toggleEsp(e)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${selectedEsp.has(e) ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border text-muted-foreground hover:border-primary/40"}`}>
                     {e}
