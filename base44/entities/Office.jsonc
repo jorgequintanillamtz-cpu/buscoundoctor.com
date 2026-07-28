@@ -32,6 +32,16 @@
         "type": "string"
       }
     },
+    "latitude": {
+      "type": "number",
+      "title": "Latitud",
+      "description": "Coordenada calculada autom\u00e1ticamente (a partir del enlace de Maps o de la direcci\u00f3n) para ubicar el pin en el mapa"
+    },
+    "longitude": {
+      "type": "number",
+      "title": "Longitud",
+      "description": "Coordenada calculada autom\u00e1ticamente (a partir del enlace de Maps o de la direcci\u00f3n) para ubicar el pin en el mapa"
+    },
     "is_primary": {
       "type": "boolean",
       "title": "Consultorio principal",
