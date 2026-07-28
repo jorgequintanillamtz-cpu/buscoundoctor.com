@@ -1,23 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Link } from "react-router-dom";
 import { Star, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { resolveOfficeCoords } from "@/lib/officeGeo";
 
 // Centro por defecto: Monterrey / San Pedro Garza García
 const MTY_CENTER = [25.6714, -100.3096];
-
-function extractCoords(mapsUrl) {
-  if (!mapsUrl) return null;
-  const match = mapsUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (!match) return null;
-  const lat = parseFloat(match[1]);
-  const lng = parseFloat(match[2]);
-  if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
-  return [lat, lng];
-}
 
 function pinIcon() {
   return L.divIcon({
@@ -50,41 +41,74 @@ function FitToMarkers({ points }) {
 /**
  * Mapa lateral (escritorio) con un pin por cada especialista visible en la
  * lista de resultados. Usa Leaflet + OpenStreetMap (sin llave de API).
- * Las coordenadas se extraen del enlace de Google Maps (`maps_url`) que el
- * médico pega al registrar su consultorio; si no hay enlace con coordenadas
- * ("@lat,lng"), ese especialista simplemente no aparece en el mapa.
+ *
+ * Las coordenadas de cada consultorio se resuelven en este orden:
+ * 1) lat/lng ya guardados en el consultorio (lo normal, quedan cacheados
+ *    desde que el médico guarda su consultorio en el panel).
+ * 2) el enlace de Google Maps, si es un enlace largo con "@lat,lng".
+ * 3) geocodificación de la dirección de texto (respaldo automático para
+ *    consultorios que se guardaron antes de tener este cálculo, o cuyo
+ *    enlace de Maps es un link corto de "compartir" sin coordenadas).
  */
 export default function SpecialistsMapPanel({ specialists }) {
   const [offices, setOffices] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [markers, setMarkers] = useState([]);
   const icon = useMemo(() => pinIcon(), []);
+  const resolveTokenRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
-    base44.entities.Office.list().then((all) => {
-      if (mounted) { setOffices(all || []); setLoaded(true); }
-    }).catch(() => { if (mounted) setLoaded(true); });
+    Promise.all([
+      base44.entities.Office.list().catch(() => []),
+      base44.entities.Zone.list().catch(() => []),
+    ]).then(([offs, zns]) => {
+      if (mounted) { setOffices(offs || []); setZones(zns || []); setLoaded(true); }
+    });
     return () => { mounted = false; };
   }, []);
 
-  const markers = useMemo(() => {
-    if (!loaded) return [];
-    const bySpecialist = new Map();
+  // Consultorio principal (o el primero disponible) por especialista.
+  const officeBySpecialist = useMemo(() => {
+    const map = new Map();
     for (const office of offices) {
-      const coords = extractCoords(office.maps_url);
-      if (!coords) continue;
-      const existing = bySpecialist.get(office.specialist_id);
-      if (!existing || office.is_primary) {
-        bySpecialist.set(office.specialist_id, { coords, address: office.address_line });
+      const existing = map.get(office.specialist_id);
+      if (!existing || office.is_primary) map.set(office.specialist_id, office);
+    }
+    return map;
+  }, [offices]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const token = ++resolveTokenRef.current;
+
+    async function resolveAll() {
+      const pending = specialists
+        .map((specialist) => {
+          const office = officeBySpecialist.get(specialist.id);
+          return office ? { specialist, office } : null;
+        })
+        .filter(Boolean);
+
+      const results = [];
+      for (const { specialist, office } of pending) {
+        if (resolveTokenRef.current !== token) return; // la lista cambió, cancelar
+        const zone = zones.find((z) => z.id === office.zone_id);
+        const coords = await resolveOfficeCoords(office, {
+          zoneName: zone?.name,
+          city: zone?.city,
+          state: zone?.state,
+        });
+        if (coords) {
+          results.push({ specialist, coords: [coords.latitude, coords.longitude], address: office.address_line });
+          if (resolveTokenRef.current === token) setMarkers([...results]);
+        }
       }
     }
-    return specialists
-      .map((s) => {
-        const match = bySpecialist.get(s.id);
-        return match ? { specialist: s, ...match } : null;
-      })
-      .filter(Boolean);
-  }, [offices, specialists, loaded]);
+
+    resolveAll();
+  }, [loaded, specialists, officeBySpecialist, zones]);
 
   const points = markers.map((m) => m.coords);
 
@@ -146,7 +170,9 @@ export default function SpecialistsMapPanel({ specialists }) {
         <p className="text-xs text-muted-foreground">
           {markers.length > 0
             ? `${markers.length} de ${specialists.length} especialista${specialists.length !== 1 ? "s" : ""} con ubicación en el mapa`
-            : "Aún no hay ubicaciones para mostrar en el mapa"}
+            : loaded
+              ? "Ubicando consultorios en el mapa…"
+              : "Cargando mapa…"}
         </p>
       </div>
     </div>
