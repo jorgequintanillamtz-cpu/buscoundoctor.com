@@ -365,23 +365,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Zonas: busca por zona (solo las que realmente cubrimos) */}
-      {zones.length > 0 && (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-2 pb-10">
-        <div className="text-center mb-7">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Busca por zona</h2>
-          <p className="text-sm text-muted-foreground mt-1">Especialistas verificados en las zonas donde trabajamos</p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-4">
-          {zones.map((z) => (
-            <div key={z.id} className="w-40">
-              <ZoneCard zone={z} />
-            </div>
-          ))}
-        </div>
-      </section>
-      )}
-
       {/* Aseguradoras en nuestro sistema */}
       {insurers.length > 0 && (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
