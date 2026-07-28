@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SpecialistCard from "@/components/SpecialistCard";
+import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -280,6 +281,13 @@ export default function SpecialtyPage() {
               {filtered.map((s, i) => <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="especialidad" />)}
             </div>
           )}
+        </div>
+
+        {/* Mapa lateral (solo escritorio grande) con los especialistas visibles */}
+        <div className="hidden xl:block xl:w-[380px] flex-shrink-0">
+          <div className="sticky top-20">
+            <SpecialistsMapPanel specialists={filtered} />
+          </div>
         </div>
       </div>
 
