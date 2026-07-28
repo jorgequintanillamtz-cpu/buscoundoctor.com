@@ -116,13 +116,6 @@ export default function Header() {
                 <span className="text-sm font-semibold">Regístrate</span>
               </span>
             </Link>
-            <Link to="/admin" className="flex items-center gap-2 text-brand-navy/80 hover:text-brand-navy transition-colors">
-              <UserRound className="w-5 h-5 flex-shrink-0" />
-              <span className="leading-tight text-left">
-                <span className="block text-[10px] text-brand-navy/50">Cuenta</span>
-                <span className="text-sm font-semibold">Iniciar sesión</span>
-              </span>
-            </Link>
           </nav>
 
           <button
@@ -181,13 +174,6 @@ export default function Header() {
             className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
               <Stethoscope className="w-4 h-4" />
               ¿Eres médico? Regístrate
-            </Link>
-            <Link
-            to="/admin"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-              <UserRound className="w-4 h-4" />
-              Iniciar sesión
             </Link>
           </nav>
         </div>
