@@ -4,6 +4,7 @@ import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loade
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { resolveOfficeCoords } from "@/lib/officeGeo";
 
 const DAYS = [
   { v: 0, label: "Domingo" },
