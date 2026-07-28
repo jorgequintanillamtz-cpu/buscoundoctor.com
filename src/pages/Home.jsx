@@ -517,6 +517,57 @@ export default function Home() {
         </div>
       </section>
 
+      {/* BuscoUnDoctor vs. Recomendaciones: comparativa visual */}
+      <section className="bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-14">
+          <div className="text-center mb-9">
+            <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Comparativa</p>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
+              ¿Y si solo le preguntas a un conocido?
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">Así se compara buscar en BuscoUnDoctor contra ir con recomendaciones</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+            {/* Columna: BuscoUnDoctor */}
+            <div className="bg-white border-2 border-brand-blue rounded-3xl shadow-lg p-5 sm:p-7">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-4.5 h-4.5 text-white" />
+                </div>
+                <h3 className="font-heading font-bold text-base text-brand-navy">BuscoUnDoctor.com</h3>
+              </div>
+              <ul className="space-y-3">
+                {COMPARISON_ROWS.map((row, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground leading-snug">{row.us}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Columna: Recomendaciones */}
+            <div className="bg-muted/40 border border-border/60 rounded-3xl p-5 sm:p-7">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="w-9 h-9 rounded-full bg-muted-foreground/20 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-4.5 h-4.5 text-muted-foreground" />
+                </div>
+                <h3 className="font-heading font-bold text-base text-muted-foreground">Recomendaciones de conocidos</h3>
+              </div>
+              <ul className="space-y-3">
+                {COMPARISON_ROWS.map((row, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <X className="w-4 h-4 text-muted-foreground/70 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground leading-snug">{row.them}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Preguntas frecuentes */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
         <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-14">
