@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Stethoscope, MapPin } from "lucide-react";
+import { Menu, X, Search, Stethoscope, MapPin, LogIn } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -107,7 +107,14 @@ export default function Header() {
             </div>
           }
 
-          <nav className="hidden md:flex items-center gap-6 flex-shrink-0">
+          <nav className="hidden md:flex items-center gap-5 flex-shrink-0">
+            <Link to="/panel-medico" className="flex items-center gap-2 text-brand-navy/80 hover:text-brand-navy transition-colors">
+              <LogIn className="w-5 h-5 text-brand-blue flex-shrink-0" />
+              <span className="leading-tight text-left">
+                <span className="block text-[10px] text-brand-navy/50">¿Ya tienes perfil?</span>
+                <span className="text-sm font-semibold">Iniciar sesión</span>
+              </span>
+            </Link>
             <Link to="/registro-medico" className="flex items-center gap-2 text-brand-navy/80 hover:text-brand-navy transition-colors">
               <Stethoscope className="w-5 h-5 text-brand-blue flex-shrink-0" />
               <span className="leading-tight text-left">
@@ -165,6 +172,13 @@ export default function Header() {
       {open &&
       <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
           <nav className="flex flex-col px-4 py-3 gap-1">
+            <Link
+            to="/panel-medico"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
+              <LogIn className="w-4 h-4" />
+              Iniciar sesión (médicos)
+            </Link>
             <Link
             to="/registro-medico"
             onClick={() => setOpen(false)}
