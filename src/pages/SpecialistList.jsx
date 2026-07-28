@@ -110,8 +110,8 @@ export default function SpecialistList() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <Breadcrumb className="mb-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <Breadcrumb className="mb-3">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild><Link to="/">Inicio</Link></BreadcrumbLink>
@@ -122,7 +122,7 @@ export default function SpecialistList() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="mb-8">
+      <div className="mb-5">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
           {filterSpecialty || "Todos los especialistas"}
         </h1>
