@@ -96,6 +96,8 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
+  const specialtyOptions = useMemo(() => specialties.map((s) => ({ id: s.name, name: s.name })), [specialties]);
+  const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
   const [testimonials, setTestimonials] = useState([]);
   const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
