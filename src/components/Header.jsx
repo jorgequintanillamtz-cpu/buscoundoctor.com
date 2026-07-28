@@ -78,7 +78,6 @@ export default function Header() {
                   value={searchSpecialty}
                   onChange={setSearchSpecialty}
                   placeholder="Todas las especialidades"
-                  searchPlaceholder="Buscar especialidad..."
                   icon={Stethoscope}
                   hint="Especialidad"
                   triggerClassName={triggerClass}
@@ -92,7 +91,6 @@ export default function Header() {
                   value={searchZone}
                   onChange={setSearchZone}
                   placeholder="Monterrey y San Pedro"
-                  searchPlaceholder="Buscar zona..."
                   icon={MapPin}
                   hint="Zona"
                   triggerClassName={triggerClass}
@@ -136,7 +134,6 @@ export default function Header() {
                 value={searchSpecialty}
                 onChange={setSearchSpecialty}
                 placeholder="Especialidad"
-                searchPlaceholder="Buscar especialidad..."
                 icon={Stethoscope}
                 hint="Especialidad"
                 triggerClassName={triggerClass}
@@ -148,7 +145,6 @@ export default function Header() {
                 value={searchZone}
                 onChange={setSearchZone}
                 placeholder="Zona"
-                searchPlaceholder="Buscar zona..."
                 icon={MapPin}
                 hint="Zona"
                 triggerClassName={triggerClass}

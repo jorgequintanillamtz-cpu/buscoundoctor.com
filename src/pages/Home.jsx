@@ -310,7 +310,6 @@ export default function Home() {
                   value={heroSpecialty}
                   onChange={setHeroSpecialty}
                   placeholder="¿Qué especialidad buscas?"
-                  searchPlaceholder="Buscar especialidad..."
                   icon={Stethoscope}
                   hint="Especialidad"
                   triggerClassName={triggerClass}
@@ -324,7 +323,6 @@ export default function Home() {
                   value={heroZone}
                   onChange={setHeroZone}
                   placeholder="Monterrey y San Pedro"
-                  searchPlaceholder="Buscar zona..."
                   icon={MapPin}
                   hint="Zona"
                   triggerClassName={triggerClass}
