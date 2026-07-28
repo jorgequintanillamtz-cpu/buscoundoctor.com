@@ -381,20 +381,63 @@ export default function Home() {
       </section>
       )}
 
-      {/* Featured: carrusel horizontal */}
+      {/* Featured: carrusel deslizable, tarjetas compactas */}
       <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialistas destacados</h2>
-            <Link to="/especialistas" className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all">
-              <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible" style={{ scrollbarWidth: 'none' }}>
-            {featured.map((s, i) =>
-            <div key={s.id} className="flex-shrink-0 w-[85vw] sm:w-auto">
-              <SpecialistCard specialist={s} priority={i === 0} sourcePage="home" />
+            <div className="flex items-center gap-2">
+              <Link to="/especialistas" className="text-sm font-medium text-brand-blue hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
+                <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => scrollFeatured(-1)}
+                aria-label="Especialistas anteriores"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 bg-white items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollFeatured(1)}
+                aria-label="Especialistas siguientes"
+                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 bg-white items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
+          </div>
+          <div
+            ref={featuredScrollRef}
+            className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {featured.map((s) =>
+            <Link
+              key={s.id}
+              to={`/especialista/${s.slug}`}
+              className="group flex-shrink-0 w-36 sm:w-40 snap-start bg-white border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:border-brand-blue/30 transition-all duration-300"
+            >
+              <div className="aspect-square bg-muted overflow-hidden">
+                {s.profile_photo ? (
+                  <img src={s.profile_photo} alt={s.full_name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
+                ) : (
+                  <div className="w-full h-full bg-brand-bluePale flex items-center justify-center">
+                    <span className="font-heading font-bold text-2xl text-brand-blue/50">
+                      {s.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="px-3 py-3 text-center">
+                <h3 className="font-heading font-bold text-sm text-foreground leading-tight">{s.full_name}</h3>
+                <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
+                {s.years_experience &&
+                <p className="text-muted-foreground text-[11px] mt-1">{s.years_experience}+ años de experiencia</p>
+                }
+              </div>
+            </Link>
             )}
           </div>
         </div>
