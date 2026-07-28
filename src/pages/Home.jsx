@@ -564,55 +564,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por qué vale la pena registrarte como doctor */}
-      <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
-        <div className="text-center mb-8">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Por qué vale la pena registrarte como doctor</h2>
-          <p className="text-sm text-muted-foreground mt-1">Así es como BuscoUnDoctor te ayuda a conseguir más pacientes</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[
-            { icon: ShieldCheck, title: "Perfil verificado, gratis", desc: "Creamos y verificamos tu perfil sin ningún costo." },
-            { icon: MessageCircle, title: "Contacto directo, sin comisión", desc: "Los pacientes te escriben por WhatsApp, sin intermediarios ni comisiones por consulta." },
-            { icon: Search, title: "Te encuentran en Google", desc: "Tu perfil aparece en búsquedas por especialidad y zona en Monterrey y San Pedro." },
-            { icon: UserCog, title: "Edítalo cuando quieras", desc: "Actualiza tu información, horarios y consultorios desde tu propio panel." },
-          ].map((item, i) => (
-            <div key={i} className="bg-card border border-border/50 rounded-2xl p-5 text-center">
-              <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center mx-auto mb-3">
-                <item.icon className="w-5 h-5 text-brand-blue" />
-              </div>
-              <h3 className="font-heading font-semibold text-sm text-foreground">{item.title}</h3>
-              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-        </div>
-      </section>
-
-      {/* Preguntas frecuentes para médicos */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-14">
-        <h3 className="font-heading font-bold text-lg text-foreground text-center mb-5">Preguntas frecuentes para médicos</h3>
-        <div className="space-y-2.5">
-          {[
-            { q: "¿Cuánto cuesta registrarme?", a: "Nada. Crear y verificar tu perfil es completamente gratuito." },
-            { q: "¿Cuánto tarda la verificación de mi cédula?", a: "Nuestro equipo revisa los documentos manualmente en unos días hábiles tras tu registro." },
-            { q: "¿Puedo editar mi perfil después de publicarlo?", a: "Sí, desde tu panel puedes actualizar tu información, consultorios y horarios cuando quieras." },
-            { q: "¿Qué pasa si mi cédula no se puede verificar?", a: "Te contactaremos para aclarar cualquier duda o para que reintentes con el documento correcto." },
-          ].map((f, i) => (
-            <details key={i} className="group bg-card border border-border/50 rounded-2xl px-5 py-4">
-              <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-heading font-semibold text-sm text-foreground">
-                {f.q}
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-accent flex items-center justify-center text-brand-blue group-open:rotate-45 transition-transform">
-                  <Plus className="w-3.5 h-3.5" />
-                </span>
-              </summary>
-              <p className="text-sm text-muted-foreground leading-relaxed mt-3">{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
       {/* CTA: banner navy de ancho completo */}
       <section className="relative bg-brand-navy overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
