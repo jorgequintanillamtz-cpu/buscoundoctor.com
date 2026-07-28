@@ -60,13 +60,21 @@ export default function SearchableSelect({
           value={query}
           onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
           onFocus={(e) => { setOpen(true); e.target.select(); }}
+          onClick={(e) => { setOpen(true); e.target.select(); }}
           placeholder={placeholder}
           className="w-full min-w-0 bg-transparent outline-none placeholder:text-muted-foreground truncate"
         />
         <button
           type="button"
           tabIndex={-1}
-          onClick={() => { setOpen((o) => !o); inputRef.current?.focus(); }}
+          onClick={() => {
+            setOpen((o) => {
+              const next = !o;
+              if (next) inputRef.current?.select();
+              return next;
+            });
+            inputRef.current?.focus();
+          }}
           className="flex-shrink-0"
         >
           <ChevronDown className={cn("h-4 w-4 opacity-50 transition-transform", open && "rotate-180")} />
