@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import SearchBar from "../components/SearchBar";
 import SpecialistCard from "../components/SpecialistCard";
+import SpecialistsMapPanel from "../components/SpecialistsMapPanel";
 import { Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
@@ -299,6 +300,13 @@ export default function SpecialistList() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Mapa lateral (solo escritorio grande) con los especialistas visibles */}
+        <div className="hidden xl:block xl:w-[380px] flex-shrink-0">
+          <div className="sticky top-20">
+            <SpecialistsMapPanel specialists={filtered} />
+          </div>
         </div>
       </div>
     </div>
