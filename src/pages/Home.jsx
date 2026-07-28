@@ -97,7 +97,6 @@ export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const blogScrollRef = useRef(null);
-  const featuredScrollRef = useRef(null);
 
   const submitNewsletter = async (e) => {
     e.preventDefault();
@@ -134,12 +133,6 @@ export default function Home() {
 
   const scrollBlog = (dir) => {
     const el = blogScrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
-  };
-
-  const scrollFeatured = (dir) => {
-    const el = featuredScrollRef.current;
     if (!el) return;
     el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
   };
