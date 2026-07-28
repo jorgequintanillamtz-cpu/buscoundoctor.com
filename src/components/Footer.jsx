@@ -3,28 +3,10 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 export default function Footer() {
-  const [topSpecialties, setTopSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Specialist.filter({ active: true }).catch(() => []),
-      base44.entities.Zone.filter({ active: true }).catch(() => []),
-    ]).then(([specialists, zoneList]) => {
-      // Solo especialidades con al menos un especialista real, ordenadas por
-      // cuántos doctores tiene cada una (para no enlazar a listados vacíos).
-      const counts = {};
-      for (const s of specialists) {
-        if (!s.specialty) continue;
-        counts[s.specialty] = (counts[s.specialty] || 0) + 1;
-      }
-      const sorted = Object.entries(counts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6)
-        .map(([name]) => name);
-      setTopSpecialties(sorted);
-      setZones(zoneList);
-    });
+    base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
   }, []);
 
   return (
@@ -45,21 +27,12 @@ export default function Footer() {
             </p>
           </div>
 
-          {topSpecialties.length > 0 && (
-            <div>
-              <h4 className="font-heading font-semibold text-sm mb-4 text-white">Especialidades</h4>
-              <div className="flex flex-col gap-2.5">
-                {topSpecialties.map((name) => (
-                  <Link
-                    key={name}
-                    to={`/especialistas?specialty=${encodeURIComponent(name)}`}
-                    className="text-sm text-white/60 hover:text-brand-blue transition-colors">
-                    {name}
-                  </Link>
-                ))}
-              </div>
+          <div>
+            <h4 className="font-heading font-semibold text-sm mb-4 text-white">Especialidades</h4>
+            <div className="flex flex-col gap-2.5">
+              <Link to="/especialistas" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Explorar especialidades</Link>
             </div>
-          )}
+          </div>
 
           {zones.length > 0 && (
             <div>
