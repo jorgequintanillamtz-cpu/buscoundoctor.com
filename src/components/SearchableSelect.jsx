@@ -40,10 +40,17 @@ export default function SearchableSelect({
   }, [value, open]);
 
   // Recalcula la posición del recuadro cada vez que se abre (y si la
-  // ventana hace scroll o cambia de tamaño mientras está abierto).
+  // ventana hace scroll o cambia de tamaño mientras está abierto). El ancho
+  // de la lista se amplía un poco respecto al del campo para que los
+  // nombres largos de especialidad no se corten, sin salirse de la pantalla.
   useEffect(() => {
     if (!open || !wrapperRef.current) return;
-    const update = () => setRect(wrapperRef.current.getBoundingClientRect());
+    const update = () => {
+      const r = wrapperRef.current.getBoundingClientRect();
+      const width = Math.min(Math.max(r.width, 300), window.innerWidth - 32);
+      const left = Math.min(r.left, window.innerWidth - width - 16);
+      setRect({ top: r.bottom, left: Math.max(left, 16), width });
+    };
     update();
     window.addEventListener("scroll", update, true);
     window.addEventListener("resize", update);
@@ -106,7 +113,7 @@ export default function SearchableSelect({
           ref={dropdownRef}
           style={{
             position: "fixed",
-            top: rect.bottom + 8,
+            top: rect.top + 8,
             left: rect.left,
             width: rect.width,
           }}
@@ -124,7 +131,7 @@ export default function SearchableSelect({
                 type="button"
                 onClick={() => selectOption(o)}
                 className={cn(
-                  "w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-left transition-colors hover:bg-brand-bluePale hover:text-brand-navy",
+                  "w-full flex items-start gap-2.5 rounded-xl px-3 py-2.5 text-sm text-left transition-colors hover:bg-brand-bluePale hover:text-brand-navy",
                   o.id === value && "bg-brand-bluePale text-brand-navy"
                 )}
               >
@@ -133,8 +140,8 @@ export default function SearchableSelect({
                     <Icon className="w-4 h-4 text-brand-blue" />
                   </span>
                 )}
-                <span className="flex-1 min-w-0 truncate">{o.name}</span>
-                {hint && <span className="text-xs text-muted-foreground flex-shrink-0">{hint}</span>}
+                <span className="flex-1 min-w-0 leading-snug">{o.name}</span>
+                {hint && <span className="text-xs text-muted-foreground flex-shrink-0 pt-0.5">{hint}</span>}
               </button>
             ))
           )}
