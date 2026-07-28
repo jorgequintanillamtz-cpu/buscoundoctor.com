@@ -365,6 +365,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Zonas: busca por zona (solo las que realmente cubrimos) */}
+      {zones.length > 0 && (
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-2 pb-10">
+        <div className="text-center mb-7">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Busca por zona</h2>
+          <p className="text-sm text-muted-foreground mt-1">Especialistas verificados en las zonas donde trabajamos</p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-4">
+          {zones.map((z) => (
+            <div key={z.id} className="w-40">
+              <ZoneCard zone={z} />
+            </div>
+          ))}
+        </div>
+      </section>
+      )}
+
       {/* Aseguradoras en nuestro sistema */}
       {insurers.length > 0 && (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
@@ -428,6 +445,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonios */}
+      {testimonials.length >= 3 &&
+      <section className="relative bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+          <div className="text-center mb-8">
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Qué dicen nuestros pacientes?</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            {testimonials.slice(0, 3).map((r) =>
+            <div key={r.id} className="flex flex-col bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
+              <div className="flex gap-0.5 mb-3">
+                {[1, 2, 3, 4, 5].map((s) =>
+                <Star key={s} className={`w-4 h-4 ${r.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
+                )}
+              </div>
+              <p className="text-sm text-foreground leading-relaxed flex-1">"{r.comment}"</p>
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <p className="font-heading font-semibold text-sm text-brand-navy">{r.patient_name || "Paciente verificado"}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {r.specialist_name}{r.specialistSpecialty ? ` — ${r.specialistSpecialty}` : ""}
+                </p>
+              </div>
+            </div>
+            )}
+          </div>
+        </div>
+      </section>
+      }
+
       {/* Cómo verificamos a nuestros médicos */}
       <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
@@ -461,62 +507,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Boletín de salud por correo */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
-        <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-          <div className="w-14 h-14 rounded-2xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-            <Mail className="w-6 h-6 text-brand-blue" />
-          </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="font-heading font-bold text-lg text-foreground">Recibe contenido de salud en tu correo</h3>
-            <p className="text-sm text-muted-foreground mt-1">Artículos y consejos de nuestros especialistas, sin spam.</p>
-          </div>
-          <form onSubmit={submitNewsletter} className="flex items-center gap-2 w-full sm:w-auto">
-            <input
-              type="email"
-              value={newsletterEmail}
-              onChange={(e) => { setNewsletterEmail(e.target.value); setNewsletterStatus("idle"); }}
-              placeholder="tu@correo.com"
-              className="flex-1 sm:w-56 h-11 px-4 rounded-full border border-border/60 text-sm outline-none focus:border-brand-blue"
-            />
-            <button type="submit" disabled={newsletterStatus === "loading"} className="h-11 px-5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold flex items-center gap-1.5 flex-shrink-0">
-              {newsletterStatus === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-              Suscribirme
-            </button>
-          </form>
-        </div>
-        {newsletterStatus === "success" && <p className="text-sm text-emerald-600 text-center sm:text-left mt-3">¡Listo! Ya estás suscrito.</p>}
-        {newsletterStatus === "error" && <p className="text-sm text-red-500 text-center sm:text-left mt-3">Ingresa un correo válido para suscribirte.</p>}
-      </section>
-
-      {/* Testimonios */}
-      {testimonials.length >= 3 &&
-      <section className="relative bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <div className="text-center mb-8">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Qué dicen nuestros pacientes?</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            {testimonials.slice(0, 3).map((r) =>
-            <div key={r.id} className="flex flex-col bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
-              <div className="flex gap-0.5 mb-3">
-                {[1, 2, 3, 4, 5].map((s) =>
-                <Star key={s} className={`w-4 h-4 ${r.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
-                )}
-              </div>
-              <p className="text-sm text-foreground leading-relaxed flex-1">"{r.comment}"</p>
-              <div className="mt-4 pt-4 border-t border-border/50">
-                <p className="font-heading font-semibold text-sm text-brand-navy">{r.patient_name || "Paciente verificado"}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {r.specialist_name}{r.specialistSpecialty ? ` — ${r.specialistSpecialty}` : ""}
-                </p>
-              </div>
+      {/* Por qué BuscoUnDoctor: diferenciador corto y directo */}
+      <section className="bg-brand-blueLight/60">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 text-center">
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
+            Sin comisiones. Sin intermediarios.
+          </h2>
+          <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
+            Hablas directo con el médico por WhatsApp — nosotros no cobramos por la consulta ni gestionamos tu cita.
+          </p>
+          <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 mt-8">
+            <div>
+              <p className="font-heading font-extrabold text-2xl text-brand-blue">$0</p>
+              <p className="text-xs text-muted-foreground mt-1">Costo para el paciente</p>
             </div>
-            )}
+            <div>
+              <p className="font-heading font-extrabold text-2xl text-brand-blue">100%</p>
+              <p className="text-xs text-muted-foreground mt-1">Contacto directo por WhatsApp</p>
+            </div>
+            <div>
+              <p className="font-heading font-extrabold text-2xl text-brand-blue">0</p>
+              <p className="text-xs text-muted-foreground mt-1">Comisiones ni intermediarios</p>
+            </div>
           </div>
         </div>
       </section>
-      }
 
       {/* Preguntas frecuentes */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
@@ -594,6 +609,34 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Boletín de salud por correo */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-10">
+        <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
+          <div className="w-14 h-14 rounded-2xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+            <Mail className="w-6 h-6 text-brand-blue" />
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="font-heading font-bold text-lg text-foreground">Recibe contenido de salud en tu correo</h3>
+            <p className="text-sm text-muted-foreground mt-1">Artículos y consejos de nuestros especialistas, sin spam.</p>
+          </div>
+          <form onSubmit={submitNewsletter} className="flex items-center gap-2 w-full sm:w-auto">
+            <input
+              type="email"
+              value={newsletterEmail}
+              onChange={(e) => { setNewsletterEmail(e.target.value); setNewsletterStatus("idle"); }}
+              placeholder="tu@correo.com"
+              className="flex-1 sm:w-56 h-11 px-4 rounded-full border border-border/60 text-sm outline-none focus:border-brand-blue"
+            />
+            <button type="submit" disabled={newsletterStatus === "loading"} className="h-11 px-5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold flex items-center gap-1.5 flex-shrink-0">
+              {newsletterStatus === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+              Suscribirme
+            </button>
+          </form>
+        </div>
+        {newsletterStatus === "success" && <p className="text-sm text-emerald-600 text-center sm:text-left mt-3">¡Listo! Ya estás suscrito.</p>}
+        {newsletterStatus === "error" && <p className="text-sm text-red-500 text-center sm:text-left mt-3">Ingresa un correo válido para suscribirte.</p>}
       </section>
 
       {/* Blog: última sección antes del footer, slider deslizable con todos los artículos */}
