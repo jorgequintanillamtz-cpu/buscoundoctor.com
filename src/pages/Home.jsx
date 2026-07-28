@@ -138,6 +138,12 @@ export default function Home() {
     el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
   };
 
+  const scrollFeatured = (dir) => {
+    const el = featuredScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
+  };
+
   useEffect(() => {
     async function load() {
       const [specs, specialists, blogPosts, zoneList, topReviews, allActive, insurerList] = await Promise.all([
