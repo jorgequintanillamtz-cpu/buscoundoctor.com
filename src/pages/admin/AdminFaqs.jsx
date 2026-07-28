@@ -4,7 +4,6 @@ import { base44 } from "@/api/base44Client";
 import { Plus, Search, Filter, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { base44 } from "@/api/base44Client";
 import FaqGeneratorModal from "@/components/admin/FaqGeneratorModal";
 import FaqBulkModal from "@/components/admin/FaqBulkModal";
 
