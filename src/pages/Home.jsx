@@ -528,9 +528,9 @@ export default function Home() {
             <p className="text-sm text-muted-foreground mt-1">Así se compara buscar en BuscoUnDoctor contra ir con recomendaciones</p>
           </div>
 
-          <div className="relative bg-white rounded-3xl border border-border/60 shadow-xl overflow-hidden">
+          <div className="relative bg-white rounded-3xl border border-border/60 shadow-xl">
             {/* Encabezados */}
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-2 rounded-t-3xl overflow-hidden">
               <div className="bg-brand-navy px-3 sm:px-8 py-5 sm:py-6 flex items-center gap-2 sm:gap-2.5">
                 <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0">
                   <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
@@ -547,13 +547,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Insignia "VS" superpuesta en la división */}
-            <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-brand-blue shadow-md flex items-center justify-center z-10">
-              <span className="font-heading font-extrabold text-[10px] sm:text-xs text-brand-blue">VS</span>
+            {/* Insignia "VS", en el flujo normal, superpuesta a la división con márgenes negativos (no se recorta) */}
+            <div className="relative z-10 flex justify-center -mt-5 -mb-5 sm:-mt-6 sm:-mb-6">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-brand-blue shadow-md flex items-center justify-center">
+                <span className="font-heading font-extrabold text-[10px] sm:text-xs text-brand-blue">VS</span>
+              </div>
             </div>
 
             {/* Filas de comparación, una junto a la otra */}
-            <div>
+            <div className="rounded-b-3xl overflow-hidden">
               {COMPARISON_ROWS.map((row, i) => (
                 <div key={i} className={`grid grid-cols-2 ${i % 2 === 1 ? "bg-brand-blueLight/40" : "bg-white"}`}>
                   <div className="flex items-start gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-3 sm:py-3.5 border-r border-border/40">
