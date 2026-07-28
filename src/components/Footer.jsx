@@ -1,6 +1,32 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 
 export default function Footer() {
+  const [topSpecialties, setTopSpecialties] = useState([]);
+  const [zones, setZones] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      base44.entities.Specialist.filter({ active: true }).catch(() => []),
+      base44.entities.Zone.filter({ active: true }).catch(() => []),
+    ]).then(([specialists, zoneList]) => {
+      // Solo especialidades con al menos un especialista real, ordenadas por
+      // cuántos doctores tiene cada una (para no enlazar a listados vacíos).
+      const counts = {};
+      for (const s of specialists) {
+        if (!s.specialty) continue;
+        counts[s.specialty] = (counts[s.specialty] || 0) + 1;
+      }
+      const sorted = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name]) => name);
+      setTopSpecialties(sorted);
+      setZones(zoneList);
+    });
+  }, []);
+
   return (
     <footer className="bg-brand-navy border-t border-white/10 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -19,25 +45,37 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
-            <h4 className="font-heading font-semibold text-sm mb-4 text-white">Especialidades</h4>
-            <div className="flex flex-col gap-2.5">
-              <Link to="/especialistas?specialty=Psicología" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Psicología</Link>
-              <Link to="/especialistas?specialty=Dentista" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Dentista</Link>
-              <Link to="/especialistas?specialty=Ginecología" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Ginecología</Link>
-              <Link to="/especialistas?specialty=Pediatría" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Pediatría</Link>
+          {topSpecialties.length > 0 && (
+            <div>
+              <h4 className="font-heading font-semibold text-sm mb-4 text-white">Especialidades</h4>
+              <div className="flex flex-col gap-2.5">
+                {topSpecialties.map((name) => (
+                  <Link
+                    key={name}
+                    to={`/especialistas?specialty=${encodeURIComponent(name)}`}
+                    className="text-sm text-white/60 hover:text-brand-blue transition-colors">
+                    {name}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div>
-            <h4 className="font-heading font-semibold text-sm mb-4 text-white">Zonas</h4>
-            <div className="flex flex-col gap-2.5">
-              <Link to="/especialistas?zone=San Pedro Garza García" className="text-sm text-white/60 hover:text-brand-blue transition-colors">San Pedro Garza García</Link>
-              <Link to="/especialistas?zone=Del Valle" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Del Valle</Link>
-              <Link to="/especialistas?zone=Cumbres" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Cumbres</Link>
-              <Link to="/especialistas?zone=Contry" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Contry</Link>
+          {zones.length > 0 && (
+            <div>
+              <h4 className="font-heading font-semibold text-sm mb-4 text-white">Zonas</h4>
+              <div className="flex flex-col gap-2.5">
+                {zones.map((z) => (
+                  <Link
+                    key={z.id}
+                    to={`/especialistas?zone=${encodeURIComponent(z.name)}`}
+                    className="text-sm text-white/60 hover:text-brand-blue transition-colors">
+                    {z.name}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div>
             <h4 className="font-heading font-semibold text-sm mb-4 text-white">Navegación</h4>
@@ -48,13 +86,15 @@ export default function Footer() {
               <Link to="/nosotros" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Nosotros</Link>
               <Link to="/contacto" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Contacto</Link>
               <Link to="/preguntas-frecuentes" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Preguntas Frecuentes</Link>
-              <Link to="/registro-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Registro Doctor</Link>
-              <Link to="/panel-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Acceso para médicos</Link>
-              <Link to="/admin" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Admin</Link>
             </div>
           </div>
 
           <div>
+            <h4 className="font-heading font-semibold text-sm mb-4 text-white">Para médicos</h4>
+            <div className="flex flex-col gap-2.5 mb-6">
+              <Link to="/registro-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Registro Doctor</Link>
+              <Link to="/panel-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Acceso para médicos</Link>
+            </div>
             <h4 className="font-heading font-semibold text-sm mb-4 text-white">Contacto</h4>
             <div className="flex flex-col gap-2.5 text-sm text-white/60">
               <span>Monterrey, Nuevo León</span>
