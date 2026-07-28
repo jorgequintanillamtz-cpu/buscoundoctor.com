@@ -98,6 +98,7 @@ export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const blogScrollRef = useRef(null);
+  const featuredScrollRef = useRef(null);
 
   const submitNewsletter = async (e) => {
     e.preventDefault();
