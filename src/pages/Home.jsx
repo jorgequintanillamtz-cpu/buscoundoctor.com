@@ -237,18 +237,28 @@ export default function Home() {
               </div>
               <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-8">
                 <span className="text-white block">
-                  Siéntete <span className="border-b-4 border-brand-blue">mejor</span> al
+                  Encuentra a tu especialista
                 </span>
-                <span className="text-white block">encontrar tu especialista</span>
+                <span className="text-white block">
+                  en <span className="border-b-4 border-brand-blue">Monterrey</span> y San Pedro
+                </span>
               </h1>
 
               {/* Iconos de confianza, estilo referencia */}
               <div className="flex flex-wrap gap-x-8 gap-y-6">
                 {TRUST_STRIP.map((item) => (
                   <div key={item.key} className="flex flex-col items-start gap-2 max-w-[160px]">
-                    <div className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center">
-                      <item.icon className="w-5 h-5 text-white" />
-                    </div>
+                    {item.key === "resenas" ? (
+                      <div className="h-11 flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center">
+                        <item.icon className="w-5 h-5 text-white" />
+                      </div>
+                    )}
                     <p className="text-xs sm:text-sm text-white/80 leading-snug">
                       {item.key === "perfiles" && totalSpecialists > 0
                         ? `Perfiles verificados de ${totalSpecialists} especialistas`
