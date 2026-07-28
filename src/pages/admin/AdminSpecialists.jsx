@@ -151,11 +151,18 @@ export default function AdminSpecialists() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="font-heading font-bold text-2xl text-foreground">Especialistas</h1>
         <Button className="gap-2 rounded-xl" onClick={openCreate}>
           <Plus className="w-4 h-4" /> Agregar
         </Button>
+      </div>
+
+      <div className="flex items-center gap-2 mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 w-fit">
+        <Star className="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" />
+        <p className="text-sm text-amber-800">
+          <span className="font-semibold">{specialists.filter((s) => s.featured).length}</span> destacado{specialists.filter((s) => s.featured).length !== 1 ? "s" : ""} para la página principal
+        </p>
       </div>
 
       <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
@@ -168,6 +175,7 @@ export default function AdminSpecialists() {
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Zona</th>
                 <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">WhatsApp</th>
                 <th className="text-center px-4 py-3 font-medium text-muted-foreground">Activo</th>
+                <th className="text-center px-4 py-3 font-medium text-muted-foreground">Página principal</th>
                 <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
               </tr>
             </thead>
@@ -180,6 +188,21 @@ export default function AdminSpecialists() {
                   <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{s.whatsapp}</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`inline-block w-2 h-2 rounded-full ${s.active !== false ? 'bg-green-500' : 'bg-red-400'}`} />
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      type="button"
+                      onClick={() => toggleFeatured(s.id, s.full_name, !!s.featured)}
+                      title={s.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
+                      aria-label={s.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
+                      className={`w-7 h-7 rounded-full inline-flex items-center justify-center border transition-colors ${
+                        s.featured
+                          ? "bg-amber-100 border-amber-200 text-amber-500 hover:bg-amber-200"
+                          : "bg-transparent border-border text-muted-foreground hover:border-amber-300 hover:text-amber-400"
+                      }`}
+                    >
+                      <Star className="w-3.5 h-3.5" fill={s.featured ? "currentColor" : "none"} />
+                    </button>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
