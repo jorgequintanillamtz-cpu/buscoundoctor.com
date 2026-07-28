@@ -380,43 +380,19 @@ export default function Home() {
       </section>
       )}
 
-      {/* Featured: carrusel deslizable, tarjetas compactas */}
+      {/* Featured: 6 doctores distribuidos en fila completa (próximamente slider hasta 12) */}
       <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-          <div className="flex items-center justify-between mb-5">
+          <div className="text-center mb-9">
+            <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Nuestro equipo</p>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialistas destacados</h2>
-            <div className="flex items-center gap-2">
-              <Link to="/especialistas" className="text-sm font-medium text-brand-blue hidden sm:flex items-center gap-1 hover:gap-2 transition-all mr-2">
-                <span>Ver todos</span> <ArrowRight className="w-4 h-4" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => scrollFeatured(-1)}
-                aria-label="Especialistas anteriores"
-                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 bg-white items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollFeatured(1)}
-                aria-label="Especialistas siguientes"
-                className="hidden sm:flex w-9 h-9 rounded-full border border-border/50 bg-white items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
           </div>
-          <div
-            ref={featuredScrollRef}
-            className="flex overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth divide-x divide-border/50"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {featured.map((s) =>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 sm:gap-x-6 gap-y-9 justify-items-center">
+            {featured.slice(0, 6).map((s) =>
             <Link
               key={s.id}
               to={`/especialista/${s.slug}`}
-              className="group flex-shrink-0 snap-start flex flex-col items-center px-3 sm:px-4"
+              className="group flex flex-col items-center w-full max-w-[10rem]"
             >
               <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl bg-muted overflow-hidden flex-shrink-0">
                 {s.profile_photo ? (
@@ -429,7 +405,7 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="pt-3 text-center w-28 sm:w-32">
+              <div className="pt-3 text-center">
                 <h3 className="font-heading font-bold text-sm text-foreground leading-tight group-hover:text-brand-blue transition-colors">{s.full_name}</h3>
                 <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
                 {s.years_experience &&
@@ -438,6 +414,13 @@ export default function Home() {
               </div>
             </Link>
             )}
+          </div>
+          <div className="flex justify-center mt-10">
+            <Link
+              to="/especialistas"
+              className="inline-flex items-center gap-2 bg-white hover:bg-accent border border-border text-brand-navy text-sm font-semibold px-6 py-2.5 rounded-full shadow-sm transition-colors">
+              Ver todos los doctores
+            </Link>
           </div>
         </div>
       </section>
