@@ -337,20 +337,20 @@ export default function Home() {
       {/* Specialties: las 8 más buscadas */}
       <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-          <div className="mb-5">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialidades más buscadas</h2>
+          <div className="text-center mb-9">
+            <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Especialidades</p>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Atención médica integral para cada necesidad</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-10 gap-y-8">
             {sortByPopularity(specialties).slice(0, 8).map((s) =>
             <SpecialtyCard key={s.id} specialty={s} />
             )}
           </div>
-          <div className="flex justify-center mt-7">
+          <div className="flex justify-center mt-10">
             <Link
               to="/especialistas"
-              className="inline-flex items-center gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-semibold px-6 py-3 rounded-full transition-colors">
+              className="inline-flex items-center gap-2 bg-white hover:bg-accent border border-border text-brand-navy text-sm font-semibold px-6 py-2.5 rounded-full shadow-sm transition-colors">
               Ver todas las especialidades
-              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
