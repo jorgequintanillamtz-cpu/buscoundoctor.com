@@ -533,7 +533,7 @@ export default function Home() {
             <div className="bg-white border-2 border-brand-blue rounded-3xl shadow-lg p-5 sm:p-7">
               <div className="flex items-center gap-2.5 mb-5">
                 <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-4.5 h-4.5 text-white" />
+                  <ShieldCheck className="w-4 h-4 text-white" />
                 </div>
                 <h3 className="font-heading font-bold text-base text-brand-navy">BuscoUnDoctor.com</h3>
               </div>
@@ -551,7 +551,7 @@ export default function Home() {
             <div className="bg-muted/40 border border-border/60 rounded-3xl p-5 sm:p-7">
               <div className="flex items-center gap-2.5 mb-5">
                 <div className="w-9 h-9 rounded-full bg-muted-foreground/20 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-4.5 h-4.5 text-muted-foreground" />
+                  <Users className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <h3 className="font-heading font-bold text-base text-muted-foreground">Recomendaciones de conocidos</h3>
               </div>
