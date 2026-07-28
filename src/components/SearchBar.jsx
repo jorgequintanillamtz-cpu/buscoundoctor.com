@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Stethoscope, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -52,26 +52,26 @@ export default function SearchBar({ className = "" }) {
   return (
     <div className={className}>
       <div className="flex flex-col sm:flex-row gap-2">
-        <Select value={specId} onValueChange={setSpecId}>
-          <SelectTrigger className="w-full h-12 sm:h-14 rounded-2xl text-sm border-border/80 focus:ring-2 focus:ring-primary/20 focus:border-primary">
-            <SelectValue placeholder="¿Qué especialidad buscas?" />
-          </SelectTrigger>
-          <SelectContent>
-            {specialties.map((s) => (
-              <SelectItem key={s.id} value={s.id} icon={Stethoscope} hint="Especialidad">{s.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={zoneId} onValueChange={setZoneId}>
-          <SelectTrigger className="w-full sm:w-44 h-12 sm:h-14 rounded-2xl text-sm border-border/80 focus:ring-2 focus:ring-primary/20 focus:border-primary">
-            <SelectValue placeholder="Zona (opcional)" />
-          </SelectTrigger>
-          <SelectContent>
-            {zones.map((z) => (
-              <SelectItem key={z.id} value={z.id} icon={MapPin} hint="Zona">{z.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          options={specialties}
+          value={specId}
+          onChange={setSpecId}
+          placeholder="¿Qué especialidad buscas?"
+          searchPlaceholder="Buscar especialidad..."
+          icon={Stethoscope}
+          hint="Especialidad"
+          triggerClassName="w-full h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+        />
+        <SearchableSelect
+          options={zones}
+          value={zoneId}
+          onChange={setZoneId}
+          placeholder="Zona (opcional)"
+          searchPlaceholder="Buscar zona..."
+          icon={MapPin}
+          hint="Zona"
+          triggerClassName="w-full sm:w-44 h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+        />
         <Button
           onClick={handleBuscar}
           disabled={!canBuscar}
