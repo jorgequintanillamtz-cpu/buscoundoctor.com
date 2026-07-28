@@ -20,6 +20,18 @@
       "type": "string",
       "title": "Tel\u00e9fono"
     },
+    "maps_url": {
+      "type": "string",
+      "title": "Enlace de Google Maps",
+      "description": "Enlace para compartir de Google Maps del consultorio (usado para mostrar el pin en el mapa)"
+    },
+    "photos": {
+      "type": "array",
+      "title": "Fotos del consultorio",
+      "items": {
+        "type": "string"
+      }
+    },
     "is_primary": {
       "type": "boolean",
       "title": "Consultorio principal",
