@@ -104,25 +104,7 @@ export default function Home() {
   const [heroSpecialty, setHeroSpecialty] = useState("");
   const [heroZone, setHeroZone] = useState("");
   const [insurers, setInsurers] = useState([]);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const blogScrollRef = useRef(null);
-
-  const submitNewsletter = async (e) => {
-    e.preventDefault();
-    if (!newsletterEmail || !newsletterEmail.includes("@")) {
-      setNewsletterStatus("error");
-      return;
-    }
-    setNewsletterStatus("loading");
-    try {
-      await base44.entities.NewsletterSubscriber.create({ email: newsletterEmail, source: "home" });
-      setNewsletterStatus("success");
-      setNewsletterEmail("");
-    } catch {
-      setNewsletterStatus("error");
-    }
-  };
 
   const submitHeroSearch = () => {
     // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
