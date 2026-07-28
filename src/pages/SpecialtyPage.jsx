@@ -147,8 +147,8 @@ export default function SpecialtyPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <Breadcrumb className="mb-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <Breadcrumb className="mb-3">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild><Link to="/">Inicio</Link></BreadcrumbLink>
@@ -164,24 +164,24 @@ export default function SpecialtyPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="mb-8">
+      <div className="mb-5">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialty.name}</h1>
-        <section className="mt-4 max-w-3xl space-y-3">
+        <p className="text-sm text-muted-foreground mt-1.5">
+          {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
+        </p>
+        <section className="mt-3 max-w-3xl space-y-2">
           {(specialty.description
             ? specialty.description.split(/\n{2,}|\n/).filter(Boolean)
             : ["Contenido en preparación."]
           ).map((para, i) => (
-            <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
+            <p key={i} className="text-muted-foreground leading-relaxed text-sm">{para}</p>
           ))}
         </section>
-        <p className="text-sm text-muted-foreground mt-2">
-          {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
-        </p>
       </div>
 
       {subspecialties.length > 0 && (
-        <section className="mb-8">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-3">Subespecialidades</h2>
+        <section className="mb-5">
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Subespecialidades</h2>
           <div className="flex flex-wrap gap-2">
             {subspecialties.map(sub => (
               <Link key={sub.id} to={`/especialidad/${sub.slug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
