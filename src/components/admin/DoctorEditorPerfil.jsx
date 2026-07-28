@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Upload, X, Plus, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-const ESPECIALIDADES = [
-  "Medicina General", "Cardiología", "Pediatría", "Ginecología", "Ortopedia",
-  "Dermatología", "Neurología", "Psiquiatría", "Oftalmología", "Otorrinolaringología",
-  "Urología", "Gastroenterología", "Endocrinología", "Oncología", "Reumatología",
-  "Dentista", "Nutrición", "Psicología",
-];
 
 function ToolbarBtn({ onClick, title, children, active }) {
   return (
@@ -70,6 +63,13 @@ export default function DoctorEditorPerfil({ form, update }) {
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showEspecialidadList, setShowEspecialidadList] = useState(false);
+  const [especialidades, setEspecialidades] = useState([]);
+
+  useEffect(() => {
+    base44.entities.Specialty.filter({ active: true }).then((list) => {
+      setEspecialidades(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
+    }).catch(() => {});
+  }, []);
 
   const words = (form.description || "").trim().split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(1, Math.ceil(words / 200));
@@ -205,7 +205,7 @@ export default function DoctorEditorPerfil({ form, update }) {
                 />
                 {showEspecialidadList && (
                   <div className="absolute z-20 mt-1 w-full bg-card border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                    {ESPECIALIDADES.filter(e => e.toLowerCase().includes((form.specialty || "").toLowerCase())).map(e => (
+                    {especialidades.filter(e => e.toLowerCase().includes((form.specialty || "").toLowerCase())).map(e => (
                       <button key={e} type="button" onMouseDown={() => update("specialty", e)}
                         className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors">{e}</button>
                     ))}
