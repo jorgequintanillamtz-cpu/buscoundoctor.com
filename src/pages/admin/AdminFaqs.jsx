@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Plus, Search, Filter, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { base44 } from "@/api/base44Client";
 import FaqGeneratorModal from "@/components/admin/FaqGeneratorModal";
 import FaqBulkModal from "@/components/admin/FaqBulkModal";
 
@@ -12,12 +13,6 @@ const STATUS_CONFIG = {
   publicado: { label: "Publicado", className: "bg-green-100 text-green-700" },
   programado: { label: "Programado", className: "bg-blue-100 text-blue-700" },
 };
-
-const ESPECIALIDADES = [
-  "Cardiología", "Dermatología", "Pediatría", "Ginecología", "Oftalmología",
-  "Ortopedia", "Urología", "Neurología", "Psiquiatría", "Gastroenterología",
-  "Endocrinología", "Oncología", "Reumatología", "Otorrinolaringología", "Medicina General",
-];
 
 const CIUDADES = [
   "Monterrey", "San Pedro Garza García", "San Nicolás de los Garza",
