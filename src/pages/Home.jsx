@@ -492,23 +492,23 @@ export default function Home() {
       <section className="bg-brand-blueLight/60">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 text-center">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
-            Sin comisiones. Sin intermediarios.
+            Nunca pagas de más por usar BuscoUnDoctor
           </h2>
           <p className="text-muted-foreground mt-2 max-w-xl mx-auto">
-            Hablas directo con el médico por WhatsApp — nosotros no cobramos por la consulta ni gestionamos tu cita.
+            El precio de tu consulta lo pone el médico, no nosotros. No cobramos comisión ni agregamos ningún cargo — pagas exactamente lo mismo que si lo contactaras por tu cuenta.
           </p>
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-6 mt-8">
             <div>
               <p className="font-heading font-extrabold text-2xl text-brand-blue">$0</p>
-              <p className="text-xs text-muted-foreground mt-1">Costo para el paciente</p>
+              <p className="text-xs text-muted-foreground mt-1">Cargos extra por usar la plataforma</p>
             </div>
             <div>
               <p className="font-heading font-extrabold text-2xl text-brand-blue">100%</p>
-              <p className="text-xs text-muted-foreground mt-1">Contacto directo por WhatsApp</p>
+              <p className="text-xs text-muted-foreground mt-1">De tu pago es para el médico</p>
             </div>
             <div>
-              <p className="font-heading font-extrabold text-2xl text-brand-blue">0</p>
-              <p className="text-xs text-muted-foreground mt-1">Comisiones ni intermediarios</p>
+              <p className="font-heading font-extrabold text-2xl text-brand-blue">Mismo precio</p>
+              <p className="text-xs text-muted-foreground mt-1">Que si agendas directo, sin la plataforma</p>
             </div>
           </div>
         </div>
