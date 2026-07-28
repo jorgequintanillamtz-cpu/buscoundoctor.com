@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, Stethoscope, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -58,7 +58,7 @@ export default function SearchBar({ className = "" }) {
           </SelectTrigger>
           <SelectContent>
             {specialties.map((s) => (
-              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              <SelectItem key={s.id} value={s.id} icon={Stethoscope} hint="Especialidad">{s.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -68,7 +68,7 @@ export default function SearchBar({ className = "" }) {
           </SelectTrigger>
           <SelectContent>
             {zones.map((z) => (
-              <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+              <SelectItem key={z.id} value={z.id} icon={MapPin} hint="Zona">{z.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
