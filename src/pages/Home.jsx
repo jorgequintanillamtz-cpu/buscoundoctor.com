@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, CheckCircle, X, Mail, Loader2 } from "lucide-react";
