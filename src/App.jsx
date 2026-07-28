@@ -13,6 +13,7 @@ import SpecialistList from './pages/SpecialistList';
 import SpecialistProfile from './pages/SpecialistProfile';
 import SpecialtyPage from './pages/SpecialtyPage';
 import SpecialtyZonePage from './pages/SpecialtyZonePage';
+import ConditionsPage from './pages/ConditionsPage';
 import BlogList from './pages/BlogList';
 import BlogPostPage from './pages/BlogPostPage';
 import Dashboard from './pages/admin/Dashboard';
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
         <Route path="/especialidad/:slug" element={<SpecialtyPage />} />
         <Route path="/especialidad/:slug/:zonaSlug" element={<SpecialtyZonePage />} />
+        <Route path="/enfermedades" element={<ConditionsPage />} />
         <Route path="/blog" element={<BlogList />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/nosotros" element={<About />} />
