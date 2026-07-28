@@ -363,12 +363,15 @@ export default function Home() {
           <p className="text-sm text-muted-foreground mt-1">Cada médico indica en su perfil cuáles acepta — no todos aceptan todas.</p>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-          {insurers.map((ins) => (
+          {insurers.filter((ins) => ins.logo_url).map((ins) => (
             <div key={ins.id} className="flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-2.5">
-              {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-5 h-5 object-contain" />}
+              <img src={ins.logo_url} alt={ins.name} className="w-5 h-5 object-contain" />
               <span className="text-sm font-medium text-foreground">{ins.name}</span>
             </div>
           ))}
+          {insurers.some((ins) => !ins.logo_url) && (
+            <span className="text-sm text-muted-foreground px-2">y muchas otras más</span>
+          )}
         </div>
       </section>
       )}
