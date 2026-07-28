@@ -1,14 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Zap, X, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-const ESPECIALIDADES = [
-  "Cardiología", "Dermatología", "Pediatría", "Ginecología", "Oftalmología",
-  "Ortopedia", "Urología", "Neurología", "Psiquiatría", "Gastroenterología",
-  "Endocrinología", "Oncología", "Reumatología", "Otorrinolaringología", "Medicina General",
-];
 
 const CIUDADES = [
   "Monterrey", "San Pedro Garza García", "San Nicolás de los Garza",
@@ -24,16 +18,25 @@ function slugify(text) {
 }
 
 export default function FaqBulkModal({ onClose, onSuccess }) {
-  const [selectedEsp, setSelectedEsp] = useState(new Set(ESPECIALIDADES));
+  const [especialidades, setEspecialidades] = useState([]);
+  const [selectedEsp, setSelectedEsp] = useState(new Set());
   const [selectedCities, setSelectedCities] = useState(new Set(["Monterrey", "San Pedro Garza García"]));
   const [cantidad, setCantidad] = useState(10);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0, current: "" });
   const [results, setResults] = useState(null);
 
+  useEffect(() => {
+    base44.entities.Specialty.filter({ active: true }).then((list) => {
+      const names = list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es"));
+      setEspecialidades(names);
+      setSelectedEsp(new Set(names));
+    }).catch(() => {});
+  }, []);
+
   const toggleEsp = (e) => setSelectedEsp(prev => { const s = new Set(prev); s.has(e) ? s.delete(e) : s.add(e); return s; });
   const toggleCity = (c) => setSelectedCities(prev => { const s = new Set(prev); s.has(c) ? s.delete(c) : s.add(c); return s; });
-  const allEsp = selectedEsp.size === ESPECIALIDADES.length;
+  const allEsp = especialidades.length > 0 && selectedEsp.size === especialidades.length;
   const allCities = selectedCities.size === CIUDADES.length;
 
   const totalPages = selectedEsp.size * selectedCities.size;
