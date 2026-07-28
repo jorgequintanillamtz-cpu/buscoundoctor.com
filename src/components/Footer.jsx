@@ -77,10 +77,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 text-center">
+        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3">
           <p className="text-xs text-white/50">
             © {new Date().getFullYear()} buscoundoctor.com — Todos los derechos reservados
           </p>
+          <Link to="/admin" className="text-xs text-white/40 hover:text-white/70 transition-colors">
+            Iniciar sesión
+          </Link>
         </div>
       </div>
     </footer>
