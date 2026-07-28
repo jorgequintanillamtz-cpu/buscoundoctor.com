@@ -5,6 +5,7 @@ import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sp
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import SearchableSelect from "../components/SearchableSelect";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
