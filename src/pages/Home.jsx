@@ -537,14 +537,14 @@ export default function Home() {
 
       {/* Testimonios */}
       {testimonials.length >= 3 &&
-      <section className="relative bg-brand-navy">
+      <section className="relative bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="text-center mb-8">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-white">Lo que dicen nuestros pacientes</h2>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Qué dicen nuestros pacientes?</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             {testimonials.slice(0, 3).map((r) =>
-            <div key={r.id} className="flex flex-col bg-white rounded-2xl p-6 shadow-lg">
+            <div key={r.id} className="flex flex-col bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
               <div className="flex gap-0.5 mb-3">
                 {[1, 2, 3, 4, 5].map((s) =>
                 <Star key={s} className={`w-4 h-4 ${r.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
