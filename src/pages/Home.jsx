@@ -517,9 +517,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BuscoUnDoctor vs. Recomendaciones: comparativa visual */}
+      {/* BuscoUnDoctor vs. Recomendaciones: comparativa visual, fila por fila con VS */}
       <section className="bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-14">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 pb-14">
           <div className="text-center mb-9">
             <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Comparativa</p>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
@@ -528,41 +528,44 @@ export default function Home() {
             <p className="text-sm text-muted-foreground mt-1">Así se compara buscar en BuscoUnDoctor contra ir con recomendaciones</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
-            {/* Columna: BuscoUnDoctor */}
-            <div className="bg-white border-2 border-brand-blue rounded-3xl shadow-lg p-5 sm:p-7">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="w-9 h-9 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-4 h-4 text-white" />
+          <div className="relative bg-white rounded-3xl border border-border/60 shadow-xl overflow-hidden">
+            {/* Encabezados */}
+            <div className="grid grid-cols-2">
+              <div className="bg-brand-navy px-3 sm:px-8 py-5 sm:py-6 flex items-center gap-2 sm:gap-2.5">
+                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                 </div>
-                <h3 className="font-heading font-bold text-base text-brand-navy">BuscoUnDoctor.com</h3>
+                <h3 className="font-heading font-bold text-xs sm:text-base text-white leading-tight">
+                  BuscoUnDoctor<span className="text-brand-bluePale">.com</span>
+                </h3>
               </div>
-              <ul className="space-y-3">
-                {COMPARISON_ROWS.map((row, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-foreground leading-snug">{row.us}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="bg-muted px-3 sm:px-8 py-5 sm:py-6 flex items-center gap-2 sm:gap-2.5">
+                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-muted-foreground/20 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+                </div>
+                <h3 className="font-heading font-bold text-xs sm:text-base text-muted-foreground leading-tight">Recomendaciones</h3>
+              </div>
             </div>
 
-            {/* Columna: Recomendaciones */}
-            <div className="bg-muted/40 border border-border/60 rounded-3xl p-5 sm:p-7">
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="w-9 h-9 rounded-full bg-muted-foreground/20 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-4 h-4 text-muted-foreground" />
+            {/* Insignia "VS" superpuesta en la división */}
+            <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-brand-blue shadow-md flex items-center justify-center z-10">
+              <span className="font-heading font-extrabold text-[10px] sm:text-xs text-brand-blue">VS</span>
+            </div>
+
+            {/* Filas de comparación, una junto a la otra */}
+            <div>
+              {COMPARISON_ROWS.map((row, i) => (
+                <div key={i} className={`grid grid-cols-2 ${i % 2 === 1 ? "bg-brand-blueLight/40" : "bg-white"}`}>
+                  <div className="flex items-start gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-3 sm:py-3.5 border-r border-border/40">
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] sm:text-sm text-foreground leading-snug">{row.us}</span>
+                  </div>
+                  <div className="flex items-start gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-3 sm:py-3.5">
+                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground/60 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] sm:text-sm text-muted-foreground leading-snug">{row.them}</span>
+                  </div>
                 </div>
-                <h3 className="font-heading font-bold text-base text-muted-foreground">Recomendaciones de conocidos</h3>
-              </div>
-              <ul className="space-y-3">
-                {COMPARISON_ROWS.map((row, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <X className="w-4 h-4 text-muted-foreground/70 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-muted-foreground leading-snug">{row.them}</span>
-                  </li>
-                ))}
-              </ul>
+              ))}
             </div>
           </div>
         </div>
