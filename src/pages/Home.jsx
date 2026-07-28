@@ -332,8 +332,6 @@ export default function Home() {
                   triggerClassName={triggerClass}
                 />
               </div>
-                </Select>
-              </div>
               <button
                 type="button"
                 onClick={submitHeroSearch}
