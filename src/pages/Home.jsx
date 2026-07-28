@@ -409,16 +409,16 @@ export default function Home() {
           </div>
           <div
             ref={featuredScrollRef}
-            className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
+            className="flex overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth divide-x divide-border/50"
             style={{ scrollbarWidth: 'none' }}
           >
             {featured.map((s) =>
             <Link
               key={s.id}
               to={`/especialista/${s.slug}`}
-              className="group flex-shrink-0 w-36 sm:w-40 snap-start bg-white border border-border/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:border-brand-blue/30 transition-all duration-300"
+              className="group flex-shrink-0 w-32 sm:w-36 snap-start px-3 sm:px-4 first:pl-0"
             >
-              <div className="aspect-square bg-muted overflow-hidden">
+              <div className="w-full aspect-square rounded-xl bg-muted overflow-hidden">
                 {s.profile_photo ? (
                   <img src={s.profile_photo} alt={s.full_name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
                 ) : (
@@ -429,8 +429,8 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="px-3 py-3 text-center">
-                <h3 className="font-heading font-bold text-sm text-foreground leading-tight">{s.full_name}</h3>
+              <div className="pt-3 text-center">
+                <h3 className="font-heading font-bold text-sm text-foreground leading-tight group-hover:text-brand-blue transition-colors">{s.full_name}</h3>
                 <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
                 {s.years_experience &&
                 <p className="text-muted-foreground text-[11px] mt-1">{s.years_experience}+ años de experiencia</p>
