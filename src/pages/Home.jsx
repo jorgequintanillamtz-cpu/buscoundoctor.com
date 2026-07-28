@@ -537,7 +537,7 @@ export default function Home() {
             <div key={r.id} className="flex flex-col bg-white rounded-2xl p-6 shadow-lg">
               <div className="flex gap-0.5 mb-3">
                 {[1, 2, 3, 4, 5].map((s) =>
-                <Star key={s} className={`w-4 h-4 ${r.rating >= s ? "fill-brand-blue text-brand-blue" : "text-border"}`} />
+                <Star key={s} className={`w-4 h-4 ${r.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
                 )}
               </div>
               <p className="text-sm text-foreground leading-relaxed flex-1">"{r.comment}"</p>
