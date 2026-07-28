@@ -39,6 +39,8 @@ export default function AdminDoctores() {
     [doctors]
   );
 
+  const featuredCount = useMemo(() => doctors.filter(d => d.featured).length, [doctors]);
+
   const handleApprove = async (id, nombre) => {
     await base44.entities.Specialist.update(id, { publication_status: "published" });
     setDoctors(prev => prev.map(d => d.id === id ? { ...d, publication_status: "published" } : d));
