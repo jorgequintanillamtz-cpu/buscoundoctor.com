@@ -88,11 +88,7 @@ const slugify = (s) => (s || "")
   .replace(/\s+/g, "-")
   .replace(/-+/g, "-");
 
-const triggerClass =
-  "border-0 shadow-none h-auto p-0 gap-1 focus:ring-0 focus:ring-offset-0 text-sm font-medium text-foreground bg-transparent [&>span]:line-clamp-1";
-const contentClass = "rounded-2xl border-none shadow-xl p-2 bg-white";
-const itemClass =
-  "rounded-xl px-3 py-2 text-sm cursor-pointer focus:bg-brand-bluePale focus:text-brand-navy data-[state=checked]:bg-brand-bluePale data-[state=checked]:text-brand-navy";
+const triggerClass = "h-auto text-sm font-medium text-foreground bg-transparent";
 
 export default function Home() {
   const navigate = useNavigate();
