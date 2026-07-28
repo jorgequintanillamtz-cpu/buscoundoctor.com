@@ -57,20 +57,18 @@ export default function SearchBar({ className = "" }) {
           value={specId}
           onChange={setSpecId}
           placeholder="¿Qué especialidad buscas?"
-          searchPlaceholder="Buscar especialidad..."
           icon={Stethoscope}
           hint="Especialidad"
-          triggerClassName="w-full h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          triggerClassName="w-full h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
         />
         <SearchableSelect
           options={zones}
           value={zoneId}
           onChange={setZoneId}
           placeholder="Zona (opcional)"
-          searchPlaceholder="Buscar zona..."
           icon={MapPin}
           hint="Zona"
-          triggerClassName="w-full sm:w-44 h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          triggerClassName="w-full sm:w-44 h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
         />
         <Button
           onClick={handleBuscar}
