@@ -313,7 +313,7 @@ export default function Home() {
                   </SelectTrigger>
                   <SelectContent className={contentClass}>
                     {specialties.map((s) => (
-                      <SelectItem key={s.id} value={s.name} className={itemClass}>{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={s.name} className={itemClass} icon={Stethoscope} hint="Especialidad">{s.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -327,7 +327,7 @@ export default function Home() {
                   </SelectTrigger>
                   <SelectContent className={contentClass}>
                     {zones.map((z) => (
-                      <SelectItem key={z.id} value={z.name} className={itemClass}>{z.name}</SelectItem>
+                      <SelectItem key={z.id} value={z.name} className={itemClass} icon={MapPin} hint="Zona">{z.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
