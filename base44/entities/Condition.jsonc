@@ -1,0 +1,34 @@
+{
+  "name": "Condition",
+  "properties": {
+    "active": {
+      "default": true,
+      "title": "Activa",
+      "type": "boolean"
+    },
+    "name": {
+      "title": "Nombre de la enfermedad/condici\u00f3n",
+      "type": "string"
+    },
+    "popular": {
+      "default": false,
+      "title": "Destacada en 'm\u00e1s buscadas'",
+      "type": "boolean"
+    },
+    "slug": {
+      "title": "Slug",
+      "type": "string"
+    },
+    "specialty": {
+      "description": "Debe coincidir exactamente con el nombre usado en la entidad Specialist/Specialty",
+      "title": "Especialidad que la atiende",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "slug",
+    "specialty"
+  ],
+  "type": "object"
+}
