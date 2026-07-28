@@ -220,6 +220,14 @@ export default function OfficeManager({ specialistId }) {
   const saveOffice = async (data, hours) => {
     setSaving(true);
     try {
+      const zone = zones.find((z) => z.id === data.zone_id);
+      const coords = await resolveOfficeCoords(data, {
+        zoneName: zone?.name,
+        city: zone?.city,
+        state: zone?.state,
+      });
+      const geoFields = coords ? { latitude: coords.latitude, longitude: coords.longitude } : {};
+
       let officeId;
       if (data.id) {
         await base44.entities.Office.update(data.id, {
@@ -229,6 +237,7 @@ export default function OfficeManager({ specialistId }) {
           maps_url: data.maps_url,
           is_primary: data.is_primary,
           photos: data.photos || [],
+          ...geoFields,
         });
         officeId = data.id;
         await base44.entities.OfficeHours.deleteMany({ office_id: officeId });
@@ -241,6 +250,7 @@ export default function OfficeManager({ specialistId }) {
           maps_url: data.maps_url,
           is_primary: data.is_primary,
           photos: data.photos || [],
+          ...geoFields,
         });
         officeId = created.id;
       }
