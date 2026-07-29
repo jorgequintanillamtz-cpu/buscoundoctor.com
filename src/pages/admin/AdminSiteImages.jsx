@@ -234,7 +234,7 @@ export default function AdminSiteImages() {
                   className="w-full flex items-center gap-2.5 p-3 rounded-xl border border-border/50 hover:border-brand-blue/40 hover:bg-brand-bluePale/30 transition-colors text-left"
                 >
                   <span className="w-9 h-9 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-                    <CurrentIcon className="w-4.5 h-4.5 text-brand-blue" />
+                    <CurrentIcon className="w-4 h-4 text-brand-blue" />
                   </span>
                   <span className="text-xs font-medium text-foreground truncate">{s.name}</span>
                 </button>
@@ -257,7 +257,7 @@ export default function AdminSiteImages() {
                               active ? "bg-brand-blue text-white" : "bg-muted text-muted-foreground hover:bg-brand-bluePale hover:text-brand-blue"
                             }`}
                           >
-                            <OptionIcon className="w-4.5 h-4.5" />
+                            <OptionIcon className="w-4 h-4" />
                           </button>
                         );
                       })}
