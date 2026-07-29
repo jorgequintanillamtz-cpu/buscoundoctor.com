@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope, Bell, UserPlus, CheckCircle2 } from "lucide-react";
+import { Stethoscope, UserPlus, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -40,7 +40,7 @@ function NotifyMeForm({ conditionSlug, conditionName }) {
         source: `condicion:${conditionSlug}`,
       });
       setSent(true);
-    } catch (err) {
+    } catch {
       toast.error("No se pudo registrar tu correo. Intenta de nuevo.");
     }
     setLoading(false);
