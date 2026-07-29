@@ -33,6 +33,7 @@ function colorFor(key) {
 export default function SpecialtyCard({ specialty, mobile = false }) {
   const Icon = iconMap[specialty.icon] || Heart;
   const color = colorFor(specialty.slug || specialty.name || "");
+  const customImage = specialty.icon_image_url;
 
   if (mobile) {
     return (
@@ -40,8 +41,12 @@ export default function SpecialtyCard({ specialty, mobile = false }) {
         to={`/especialistas?specialty=${encodeURIComponent(specialty.name)}`}
         className="group flex-shrink-0 w-28 flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-white border border-border/50 shadow-sm hover:shadow-lg hover:border-brand-blue/30 transition-all duration-300"
       >
-        <div className="w-14 h-14 rounded-full bg-brand-bluePale flex items-center justify-center group-hover:bg-brand-blue transition-colors duration-300 flex-shrink-0">
-          <Icon className="w-6 h-6 text-brand-blue group-hover:text-white transition-colors duration-300" />
+        <div className="w-14 h-14 rounded-full bg-brand-bluePale overflow-hidden flex items-center justify-center group-hover:bg-brand-blue transition-colors duration-300 flex-shrink-0">
+          {customImage ? (
+            <img src={customImage} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <Icon className="w-6 h-6 text-brand-blue group-hover:text-white transition-colors duration-300" />
+          )}
         </div>
         <span className="text-xs font-heading font-semibold text-brand-navy text-center leading-snug">{specialty.name}</span>
       </Link>
@@ -54,10 +59,14 @@ export default function SpecialtyCard({ specialty, mobile = false }) {
       className="group flex flex-col items-center gap-3 w-20 sm:w-24"
     >
       <div
-        className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full flex items-center justify-center transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-lg"
-        style={{ backgroundColor: color.bg }}
+        className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:-translate-y-1 group-hover:shadow-lg"
+        style={{ backgroundColor: customImage ? undefined : color.bg }}
       >
-        <Icon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: color.fg }} />
+        {customImage ? (
+          <img src={customImage} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <Icon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: color.fg }} />
+        )}
       </div>
       <span className="text-xs sm:text-sm font-medium text-foreground text-center leading-tight">{specialty.name}</span>
     </Link>
