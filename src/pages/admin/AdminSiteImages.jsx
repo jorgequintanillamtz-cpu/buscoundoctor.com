@@ -25,6 +25,38 @@ const POPULAR_SPECIALTY_ORDER = [
   "Gastroenterología", "Endocrinología",
 ];
 
+// Tamaño fijo (en px) al que se recorta/redimensiona cada ícono subido, para
+// que todos midan exactamente lo mismo sin importar la foto original.
+const ICON_IMAGE_SIZE = 480;
+
+// Recorta cualquier imagen al centro en un cuadrado 1:1, la redimensiona a un
+// tamaño fijo y la convierte a WebP — así no depende de que el admin suba
+// ya una imagen cuadrada o en el formato correcto, la app lo hace sola.
+function cropToSquareWebp(file, size = ICON_IMAGE_SIZE, quality = 0.9) {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width - side) / 2;
+      const sy = (img.height - side) / 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url);
+        if (!blob) { reject(new Error("No se pudo procesar la imagen")); return; }
+        const baseName = (file.name || "icono").replace(/\.[^.]+$/, "");
+        resolve(new File([blob], `${baseName}.webp`, { type: "image/webp" }));
+      }, "image/webp", quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("No se pudo leer la imagen")); };
+    img.src = url;
+  });
+}
+
 export default function AdminSiteImages() {
   const [settings, setSettings] = useState(null);
   const [settingsId, setSettingsId] = useState(null);
@@ -108,7 +140,8 @@ export default function AdminSiteImages() {
     if (!file) return;
     setUploadingIconFor(specialty.id);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const squareWebp = await cropToSquareWebp(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: squareWebp });
       setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon_image_url: file_url } : s)));
       await base44.entities.Specialty.update(specialty.id, { icon_image_url: file_url });
       toast.success(`Imagen de "${specialty.name}" actualizada`);
@@ -253,7 +286,7 @@ export default function AdminSiteImages() {
           <div className="flex-1 min-w-0">
             <h2 className="font-heading font-semibold text-foreground">Íconos de especialidades</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Son las 8 que se ven en "Especialidades más buscadas" en la página de inicio. Para cada una puedes elegir un ícono o subir tu propia imagen (webp, png, jpg).
+              Son las 8 que se ven en "Especialidades más buscadas" en la página de inicio. Sube cualquier imagen (jpg, png, lo que sea) y aquí mismo se recorta automáticamente a cuadrada y se convierte a WebP, para que todas queden del mismo tamaño.
             </p>
           </div>
         </div>
@@ -290,9 +323,10 @@ export default function AdminSiteImages() {
 
                     <label className="flex items-center justify-center gap-2 w-full mb-3 px-3 py-2.5 rounded-xl border border-dashed border-brand-blue/40 bg-brand-bluePale/30 text-xs font-medium text-brand-navy cursor-pointer hover:bg-brand-bluePale/60 transition-colors">
                       {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                      Subir imagen propia
+                      {isUploading ? "Procesando..." : "Subir imagen propia"}
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadSpecialtyIconImage(s, e)} disabled={isUploading} />
                     </label>
+                    <p className="text-[10px] text-muted-foreground text-center -mt-2 mb-3">Se recorta a cuadrada y se convierte a WebP automáticamente</p>
                     {s.icon_image_url && (
                       <button
                         onClick={() => removeSpecialtyIconImage(s)}
