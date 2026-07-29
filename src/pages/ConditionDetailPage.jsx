@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope, UserPlus, CheckCircle2, Star, MapPin, ArrowRight } from "lucide-react";
+import { Stethoscope, UserPlus, Star, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import BlogCard from "@/components/BlogCard";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import {
@@ -63,58 +61,6 @@ function setMeta(name, content) {
   el.setAttribute("content", content);
 }
 
-// Formulario simple para capturar el interés de un paciente cuando todavía no
-// hay especialistas publicados en la especialidad de esta condición.
-function NotifyMeForm({ conditionSlug, conditionName }) {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email.trim()) {
-      toast.error("Escribe un correo válido");
-      return;
-    }
-    setLoading(true);
-    try {
-      await base44.entities.NewsletterSubscriber.create({
-        email: email.trim(),
-        source: `condicion:${conditionSlug}`,
-      });
-      setSent(true);
-    } catch {
-      toast.error("No se pudo registrar tu correo. Intenta de nuevo.");
-    }
-    setLoading(false);
-  };
-
-  if (sent) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-brand-navy font-medium">
-        <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0" />
-        Listo, te avisamos en cuanto tengamos un especialista disponible.
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-      <Input
-        type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="tu@correo.com"
-        className="h-11 rounded-xl text-sm"
-        aria-label={`Avísame cuando haya especialistas para ${conditionName}`}
-      />
-      <Button type="submit" disabled={loading} className="h-11 rounded-xl font-heading font-semibold whitespace-nowrap">
-        {loading ? "Enviando..." : "Avísame"}
-      </Button>
-    </form>
-  );
-}
 
 export default function ConditionDetailPage() {
   const { slug } = useParams();
@@ -292,13 +238,12 @@ export default function ConditionDetailPage() {
                   Aún no tenemos {condition.specialty.toLowerCase()} verificados en Monterrey
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Estamos incorporando especialistas todo el tiempo. Déjanos tu correo y te avisamos en cuanto haya uno disponible.
+                  Estamos incorporando especialistas verificados todo el tiempo en Monterrey y San Pedro Garza García.
                 </p>
               </div>
             </div>
-            <NotifyMeForm conditionSlug={condition.slug} conditionName={condition.name} />
 
-            <div className="mt-5 pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+            <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
               <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
               <p className="text-xs text-muted-foreground flex-1">
                 ¿Eres {condition.specialty.toLowerCase()}? Sé de los primeros en aparecer aquí.
