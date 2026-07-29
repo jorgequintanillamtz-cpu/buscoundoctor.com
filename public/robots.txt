@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin
+Disallow: /panel-medico
+Allow: /
+
+Sitemap: https://buscoundoctor.com/sitemap.xml
