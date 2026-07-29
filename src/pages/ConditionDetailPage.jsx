@@ -259,7 +259,7 @@ export default function ConditionDetailPage() {
           Atendida por: {condition.specialty}
         </Link>
 
-        <section className="mt-4 max-w-3xl">
+        <section className="mt-4">
           <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-3">
             {(paragraphs.length > 0 ? paragraphs : ["Contenido en preparación."]).map((para, i) => (
               <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
@@ -318,7 +318,7 @@ export default function ConditionDetailPage() {
           <div>
             <h2 className="font-heading font-bold text-lg sm:text-xl text-white">
               {specialists.length > 0
-                ? `¿Listo para agendar con un ${condition.specialty.toLowerCase()}?`
+                ? "¿Listo para agendar con un especialista?"
                 : "Explora otras especialidades disponibles"}
             </h2>
             <p className="text-white/70 text-sm mt-1.5 max-w-md">
