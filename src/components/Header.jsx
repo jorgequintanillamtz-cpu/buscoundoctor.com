@@ -3,6 +3,7 @@ import { Menu, X, Search, Stethoscope, MapPin, LogIn } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
+import { buildSearchOptions } from "@/lib/searchOptions";
 
 const triggerClass =
   "h-auto text-sm font-medium text-foreground bg-transparent";
@@ -20,7 +21,8 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const [zones, setZones] = useState([]);
   const [specialties, setSpecialties] = useState([]);
-  const [searchSpecialty, setSearchSpecialty] = useState("");
+  const [conditions, setConditions] = useState([]);
+  const [searchPick, setSearchPick] = useState("");
   const [searchZone, setSearchZone] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
@@ -30,29 +32,35 @@ export default function Header() {
     Promise.all([
       base44.entities.Zone.filter({ active: true }).catch(() => []),
       base44.entities.Specialty.filter({ active: true }).catch(() => []),
-    ]).then(([z, s]) => { setZones(z); setSpecialties(s); });
+      base44.entities.Condition.filter({ active: true }).catch(() => []),
+    ]).then(([z, s, c]) => { setZones(z); setSpecialties(s); setConditions(c); });
   }, []);
 
-  // El combobox trabaja con "id" como valor; aquí usamos el nombre como id
-  // porque el resto de la lógica de búsqueda ya trabaja con nombres.
-  const specialtyOptions = useMemo(() => specialties.map((s) => ({ id: s.name, name: s.name })), [specialties]);
+  // Especialidades y enfermedades combinadas en un solo buscador (como el de
+  // Doctoralia): el usuario puede escribir tanto "dermatólogo" como "acné".
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
 
   const submitSearch = (e) => {
     e?.preventDefault?.();
+    const picked = searchOptions.find((o) => o.id === searchPick);
+    // Enfermedad seleccionada: siempre a su página SEO dedicada.
+    if (picked?.type === "condition") {
+      navigate(`/enfermedades/${picked.ref.slug}`);
+      return;
+    }
     // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
     // filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
-    const specialtyObj = specialties.find((s) => s.name === searchSpecialty);
-    if (specialtyObj) {
+    if (picked?.type === "specialty") {
       if (searchZone) {
-        navigate(`/especialidad/${specialtyObj.slug}/${slugify(searchZone)}`);
+        navigate(`/especialidad/${picked.ref.slug}/${slugify(searchZone)}`);
       } else {
-        navigate(`/especialidad/${specialtyObj.slug}`);
+        navigate(`/especialidad/${picked.ref.slug}`);
       }
       return;
     }
-    // Sin especialidad seleccionada: no hay página dedicada solo-por-zona todavía,
-    // así que caemos al listado general filtrado.
+    // Sin especialidad ni enfermedad seleccionada: no hay página dedicada solo-por-zona
+    // todavía, así que caemos al listado general filtrado.
     const params = new URLSearchParams();
     if (searchZone) params.set("zone", searchZone);
     navigate(`/especialistas?${params.toString()}`);
@@ -72,14 +80,13 @@ export default function Header() {
           {
             <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
                 <SearchableSelect
-                  options={specialtyOptions}
-                  value={searchSpecialty}
-                  onChange={setSearchSpecialty}
-                  placeholder="Todas las especialidades"
+                  options={searchOptions}
+                  value={searchPick}
+                  onChange={setSearchPick}
+                  placeholder="Especialidad o enfermedad"
                   icon={Stethoscope}
-                  hint="Especialidad"
                   triggerClassName={triggerClass}
                 />
               </div>
@@ -137,12 +144,11 @@ export default function Header() {
           <div className="lg:hidden flex items-center gap-2 mb-3">
             <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
               <SearchableSelect
-                options={specialtyOptions}
-                value={searchSpecialty}
-                onChange={setSearchSpecialty}
-                placeholder="Especialidad"
+                options={searchOptions}
+                value={searchPick}
+                onChange={setSearchPick}
+                placeholder="¿Qué buscas?"
                 icon={Stethoscope}
-                hint="Especialidad"
                 triggerClassName={triggerClass}
               />
             </div>
