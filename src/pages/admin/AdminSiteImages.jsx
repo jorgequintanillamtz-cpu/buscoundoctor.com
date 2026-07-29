@@ -302,7 +302,7 @@ export default function AdminSiteImages() {
                   onClick={() => setPickerOpenFor(isOpen ? null : s.id)}
                   className="w-full flex flex-col items-center gap-2 p-3 rounded-xl border border-border/50 hover:border-brand-blue/40 hover:bg-brand-bluePale/30 transition-colors text-center"
                 >
-                  <span className="w-12 h-12 rounded-full bg-brand-bluePale overflow-hidden flex items-center justify-center flex-shrink-0">
+                  <span className={`w-12 h-12 flex-shrink-0 overflow-hidden flex items-center justify-center ${s.icon_image_url ? "rounded-lg" : "rounded-full bg-brand-bluePale"}`}>
                     {s.icon_image_url ? (
                       <img src={s.icon_image_url} alt="" className="w-full h-full object-cover" />
                     ) : (
