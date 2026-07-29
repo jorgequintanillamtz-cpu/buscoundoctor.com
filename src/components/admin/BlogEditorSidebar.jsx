@@ -8,6 +8,10 @@ import { base44 } from "@/api/base44Client";
 const SCHEMA_OPTIONS = ["Article", "MedicalWebPage", "FAQPage", "Physician", "MedicalClinic"];
 
 // ---- SEO Score ----
+// Quita acentos/diacríticos para comparar keyword vs. slug (las URLs no llevan acentos,
+// pero deben considerarse la misma palabra para efectos de SEO).
+const stripAccents = (str) => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
+
 function calcSEO(form, specialtyOptions = []) {
   const kw = (form.primary_keyword || "").toLowerCase().trim();
   const content = (form.content || "").toLowerCase();
@@ -18,7 +22,7 @@ function calcSEO(form, specialtyOptions = []) {
   const words = content.trim().split(/\s+/).filter(Boolean).length;
 
   const kwInTitle = kw && title.includes(kw);
-  const kwInUrl = kw && slug.includes(kw.replace(/\s+/g, "-"));
+  const kwInUrl = kw && stripAccents(slug).includes(stripAccents(kw).replace(/\s+/g, "-"));
   const kwInFirst100Words = kw && (() => {
     const first100 = content.trim().split(/\s+/).filter(Boolean).slice(0, 100).join(" ");
     return first100.includes(kw);
