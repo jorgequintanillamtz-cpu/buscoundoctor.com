@@ -264,13 +264,21 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: ilustración */}
+            {/* Right: ilustración (o imagen personalizada desde el admin) */}
             <div className="relative hidden md:flex justify-center items-center">
               <div
                 className="absolute w-[360px] h-[400px] bg-gradient-to-br from-brand-blue/50 to-brand-bluePale/20"
                 style={{ borderRadius: '62% 38% 55% 45% / 50% 60% 40% 50%' }}
               />
-              <DoctorHeroIllustration className="relative z-10 w-64 h-72 lg:w-72 lg:h-80 drop-shadow-2xl" />
+              {heroImageUrl ? (
+                <img
+                  src={heroImageUrl}
+                  alt="BuscoUnDoctor"
+                  className="relative z-10 w-72 h-80 lg:w-80 lg:h-96 object-cover rounded-[2rem] drop-shadow-2xl"
+                />
+              ) : (
+                <DoctorHeroIllustration className="relative z-10 w-64 h-72 lg:w-72 lg:h-80 drop-shadow-2xl" />
+              )}
             </div>
           </div>
         </div>
