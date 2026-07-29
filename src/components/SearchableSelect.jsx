@@ -141,7 +141,7 @@ export default function SearchableSelect({
                   </span>
                 )}
                 <span className="flex-1 min-w-0 leading-snug">{o.name}</span>
-                {hint && <span className="text-xs text-muted-foreground flex-shrink-0 pt-0.5">{hint}</span>}
+                {(o.hint || hint) && <span className="text-xs text-muted-foreground flex-shrink-0 pt-0.5">{o.hint || hint}</span>}
               </button>
             ))
           )}
