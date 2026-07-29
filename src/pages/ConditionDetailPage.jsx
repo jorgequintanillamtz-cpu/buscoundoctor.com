@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope, UserPlus, CheckCircle2 } from "lucide-react";
+import { Stethoscope, UserPlus, CheckCircle2, Star, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import SpecialistCard from "@/components/SpecialistCard";
+import BlogCard from "@/components/BlogCard";
+import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -13,6 +14,48 @@ import {
 import {
   Accordion, AccordionItem, AccordionTrigger, AccordionContent,
 } from "@/components/ui/accordion";
+
+// Tarjeta compacta para la lista de especialistas de una enfermedad: solo lo
+// esencial para comparar de un vistazo (igual que en el home), sin el detalle
+// completo de reservar cita que sí tiene SpecialistCard en otras páginas.
+function SpecialistMiniCard({ specialist }) {
+  return (
+    <Link
+      to={`/especialista/${specialist.slug}`}
+      onClick={() => trackDoctorClick(specialist, "condicion")}
+      className="group flex flex-col items-center text-center bg-card border border-border/50 rounded-2xl p-5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+    >
+      <div className="w-20 h-20 rounded-full bg-muted overflow-hidden flex-shrink-0">
+        {specialist.profile_photo ? (
+          <img src={specialist.profile_photo} alt={specialist.full_name} loading="lazy" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
+        ) : (
+          <div className="w-full h-full bg-brand-bluePale flex items-center justify-center">
+            <span className="font-heading font-bold text-lg text-brand-blue/50">
+              {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+            </span>
+          </div>
+        )}
+      </div>
+      <h3 className="font-heading font-semibold text-sm text-foreground mt-3 group-hover:text-brand-blue transition-colors line-clamp-1">
+        {specialist.full_name}
+      </h3>
+      {specialist.rating != null && (
+        <div className="flex items-center gap-0.5 mt-1">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star key={s} className={`w-3.5 h-3.5 ${specialist.rating >= s ? "fill-amber-400 text-amber-400" : "text-border"}`} />
+          ))}
+        </div>
+      )}
+      <p className="text-brand-blue text-xs font-medium mt-1.5">{specialist.specialty}</p>
+      {(specialist.zone || specialist.location) && (
+        <p className="text-muted-foreground text-xs mt-1 flex items-center gap-1">
+          <MapPin className="w-3 h-3 flex-shrink-0" />
+          <span className="line-clamp-1">{specialist.zone || specialist.location}</span>
+        </p>
+      )}
+    </Link>
+  );
+}
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -79,6 +122,8 @@ export default function ConditionDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [specialists, setSpecialists] = useState([]);
   const [relatedConditions, setRelatedConditions] = useState([]);
+  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [specialtySlug, setSpecialtySlug] = useState(null);
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -98,14 +143,17 @@ export default function ConditionDetailPage() {
       if (!active) return;
 
       const specialtyRecord = specialtyList[0];
-      const faqItems = specialtyRecord
-        ? await base44.entities.FaqItem.filter({ specialty_id: specialtyRecord.id, status: "publicado" })
-        : [];
+      const [faqItems, blogPosts] = await Promise.all([
+        specialtyRecord ? base44.entities.FaqItem.filter({ specialty_id: specialtyRecord.id, status: "publicado" }) : Promise.resolve([]),
+        specialtyRecord ? base44.entities.BlogPost.filter({ specialty_id: specialtyRecord.id, published: true }) : Promise.resolve([]),
+      ]);
       if (!active) return;
 
       setCondition(found);
       setSpecialists(allSpecialists);
       setRelatedConditions(allConditions.filter((c) => c.slug !== found.slug).slice(0, 8));
+      setRelatedPosts(blogPosts.slice(0, 3));
+      setSpecialtySlug(specialtyRecord?.slug || null);
       setFaqs(faqItems);
       setLoading(false);
     })();
@@ -211,10 +259,12 @@ export default function ConditionDetailPage() {
           Atendida por: {condition.specialty}
         </Link>
 
-        <section className="mt-4 max-w-3xl space-y-3">
-          {(paragraphs.length > 0 ? paragraphs : ["Contenido en preparación."]).map((para, i) => (
-            <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
-          ))}
+        <section className="mt-4 max-w-3xl">
+          <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-3">
+            {(paragraphs.length > 0 ? paragraphs : ["Contenido en preparación."]).map((para, i) => (
+              <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
+            ))}
+          </div>
         </section>
       </div>
 
@@ -225,9 +275,9 @@ export default function ConditionDetailPage() {
             <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-4">
               Especialistas que atienden {condition.name.toLowerCase()}
             </h2>
-            <div className="grid grid-cols-1 gap-4">
-              {specialists.map((s, i) => (
-                <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="condicion" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {specialists.map((s) => (
+                <SpecialistMiniCard key={s.id} specialist={s} />
               ))}
             </div>
           </>
@@ -261,6 +311,30 @@ export default function ConditionDetailPage() {
         )}
       </section>
 
+      {/* CTA: siempre visible, con destino distinto según si ya hay especialistas cargados */}
+      <section className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-8 mb-10">
+        <div className="absolute -top-10 -right-10 w-48 h-48 bg-brand-blue/20 rounded-full pointer-events-none" />
+        <div className="relative flex flex-col sm:flex-row items-center gap-5 justify-between text-center sm:text-left">
+          <div>
+            <h2 className="font-heading font-bold text-lg sm:text-xl text-white">
+              {specialists.length > 0
+                ? `¿Listo para agendar con un ${condition.specialty.toLowerCase()}?`
+                : "Explora otras especialidades disponibles"}
+            </h2>
+            <p className="text-white/70 text-sm mt-1.5 max-w-md">
+              {specialists.length > 0
+                ? "Compara perfiles verificados, reseñas y contacta directo por WhatsApp."
+                : "Mientras sumamos especialistas para esta condición, conoce a los médicos verificados que ya tenemos en Monterrey y San Pedro Garza García."}
+            </p>
+          </div>
+          <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
+            <Link to={specialists.length > 0 && specialtySlug ? `/especialidad/${specialtySlug}` : "/especialistas"}>
+              {specialists.length > 0 ? "Ver todos" : "Ver especialistas"} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </Button>
+        </div>
+      </section>
+
       {relatedConditions.length > 0 && (
         <section className="mb-10">
           <h2 className="font-heading font-semibold text-sm text-foreground mb-3">Otras enfermedades de {condition.specialty}</h2>
@@ -273,6 +347,19 @@ export default function ConditionDetailPage() {
               >
                 {c.name}
               </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {relatedPosts.length > 0 && (
+        <section className="mb-10">
+          <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-4">
+            Artículos sobre {condition.specialty.toLowerCase()}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {relatedPosts.map((p, i) => (
+              <BlogCard key={p.id} post={p} priority={i === 0} />
             ))}
           </div>
         </section>
