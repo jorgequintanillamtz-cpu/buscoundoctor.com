@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Stethoscope, MapPin } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/SearchableSelect";
+import { buildSearchOptions } from "@/lib/searchOptions";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -16,8 +17,9 @@ const slugify = (s) => (s || "")
 
 export default function SearchBar({ className = "" }) {
   const [specialties, setSpecialties] = useState([]);
+  const [conditions, setConditions] = useState([]);
   const [zones, setZones] = useState([]);
-  const [specId, setSpecId] = useState("");
+  const [pickId, setPickId] = useState("");
   const [zoneId, setZoneId] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,26 +28,35 @@ export default function SearchBar({ className = "" }) {
     Promise.all([
       base44.entities.Specialty.filter({ active: true }).catch(() => []),
       base44.entities.Zone.filter({ active: true }).catch(() => []),
-    ]).then(([s, z]) => { setSpecialties(s); setZones(z); });
+      base44.entities.Condition.filter({ active: true }).catch(() => []),
+    ]).then(([s, z, c]) => { setSpecialties(s); setZones(z); setConditions(c); });
   }, []);
 
-  const spec = specialties.find((s) => s.id === specId);
+  // Especialidades y enfermedades combinadas en un solo buscador (como el de
+  // Doctoralia): el usuario puede escribir tanto "dermatólogo" como "acné".
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
+  const picked = searchOptions.find((o) => o.id === pickId);
   const zone = zones.find((z) => z.id === zoneId);
   const onListPage = location.pathname.startsWith("/especialistas");
-  const canBuscar = onListPage ? Boolean(spec || zone) : Boolean(spec);
+  const canBuscar = onListPage ? Boolean(picked || zone) : Boolean(picked);
 
   const handleBuscar = () => {
     if (!canBuscar) return;
+    // Enfermedad seleccionada: siempre a su página SEO dedicada, sin importar la página actual.
+    if (picked?.type === "condition") {
+      navigate(`/enfermedades/${picked.ref.slug}`);
+      return;
+    }
     // En la página de lista, preservar el filtrado por query params (no romper SpecialistList)
     if (onListPage) {
       const params = new URLSearchParams();
-      if (spec?.name) params.set("specialty", spec.name);
+      if (picked?.ref?.name) params.set("specialty", picked.ref.name);
       if (zone?.name) params.set("zone", zone.name);
       navigate(`/especialistas?${params.toString()}`);
       return;
     }
     // Fuera de la lista: navegar a la página SEO de especialidad (o combinada con zona)
-    const base = `/especialidad/${spec.slug}`;
+    const base = `/especialidad/${picked.ref.slug}`;
     navigate(zone ? `${base}/${slugify(zone.name)}` : base);
   };
 
@@ -53,12 +64,11 @@ export default function SearchBar({ className = "" }) {
     <div className={className}>
       <div className="flex flex-col sm:flex-row gap-2">
         <SearchableSelect
-          options={specialties}
-          value={specId}
-          onChange={setSpecId}
-          placeholder="¿Qué especialidad buscas?"
+          options={searchOptions}
+          value={pickId}
+          onChange={setPickId}
+          placeholder="¿Qué especialidad o enfermedad buscas?"
           icon={Stethoscope}
-          hint="Especialidad"
           triggerClassName="w-full h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
         />
         <SearchableSelect
