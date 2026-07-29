@@ -1,0 +1,17 @@
+{
+  "name": "SiteSettings",
+  "properties": {
+    "hero_image_url": {
+      "description": "Si se deja vac\u00edo, se usa la ilustraci\u00f3n por defecto",
+      "title": "Imagen principal del Hero (p\u00e1gina de inicio)",
+      "type": "string"
+    },
+    "og_image_url": {
+      "description": "Aparece como miniatura cuando alguien comparte el enlace del sitio en WhatsApp, Facebook, etc. Si se deja vac\u00eda, se usa la imagen por defecto",
+      "title": "Imagen para compartir en redes sociales (Open Graph)",
+      "type": "string"
+    }
+  },
+  "type": "object",
+  "required": []
+}
