@@ -40,3 +40,26 @@ export function setOpenGraph({ title, description, image }) {
   if (description !== undefined) upsertMeta("property", "og:description", description);
   if (image !== undefined) upsertMeta("property", "og:image", image);
 }
+
+const SITE_ORIGIN = "https://buscoundoctor.com";
+
+// Actualiza (o crea) el <link rel="canonical"> del documento. index.html trae
+// uno fijo apuntando a "/" como valor por defecto estático; esta función toma
+// el control de ese mismo tag en cuanto React monta, y lo actualiza en cada
+// cambio de ruta. Por defecto usa la ruta actual sin query string ni hash,
+// para que las variantes filtradas (ej. /especialistas?specialty=X) apunten
+// a la versión limpia de la página en vez de indexarse como páginas aparte.
+// Las páginas que necesiten algo distinto (ej. el blog, que ya arma su
+// propio canonical tras cargar el post) pueden llamarla de nuevo después
+// con una ruta explícita, y esa llamada posterior gana.
+export function setCanonical(pathname) {
+  const clean = (pathname || "/").split("?")[0].split("#")[0];
+  const href = clean === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}`;
+  let el = document.head.querySelector('link[rel="canonical"]');
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", "canonical");
+    document.head.appendChild(el);
+  }
+  el.setAttribute("href", href);
+}
