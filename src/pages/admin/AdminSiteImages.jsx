@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import {
-  Upload, X, Image as ImageIcon, Share2, Loader2, Search,
+  Upload, X, Image as ImageIcon, Share2, Loader2,
   Brain, Smile, Heart, Baby, Stethoscope, Sparkles, Bone, Eye, Ear,
   Droplet, Activity, Scissors, Pill, Wind, Dumbbell, Syringe, Microscope, Users, Utensils,
 } from "lucide-react";
@@ -15,6 +15,16 @@ const ICONS = {
 };
 const ICON_NAMES = Object.keys(ICONS);
 
+// Mismo orden que usa Home.jsx para elegir las "Especialidades más
+// buscadas" — son las únicas 8 cuyo ícono se ve en la página de inicio, así
+// que son las únicas que tiene sentido editar aquí.
+const POPULAR_SPECIALTY_ORDER = [
+  "Dentista", "Ginecología", "Pediatría", "Dermatología", "Psicología",
+  "Nutrición", "Ortopedia y Traumatología", "Oftalmología", "Cardiología",
+  "Otorrinolaringología", "Medicina General", "Urología", "Psiquiatría",
+  "Gastroenterología", "Endocrinología",
+];
+
 export default function AdminSiteImages() {
   const [settings, setSettings] = useState(null);
   const [settingsId, setSettingsId] = useState(null);
@@ -23,8 +33,8 @@ export default function AdminSiteImages() {
   const [uploadingOg, setUploadingOg] = useState(false);
 
   const [specialties, setSpecialties] = useState([]);
-  const [specialtySearch, setSpecialtySearch] = useState("");
   const [pickerOpenFor, setPickerOpenFor] = useState(null);
+  const [uploadingIconFor, setUploadingIconFor] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -83,21 +93,57 @@ export default function AdminSiteImages() {
   };
 
   const changeSpecialtyIcon = async (specialty, iconName) => {
-    setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon: iconName } : s)));
+    setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon: iconName, icon_image_url: "" } : s)));
     setPickerOpenFor(null);
     try {
-      await base44.entities.Specialty.update(specialty.id, { icon: iconName });
+      await base44.entities.Specialty.update(specialty.id, { icon: iconName, icon_image_url: "" });
       toast.success(`Ícono de "${specialty.name}" actualizado`);
     } catch (e) {
       toast.error("No se pudo guardar: " + e.message);
     }
   };
 
-  const filteredSpecialties = useMemo(() => {
-    const q = specialtySearch.trim().toLowerCase();
-    if (!q) return specialties;
-    return specialties.filter((s) => s.name.toLowerCase().includes(q));
-  }, [specialties, specialtySearch]);
+  const uploadSpecialtyIconImage = async (specialty, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingIconFor(specialty.id);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon_image_url: file_url } : s)));
+      await base44.entities.Specialty.update(specialty.id, { icon_image_url: file_url });
+      toast.success(`Imagen de "${specialty.name}" actualizada`);
+      setPickerOpenFor(null);
+    } catch {
+      toast.error("Error al subir la imagen");
+    }
+    setUploadingIconFor(null);
+    e.target.value = "";
+  };
+
+  const removeSpecialtyIconImage = async (specialty) => {
+    setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon_image_url: "" } : s)));
+    try {
+      await base44.entities.Specialty.update(specialty.id, { icon_image_url: "" });
+      toast.success(`Se quitó la imagen de "${specialty.name}"`);
+    } catch (e) {
+      toast.error("No se pudo guardar: " + e.message);
+    }
+  };
+
+  // Solo las 8 especialidades que realmente se muestran en "Especialidades
+  // más buscadas" del Home (mismo criterio que sortByPopularity().slice(0,8)).
+  const homepageSpecialties = useMemo(() => {
+    return [...specialties]
+      .sort((a, b) => {
+        const ia = POPULAR_SPECIALTY_ORDER.indexOf(a.name);
+        const ib = POPULAR_SPECIALTY_ORDER.indexOf(b.name);
+        if (ia === -1 && ib === -1) return 0;
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      })
+      .slice(0, 8);
+  }, [specialties]);
 
   if (loading) {
     return (
