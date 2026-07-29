@@ -14,6 +14,11 @@
       "type": "string",
       "title": "\u00cdcono"
     },
+    "icon_image_url": {
+      "type": "string",
+      "title": "Imagen personalizada del icono",
+      "description": "Si se sube una imagen, se usa en vez del icono en el circulo de Especialidades mas buscadas en la pagina de inicio."
+    },
     "description": {
       "type": "string",
       "title": "Descripci\u00f3n breve"
