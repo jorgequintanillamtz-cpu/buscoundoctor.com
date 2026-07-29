@@ -21,11 +21,12 @@ Deno.serve(async (req) => {
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-");
 
-    const [specialties, zones, specialists, posts] = await Promise.all([
+    const [specialties, zones, specialists, posts, conditions] = await Promise.all([
       base44.asServiceRole.entities.Specialty.filter({ active: true }),
       base44.asServiceRole.entities.Zone.filter({ active: true }),
       base44.asServiceRole.entities.Specialist.filter({ publication_status: 'published' }),
       base44.asServiceRole.entities.BlogPost.filter({ published: true }),
+      base44.asServiceRole.entities.Condition.filter({ active: true }),
     ]);
 
     const specByName = {};
@@ -66,6 +67,15 @@ Deno.serve(async (req) => {
       if (p.slug) urls.push({ loc: `${ORIGIN}/blog/${p.slug}`, priority: "0.6", changefreq: "weekly" });
     });
 
+    // 6) Enfermedades con contenido revisado/publicado -> /enfermedades/:slug
+    // Las que están en "borrador" (o sin content_status, catálogo viejo sin contenido)
+    // se dejan fuera a propósito: la página las marca noindex hasta que alguien las revise.
+    conditions.forEach((c) => {
+      if (c.slug && (c.content_status === 'revisado' || c.content_status === 'publicado')) {
+        urls.push({ loc: `${ORIGIN}/enfermedades/${c.slug}`, priority: "0.7", changefreq: "monthly" });
+      }
+    });
+
     const xml =
       `<?xml version="1.0" encoding="UTF-8"?>\n` +
       `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -84,6 +94,7 @@ Deno.serve(async (req) => {
       combinaciones: comboSet.size,
       especialistas: specialists.length,
       blogPosts: posts.length,
+      enfermedades: conditions.filter(c => c.content_status === 'revisado' || c.content_status === 'publicado').length,
       total: urls.length,
     }));
 
