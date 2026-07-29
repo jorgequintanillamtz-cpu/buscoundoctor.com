@@ -21,6 +21,7 @@ import AdminDoctorStats from './pages/admin/AdminDoctorStats';
 import AdminSpecialists from './pages/admin/AdminSpecialists';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
 import AdminZones from './pages/admin/AdminZones';
+import AdminSiteImages from './pages/admin/AdminSiteImages';
 import AdminBlog from './pages/admin/AdminBlog';
 import BlogEditor from './pages/admin/BlogEditor.jsx';
 import AdminReviews from './pages/admin/AdminReviews';
@@ -88,6 +89,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/especialistas" element={<AdminSpecialists />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />
           <Route path="/admin/zonas" element={<AdminZones />} />
+          <Route path="/admin/imagenes" element={<AdminSiteImages />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
           <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
