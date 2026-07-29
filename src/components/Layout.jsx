@@ -24,9 +24,9 @@ export default function Layout() {
   // sobreescribir después con la suya propia).
   //
   // También fija el <link rel="canonical"> a la ruta actual (sin query ni
-  // hash) en cada cambio de página. Antes, index.html trafa un canonical fijo
+  // hash) en cada cambio de página. Antes, index.html trae un canonical fijo
   // apuntando siempre a "/", y como ninguna otra página (salvo el blog) lo
-  // corregfa, Google recibfa la señal de que TODO el sitio era la home. Las
+  // corrige, Google recibe la señal de que TODO el sitio era la home. Las
   // páginas con filtros por query string (ej. /especialistas?specialty=X)
   // quedan apuntando así a su versión limpia, que es lo correcto.
   useEffect(() => {
