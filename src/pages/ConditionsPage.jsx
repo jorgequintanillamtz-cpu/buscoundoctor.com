@@ -83,7 +83,7 @@ export default function ConditionsPage() {
             {popular.map((c) => (
               <Link
                 key={c.id}
-                to={`/especialistas?specialty=${encodeURIComponent(c.specialty)}`}
+                to={`/enfermedades/${c.slug}`}
                 className="inline-flex items-center gap-1.5 bg-brand-bluePale hover:bg-brand-blue hover:text-white text-brand-navy text-sm font-medium px-4 py-2 rounded-full transition-colors"
               >
                 {c.name}
@@ -127,7 +127,7 @@ export default function ConditionsPage() {
               {byLetter[letter].map((c) => (
                 <Link
                   key={c.id}
-                  to={`/especialistas?specialty=${encodeURIComponent(c.specialty)}`}
+                  to={`/enfermedades/${c.slug}`}
                   className="group flex items-center gap-1.5 text-sm text-foreground hover:text-brand-blue transition-colors py-0.5"
                 >
                   <span className="truncate">{c.name}</span>
