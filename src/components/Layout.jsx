@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import { applyDefaultOG, setOpenGraph } from "@/lib/seoMeta";
+import { applyDefaultOG, setOpenGraph, setCanonical } from "@/lib/seoMeta";
 import { base44 } from "@/api/base44Client";
 
 export default function Layout() {
@@ -22,9 +22,17 @@ export default function Layout() {
   // imagen de Open Graph personalizada, se aplica justo después del default
   // (las páginas específicas, como perfiles de doctor, la siguen pudiendo
   // sobreescribir después con la suya propia).
+  //
+  // También fija el <link rel="canonical"> a la ruta actual (sin query ni
+  // hash) en cada cambio de página. Antes, index.html trafa un canonical fijo
+  // apuntando siempre a "/", y como ninguna otra página (salvo el blog) lo
+  // corregfa, Google recibfa la señal de que TODO el sitio era la home. Las
+  // páginas con filtros por query string (ej. /especialistas?specialty=X)
+  // quedan apuntando así a su versión limpia, que es lo correcto.
   useEffect(() => {
     applyDefaultOG();
     if (customOgImage) setOpenGraph({ image: customOgImage });
+    setCanonical(location.pathname);
   }, [location.pathname, customOgImage]);
 
   return (
