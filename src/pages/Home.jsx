@@ -104,6 +104,7 @@ export default function Home() {
   const [heroSpecialty, setHeroSpecialty] = useState("");
   const [heroZone, setHeroZone] = useState("");
   const [insurers, setInsurers] = useState([]);
+  const [heroImageUrl, setHeroImageUrl] = useState("");
   const blogScrollRef = useRef(null);
 
   const submitHeroSearch = () => {
@@ -131,20 +132,22 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, topReviews, allActive, insurerList] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, topReviews, allActive, insurerList, siteSettings] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
       base44.entities.Review.filter({ approved: true }, "-rating", 3),
       base44.entities.Specialist.filter({ active: true }),
-      base44.entities.Insurer.list('name', 50).catch(() => [])]
+      base44.entities.Insurer.list('name', 50).catch(() => []),
+      base44.entities.SiteSettings.list().catch(() => [])]
       );
       setSpecialties(specs);
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
       setTotalSpecialists(allActive.length);
+      setHeroImageUrl(siteSettings[0]?.hero_image_url || "");
       // "Particular/Sin seguro" siempre al final, no es una aseguradora real
       setInsurers([...insurerList].sort((a, b) => {
         if (a.name === "Particular/Sin seguro") return 1;
