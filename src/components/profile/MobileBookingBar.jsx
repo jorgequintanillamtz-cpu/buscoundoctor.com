@@ -6,7 +6,7 @@ import BookingFlow from "./BookingFlow";
 // Botón fijo abajo, siempre visible en móvil. Al tocarlo abre un Bottom
 // Sheet (no una página nueva) con el mismo flujo de reserva que la tarjeta
 // sticky de escritorio.
-export default function MobileBookingBar({ specialist, offices, services }) {
+export default function MobileBookingBar({ specialist, offices, services, insurers = [] }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -28,7 +28,7 @@ export default function MobileBookingBar({ specialist, offices, services }) {
             <SheetTitle className="font-heading text-left">Agendar cita con {specialist.full_name}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
-            <BookingFlow specialist={specialist} offices={offices} services={services} onConfirmed={() => setOpen(false)} />
+            <BookingFlow specialist={specialist} offices={offices} services={services} insurers={insurers} onConfirmed={() => setOpen(false)} />
           </div>
         </SheetContent>
       </Sheet>
