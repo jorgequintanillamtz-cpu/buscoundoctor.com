@@ -2,60 +2,46 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Calendar, ChevronLeft, Monitor, Users, CheckCircle, Instagram, ShieldCheck, MessageCircle, Phone, Languages, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import AppointmentForm from "../components/AppointmentForm";
-import ReviewList from "../components/ReviewList";
-import ReviewForm from "../components/ReviewForm";
+import { MapPin, ChevronLeft, Monitor, ShieldCheck, Star, Building2 } from "lucide-react";
 import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
-import LanguagesChips from "../components/LanguagesChips";
 import SimilarSpecialists from "../components/SimilarSpecialists";
 import SpecialistCases from "../components/SpecialistCases";
 import SpecialistPosts from "../components/SpecialistPosts";
 import SpecialistServices from "../components/SpecialistServices";
+import TrustBadges from "../components/profile/TrustBadges";
+import ScrollSpyNav from "../components/profile/ScrollSpyNav";
+import EspecialidadesSection from "../components/profile/EspecialidadesSection";
+import ReviewsSection from "../components/profile/ReviewsSection";
+import FaqSection from "../components/profile/FaqSection";
+import BookingSidebar from "../components/profile/BookingSidebar";
+import MobileBookingBar from "../components/profile/MobileBookingBar";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
-import { trackDoctorContact } from "@/utils/trackDoctorStats";
+
+const NAV_SECTIONS = [
+  { id: "informacion", label: "Información" },
+  { id: "especialidades", label: "Especialidades" },
+  { id: "experiencia", label: "Experiencia" },
+  { id: "estudios", label: "Estudios" },
+  { id: "hospitales", label: "Hospitales" },
+  { id: "servicios", label: "Servicios" },
+  { id: "opiniones", label: "Opiniones" },
+  { id: "faq", label: "Preguntas frecuentes" },
+];
+
+const PAYMENT_LABELS = { tarjeta: "Tarjeta", transferencia: "Transferencia", efectivo: "Efectivo" };
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
   const [specialist, setSpecialist] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [insurers, setInsurers] = useState([]);
-  const [primaryOffice, setPrimaryOffice] = useState(null);
+  const [offices, setOffices] = useState([]);
   const [zoneName, setZoneName] = useState("");
   const [descExpanded, setDescExpanded] = useState(false);
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
-  const [minServicePrice, setMinServicePrice] = useState(null);
-
-  const getNext8Days = () => {
-    const days = [];
-    for (let i = 0; i < 8; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      days.push(d);
-    }
-    return days;
-  };
-
-  const formatDayLabel = (date) => {
-    if (date.toDateString() === new Date().toDateString()) return 'Hoy';
-    return date.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
-  };
-
-  const formatDateValue = (date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
-    setShowForm(true);
-    trackDoctorContact(specialist);
-  };
+  const [services, setServices] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -69,14 +55,12 @@ export default function SpecialistProfile() {
         } catch {}
 
         try {
-          const offices = await base44.entities.Office.filter({ specialist_id: specialist.id });
-          if (offices.length > 0) {
-            const primary = offices.find(o => o.is_primary) || offices[0];
-            setPrimaryOffice(primary);
-            if (primary.zone_id) {
-              const zones = await base44.entities.Zone.filter({ id: primary.zone_id });
-              if (zones.length > 0) setZoneName(zones[0].name);
-            }
+          const offList = await base44.entities.Office.filter({ specialist_id: specialist.id });
+          setOffices(offList);
+          const primary = offList.find(o => o.is_primary) || offList[0];
+          if (primary?.zone_id) {
+            const zones = await base44.entities.Zone.filter({ id: primary.zone_id });
+            if (zones.length > 0) setZoneName(zones[0].name);
           }
         } catch {}
 
@@ -95,14 +79,11 @@ export default function SpecialistProfile() {
         } catch {}
 
         try {
-          const services = await base44.entities.SpecialistService.filter({ specialist_id: specialist.id });
-          if (services.length > 0) {
-            const firstConsult = services.find((s) => (s.name || "").trim().toLowerCase() === "consulta por primera vez");
-            setMinServicePrice(firstConsult ? firstConsult.price : Math.min(...services.map((s) => s.price || Infinity)));
-          }
+          const svcList = await base44.entities.SpecialistService.filter({ specialist_id: specialist.id });
+          setServices(svcList.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
         } catch {}
-        
-        // Add JSON-LD LocalBusiness schema
+
+        // JSON-LD Physician — se conserva exactamente igual que antes del rediseño.
         const schema = {
           "@context": "https://schema.org",
           "@type": "Physician",
@@ -127,13 +108,12 @@ export default function SpecialistProfile() {
             }
           })
         };
-        
+
         const script = document.createElement('script');
         script.type = 'application/ld+json';
         script.innerHTML = JSON.stringify(schema);
         document.head.appendChild(script);
 
-        // Open Graph: sobrescribe los defaults del Layout con datos del médico
         setOpenGraph({
           title: `${specialist.full_name} — ${specialist.specialty} | BuscoUnDoctor`,
           description: specialist.description
@@ -152,7 +132,6 @@ export default function SpecialistProfile() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
       </div>);
-
   }
 
   if (!specialist) {
@@ -161,20 +140,18 @@ export default function SpecialistProfile() {
         <h1 className="font-heading font-bold text-2xl text-foreground">Especialista no encontrado</h1>
         <Link to="/especialistas" className="text-primary mt-4 inline-block">Ver todos los especialistas</Link>
       </div>);
-
   }
 
   const resolvedInsurers = (specialist.insurers_relation || [])
     .map(id => insurers.find(i => i.id === id))
     .filter(Boolean);
 
+  const primaryOffice = offices.find(o => o.is_primary) || offices[0];
   const whatsappHref = specialist.whatsapp
     ? `https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, encontré su perfil en BuscoUnDoctor y me gustaría agendar una cita.")}`
     : null;
-
-  const displayAddress = primaryOffice?.address_line || specialist.address;
-  const displayLocation = zoneName || specialist.city || specialist.zone;
   const displayPhone = primaryOffice?.phone;
+  const displayLocation = zoneName || specialist.city || specialist.zone;
 
   const description = specialist.description || "";
   const isLongDescription = description.length > 300;
@@ -182,8 +159,18 @@ export default function SpecialistProfile() {
     ? description
     : description.slice(0, 300).trim() + "…";
 
+  const avgRating = allReviews.length > 0
+    ? allReviews.reduce((a, r) => a + r.rating, 0) / allReviews.length
+    : specialist.rating;
+
+  const featuredReview = allReviews.length > 0
+    ? [...allReviews].sort((a, b) => b.rating - a.rating || (b.comment?.length || 0) - (a.comment?.length || 0))[0]
+    : null;
+
+  const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 lg:pb-10">
       <Breadcrumb className="mb-4">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -210,13 +197,12 @@ export default function SpecialistProfile() {
         </p>
       )}
 
-      {/* Hero: presentación principal, estilo landing para enganchar al paciente */}
+      {/* HERO */}
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-bluePale to-brand-blueLight shadow-xl p-6 sm:p-10">
         <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/60 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-16 left-1/3 w-64 h-64 rounded-full bg-brand-blue/15 blur-3xl" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
-          {/* Columna de texto */}
           <div className="text-center lg:text-left order-2 lg:order-1">
             {specialist.license_verification_status === "verified" && (
               <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
@@ -230,21 +216,31 @@ export default function SpecialistProfile() {
             </h1>
             <p className="text-brand-navy/70 font-semibold text-base sm:text-lg mt-2">
               {specialist.specialty}
-              {specialist.subspecialty && <> {'\u00b7'} {specialist.subspecialty}</>}
+              {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
             </p>
 
-            {displayAddress &&
-            <p className="flex items-center justify-center lg:justify-start gap-1.5 text-sm text-brand-navy/70 mt-3">
+            {displayLocation && (
+              <p className="flex items-center justify-center lg:justify-start gap-1.5 text-sm text-brand-navy/70 mt-3">
                 <MapPin className="w-4 h-4 text-brand-blue flex-shrink-0" />
-                {displayAddress}
+                {displayLocation}
               </p>
-            }
+            )}
+
+            {offices.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
+                {offices.map((o) => (
+                  <span key={o.id} className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
+                    <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
+                    {o.name || o.address_line}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {(languageNames.length > 0 || specialist.modality) && (
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-4">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
                 {languageNames.length > 0 && (
                   <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
-                    <Languages className="w-3.5 h-3.5" />
                     {languageNames.join(", ")}
                   </span>
                 )}
@@ -263,89 +259,61 @@ export default function SpecialistProfile() {
               </div>
             )}
 
-            {/* Botones de acción */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 mt-6">
-              <button
-                onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
-                className="inline-flex items-center gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-bold px-5 py-3 min-h-[44px] rounded-full shadow-lg transition-colors">
-                <Calendar className="w-4 h-4" />
-                Agendar cita
-              </button>
-              {whatsappHref &&
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp
-              </a>
-              }
-              {displayPhone &&
-              <a
-                href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
-                className="inline-flex items-center gap-2 bg-white hover:bg-white/80 border border-brand-navy/15 text-brand-navy text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
-                <Phone className="w-4 h-4" />
-                Llamar
-              </a>
-              }
-              {minServicePrice != null && (
-                <span className="text-sm font-semibold text-brand-navy bg-white border border-brand-navy/10 px-3 py-2 rounded-full">
-                  Desde ${minServicePrice.toLocaleString("es-MX")} MXN
-                </span>
-              )}
-            </div>
+            <TrustBadges specialist={specialist} primaryOffice={primaryOffice} reviewCount={allReviews.length} avgRating={avgRating} />
 
-            {/* Estadísticas rápidas, tipo hero */}
-            <div className="flex items-center justify-center lg:justify-start gap-6 sm:gap-8 mt-8 pt-6 border-t border-brand-navy/10">
-              {specialist.years_experience &&
-              <div className="text-center lg:text-left">
+            {/* Stats: experiencia, calificación, cédula profesional, cédula de especialidad/certificaciones */}
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-4 sm:gap-8 mt-8 pt-6 border-t border-brand-navy/10">
+              {specialist.years_experience && (
+                <div className="text-center lg:text-left">
                   <p className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">{specialist.years_experience}+</p>
                   <p className="text-xs text-brand-navy/60 mt-0.5">Años de experiencia</p>
                 </div>
-              }
+              )}
               <div className="text-center lg:text-left">
                 <p className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy flex items-center justify-center lg:justify-start gap-1">
-                  {specialist.rating != null ? specialist.rating.toFixed(1) : "—"}
+                  {avgRating != null ? avgRating.toFixed(1) : "—"}
                   <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
                 </p>
                 <p className="text-xs text-brand-navy/60 mt-0.5">
-                  {allReviews.length > 0 ? `${allReviews.length} reseña${allReviews.length !== 1 ? "s" : ""}` : "Sin reseñas aún"}
+                  {allReviews.length > 0 ? `${allReviews.length} opinión${allReviews.length !== 1 ? "es" : ""}` : "Sin opiniones aún"}
                 </p>
               </div>
-              {specialist.certifications &&
-              <div className="text-center lg:text-left">
-                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">
-                    {specialist.certifications.replace(/cédula\s*(profesional)?:?\s*/i, '').split(/[,\-|]/)[0].trim()}
-                  </p>
+              {specialist.professional_license_number && (
+                <div className="text-center lg:text-left">
+                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">{specialist.professional_license_number}</p>
                   <p className="text-xs text-brand-navy/60 mt-0.5">Cédula profesional</p>
                 </div>
-              }
+              )}
+              {specialist.certifications && (
+                <div className="text-center lg:text-left">
+                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy line-clamp-1">{specialist.certifications}</p>
+                  <p className="text-xs text-brand-navy/60 mt-0.5">Cédula de especialidad / certificaciones</p>
+                </div>
+              )}
             </div>
-            <a href="#resenas" className="inline-block text-xs font-semibold text-brand-blue hover:underline mt-3">Ver todas las reseñas →</a>
+            <a href="#opiniones" className="inline-block text-xs font-semibold text-brand-blue hover:underline mt-3">Ver todas las opiniones →</a>
           </div>
 
-          {/* Columna de foto */}
           <div className="relative flex justify-center order-1 lg:order-2">
             <div className="pointer-events-none absolute w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-white/70 blur-2xl" />
             <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-white/40">
-              {specialist.profile_photo ?
-              <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" /> :
-              <div className="w-full h-full bg-white/60 flex items-center justify-center">
-                <span className="font-heading font-bold text-4xl text-brand-navy/30">
-                  {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                </span>
-              </div>
-              }
+              {specialist.profile_photo ? (
+                <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
+              ) : (
+                <div className="w-full h-full bg-white/60 flex items-center justify-center">
+                  <span className="font-heading font-bold text-4xl text-brand-navy/30">
+                    {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                  </span>
+                </div>
+              )}
             </div>
-            {/* Tarjeta flotante de calificación, estilo referencia */}
             <div className="hidden sm:flex absolute -bottom-5 -left-4 items-center gap-2.5 bg-white rounded-2xl shadow-xl px-4 py-3 border border-border/50">
               <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
               </div>
               <div>
                 <p className="font-heading font-bold text-sm text-foreground leading-tight">
-                  {specialist.rating != null ? `${specialist.rating.toFixed(1)} / 5` : "Nuevo en la plataforma"}
+                  {avgRating != null ? `${avgRating.toFixed(1)} / 5` : "Nuevo en la plataforma"}
                 </p>
                 <p className="text-[11px] text-muted-foreground leading-tight">
                   {allReviews.length > 0 ? `${allReviews.length} pacientes atendidos` : "Sé el primero en calificar"}
@@ -356,257 +324,205 @@ export default function SpecialistProfile() {
         </div>
       </div>
 
-      {/* Selección de fecha para agendar (móvil) */}
-      <div className="mt-4 bg-card rounded-3xl border border-border/50 shadow-sm p-5 sm:p-6 lg:hidden">
-        <p className="text-sm font-heading font-semibold text-foreground mb-1">Selecciona una fecha</p>
-        <p className="text-xs text-muted-foreground mb-3">para agendar tu cita con {specialist.full_name?.split(' ')[0]}</p>
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-          {getNext8Days().map((date, i) =>
-            <button
-              key={i}
-              onClick={() => handleDateSelect(date)}
-              className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center group">
-              <span className="text-xs text-muted-foreground group-hover:text-primary font-medium leading-tight">
-                {formatDayLabel(date).split(' ')[0]}
-              </span>
-              <span className="text-sm font-heading font-bold text-foreground group-hover:text-primary">
-                {date.getDate()}
-              </span>
-            </button>
-            )}
+      {/* Resumen de calificación, justo debajo del hero */}
+      {allReviews.length > 0 && (
+        <div className="mt-4 bg-card rounded-3xl border border-border/50 shadow-sm p-6 sm:p-7">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="font-heading font-extrabold text-3xl text-foreground">{avgRating.toFixed(1)}</span>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} className={`w-4 h-4 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                ))}
+              </div>
+            </div>
+            <span className="text-sm text-muted-foreground">{allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} de pacientes</span>
+          </div>
+          {featuredReview?.comment && (
+            <p className="text-sm text-foreground/80 italic mt-3 leading-relaxed">"{featuredReview.comment}"</p>
+          )}
+          <a href="#opiniones" className="inline-block text-sm font-semibold text-brand-blue hover:underline mt-3">Ver todas las opiniones →</a>
         </div>
-      </div>
+      )}
 
-      {/* Navegación interna sticky (escritorio) */}
-      <nav className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky top-16 z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm">
-        <a href="#sobre-mi" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Sobre mí</a>
-        <a href="#formacion" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Formación</a>
-        <a href="#consultorios" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Consultorios</a>
-        <a href="#aseguradoras" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Aseguradoras</a>
-        <a href="#resenas" className="px-3 py-1.5 rounded-full text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale transition-colors font-medium">Reseñas</a>
+      {/* Nav sticky con scroll-spy (escritorio) */}
+      <ScrollSpyNav sections={NAV_SECTIONS} />
+
+      {/* Quick-nav horizontal (móvil): equivalente en espíritu a "tabs", pero
+          como enlaces ancla que hacen scroll — así todo el contenido sigue
+          siempre renderizado y visible para Google (no ocultamos paneles). */}
+      <nav className="lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
+        {NAV_SECTIONS.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-accent hover:text-foreground transition-colors whitespace-nowrap"
+          >
+            {s.label}
+          </a>
+        ))}
       </nav>
 
-      <div className="mt-2 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
-      <div className="lg:col-span-2">
+      <div className="mt-2 lg:grid lg:grid-cols-[1fr_380px] gap-8 items-start">
+        <div className="flex flex-col">
 
-      <LanguagesChips specialistId={specialist.id} />
-
-      {/* Descripción + Video */}
-      {(specialist.description || specialist.video_url) &&
-      <div id="sobre-mi" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
-          <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
-          {specialist.video_url &&
-        <div className="mt-0 mb-5">
-              
-              <video
-            src={specialist.video_url}
-            controls
-            className="w-full rounded-2xl max-h-64 bg-black"
-            playsInline />
-          
-            </div>
-        }
-          {specialist.description &&
-        <p className="text-sm text-muted-foreground leading-relaxed">
-              {shownDescription}
-              {isLongDescription &&
-              <button
-                onClick={() => setDescExpanded(v => !v)}
-                className="text-brand-blue font-medium ml-1 hover:underline">
-                
-                  {descExpanded ? "Leer menos" : "Leer más"}
-                </button>
-              }
-            </p>
-        }
-        </div>
-      }
-
-      <div id="formacion" className="scroll-mt-32">
-        <EducationTimeline specialistId={specialist.id} />
-      </div>
-
-      {/* Aseguradoras aceptadas */}
-      <div id="aseguradoras" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
-        <h2 className="font-heading font-bold text-lg text-foreground mb-4">Aseguradoras aceptadas</h2>
-        {resolvedInsurers.length > 0 ?
-        <div className="flex flex-wrap gap-2">
-            {resolvedInsurers.map((ins, i) =>
-        <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
-               {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
-               {ins.name}
-             </span>
-        )}
-         </div> :
-
-        <span className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full">N/A</span>
-        }
-      </div>
-
-      {specialist.gallery?.length > 0 &&
-      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {specialist.gallery.map((img, i) =>
-          <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
-                <img src={img} alt={`Galería de ${specialist.full_name}, imagen ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-              </div>
-          )}
+          {/* OPINIONES: en el DOM permanece en el orden lógico de escritorio,
+              pero en móvil se muestra primero (order-1) por conversión —
+              exactamente lo que pidió Jorge: hero → opiniones → resto. */}
+          <div className="order-1 lg:order-none">
+            <ReviewsSection specialistId={specialist.id} specialist={specialist} />
           </div>
-        </div>
-      }
 
-      <div id="consultorios" className="scroll-mt-32">
-        <PublicOfficeList specialistId={specialist.id} />
-      </div>
-
-      <SpecialistCases specialistId={specialist.id} />
-      <SpecialistPosts specialistId={specialist.id} />
-      <SpecialistServices specialistId={specialist.id} />
-
-      {/* Tipos de consulta */}
-      {specialist.modality &&
-      <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-          <h2 className="font-heading font-bold text-lg text-foreground mb-4">Tipos de consulta</h2>
-          <div className="flex flex-wrap gap-3">
-            {(specialist.modality === 'presencial' || specialist.modality === 'ambas') &&
-          <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
-                <Users className="w-4 h-4" />
-                Presencial
+          {/* INFORMACIÓN: biografía, idiomas, enfoque del tratamiento */}
+          <div id="informacion" className="order-3 lg:order-none mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+            <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
+            {specialist.video_url && (
+              <div className="mt-0 mb-5">
+                <video src={specialist.video_url} controls className="w-full rounded-2xl max-h-64 bg-black" playsInline />
               </div>
-          }
-            {(specialist.modality === 'online' || specialist.modality === 'ambas') &&
-          <div className="flex items-center gap-2 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl text-sm font-medium">
-                <Monitor className="w-4 h-4" />
-                En línea
-              </div>
-          }
-          </div>
-          {specialist.instagram &&
-        <div className="mt-4 pt-4 border-t border-border/50">
-              <a
-            href={`https://instagram.com/${specialist.instagram.replace(/^@/, '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary bg-accent hover:bg-accent/80 px-4 py-2.5 rounded-xl transition-colors">
-            
-                <Instagram className="w-4 h-4" />
-                @{specialist.instagram.replace(/^@/, '')}
-              </a>
-            </div>
-        }
-        </div>
-      }
+            )}
+            {specialist.description ? (
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {shownDescription}
+                {isLongDescription && (
+                  <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium ml-1 hover:underline">
+                    {descExpanded ? "Leer menos" : "Leer más"}
+                  </button>
+                )}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Este especialista aún no agregó una biografía.</p>
+            )}
 
-      {/* Reseñas */}
-      <div id="resenas" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-heading font-bold text-lg text-foreground">Reseñas de pacientes</h2>
-          {!showReviewForm &&
-          <button
-            onClick={() => setShowReviewForm(true)}
-            className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors">
-            
-              ✏️ Escribir reseña
-            </button>
-          }
-        </div>
-        <ReviewList specialistId={specialist.id} />
-        {allReviews.length > 0 && (
-          <div className="mb-6 space-y-1.5">
-            {[5, 4, 3, 2, 1].map((star) => {
-              const count = allReviews.filter((r) => Math.round(r.rating) === star).length;
-              const pct = Math.round((count / allReviews.length) * 100);
-              return (
-                <div key={star} className="flex items-center gap-2 text-xs">
-                  <span className="flex items-center gap-0.5 w-10 flex-shrink-0 text-muted-foreground">
-                    {star} <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  </span>
-                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-brand-blue rounded-full" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="w-9 text-right text-muted-foreground flex-shrink-0">{pct}%</span>
+            {languageNames.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-border/50">
+                <p className="text-sm font-semibold text-foreground mb-2">Idiomas</p>
+                <div className="flex flex-wrap gap-2">
+                  {languageNames.map((name, i) => (
+                    <span key={i} className="text-xs font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-full">{name}</span>
+                  ))}
                 </div>
-              );
-            })}
-            <p className="text-xs text-muted-foreground pt-1">Basado en {allReviews.length} reseña{allReviews.length !== 1 ? "s" : ""} verificada{allReviews.length !== 1 ? "s" : ""}</p>
-          </div>
-        )}
-        {showReviewForm &&
-        <div className="mt-6 pt-6 border-t border-border/50">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-heading font-semibold text-base text-foreground">Dejar una reseña</h3>
-              <button onClick={() => setShowReviewForm(false)} className="text-xs text-muted-foreground hover:text-foreground">Cancelar</button>
-            </div>
-            <ReviewForm specialist={specialist} />
-          </div>
-        }
-      </div>
+              </div>
+            )}
 
-      </div>
-
-      {/* Sidebar de contacto fijo (escritorio) */}
-      <aside className="hidden lg:block lg:col-span-1">
-        <div className="sticky top-32 bg-card rounded-3xl border border-border/50 shadow-sm p-6 space-y-4">
-          <div>
-            <p className="font-heading font-semibold text-base text-foreground">¿Tienes alguna pregunta?</p>
-            <p className="text-xs text-muted-foreground mt-1">Contacta directamente a {specialist.full_name?.split(' ')[0]}.</p>
+            {specialist.gallery?.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-border/50">
+                <p className="text-sm font-semibold text-foreground mb-3">Galería</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {specialist.gallery.map((img, i) => (
+                    <div key={i} className="aspect-square rounded-2xl overflow-hidden bg-muted">
+                      <img src={img} alt={`Galería de ${specialist.full_name}, imagen ${i + 1}`} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          {specialist.license_verification_status === "verified" && (
-            <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full w-fit">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Cédula verificada
+
+          {/* ESPECIALIDADES */}
+          <div className="order-4 lg:order-none">
+            <EspecialidadesSection specialist={specialist} />
+          </div>
+
+          {/* EXPERIENCIA */}
+          <div className="order-5 lg:order-none">
+            <EducationTimeline
+              specialistId={specialist.id}
+              variant="experiencia"
+              currentOffices={offices}
+              yearsExperience={specialist.years_experience}
+            />
+          </div>
+
+          {/* ESTUDIOS */}
+          <div className="order-6 lg:order-none">
+            <EducationTimeline specialistId={specialist.id} variant="estudios" />
+          </div>
+
+          {/* HOSPITALES */}
+          <div className="order-7 lg:order-none">
+            <PublicOfficeList specialistId={specialist.id} />
+          </div>
+
+          {/* SERVICIOS */}
+          <div className="order-8 lg:order-none">
+            <SpecialistServices specialistId={specialist.id} />
+          </div>
+
+          {/* Versión móvil de aseguradoras/pagos/idiomas: en escritorio esta
+              misma información ya vive en la tarjeta sticky de la derecha,
+              que en móvil no se renderiza — así el contenido sigue presente
+              e indexable en el HTML que ve el rastreador mobile-first. */}
+          {showMobileExtras && (
+            <div className="order-9 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
+              {resolvedInsurers.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Acepta seguros</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {resolvedInsurers.map((ins, i) => (
+                      <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                        {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
+                        {ins.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {specialist.payment_methods?.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Métodos de pago</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {specialist.payment_methods.map((m) => (
+                      <span key={m} className="text-xs font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-full">{PAYMENT_LABELS[m] || m}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {languageNames.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Idiomas</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {languageNames.map((name, i) => (
+                      <span key={i} className="text-xs font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-full">{name}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
-          <div className="flex flex-col gap-2.5">
-            {whatsappHref &&
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full shadow-sm transition-colors">
-              
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp
-              </a>
-            }
-            <button
-              onClick={() => { setShowForm(true); trackDoctorContact(specialist); }}
-              className="inline-flex items-center justify-center gap-2 bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-semibold px-5 py-3 min-h-[44px] rounded-full transition-colors">
-              
-              <Calendar className="w-4 h-4" />
-              Agendar cita
-            </button>
+
+          {/* FAQ */}
+          <div className="order-10 lg:order-none">
+            <FaqSection specialist={specialist} />
           </div>
-          {minServicePrice != null && (
-            <p className="text-xs text-muted-foreground">Precio de consulta: <span className="font-semibold text-foreground">Desde ${minServicePrice.toLocaleString("es-MX")} MXN</span></p>
-          )}
-          <p className="text-[11px] text-muted-foreground border-t border-border/50 pt-3">La reserva y el contacto son gratuitos.</p>
+
+          {/* Contenido adicional existente (se conserva para no perder SEO/indexación previa) */}
+          <div className="order-11 lg:order-none">
+            <SpecialistCases specialistId={specialist.id} />
+          </div>
+          <div className="order-12 lg:order-none">
+            <SpecialistPosts specialistId={specialist.id} />
+          </div>
         </div>
-      </aside>
+
+        {/* Columna de reserva sticky (escritorio) */}
+        <aside className="hidden lg:block">
+          <BookingSidebar
+            specialist={specialist}
+            offices={offices}
+            services={services}
+            resolvedInsurers={resolvedInsurers}
+            languageNames={languageNames}
+            whatsappHref={whatsappHref}
+            displayPhone={displayPhone}
+          />
+        </aside>
       </div>
 
       <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
 
-      {/* CTA fijo en móvil */}
-      {whatsappHref &&
-      <div className="fixed bottom-0 inset-x-0 z-40 sm:hidden bg-card border-t border-border/50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <a
-          href={whatsappHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-5 py-3.5 min-h-[44px] rounded-full shadow-sm transition-colors">
-          
-            <MessageCircle className="w-4 h-4" />
-            Contactar por WhatsApp
-          </a>
-        </div>
-      }
-
-      {/* Appointment Form Modal */}
-      {showForm &&
-      <AppointmentForm specialist={specialist} initialDate={selectedDate ? formatDateValue(selectedDate) : ''} onClose={() => {setShowForm(false);setSelectedDate(null);}} />
-      }
-    </div>);
-
+      {/* Botón fijo "Agendar cita" + Bottom Sheet (móvil) */}
+      <MobileBookingBar specialist={specialist} offices={offices} services={services} />
+    </div>
+  );
 }
