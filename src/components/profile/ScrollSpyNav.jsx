@@ -17,7 +17,7 @@ export default function ScrollSpyNav({ sections }) {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) setActive(visible[0].target.id);
       },
-      { rootMargin: "-120px 0px -60% 0px", threshold: 0 }
+      { rootMargin: "-150px 0px -60% 0px", threshold: 0 }
     );
 
     elements.forEach((el) => observerRef.current.observe(el));
@@ -26,7 +26,7 @@ export default function ScrollSpyNav({ sections }) {
 
   return (
     <nav
-      className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky top-16 z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm overflow-x-auto"
+      className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky top-20 z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm overflow-x-auto"
       aria-label="Navegación del perfil"
     >
       {sections.map((s) => (
