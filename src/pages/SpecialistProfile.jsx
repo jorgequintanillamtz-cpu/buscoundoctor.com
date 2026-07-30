@@ -202,8 +202,8 @@ export default function SpecialistProfile() {
 
       {/* HERO */}
       <div className="pb-2">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
-          <div className="text-center lg:text-left order-2 lg:order-1">
+        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:gap-10 items-center">
+          <div className="text-center lg:text-left order-2">
             {specialist.license_verification_status === "verified" && (
               <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 <ShieldCheck className="w-3.5 h-3.5" />
@@ -294,8 +294,8 @@ export default function SpecialistProfile() {
             <a href="#opiniones" className="inline-block text-xs font-semibold text-brand-blue hover:underline mt-3">Ver todas las opiniones →</a>
           </div>
 
-          <div className="relative flex justify-center order-1 lg:order-2">
-            <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border border-border/50 shadow-md bg-muted">
+          <div className="relative flex justify-center order-1">
+            <div className="relative w-36 h-44 sm:w-48 sm:h-56 rounded-[2rem] overflow-hidden border border-border/50 shadow-md bg-muted">
               {specialist.profile_photo ? (
                 <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
               ) : (
