@@ -225,32 +225,39 @@ export default function SpecialistProfile() {
               </p>
             )}
 
-            {allReviews.length > 0 && (
-              <div className="flex items-center justify-center lg:justify-start gap-2 mt-3">
-                <span className="font-heading font-bold text-lg text-foreground">{avgRating.toFixed(1)}</span>
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className={`w-3.5 h-3.5 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground">({allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""})</span>
-                <a href="#opiniones" className="text-xs font-semibold text-brand-blue hover:underline">Ver todas →</a>
-              </div>
-            )}
-
-            <div className="mt-4 min-h-[76px] bg-card border border-border/50 rounded-2xl px-4 py-3.5 max-w-xl mx-auto lg:mx-0">
-              {featuredReview ? (
-                <>
-                  <div className="flex justify-center lg:justify-start gap-0.5 mb-1.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={`w-3.5 h-3.5 ${featuredReview.rating >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
-                    ))}
+            <div className="mt-4 min-h-[92px] bg-card border border-border/50 rounded-2xl px-5 py-4 max-w-xl mx-auto lg:mx-0">
+              {allReviews.length > 0 ? (
+                <div className="flex items-start gap-4">
+                  <div className="flex flex-col items-center flex-shrink-0 pr-4 border-r border-border/50">
+                    <span className="font-heading font-extrabold text-3xl text-foreground leading-none">{avgRating.toFixed(2)}</span>
+                    <div className="flex gap-0.5 mt-2">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className={`w-3.5 h-3.5 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-sm text-foreground/80 italic leading-relaxed line-clamp-2">
-                    “{featuredReview.comment}”
-                  </p>
-                  <p className="text-xs text-muted-foreground font-medium mt-1.5">— {featuredReview.patient_name}</p>
-                </>
+                  <div className="flex-1 min-w-0 text-left">
+                    {featuredReview ? (
+                      <>
+                        <p className="text-sm text-foreground/80 italic leading-relaxed line-clamp-2">
+                          “{featuredReview.comment}”
+                        </p>
+                        <div className="flex items-center justify-between gap-3 mt-2 flex-wrap">
+                          <span className="text-xs text-muted-foreground">
+                            {featuredReview.patient_name} · {new Date(featuredReview.created_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
+                          </span>
+                          <a href="#opiniones" className="text-xs font-semibold text-brand-blue hover:underline whitespace-nowrap">
+                            Ver las {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} →
+                          </a>
+                        </div>
+                      </>
+                    ) : (
+                      <a href="#opiniones" className="text-xs font-semibold text-brand-blue hover:underline">
+                        Ver las {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} →
+                      </a>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <p className="text-sm text-muted-foreground">Este especialista aún no tiene reseñas.</p>
               )}
