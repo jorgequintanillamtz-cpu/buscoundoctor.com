@@ -40,13 +40,9 @@ const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba446723
 // cómo se ve un perfil; el perfil completo es ficticio.
 const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
 
-// Beneficio principal destacado (banner ancho) + el resto en tarjetas.
-const FEATURED_BENEFIT = {
-  icon: TrendingUp,
-  title: "Más pacientes nuevos, cada mes",
-  desc: "Apareces justo cuando alguien en tu ciudad busca un especialista como tú, todos los días.",
-};
-const BENEFIT_CARDS = [
+// Beneficios como lista dividida (sin tarjetas/cuadros).
+const BENEFITS = [
+  { icon: TrendingUp, color: "blue", title: "Más pacientes nuevos, cada mes", desc: "Apareces justo cuando alguien en tu ciudad busca un especialista como tú, todos los días." },
   { icon: ShieldCheck, color: "emerald", title: "Más confianza", desc: "La cédula verificada dice que eres quien dices ser." },
   { icon: Star, color: "amber", title: "Mejor reputación", desc: "Las opiniones de tus pacientes trabajan por ti." },
   { icon: Search, color: "violet", title: "Optimizado para Google", desc: "Sin que tú hagas nada de SEO." },
@@ -54,6 +50,7 @@ const BENEFIT_CARDS = [
   { icon: Users, color: "rose", title: "Hecho para especialistas", desc: "Pensado para médicos, no es un directorio genérico." },
 ];
 const COLOR_MAP = {
+  blue: "bg-brand-bluePale text-brand-blue",
   emerald: "bg-emerald-50 text-emerald-600",
   amber: "bg-amber-50 text-amber-600",
   violet: "bg-violet-50 text-violet-600",
