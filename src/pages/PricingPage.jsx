@@ -32,15 +32,22 @@ export default function PricingPage() {
   const hasYearlyOption = useMemo(() => plans.some((p) => (p.price_monthly || 0) > 0 && (p.price_yearly || 0) > 0), [plans]);
 
   useEffect(() => {
-    const title = "Planes y precios para médicos | BuscoUnDoctor";
-    const description = "Planes para médicos en BuscoUnDoctor: uno Gratis para aparecer en el directorio y uno Premium con todas las funciones. Sin contratos, cancela cuando quieras.";
-    document.title = title;
-    setMeta("description", description);
-    // Sin esto, al compartir /planes se vería el título/descripción genéricos
-    // del sitio (los que aplica Layout por defecto) en vez de algo relevante
-    // a precios.
-    setOpenGraph({ title, description });
+    document.title = "Planes y precios para médicos | BuscoUnDoctor";
+    setMeta("description", "Planes para médicos en BuscoUnDoctor: uno Gratis para aparecer en el directorio y uno Premium con todas las funciones. Sin contratos, cancela cuando quieras.");
   }, []);
+
+  // El Open Graph se sobreescribe recién cuando ya hay datos (no en el mount
+  // inicial): Layout aplica los valores por defecto del sitio de forma
+  // síncrona al montar, así que si esto corriera antes, Layout lo pisaría de
+  // vuelta. Al depender de "plans" (que llega tras el fetch async), esta
+  // llamada queda garantizada después de ese efecto de Layout.
+  useEffect(() => {
+    if (loading || plans.length === 0) return;
+    setOpenGraph({
+      title: "Planes y precios para médicos | BuscoUnDoctor",
+      description: "Planes para médicos en BuscoUnDoctor: uno Gratis para aparecer en el directorio y uno Premium con todas las funciones.",
+    });
+  }, [loading, plans]);
 
   useEffect(() => {
     if (loading || plans.length === 0) return;
