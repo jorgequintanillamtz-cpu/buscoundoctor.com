@@ -1,0 +1,70 @@
+{
+  "name": "Plan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nombre del plan"
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug"
+    },
+    "tagline": {
+      "type": "string",
+      "title": "Descripci\u00f3n corta",
+      "maxLength": 200
+    },
+    "price_monthly": {
+      "type": "number",
+      "title": "Precio mensual (MXN)",
+      "default": 0
+    },
+    "price_yearly": {
+      "type": "number",
+      "title": "Precio anual (MXN)",
+      "description": "Precio total por a\u00f1o. D\u00e9jalo en 0 si el plan es gratis o si no ofreces facturaci\u00f3n anual."
+    },
+    "currency": {
+      "type": "string",
+      "title": "Moneda",
+      "default": "MXN"
+    },
+    "features": {
+      "type": "array",
+      "title": "Funciones incluidas",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cta_label": {
+      "type": "string",
+      "title": "Texto del bot\u00f3n"
+    },
+    "cta_url": {
+      "type": "string",
+      "title": "Enlace del bot\u00f3n",
+      "description": "Ej: /registro-medico o /contacto"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "title": "Destacado ('M\u00e1s popular')",
+      "default": false
+    },
+    "display_order": {
+      "type": "number",
+      "title": "Orden de visualizaci\u00f3n",
+      "default": 0,
+      "multipleOf": 1
+    },
+    "active": {
+      "type": "boolean",
+      "title": "Activo (visible en /planes)",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ]
+}
