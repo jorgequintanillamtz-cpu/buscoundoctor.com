@@ -36,6 +36,7 @@ export default function SpecialtyPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [subspecialties, setSubspecialties] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [conditions, setConditions] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -48,9 +49,10 @@ export default function SpecialtyPage() {
       if (!active) return;
       const spec = specList[0];
       if (!spec) { setNotFound(true); setLoading(false); return; }
-      const [subs, faqItems] = await Promise.all([
+      const [subs, faqItems, conditionList] = await Promise.all([
         base44.entities.Specialty.filter({ parent_specialty_id: spec.id, active: true }),
         base44.entities.FaqItem.filter({ specialty_id: spec.id, status: "publicado" }),
+        base44.entities.Condition.filter({ specialty: spec.name, active: true }),
       ]);
       if (!active) return;
       setSpecialty(spec);
@@ -58,6 +60,7 @@ export default function SpecialtyPage() {
       setZones(zoneList);
       setSubspecialties(subs);
       setFaqs(faqItems);
+      setConditions(conditionList);
       setLoading(false);
     })();
     return () => { active = false; };
