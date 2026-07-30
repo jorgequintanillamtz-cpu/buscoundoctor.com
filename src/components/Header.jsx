@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Stethoscope, MapPin, LogIn, ChevronDown, UserPlus } from "lucide-react";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
@@ -24,20 +24,9 @@ export default function Header() {
   const [conditions, setConditions] = useState([]);
   const [searchPick, setSearchPick] = useState("");
   const [searchZone, setSearchZone] = useState("");
-  const [doctorMenuOpen, setDoctorMenuOpen] = useState(false);
-  const doctorMenuRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
-
-  useEffect(() => {
-    if (!doctorMenuOpen) return;
-    const onClickOutside = (e) => {
-      if (doctorMenuRef.current && !doctorMenuRef.current.contains(e.target)) setDoctorMenuOpen(false);
-    };
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, [doctorMenuOpen]);
 
   useEffect(() => {
     Promise.all([
@@ -127,48 +116,20 @@ export default function Header() {
             </div>
           }
 
-          <div ref={doctorMenuRef} className="hidden md:block relative flex-shrink-0">
-            <div className="flex items-center bg-brand-navy rounded-full pl-4 pr-1.5 py-1.5 gap-3">
-              <Link to="/panel-medico" className="text-sm font-medium text-white/85 hover:text-white transition-colors whitespace-nowrap">
-                Iniciar sesión
-              </Link>
-              <button
-                type="button"
-                onClick={() => setDoctorMenuOpen((o) => !o)}
-                aria-expanded={doctorMenuOpen}
-                className="flex items-center gap-1.5 bg-white text-brand-navy text-sm font-semibold rounded-full pl-4 pr-3 py-2 hover:bg-white/90 transition-colors whitespace-nowrap"
-              >
-                ¿Eres profesional de la salud?
-                <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${doctorMenuOpen ? "rotate-180" : ""}`} />
-              </button>
-            </div>
-
-            {doctorMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden z-50">
-                <Link
-                  to="/panel-medico"
-                  onClick={() => setDoctorMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors"
-                >
-                  <LogIn className="w-4 h-4 text-brand-blue flex-shrink-0" />
-                  <span>
-                    <span className="block">Iniciar sesión</span>
-                    <span className="block text-xs text-muted-foreground">Ya tengo cuenta como médico</span>
-                  </span>
-                </Link>
-                <Link
-                  to="/registro-medico"
-                  onClick={() => setDoctorMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-brand-blue hover:bg-accent transition-colors border-t border-border/50"
-                >
-                  <UserPlus className="w-4 h-4 flex-shrink-0" />
-                  <span>
-                    <span className="block">Crear cuenta gratis</span>
-                    <span className="block text-xs font-normal text-muted-foreground">Regístrate como especialista</span>
-                  </span>
-                </Link>
-              </div>
-            )}
+          <div className="hidden md:flex items-center gap-4 flex-shrink-0">
+            <Link
+              to="/panel-medico"
+              className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors whitespace-nowrap"
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              to="/registro-medico"
+              className="flex items-center gap-1.5 bg-brand-navy text-white text-sm font-semibold rounded-full pl-4 pr-4 py-2.5 hover:bg-brand-navy/90 transition-colors whitespace-nowrap"
+            >
+              <UserPlus className="w-4 h-4 flex-shrink-0" />
+              ¿Eres profesional de la salud?
+            </Link>
           </div>
 
           <button
@@ -217,24 +178,21 @@ export default function Header() {
 
       {open &&
       <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
-          <nav className="flex flex-col gap-3 px-4 py-3">
-            <div className="bg-brand-navy rounded-2xl p-3">
-              <p className="text-[11px] font-medium text-white/60 px-1 mb-2">¿Eres profesional de la salud?</p>
-              <Link
-                to="/panel-medico"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-white/90 hover:bg-white/10 transition-colors">
-                <LogIn className="w-4 h-4 flex-shrink-0" />
-                Iniciar sesión
-              </Link>
-              <Link
-                to="/registro-medico"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 mt-1 rounded-xl text-sm font-semibold bg-white text-brand-navy hover:bg-white/90 transition-colors">
-                <UserPlus className="w-4 h-4 flex-shrink-0" />
-                Crear cuenta gratis
-              </Link>
-            </div>
+          <nav className="flex flex-col gap-2 px-4 py-3">
+            <Link
+              to="/panel-medico"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-accent hover:text-brand-navy transition-colors">
+              <LogIn className="w-4 h-4 flex-shrink-0" />
+              Iniciar sesión
+            </Link>
+            <Link
+              to="/registro-medico"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold bg-brand-navy text-white hover:bg-brand-navy/90 transition-colors">
+              <UserPlus className="w-4 h-4 flex-shrink-0" />
+              ¿Eres profesional de la salud?
+            </Link>
           </nav>
         </div>
       }
