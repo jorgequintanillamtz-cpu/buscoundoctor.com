@@ -203,6 +203,11 @@ export default function SpecialistProfile() {
               {specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
             </p>
+            {primaryOffice?.address_line && (
+              <p className="text-muted-foreground text-sm mt-1">
+                {primaryOffice.address_line}
+              </p>
+            )}
           </div>
 
           <div className="relative flex justify-center order-1">
