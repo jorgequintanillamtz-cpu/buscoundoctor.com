@@ -26,7 +26,7 @@ const emptyHours = () =>
     is_closed: d.v === 0 || d.v === 6,
   }));
 
-const emptyOffice = () => ({ zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false, photos: [] });
+const emptyOffice = () => ({ name: "", zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false, photos: [] });
 
 function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, saving }) {
   const [office, setOffice] = useState(initial || emptyOffice());
@@ -63,6 +63,16 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
   return (
     <div className="border border-primary/30 rounded-xl p-4 bg-accent/20 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="sm:col-span-3">
+          <label className="text-xs font-medium mb-1 block">Nombre del hospital o consultorio</label>
+          <Input
+            value={office.name || ""}
+            onChange={(e) => setOffice({ ...office, name: e.target.value })}
+            className="rounded-xl text-sm"
+            placeholder="Ej: Hospital Zambrano Hellion, Torre de Especialidades"
+          />
+          <p className="text-[11px] text-muted-foreground mt-1">Este nombre es el que ven los pacientes en tu perfil (ej. en "Hospitales donde consulta"). Si lo dejas vacío, se muestra la dirección.</p>
+        </div>
         <div>
           <label className="text-xs font-medium mb-1 block">Zona *</label>
           <select
@@ -231,6 +241,7 @@ export default function OfficeManager({ specialistId }) {
       let officeId;
       if (data.id) {
         await base44.entities.Office.update(data.id, {
+          name: data.name || "",
           zone_id: data.zone_id,
           address_line: data.address_line,
           phone: data.phone,
@@ -244,6 +255,7 @@ export default function OfficeManager({ specialistId }) {
       } else {
         const created = await base44.entities.Office.create({
           specialist_id: specialistId,
+          name: data.name || "",
           zone_id: data.zone_id,
           address_line: data.address_line,
           phone: data.phone,
@@ -355,13 +367,16 @@ export default function OfficeManager({ specialistId }) {
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span className="text-sm font-medium truncate">{office.address_line}</span>
+                        <span className="text-sm font-medium truncate">{office.name || office.address_line}</span>
                         {office.is_primary && (
                           <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Star className="w-3 h-3" /> Principal
                           </span>
                         )}
                       </div>
+                      {office.name && (
+                        <p className="text-xs text-muted-foreground">{office.address_line}</p>
+                      )}
                       <p className="text-xs text-muted-foreground">
                         Zona: {zoneName(office.zone_id)}{office.phone ? ` · Tel: ${office.phone}` : ""}
                       </p>
