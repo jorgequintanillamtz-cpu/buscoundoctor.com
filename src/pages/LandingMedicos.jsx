@@ -182,7 +182,19 @@ export default function LandingMedicos() {
 
       <main>
         {/* ============ HERO ============ */}
-        <section ref={heroRef} aria-labelledby="hero-heading" className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-12">
+        <section ref={heroRef} aria-labelledby="hero-heading" className="relative overflow-hidden">
+          {/* Fondo con desvanecido, mismo tratamiento que el hero de la página principal */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div
+              className="absolute -top-24 -right-16 w-[420px] h-[420px] bg-brand-blue/10"
+              style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
+            />
+            <div
+              className="absolute bottom-0 -left-24 w-[300px] h-[300px] bg-brand-bluePale/40"
+              style={{ borderRadius: '42% 58% 35% 65% / 45% 55% 45% 55%' }}
+            />
+          </div>
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-12">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-5">
@@ -254,6 +266,7 @@ export default function LandingMedicos() {
               </div>
               <p className="text-center text-xs text-muted-foreground mt-3">Así se ve un perfil en BuscoUnDoctor</p>
             </div>
+          </div>
           </div>
         </section>
 
