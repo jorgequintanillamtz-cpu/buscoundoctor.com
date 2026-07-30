@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
 import { ChevronLeft, Star } from "lucide-react";
+import VerifiedSeal from "../components/profile/VerifiedSeal";
 import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
 import SimilarSpecialists from "../components/SimilarSpecialists";
@@ -192,9 +193,14 @@ export default function SpecialistProfile() {
       <div className="pb-2">
         <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:gap-10 items-start">
           <div className="text-center lg:text-left order-2">
-            <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-brand-navy">
-              {specialist.full_name}
-            </h1>
+            <div className="flex items-center justify-center lg:justify-start gap-2.5 flex-wrap">
+              <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-brand-navy">
+                {specialist.full_name}
+              </h1>
+              {specialist.license_verification_status === "verified" && (
+                <VerifiedSeal size="sm" />
+              )}
+            </div>
             <p className="text-brand-navy/70 font-semibold text-base sm:text-lg mt-2">
               {specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
