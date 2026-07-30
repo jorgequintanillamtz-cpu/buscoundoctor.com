@@ -186,7 +186,14 @@ export default function SpecialistProfile() {
         </p>
       )}
 
-      <div className="lg:grid lg:grid-cols-[1fr_460px] gap-8 items-start">
+      {/* Nota sobre items-start: aquí NO se usa items-start a propósito. Si el
+          contenedor grid alinea sus hijos a start, la celda del <aside> solo
+          mide lo alto de su propio contenido y el sticky de adentro no tiene
+          espacio para desplazarse — se "desaparece" casi de inmediato al
+          hacer scroll. Dejando el stretch por default, la celda del aside se
+          estira para igualar el alto de la columna izquierda (mucho más
+          alta), dándole al Agendar cita todo ese rango para quedarse fijo. */}
+      <div className="lg:grid lg:grid-cols-[1fr_460px] gap-8">
       <div className="flex flex-col">
 
       {/* HERO */}
