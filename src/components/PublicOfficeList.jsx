@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Star, Phone } from "lucide-react";
+import { MapPin, Clock, Star, Phone, ExternalLink } from "lucide-react";
 
 const DAYS = [
   { v: 0, label: "Domingo" },
@@ -21,6 +21,12 @@ function buildMapEmbedUrl(office) {
   }
   const query = encodeURIComponent(`${office.address_line}, Monterrey, Nuevo León, México`);
   return `https://www.google.com/maps?q=${query}&output=embed`;
+}
+
+function buildMapsLink(office) {
+  if (office.maps_url) return office.maps_url;
+  const query = encodeURIComponent(`${office.name ? office.name + ", " : ""}${office.address_line}, Monterrey, Nuevo León, México`);
+  return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 
 export default function PublicOfficeList({ specialistId }) {
@@ -63,8 +69,8 @@ export default function PublicOfficeList({ specialistId }) {
   const zoneName = (zid) => zones.find((z) => z.id === zid)?.name || "";
 
   return (
-    <div className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8">
-      <h2 className="font-heading font-bold text-lg text-foreground mb-4">Consultorios y horarios</h2>
+    <div id="hospitales" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+      <h2 className="font-heading font-bold text-lg text-foreground mb-4">Hospitales y consultorios</h2>
       <div className="space-y-5">
         {offices.map(({ office, hours }) => (
           <div key={office.id} className="border border-border/50 rounded-2xl p-4 sm:p-5">
@@ -72,13 +78,16 @@ export default function PublicOfficeList({ specialistId }) {
               <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-foreground">{office.address_line}</p>
+                  <p className="text-sm font-semibold text-foreground">{office.name || office.address_line}</p>
                   {office.is_primary && (
                     <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
                       <Star className="w-3 h-3" /> Principal
                     </span>
                   )}
                 </div>
+                {office.name && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{office.address_line}</p>
+                )}
                 {zoneName(office.zone_id) && (
                   <p className="text-xs text-muted-foreground mt-0.5">Zona: {zoneName(office.zone_id)}</p>
                 )}
@@ -91,7 +100,7 @@ export default function PublicOfficeList({ specialistId }) {
             </div>
             <div className="mt-3 rounded-xl overflow-hidden border border-border/50">
               <iframe
-                title={`Mapa de ${office.address_line}`}
+                title={`Mapa de ${office.name || office.address_line}`}
                 src={buildMapEmbedUrl(office)}
                 width="100%"
                 height="220"
@@ -100,14 +109,23 @@ export default function PublicOfficeList({ specialistId }) {
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
+            <a
+              href={buildMapsLink(office)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-blue hover:underline"
+            >
+              Abrir en Google Maps
+              <ExternalLink className="w-3 h-3" />
+            </a>
             {office.photos?.length > 0 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                 {office.photos.map((url, i) => (
-                  <img key={i} src={url} alt={`Foto ${i + 1} del consultorio en ${office.address_line}`} className="w-24 h-24 rounded-xl object-cover flex-shrink-0 border border-border/50" />
+                  <img key={i} src={url} alt={`Foto ${i + 1} del consultorio en ${office.name || office.address_line}`} className="w-24 h-24 rounded-xl object-cover flex-shrink-0 border border-border/50" />
                 ))}
               </div>
             )}
-            <div className="ml-8">
+            <div className="ml-8 mt-3">
               <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Horarios
               </p>
