@@ -36,6 +36,9 @@ function addJsonLd(id, data) {
 }
 
 const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
+// Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar
+// cómo se ve un perfil; el perfil completo es ficticio.
+const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
 
 // Beneficio principal destacado (banner ancho) + el resto en tarjetas.
 const FEATURED_BENEFIT = {
@@ -238,9 +241,11 @@ export default function LandingMedicos() {
               <div className="bg-card border border-border/50 rounded-3xl shadow-2xl p-6 max-w-sm mx-auto" aria-hidden="true">
                 <div className="flex items-center gap-3 pb-4 border-b border-border/50">
                   <div className="relative flex-shrink-0">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-blue to-cyan-500 flex items-center justify-center text-white font-heading font-bold text-lg">
-                      AM
-                    </div>
+                    <img
+                      src={EXAMPLE_DOCTOR_PHOTO}
+                      alt=""
+                      className="w-16 h-16 rounded-full object-cover ring-2 ring-white shadow"
+                    />
                     <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center">
                       <BadgeCheck className="w-3.5 h-3.5 text-white" />
                     </span>
@@ -250,8 +255,13 @@ export default function LandingMedicos() {
                     <p className="text-sm text-muted-foreground truncate">Cardiólogo · Monterrey, N.L.</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 py-3">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-amber-400" fill="currentColor" />)}
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-amber-400" fill="currentColor" />)}
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                    12 años de experiencia
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-1">
                   <MapPin className="w-4 h-4 flex-shrink-0" /> San Pedro Garza García
