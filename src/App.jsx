@@ -36,6 +36,8 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import RegistroMedico from './pages/RegistroMedico';
 import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
+import PricingPage from './pages/PricingPage';
+import AdminPlanes from './pages/admin/AdminPlanes';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -77,6 +79,7 @@ const AuthenticatedApp = () => {
         <Route path="/contacto" element={<Contact />} />
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
+        <Route path="/planes" element={<PricingPage />} />
         {/* Redirección de la URL vieja, por si alguien la tiene guardada */}
         <Route path="/admin/mi-perfil" element={<Navigate to="/panel-medico" replace />} />
       </Route>
@@ -101,6 +104,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
           <Route path="/admin/faqs" element={<AdminFaqs />} />
           <Route path="/admin/faqs/editar/:id" element={<AdminFaqEditor />} />
+          <Route path="/admin/planes" element={<AdminPlanes />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
