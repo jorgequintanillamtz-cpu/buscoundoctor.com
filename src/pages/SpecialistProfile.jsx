@@ -156,6 +156,13 @@ export default function SpecialistProfile() {
     ? allReviews.reduce((a, r) => a + r.rating, 0) / allReviews.length
     : specialist.rating;
 
+  // Un comentario real destacado junto al hero (no inventado): preferimos el
+  // más reciente que sí tenga texto, para que el espacio reservado abajo del
+  // rating siempre muestre algo genuino en vez de quedar vacío sin razón.
+  const featuredReview = [...allReviews]
+    .filter((r) => r.comment?.trim())
+    .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
+
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
 
   return (
