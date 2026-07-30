@@ -15,10 +15,14 @@ export default function AdminDoctores() {
   }, []);
 
   const handleDelete = async (id, nombre) => {
-    if (!confirm(`¿Eliminar al doctor "${nombre}"?`)) return;
-    await base44.entities.Specialist.delete(id);
-    setDoctors(prev => prev.filter(d => d.id !== id));
-    toast.success("Doctor eliminado");
+    if (!confirm(`¿Eliminar al doctor "${nombre}"? Esto también borra sus reseñas, consultorios, servicios, documentos y estadísticas.`)) return;
+    try {
+      await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
+      setDoctors(prev => prev.filter(d => d.id !== id));
+      toast.success("Doctor eliminado por completo");
+    } catch (e) {
+      toast.error("No se pudo eliminar: " + e.message);
+    }
   };
 
   const toggleFeatured = async (id, nombre, current) => {
@@ -71,9 +75,13 @@ export default function AdminDoctores() {
 
   const handleDeleteDraft = async (id, nombre) => {
     if (!confirm(`¿Eliminar el registro en progreso de "${nombre}"?`)) return;
-    await base44.entities.Specialist.delete(id);
-    setDoctors(prev => prev.filter(d => d.id !== id));
-    toast.success("Registro eliminado");
+    try {
+      await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
+      setDoctors(prev => prev.filter(d => d.id !== id));
+      toast.success("Registro eliminado por completo");
+    } catch (e) {
+      toast.error("No se pudo eliminar: " + e.message);
+    }
   };
 
   const featuredCount = useMemo(() => doctors.filter(d => d.featured).length, [doctors]);
