@@ -123,10 +123,14 @@ export default function AdminSpecialists() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar este especialista?")) return;
-    await base44.entities.Specialist.delete(id);
-    toast.success("Especialista eliminado");
-    load();
+    if (!confirm("¿Eliminar este especialista? Esto también borra sus reseñas, consultorios, servicios, documentos y estadísticas.")) return;
+    try {
+      await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
+      toast.success("Especialista eliminado por completo");
+      load();
+    } catch (e) {
+      toast.error("No se pudo eliminar: " + e.message);
+    }
   };
 
   const toggleFeatured = async (id, nombre, current) => {
