@@ -7,6 +7,12 @@ const MODALIDADES = [
   { value: "ambas", label: "Ambas" },
 ];
 
+const PAYMENT_METHODS = [
+  { value: "tarjeta", label: "Tarjeta" },
+  { value: "transferencia", label: "Transferencia" },
+  { value: "efectivo", label: "Efectivo" },
+];
+
 export default function DoctorDetailsManager({ form, update, specialistId }) {
   return (
     <div className="space-y-5">
@@ -37,6 +43,32 @@ export default function DoctorDetailsManager({ form, update, specialistId }) {
               ))}
             </select>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
+        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Métodos de pago aceptados</h2>
+        <p className="text-xs text-muted-foreground -mt-2">Se muestran en tu perfil público. Deja sin marcar los que no aceptes — no se muestra nada inventado.</p>
+        <div className="flex flex-wrap gap-2">
+          {PAYMENT_METHODS.map((m) => {
+            const checked = (form.payment_methods || []).includes(m.value);
+            return (
+              <label key={m.value} className={`flex items-center gap-2 text-sm px-3 py-2 rounded-xl border cursor-pointer transition-colors ${checked ? "border-primary bg-accent/40" : "border-border/60"}`}>
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...(form.payment_methods || []), m.value]
+                      : (form.payment_methods || []).filter((v) => v !== m.value);
+                    update("payment_methods", next);
+                  }}
+                  className="w-4 h-4 accent-primary"
+                />
+                {m.label}
+              </label>
+            );
+          })}
         </div>
       </div>
 
