@@ -503,7 +503,6 @@ export default function SpecialistProfile() {
             <SpecialistPosts specialistId={specialist.id} />
           </div>
       </div>
-      </div>
 
       {/* Columna de reserva sticky (escritorio), alineada desde arriba junto al hero */}
       <aside className="hidden lg:block">
