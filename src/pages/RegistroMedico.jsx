@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Phone, Stethoscope, FileText, Monitor, Languages, MapPin } from "lucide-react";
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
+const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
 
 function GoogleIcon(props) {
   return (
@@ -59,6 +60,10 @@ export default function RegistroMedico() {
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
   const [languageOptions, setLanguageOptions] = useState([]);
+  // Id del perfil Specialist en borrador que se va guardando paso a paso,
+  // antes incluso de que exista una cuenta. Persistido en localStorage para
+  // sobrevivir el redirect de Google OAuth y recargas de página.
+  const [draftId, setDraftId] = useState(() => localStorage.getItem(DRAFT_ID_KEY) || "");
 
   useEffect(() => {
     Promise.all([
@@ -84,10 +89,42 @@ export default function RegistroMedico() {
 
   const buildFullNameWithTitle = () => `${data.title} ${data.full_name.trim()}`.trim();
 
-  // Crea el perfil (Specialist) con toda la información recabada en el wizard,
-  // vincula los idiomas seleccionados, y marca el rol del usuario como "doctor".
+  // Autoguardado progresivo: se llama al avanzar cada paso del wizard, antes
+  // de que exista cuenta. Crea (o actualiza) un perfil Specialist en borrador
+  // para que el registro quede visible en el panel de admin aunque la
+  // persona abandone antes de terminar. Es best-effort: si falla, no bloquea
+  // el avance del wizard.
+  const saveProgress = async (stepJustCompleted, dataOverride) => {
+    const payload = dataOverride || data;
+    try {
+      const res = await base44.functions.invoke("saveRegistrationDraft", {
+        draft_id: draftId || undefined,
+        title: payload.title,
+        full_name: payload.full_name,
+        whatsapp: payload.whatsapp,
+        specialty: payload.specialty,
+        subspecialty: payload.subspecialty,
+        cedula: payload.cedula,
+        modality: payload.modality,
+        zone: payload.zone,
+        languages: payload.languages,
+        step: stepJustCompleted,
+      });
+      const newId = res?.data?.id || res?.id;
+      if (newId && newId !== draftId) {
+        setDraftId(newId);
+        localStorage.setItem(DRAFT_ID_KEY, newId);
+      }
+    } catch {
+      // Autoguardado silencioso: un fallo aquí no debe interrumpir el registro.
+    }
+  };
+
+  // Crea el perfil (Specialist) con toda la información recabada en el wizard
+  // -o reclama el borrador que ya se había ido guardando paso a paso- y
+  // marca el rol del usuario como "doctor".
   const createProfileFromData = async (finalData) => {
-    const res = await base44.functions.invoke("createDoctorProfile", {
+    await base44.functions.invoke("createDoctorProfile", {
       full_name: `${finalData.title} ${finalData.full_name.trim()}`.trim(),
       specialty: finalData.specialty,
       subspecialty: finalData.subspecialty,
@@ -95,20 +132,10 @@ export default function RegistroMedico() {
       professional_license_number: finalData.cedula,
       modality: finalData.modality,
       zone: finalData.zone,
+      draft_id: finalData.draft_id || draftId || undefined,
     });
-    const specialist = res?.data?.specialist || res?.specialist;
-    if (specialist?.id && finalData.languages?.length > 0) {
-      await Promise.all(
-        finalData.languages.map((languageId) =>
-          base44.entities.SpecialistLanguage.create({
-            specialist_id: specialist.id,
-            language_id: languageId,
-            level: "avanzado",
-          }).catch(() => {})
-        )
-      );
-    }
     try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
+    localStorage.removeItem(DRAFT_ID_KEY);
   };
 
   // Al cargar: si ya viene autenticado (regres\u00f3 de Google), usa los datos guardados
@@ -178,6 +205,7 @@ export default function RegistroMedico() {
     const err = validateStep();
     if (err) { setError(err); return; }
     setError("");
+    saveProgress(stepKey);
     setStepIndex((i) => Math.min(i + 1, STEP_KEYS.length - 1));
   };
   const goBack = () => {
@@ -186,7 +214,7 @@ export default function RegistroMedico() {
   };
 
   const continueWithGoogle = () => {
-    localStorage.setItem(PENDING_KEY, JSON.stringify(data));
+    localStorage.setItem(PENDING_KEY, JSON.stringify({ ...data, draft_id: draftId || undefined }));
     base44.auth.loginWithProvider("google", window.location.href);
   };
 
