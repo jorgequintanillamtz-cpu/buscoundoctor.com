@@ -4,7 +4,7 @@ import SaveDoctorButton from "./SaveDoctorButton";
 import ShareProfileButton from "./ShareProfileButton";
 
 // Columna derecha (30%), sticky: la pieza que convierte pacientes.
-export default function BookingSidebar({ specialist, offices, services, whatsappHref, displayPhone }) {
+export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [], whatsappHref, displayPhone }) {
   const messageHref = specialist.email
     ? `mailto:${specialist.email}?subject=${encodeURIComponent("Pregunta desde BuscoUnDoctor")}&body=${encodeURIComponent(`Hola ${specialist.full_name}, tengo una pregunta antes de agendar mi cita.`)}`
     : specialist.whatsapp
@@ -19,7 +19,7 @@ export default function BookingSidebar({ specialist, offices, services, whatsapp
           Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
         </p>
 
-        <BookingFlow specialist={specialist} offices={offices} services={services} />
+        <BookingFlow specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
 
         <div className="mt-6 pt-6 border-t border-border/50 flex flex-wrap gap-2">
           {whatsappHref && (
