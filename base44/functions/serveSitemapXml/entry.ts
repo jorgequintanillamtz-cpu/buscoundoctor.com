@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     const urls = [];
 
     // 1) Páginas estáticas
-    const staticPaths = ["/", "/especialistas", "/blog", "/nosotros", "/contacto", "/preguntas-frecuentes", "/planes"];
+    const staticPaths = ["/", "/especialistas", "/blog", "/nosotros", "/contacto", "/preguntas-frecuentes", "/planes", "/para-medicos"];
     staticPaths.forEach((p) => urls.push({ loc: ORIGIN + p, priority: "1.0", changefreq: "weekly" }));
 
     // 2) Especialidades publicadas -> /especialidad/:slug
