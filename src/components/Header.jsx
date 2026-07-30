@@ -217,21 +217,24 @@ export default function Header() {
 
       {open &&
       <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
-          <nav className="flex flex-col px-4 py-3 gap-1">
-            <Link
-            to="/panel-medico"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-              <LogIn className="w-4 h-4" />
-              Iniciar sesión (médicos)
-            </Link>
-            <Link
-            to="/registro-medico"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-brand-bluePale hover:text-brand-navy transition-colors">
-              <Stethoscope className="w-4 h-4" />
-              ¿Eres médico? Regístrate
-            </Link>
+          <nav className="flex flex-col gap-3 px-4 py-3">
+            <div className="bg-brand-navy rounded-2xl p-3">
+              <p className="text-[11px] font-medium text-white/60 px-1 mb-2">¿Eres profesional de la salud?</p>
+              <Link
+                to="/panel-medico"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-white/90 hover:bg-white/10 transition-colors">
+                <LogIn className="w-4 h-4 flex-shrink-0" />
+                Iniciar sesión
+              </Link>
+              <Link
+                to="/registro-medico"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 px-3 py-2.5 mt-1 rounded-xl text-sm font-semibold bg-white text-brand-navy hover:bg-white/90 transition-colors">
+                <UserPlus className="w-4 h-4 flex-shrink-0" />
+                Crear cuenta gratis
+              </Link>
+            </div>
           </nav>
         </div>
       }
