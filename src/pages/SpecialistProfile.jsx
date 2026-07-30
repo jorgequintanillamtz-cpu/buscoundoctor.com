@@ -406,7 +406,11 @@ export default function SpecialistProfile() {
           </div>
       </div>
 
-      {/* Columna de reserva sticky (escritorio), alineada desde arriba junto al hero */}
+      {/* Columna de reserva sticky (escritorio), alineada desde arriba junto al hero.
+          Es hermana del contenido dentro del MISMO grid (en vez de ir después),
+          para que el sticky se mantenga visible durante todo el scroll, incluyendo
+          la sección de especialistas similares de abajo — así el botón de agendar
+          acompaña al usuario en (casi) todo momento y no se pierde la conversión. */}
       <aside className="hidden lg:block">
           <BookingSidebar
             specialist={specialist}
@@ -418,9 +422,11 @@ export default function SpecialistProfile() {
             displayPhone={displayPhone}
           />
         </aside>
-      </div>
 
-      <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
+      <div className="lg:col-span-2">
+        <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
+      </div>
+      </div>
 
       {/* Botón fijo "Agendar cita" + Bottom Sheet (móvil) */}
       <MobileBookingBar specialist={specialist} offices={offices} services={services} />
