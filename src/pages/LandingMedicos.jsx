@@ -171,12 +171,9 @@ export default function LandingMedicos() {
       {/* Header mínimo: solo logo + un único CTA. */}
       <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2" aria-label="BuscoUnDoctor, ir al inicio">
-            <div className="w-7 h-7 rounded-lg bg-brand-blue flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-heading font-bold text-xs">B</span>
-            </div>
-            <span className="font-heading font-extrabold text-foreground hidden sm:inline">
-              busco<span className="text-brand-blue">undoctor</span>
+          <Link to="/" className="flex items-center flex-shrink-0" aria-label="BuscoUnDoctor, ir al inicio">
+            <span className="font-heading font-extrabold text-[20px] sm:text-[23px] whitespace-nowrap">
+              <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
             </span>
           </Link>
           <CtaButton size="sm">Registrar mi perfil</CtaButton>
@@ -454,12 +451,9 @@ export default function LandingMedicos() {
       {/* Footer mínimo */}
       <footer className="border-t border-border/50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-brand-blue flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-heading font-bold text-[10px]">B</span>
-            </div>
-            <span className="font-heading font-bold text-sm text-foreground">
-              busco<span className="text-brand-blue">undoctor</span>
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <span className="font-heading font-extrabold text-[18px] whitespace-nowrap">
+              <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
             </span>
           </Link>
           <p className="text-xs text-muted-foreground">
