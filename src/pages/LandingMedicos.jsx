@@ -298,33 +298,24 @@ export default function LandingMedicos() {
         </section>
 
         {/* ============ BENEFICIOS ============ */}
-        <section aria-labelledby="beneficios-heading" className="max-w-5xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
+        <section aria-labelledby="beneficios-heading" className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
           <h2 id="beneficios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground text-center mb-10">
             Esto es lo que ganas
           </h2>
 
-          {/* Banner destacado: el beneficio principal */}
-          <div className="bg-brand-navy rounded-3xl p-6 sm:p-8 flex items-center gap-5 mb-4">
-            <span className="w-14 h-14 rounded-2xl bg-brand-blue flex items-center justify-center flex-shrink-0">
-              <FEATURED_BENEFIT.icon className="w-7 h-7 text-white" />
-            </span>
-            <div>
-              <h3 className="font-heading font-bold text-lg sm:text-xl text-white">{FEATURED_BENEFIT.title}</h3>
-              <p className="text-sm sm:text-base text-white/70 mt-1 leading-relaxed">{FEATURED_BENEFIT.desc}</p>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {BENEFIT_CARDS.map((b) => (
-              <div
-                key={b.title}
-                className="bg-card border border-border/50 rounded-2xl p-5 hover:shadow-md hover:-translate-y-0.5 transition-all"
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${COLOR_MAP[b.color]}`}>
+          <div className="divide-y divide-border/60 border-t border-b border-border/60">
+            {BENEFITS.map((b, i) => (
+              <div key={b.title} className="flex items-start sm:items-center gap-5 py-6">
+                <span className="text-xs font-bold text-muted-foreground/60 w-6 flex-shrink-0 hidden sm:block">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${COLOR_MAP[b.color]}`}>
                   <b.icon className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-heading font-bold text-foreground">{b.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{b.desc}</p>
                 </div>
-                <h3 className="font-heading font-bold text-foreground text-sm">{b.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{b.desc}</p>
               </div>
             ))}
           </div>
