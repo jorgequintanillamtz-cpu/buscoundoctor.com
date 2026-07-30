@@ -370,6 +370,9 @@ export default function RegistroMedico() {
                 <Button type="button" onClick={() => setPhase("email-form")} className="w-full min-h-[44px] rounded-xl">
                   Registrarme con correo electrónico
                 </Button>
+                <Link to="/planes" className="block text-center text-xs text-muted-foreground hover:text-foreground">
+                  Ver planes y precios
+                </Link>
               </StepShell>
             )}
 
