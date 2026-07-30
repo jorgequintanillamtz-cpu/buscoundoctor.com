@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { setOpenGraph } from "@/lib/seoMeta";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -31,8 +32,14 @@ export default function PricingPage() {
   const hasYearlyOption = useMemo(() => plans.some((p) => (p.price_monthly || 0) > 0 && (p.price_yearly || 0) > 0), [plans]);
 
   useEffect(() => {
-    document.title = "Planes y precios para médicos | BuscoUnDoctor";
-    setMeta("description", "Compara los planes para médicos en BuscoUnDoctor: un plan Gratis para aparecer en el directorio y un plan Premium con todas las funciones para destacar. Sin contratos, cancela cuando quieras.");
+    const title = "Planes y precios para médicos | BuscoUnDoctor";
+    const description = "Planes para médicos en BuscoUnDoctor: uno Gratis para aparecer en el directorio y uno Premium con todas las funciones. Sin contratos, cancela cuando quieras.";
+    document.title = title;
+    setMeta("description", description);
+    // Sin esto, al compartir /planes se vería el título/descripción genéricos
+    // del sitio (los que aplica Layout por defecto) en vez de algo relevante
+    // a precios.
+    setOpenGraph({ title, description });
   }, []);
 
   useEffect(() => {
