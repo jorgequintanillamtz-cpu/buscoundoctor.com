@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Check, X, Minus, ShieldCheck, Users, Clock, Gift, Search, MessageCircle,
-  Star, UserPlus, FileText, Rocket, TrendingUp, Award, Globe, Camera,
+  Star, UserPlus, FileText, Rocket, TrendingUp, Award, Globe,
   ArrowRight, MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
