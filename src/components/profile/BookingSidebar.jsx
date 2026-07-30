@@ -17,16 +17,16 @@ export default function BookingSidebar({ specialist, offices, services, resolved
     : null;
 
   return (
-    <div className="sticky top-24 space-y-4 max-h-[calc(100vh-7rem)] overflow-y-auto pb-2">
-      <div className="bg-card rounded-3xl border border-border/50 shadow-sm p-6">
-        <h2 className="font-heading font-bold text-lg text-foreground">Agendar cita</h2>
-        <p className="text-xs text-muted-foreground mt-1 mb-4">
+    <div className="sticky top-24 space-y-5 max-h-[calc(100vh-6rem)] overflow-y-auto pb-2">
+      <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-7 sm:p-8">
+        <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
+        <p className="text-sm text-muted-foreground mt-1.5 mb-6">
           Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
         </p>
 
         <BookingFlow specialist={specialist} offices={offices} services={services} />
 
-        <div className="mt-5 pt-5 border-t border-border/50 flex flex-wrap gap-2">
+        <div className="mt-6 pt-6 border-t border-border/50 flex flex-wrap gap-2">
           {whatsappHref && (
             <a
               href={whatsappHref}
@@ -62,16 +62,16 @@ export default function BookingSidebar({ specialist, offices, services, resolved
           <SaveDoctorButton specialistId={specialist.id} className="flex-1 basis-[47%]" />
         </div>
 
-        <p className="text-[11px] text-muted-foreground border-t border-border/50 pt-3 mt-4">
+        <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
           El contacto y la solicitud de cita son gratuitos.
         </p>
       </div>
 
       {resolvedInsurers.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border/50 p-5">
+        <div className="bg-card rounded-3xl border border-border/50 p-6">
           <div className="flex items-center gap-2 mb-3">
             <ShieldCheck className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-heading font-semibold text-foreground">Acepta seguros</h3>
+            <h3 className="text-base font-heading font-semibold text-foreground">Acepta seguros</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {resolvedInsurers.map((ins, i) => (
@@ -85,10 +85,10 @@ export default function BookingSidebar({ specialist, offices, services, resolved
       )}
 
       {specialist.payment_methods?.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border/50 p-5">
+        <div className="bg-card rounded-3xl border border-border/50 p-6">
           <div className="flex items-center gap-2 mb-3">
             <CreditCard className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-heading font-semibold text-foreground">Métodos de pago</h3>
+            <h3 className="text-base font-heading font-semibold text-foreground">Métodos de pago</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {specialist.payment_methods.map((m) => (
@@ -101,10 +101,10 @@ export default function BookingSidebar({ specialist, offices, services, resolved
       )}
 
       {languageNames.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border/50 p-5">
+        <div className="bg-card rounded-3xl border border-border/50 p-6">
           <div className="flex items-center gap-2 mb-3">
             <LanguagesIcon className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-heading font-semibold text-foreground">Idiomas</h3>
+            <h3 className="text-base font-heading font-semibold text-foreground">Idiomas</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {languageNames.map((name, i) => (
