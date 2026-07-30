@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, BarChart3, ImageIcon } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, BarChart3, ImageIcon, Tag } from "lucide-react";
 
 const adminNavItems = [
   { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -12,6 +12,7 @@ const adminNavItems = [
   { path: "/admin/doctores", label: "Doctores", icon: Users },
   { path: "/admin/resenas", label: "Reseñas", icon: Star },
   { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
+  { path: "/admin/planes", label: "Planes y precios", icon: Tag },
 ];
 
 // Layout exclusivo del panel de administración (dueños de la plataforma).
