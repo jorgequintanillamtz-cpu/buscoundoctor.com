@@ -136,8 +136,11 @@ export default function SearchableSelect({
                 )}
               >
                 {Icon && (
-                  <span className="w-8 h-8 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-brand-blue" />
+                  <span className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+                    o.type === "condition" ? "bg-emerald-100" : "bg-brand-bluePale"
+                  )}>
+                    <Icon className={cn("w-4 h-4", o.type === "condition" ? "text-emerald-600" : "text-brand-blue")} />
                   </span>
                 )}
                 <span className="flex-1 min-w-0 leading-snug">{o.name}</span>
