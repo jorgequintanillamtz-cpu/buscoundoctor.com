@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Phone, Stethoscope, FileText, Monitor, Languages, MapPin } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Phone, Stethoscope, Monitor, Languages, MapPin } from "lucide-react";
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
 const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
@@ -86,8 +86,6 @@ export default function RegistroMedico() {
   }, []);
 
   const update = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
-
-  const buildFullNameWithTitle = () => `${data.title} ${data.full_name.trim()}`.trim();
 
   // Autoguardado progresivo: se llama al avanzar cada paso del wizard, antes
   // de que exista cuenta. Crea (o actualiza) un perfil Specialist en borrador
