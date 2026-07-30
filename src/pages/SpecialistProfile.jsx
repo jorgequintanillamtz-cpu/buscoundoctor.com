@@ -238,14 +238,23 @@ export default function SpecialistProfile() {
               </div>
             )}
 
-            {featuredReview && (
-              <div className="mt-4 min-h-[76px] bg-brand-blueLight/50 border border-brand-blue/10 rounded-2xl px-4 py-3.5 max-w-xl mx-auto lg:mx-0">
-                <p className="text-sm text-brand-navy/80 italic leading-relaxed line-clamp-2">
-                  “{featuredReview.comment}”
-                </p>
-                <p className="text-xs text-brand-navy/50 font-medium mt-1.5">— {featuredReview.patient_name}</p>
-              </div>
-            )}
+            <div className="mt-4 min-h-[76px] bg-card border border-border/50 rounded-2xl px-4 py-3.5 max-w-xl mx-auto lg:mx-0">
+              {featuredReview ? (
+                <>
+                  <div className="flex justify-center lg:justify-start gap-0.5 mb-1.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={`w-3.5 h-3.5 ${featuredReview.rating >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-foreground/80 italic leading-relaxed line-clamp-2">
+                    “{featuredReview.comment}”
+                  </p>
+                  <p className="text-xs text-muted-foreground font-medium mt-1.5">— {featuredReview.patient_name}</p>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Este especialista aún no tiene reseñas.</p>
+              )}
+            </div>
 
             {specialist.description && (
               <p className="text-sm text-muted-foreground leading-relaxed mt-4">
