@@ -40,23 +40,27 @@ export default function SearchBar({ className = "" }) {
   const onListPage = location.pathname.startsWith("/especialistas");
   const canBuscar = onListPage ? Boolean(picked || zone) : Boolean(picked);
 
+  // Si se eligió una enfermedad, la búsqueda resuelve a la especialidad que la
+  // atiende: así el usuario ve el listado completo de doctores de esa
+  // especialidad (con filtros), no solo la página informativa de la enfermedad.
+  const resolvedSpecialty = picked?.type === "specialty"
+    ? picked.ref
+    : picked?.type === "condition"
+      ? specialties.find((s) => s.name === picked.ref.specialty)
+      : null;
+
   const handleBuscar = () => {
     if (!canBuscar) return;
-    // Enfermedad seleccionada: siempre a su página SEO dedicada, sin importar la página actual.
-    if (picked?.type === "condition") {
-      navigate(`/enfermedades/${picked.ref.slug}`);
-      return;
-    }
     // En la página de lista, preservar el filtrado por query params (no romper SpecialistList)
     if (onListPage) {
       const params = new URLSearchParams();
-      if (picked?.ref?.name) params.set("specialty", picked.ref.name);
+      if (resolvedSpecialty?.name) params.set("specialty", resolvedSpecialty.name);
       if (zone?.name) params.set("zone", zone.name);
       navigate(`/especialistas?${params.toString()}`);
       return;
     }
     // Fuera de la lista: navegar a la página SEO de especialidad (o combinada con zona)
-    const base = `/especialidad/${picked.ref.slug}`;
+    const base = `/especialidad/${resolvedSpecialty.slug}`;
     navigate(zone ? `${base}/${slugify(zone.name)}` : base);
   };
 
