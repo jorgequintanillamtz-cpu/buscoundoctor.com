@@ -44,18 +44,20 @@ export default function Header() {
   const submitSearch = (e) => {
     e?.preventDefault?.();
     const picked = searchOptions.find((o) => o.id === searchPick);
-    // Enfermedad seleccionada: siempre a su página SEO dedicada.
-    if (picked?.type === "condition") {
-      navigate(`/enfermedades/${picked.ref.slug}`);
-      return;
-    }
+    // Si se eligió una enfermedad, resolvemos la especialidad que la atiende:
+    // la búsqueda por enfermedad lleva al listado completo de esa especialidad.
+    const resolvedSpecialty = picked?.type === "specialty"
+      ? picked.ref
+      : picked?.type === "condition"
+        ? specialties.find((s) => s.name === picked.ref.specialty)
+        : null;
     // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
     // filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
-    if (picked?.type === "specialty") {
+    if (resolvedSpecialty) {
       if (searchZone) {
-        navigate(`/especialidad/${picked.ref.slug}/${slugify(searchZone)}`);
+        navigate(`/especialidad/${resolvedSpecialty.slug}/${slugify(searchZone)}`);
       } else {
-        navigate(`/especialidad/${picked.ref.slug}`);
+        navigate(`/especialidad/${resolvedSpecialty.slug}`);
       }
       return;
     }
