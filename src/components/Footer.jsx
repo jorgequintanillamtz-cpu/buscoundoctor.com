@@ -67,6 +67,7 @@ export default function Footer() {
             <h4 className="font-heading font-semibold text-sm mb-4 text-white">Para médicos</h4>
             <div className="flex flex-col gap-2.5 mb-6">
               <Link to="/registro-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Registro Doctor</Link>
+              <Link to="/planes" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Planes y precios</Link>
               <Link to="/panel-medico" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Acceso para médicos</Link>
             </div>
             <h4 className="font-heading font-semibold text-sm mb-4 text-white">Contacto</h4>
