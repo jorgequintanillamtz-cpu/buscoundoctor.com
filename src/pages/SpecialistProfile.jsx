@@ -2,14 +2,13 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ChevronLeft, Monitor, ShieldCheck, Star, Building2 } from "lucide-react";
+import { ChevronLeft, Star } from "lucide-react";
 import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
 import SimilarSpecialists from "../components/SimilarSpecialists";
 import SpecialistCases from "../components/SpecialistCases";
 import SpecialistPosts from "../components/SpecialistPosts";
 import SpecialistServices from "../components/SpecialistServices";
-import TrustBadges from "../components/profile/TrustBadges";
 import ScrollSpyNav from "../components/profile/ScrollSpyNav";
 import EspecialidadesSection from "../components/profile/EspecialidadesSection";
 import ReviewsSection from "../components/profile/ReviewsSection";
@@ -37,7 +36,6 @@ export default function SpecialistProfile() {
   const [loading, setLoading] = useState(true);
   const [insurers, setInsurers] = useState([]);
   const [offices, setOffices] = useState([]);
-  const [zoneName, setZoneName] = useState("");
   const [descExpanded, setDescExpanded] = useState(false);
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
@@ -57,11 +55,6 @@ export default function SpecialistProfile() {
         try {
           const offList = await base44.entities.Office.filter({ specialist_id: specialist.id });
           setOffices(offList);
-          const primary = offList.find(o => o.is_primary) || offList[0];
-          if (primary?.zone_id) {
-            const zones = await base44.entities.Zone.filter({ id: primary.zone_id });
-            if (zones.length > 0) setZoneName(zones[0].name);
-          }
         } catch {}
 
         try {
@@ -151,7 +144,6 @@ export default function SpecialistProfile() {
     ? `https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, encontré su perfil en BuscoUnDoctor y me gustaría agendar una cita.")}`
     : null;
   const displayPhone = primaryOffice?.phone;
-  const displayLocation = zoneName || specialist.city || specialist.zone;
 
   const description = specialist.description || "";
   const isLongDescription = description.length > 300;
@@ -202,15 +194,8 @@ export default function SpecialistProfile() {
 
       {/* HERO */}
       <div className="pb-2">
-        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:gap-10 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:gap-10 items-start">
           <div className="text-center lg:text-left order-2">
-            {specialist.license_verification_status === "verified" && (
-              <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Cédula profesional verificada
-              </div>
-            )}
-
             <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-brand-navy">
               {specialist.full_name}
             </h1>
@@ -218,80 +203,6 @@ export default function SpecialistProfile() {
               {specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
             </p>
-
-            {displayLocation && (
-              <p className="flex items-center justify-center lg:justify-start gap-1.5 text-sm text-brand-navy/70 mt-3">
-                <MapPin className="w-4 h-4 text-brand-blue flex-shrink-0" />
-                {displayLocation}
-              </p>
-            )}
-
-            {offices.length > 0 && (
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
-                {offices.map((o) => (
-                  <span key={o.id} className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
-                    <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
-                    {o.name || o.address_line}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {(languageNames.length > 0 || specialist.modality) && (
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
-                {languageNames.length > 0 && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
-                    {languageNames.join(", ")}
-                  </span>
-                )}
-                {specialist.modality === "online" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
-                    <Monitor className="w-3.5 h-3.5" />
-                    Consulta virtual disponible
-                  </span>
-                )}
-                {specialist.modality === "ambas" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
-                    <Monitor className="w-3.5 h-3.5" />
-                    Presencial y en línea
-                  </span>
-                )}
-              </div>
-            )}
-
-            <TrustBadges specialist={specialist} primaryOffice={primaryOffice} reviewCount={allReviews.length} avgRating={avgRating} />
-
-            {/* Stats: experiencia, calificación, cédula profesional, cédula de especialidad/certificaciones */}
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-4 sm:gap-8 mt-8 pt-6 border-t border-brand-navy/10">
-              {specialist.years_experience && (
-                <div className="text-center lg:text-left">
-                  <p className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy">{specialist.years_experience}+</p>
-                  <p className="text-xs text-brand-navy/60 mt-0.5">Años de experiencia</p>
-                </div>
-              )}
-              <div className="text-center lg:text-left">
-                <p className="font-heading font-extrabold text-2xl sm:text-3xl text-brand-navy flex items-center justify-center lg:justify-start gap-1">
-                  {avgRating != null ? avgRating.toFixed(1) : "—"}
-                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-                </p>
-                <p className="text-xs text-brand-navy/60 mt-0.5">
-                  {allReviews.length > 0 ? `${allReviews.length} opinión${allReviews.length !== 1 ? "es" : ""}` : "Sin opiniones aún"}
-                </p>
-              </div>
-              {specialist.professional_license_number && (
-                <div className="text-center lg:text-left">
-                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy">{specialist.professional_license_number}</p>
-                  <p className="text-xs text-brand-navy/60 mt-0.5">Cédula profesional</p>
-                </div>
-              )}
-              {specialist.certifications && (
-                <div className="text-center lg:text-left">
-                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy line-clamp-1">{specialist.certifications}</p>
-                  <p className="text-xs text-brand-navy/60 mt-0.5">Cédula de especialidad / certificaciones</p>
-                </div>
-              )}
-            </div>
-            <a href="#opiniones" className="inline-block text-xs font-semibold text-brand-blue hover:underline mt-3">Ver todas las opiniones →</a>
           </div>
 
           <div className="relative flex justify-center order-1">
@@ -305,19 +216,6 @@ export default function SpecialistProfile() {
                   </span>
                 </div>
               )}
-            </div>
-            <div className="hidden sm:flex absolute -bottom-5 -left-4 items-center gap-2.5 bg-white rounded-2xl shadow-xl px-4 py-3 border border-border/50">
-              <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-              </div>
-              <div>
-                <p className="font-heading font-bold text-sm text-foreground leading-tight">
-                  {avgRating != null ? `${avgRating.toFixed(1)} / 5` : "Nuevo en la plataforma"}
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-tight">
-                  {allReviews.length > 0 ? `${allReviews.length} pacientes atendidos` : "Sé el primero en calificar"}
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -387,6 +285,17 @@ export default function SpecialistProfile() {
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">Este especialista aún no agregó una biografía.</p>
+            )}
+
+            {(specialist.professional_license_number || specialist.certifications) && (
+              <div className="mt-5 pt-5 border-t border-border/50 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                {specialist.professional_license_number && (
+                  <span><strong className="text-foreground font-medium">Cédula profesional:</strong> {specialist.professional_license_number}</span>
+                )}
+                {specialist.certifications && (
+                  <span><strong className="text-foreground font-medium">Cédula de especialidad / certificaciones:</strong> {specialist.certifications}</span>
+                )}
+              </div>
             )}
 
             {languageNames.length > 0 && (
