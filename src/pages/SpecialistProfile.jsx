@@ -201,11 +201,8 @@ export default function SpecialistProfile() {
       <div className="flex flex-col">
 
       {/* HERO */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-bluePale to-brand-blueLight shadow-xl p-6 sm:p-10">
-        <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/60 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-1/3 w-64 h-64 rounded-full bg-brand-blue/15 blur-3xl" />
-
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
+      <div className="pb-2">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
           <div className="text-center lg:text-left order-2 lg:order-1">
             {specialist.license_verification_status === "verified" && (
               <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
@@ -232,7 +229,7 @@ export default function SpecialistProfile() {
             {offices.length > 0 && (
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
                 {offices.map((o) => (
-                  <span key={o.id} className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
+                  <span key={o.id} className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
                     <Building2 className="w-3.5 h-3.5 flex-shrink-0" />
                     {o.name || o.address_line}
                   </span>
@@ -243,18 +240,18 @@ export default function SpecialistProfile() {
             {(languageNames.length > 0 || specialist.modality) && (
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
                 {languageNames.length > 0 && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
                     {languageNames.join(", ")}
                   </span>
                 )}
                 {specialist.modality === "online" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
                     <Monitor className="w-3.5 h-3.5" />
                     Consulta virtual disponible
                   </span>
                 )}
                 {specialist.modality === "ambas" && (
-                  <span className="flex items-center gap-1.5 text-xs font-medium bg-white/80 border border-white text-brand-navy rounded-full px-3 py-1.5">
+                  <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
                     <Monitor className="w-3.5 h-3.5" />
                     Presencial y en línea
                   </span>
@@ -298,12 +295,11 @@ export default function SpecialistProfile() {
           </div>
 
           <div className="relative flex justify-center order-1 lg:order-2">
-            <div className="pointer-events-none absolute w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-white/70 blur-2xl" />
-            <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border-4 border-white shadow-2xl bg-white/40">
+            <div className="relative w-48 h-56 sm:w-72 sm:h-80 rounded-[2rem] overflow-hidden border border-border/50 shadow-md bg-muted">
               {specialist.profile_photo ? (
                 <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
               ) : (
-                <div className="w-full h-full bg-white/60 flex items-center justify-center">
+                <div className="w-full h-full bg-muted flex items-center justify-center">
                   <span className="font-heading font-bold text-4xl text-brand-navy/30">
                     {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                   </span>
