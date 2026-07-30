@@ -366,15 +366,13 @@ export default function SpecialistProfile() {
         ))}
       </nav>
 
-      <div className="mt-6">
+      <div className="mt-6 order-1 lg:order-7">
           {/* OPINIONES: en el DOM permanece en el orden lógico de escritorio,
               pero en móvil se muestra primero (order-1) por conversión —
               exactamente lo que pidió Jorge: hero → opiniones → resto. */}
-          <div className="order-1 lg:order-7">
             <ReviewsSection specialistId={specialist.id} specialist={specialist} />
-          </div>
+      </div>
 
-          {/* INFORMACIÓN: biografía, idiomas, enfoque del tratamiento */}
           <div id="informacion" className="order-3 lg:order-1 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
             <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
             {specialist.video_url && (
