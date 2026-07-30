@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Clock, ChevronRight } from "lucide-react";
+import { MapPin, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "./AppointmentForm";
 import VerifiedSeal from "./profile/VerifiedSeal";
