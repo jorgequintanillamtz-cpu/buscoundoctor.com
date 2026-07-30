@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { MapPin, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "./AppointmentForm";
+import VerifiedSeal from "./profile/VerifiedSeal";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import { base44 } from "@/api/base44Client";
@@ -80,9 +81,14 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                {specialist.full_name}
-              </h3>
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                  {specialist.full_name}
+                </h3>
+                {specialist.license_verification_status === "verified" && (
+                  <VerifiedSeal size="sm" className="flex-shrink-0" />
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                 <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full">
                   {specialist.specialty}
