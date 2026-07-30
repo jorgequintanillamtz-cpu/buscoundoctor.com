@@ -17,7 +17,7 @@ export default function BookingSidebar({ specialist, offices, services, resolved
     : null;
 
   return (
-    <div className="sticky top-24 space-y-5 max-h-[calc(100vh-6rem)] overflow-y-auto pb-2">
+    <div className="sticky top-24 space-y-5 pb-2">
       <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-7 sm:p-8">
         <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
         <p className="text-sm text-muted-foreground mt-1.5 mb-6">
