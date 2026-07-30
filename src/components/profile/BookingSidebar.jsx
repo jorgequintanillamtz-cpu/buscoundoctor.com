@@ -1,15 +1,10 @@
-import { MessageCircle, Phone, Mail, CreditCard, Languages as LanguagesIcon, ShieldCheck } from "lucide-react";
+import { MessageCircle, Phone, Mail } from "lucide-react";
 import BookingFlow from "./BookingFlow";
 import SaveDoctorButton from "./SaveDoctorButton";
 import ShareProfileButton from "./ShareProfileButton";
 
-const PAYMENT_LABELS = { tarjeta: "Tarjeta", transferencia: "Transferencia", efectivo: "Efectivo" };
-
-// Columna derecha (30%), sticky: la pieza que convierte pacientes. Todo lo
-// que muestra (aseguradoras, métodos de pago, idiomas) sale de datos reales
-// del especialista — si no los tiene cargados, simplemente no se muestra esa
-// tarjeta en vez de rellenarla con contenido genérico.
-export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [], languageNames = [], whatsappHref, displayPhone }) {
+// Columna derecha (30%), sticky: la pieza que convierte pacientes.
+export default function BookingSidebar({ specialist, offices, services, whatsappHref, displayPhone }) {
   const messageHref = specialist.email
     ? `mailto:${specialist.email}?subject=${encodeURIComponent("Pregunta desde BuscoUnDoctor")}&body=${encodeURIComponent(`Hola ${specialist.full_name}, tengo una pregunta antes de agendar mi cita.`)}`
     : specialist.whatsapp
