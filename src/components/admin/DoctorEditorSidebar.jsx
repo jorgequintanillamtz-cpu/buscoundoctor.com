@@ -1,12 +1,33 @@
-import { CheckCircle2, Star, Globe } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Star, Globe, BadgeCheck } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { base44 } from "@/api/base44Client";
+import VerifiedSeal from "@/components/profile/VerifiedSeal";
 
 // Este componente ahora SOLO se renderiza para administradores.
 // El control de "active" (perfil visible al público) es exclusivo de admin,
 // ya que es lo que realmente controla la visibilidad del perfil en el sitio.
 export default function DoctorEditorSidebar({ form, update, onSaveDraft, saving }) {
   const completitud = form.completeness_score || 0;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
+  const isVerified = form.license_verification_status === "verified";
+
+  // Autoriza (o retira) el sello de verificado. Esto es independiente del
+  // flujo de aprobación de documentos (que también puede marcarlo como
+  // "verified" al aprobar la cédula profesional cargada) — este switch le da
+  // al dueño/admin la opción de autorizarlo directamente cuando ya confirmó
+  // la identidad del médico por otro medio.
+  const toggleVerified = (v) => {
+    update("license_verification_status", v ? "verified" : "pending");
+    update("license_verified_at", v ? new Date().toISOString() : null);
+    if (v && user?.id) update("license_verified_by", user.id);
+  };
 
   return (
     <div className="space-y-4 xl:sticky xl:top-4">
@@ -27,6 +48,29 @@ export default function DoctorEditorSidebar({ form, update, onSaveDraft, saving 
             Perfil destacado
           </div>
           <Switch checked={!!form.featured} onCheckedChange={(v) => update("featured", v)} />
+        </div>
+
+        <div className="pt-3 border-t border-border/40 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <BadgeCheck className="w-4 h-4 text-brand-blue" />
+              Sello de verificado
+            </div>
+            <Switch checked={isVerified} onCheckedChange={toggleVerified} />
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Actívalo solo después de confirmar la cédula profesional (documento aprobado en "Documentos y cédula" o verificación manual tuya). El sello se muestra en el perfil público y en las tarjetas de búsqueda — no lo actives sin haber verificado de verdad.
+          </p>
+          {isVerified && (
+            <div className="pt-1">
+              <VerifiedSeal size="sm" />
+              {form.license_verified_at && (
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Verificado el {new Date(form.license_verified_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <Button variant="outline" size="sm" onClick={onSaveDraft} disabled={saving} className="w-full rounded-xl">
