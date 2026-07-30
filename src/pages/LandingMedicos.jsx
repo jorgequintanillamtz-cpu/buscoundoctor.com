@@ -327,7 +327,7 @@ export default function LandingMedicos() {
               Tu perfil puede estar activo hoy mismo.
             </p>
             <div className="relative mt-6">
-              <CtaButton className="bg-white text-brand-blue hover:bg-white/90 h-13 px-8">Registrar mi perfil gratis</CtaButton>
+              <CtaButton className="bg-white text-brand-blue hover:bg-white/90 h-14 px-8">Registrar mi perfil gratis</CtaButton>
             </div>
           </div>
         </section>
