@@ -38,6 +38,7 @@ import RegistroMedico from './pages/RegistroMedico';
 import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
 import PricingPage from './pages/PricingPage';
 import AdminPlanes from './pages/admin/AdminPlanes';
+import LandingMedicos from './pages/LandingMedicos';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -86,6 +87,11 @@ const AuthenticatedApp = () => {
 
       {/* Panel del médico: área completamente separada del panel de administración, con su propio shell completo */}
       <Route path="/panel-medico" element={<DoctorPanel />} />
+
+      {/* Landing de conversión para el registro de médicos: shell propio y
+          minimalista (sin el Header/Footer del sitio) a propósito, para no
+          competir con el único CTA de la página. */}
+      <Route path="/para-medicos" element={<LandingMedicos />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>
