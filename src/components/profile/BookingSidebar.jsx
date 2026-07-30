@@ -67,54 +67,6 @@ export default function BookingSidebar({ specialist, offices, services, resolved
         </p>
       </div>
 
-      {resolvedInsurers.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border/50 p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <ShieldCheck className="w-4 h-4 text-primary" />
-            <h3 className="text-base font-heading font-semibold text-foreground">Acepta seguros</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {resolvedInsurers.map((ins, i) => (
-              <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
-                {ins.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {specialist.payment_methods?.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border/50 p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <CreditCard className="w-4 h-4 text-primary" />
-            <h3 className="text-base font-heading font-semibold text-foreground">Métodos de pago</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {specialist.payment_methods.map((m) => (
-              <span key={m} className="text-xs font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                {PAYMENT_LABELS[m] || m}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {languageNames.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border/50 p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <LanguagesIcon className="w-4 h-4 text-primary" />
-            <h3 className="text-base font-heading font-semibold text-foreground">Idiomas</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {languageNames.map((name, i) => (
-              <span key={i} className="text-xs font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
