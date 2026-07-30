@@ -51,9 +51,9 @@ export default function ReviewsSection({ specialistId, specialist }) {
   if (loading) return null;
 
   return (
-    <div id="opiniones" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
-      <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
-        <h2 className="font-heading font-bold text-lg text-foreground">Opiniones de pacientes</h2>
+    <div id="opiniones" className="mt-6 bg-card rounded-3xl border border-border/50 p-7 sm:p-9 scroll-mt-32">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <h2 className="font-heading font-bold text-xl text-foreground">Opiniones de pacientes</h2>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -104,15 +104,15 @@ export default function ReviewsSection({ specialistId, specialist }) {
             ))}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {sortedReviews.map((r) => (
-              <div key={r.id} className="pb-4 border-b border-border/30 last:border-0 last:pb-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium text-sm text-foreground">{r.patient_name}</span>
+              <div key={r.id} className="pb-6 border-b border-border/30 last:border-0 last:pb-0">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-semibold text-base text-foreground">{r.patient_name}</span>
                   <span className="text-xs text-muted-foreground">{moment(r.created_date).format("DD MMM YYYY")}</span>
                 </div>
-                <StarDisplay rating={r.rating} />
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{r.comment}</p>
+                <StarDisplay rating={r.rating} size="w-4 h-4" />
+                <p className="text-base text-foreground/80 mt-2.5 leading-relaxed">{r.comment}</p>
               </div>
             ))}
           </div>
