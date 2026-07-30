@@ -470,7 +470,7 @@ export default function SpecialistProfile() {
       </div>
 
       {/* Botón fijo "Agendar cita" + Bottom Sheet (móvil) */}
-      <MobileBookingBar specialist={specialist} offices={offices} services={services} />
+      <MobileBookingBar specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
     </div>
   );
 }
