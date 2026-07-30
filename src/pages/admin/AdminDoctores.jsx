@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -38,6 +38,43 @@ export default function AdminDoctores() {
     () => doctors.filter(s => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)),
     [doctors]
   );
+
+  // Borradores anónimos: el wizard de /registro-medico va guardando el
+  // progreso paso a paso desde antes de que exista una cuenta. Si la persona
+  // abandona el registro, el perfil queda aquí (sin dueño todavía) para que
+  // se pueda dar seguimiento manualmente.
+  const enProgreso = useMemo(
+    () => doctors.filter(s => s.publication_status === "draft" && !s.owner_user_id && s.registration_step),
+    [doctors]
+  );
+
+  // "Todos" muestra los perfiles reales (publicados o en revisión formal);
+  // los borradores anónimos viven solo en la pestaña "En progreso".
+  const doctoresReales = useMemo(
+    () => doctors.filter(s => !(s.publication_status === "draft" && !s.owner_user_id)),
+    [doctors]
+  );
+
+  const STEP_LABELS = {
+    nombre: "Nombre",
+    whatsapp: "WhatsApp",
+    especialidad: "Especialidad",
+    modalidad: "Modalidad",
+    idiomas: "Idiomas",
+    ubicacion: "Datos completos (falta crear cuenta)",
+  };
+
+  const waLink = (whatsapp) => {
+    const digits = (whatsapp || "").replace(/\D/g, "");
+    return digits ? `https://wa.me/52${digits.replace(/^52/, "")}` : null;
+  };
+
+  const handleDeleteDraft = async (id, nombre) => {
+    if (!confirm(`¿Eliminar el registro en progreso de "${nombre}"?`)) return;
+    await base44.entities.Specialist.delete(id);
+    setDoctors(prev => prev.filter(d => d.id !== id));
+    toast.success("Registro eliminado");
+  };
 
   const featuredCount = useMemo(() => doctors.filter(d => d.featured).length, [doctors]);
 
@@ -101,11 +138,20 @@ export default function AdminDoctores() {
             <span className="text-xs bg-amber-500 text-white rounded-full px-1.5 min-w-[18px] text-center">{pendientes.length}</span>
           )}
         </button>
+        <button
+          onClick={() => setTab("progreso")}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5 ${tab === "progreso" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Registros en progreso
+          {enProgreso.length > 0 && (
+            <span className="text-xs bg-blue-500 text-white rounded-full px-1.5 min-w-[18px] text-center">{enProgreso.length}</span>
+          )}
+        </button>
       </div>
 
-      {/* Listado general (sin cambios) */}
+      {/* Listado general: perfiles reales (publicados o en revisión formal) */}
       {tab === "todos" && (
-        doctors.length === 0 ? (
+        doctoresReales.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <p className="mb-4">No hay doctores registrados todavía.</p>
             <Button asChild className="rounded-xl gap-2">
@@ -114,7 +160,7 @@ export default function AdminDoctores() {
           </div>
         ) : (
           <div className="space-y-3">
-            {doctors.map(doc => (
+            {doctoresReales.map(doc => (
               <div key={doc.id} className="bg-card rounded-2xl border border-border/50 p-4 flex items-center gap-4">
                 {doc.profile_photo ? (
                   <img src={doc.profile_photo} alt={doc.full_name} loading="lazy" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
@@ -157,6 +203,65 @@ export default function AdminDoctores() {
                 </div>
               </div>
             ))}
+          </div>
+        )
+      )}
+
+      {/* Registros en progreso: borradores anónimos guardados paso a paso */}
+      {tab === "progreso" && (
+        enProgreso.length === 0 ? (
+          <div className="text-center py-16 text-muted-foreground">
+            <Clock className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p>No hay registros en progreso por ahora.</p>
+          </div>
+        ) : (
+          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/50 bg-muted/50">
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">WhatsApp</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Llegó hasta</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Fecha</th>
+                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enProgreso.map(doc => (
+                    <tr key={doc.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-foreground">
+                        {doc.full_name}
+                        {doc.specialty && <span className="block text-xs text-muted-foreground font-normal">{doc.specialty}</span>}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{doc.whatsapp || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
+                          {STEP_LABELS[doc.registration_step] || doc.registration_step}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                        {doc.created_date ? new Date(doc.created_date).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {waLink(doc.whatsapp) && (
+                            <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50" asChild>
+                              <a href={waLink(doc.whatsapp)} target="_blank" rel="noopener noreferrer">
+                                <MessageCircle className="w-4 h-4" /> Contactar
+                              </a>
+                            </Button>
+                          )}
+                          <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => handleDeleteDraft(doc.id, doc.full_name)}>
+                            <Trash2 className="w-4 h-4" /> Eliminar
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )
       )}
