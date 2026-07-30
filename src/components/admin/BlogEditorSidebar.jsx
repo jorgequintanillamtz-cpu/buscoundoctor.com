@@ -170,8 +170,17 @@ export default function BlogEditorSidebar({ form, update, onSaveDraft, onPublish
           <div>
             <SideLabel>Fecha de publicación</SideLabel>
             <input type="datetime-local" value={form.scheduled_at || ""}
-              onChange={e => update("scheduled_at", e.target.value)}
+              onChange={e => {
+                update("scheduled_at", e.target.value);
+                // Programar una fecha futura implica quedar en borrador hasta
+                // que llegue esa fecha (el cron publishScheduledPosts la
+                // publica sola). Si se borra la fecha, no se toca published.
+                if (e.target.value) update("published", false);
+              }}
               className="w-full h-9 px-3 text-sm bg-background border border-input rounded-xl focus:outline-none focus:ring-1 focus:ring-ring" />
+            {form.scheduled_at && (
+              <p className="text-xs text-amber-600 mt-1">Quedará en borrador hasta esta fecha.</p>
+            )}
           </div>
         )}
 
