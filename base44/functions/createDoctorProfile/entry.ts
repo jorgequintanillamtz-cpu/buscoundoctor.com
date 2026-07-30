@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       zone: body.zone || '',
       location: body.zone || '',
       owner_user_id: user.id,
-      publication_status: 'draft',
+      publication_status: 'pending_review',
       license_verification_status: 'pending',
       active: false,
     };
@@ -53,6 +53,18 @@ Deno.serve(async (req) => {
     // con la restricción de unicidad si se manda vacía.
     if (cedula) {
       payload.professional_license_number = cedula;
+    }
+
+    // Si el wizard de /registro-medico ya había ido guardando un borrador
+    // anónimo paso a paso (sin dueño todavía), lo reclamamos asignándole
+    // owner_user_id en vez de crear un registro duplicado.
+    if (body.draft_id) {
+      try {
+        await base44.asServiceRole.entities.Specialist.update(body.draft_id, payload);
+        return Response.json({ specialist: { id: body.draft_id, ...payload } });
+      } catch {
+        // El borrador ya no existe o no es válido: sigue al flujo normal de creación.
+      }
     }
 
     const created = await base44.asServiceRole.entities.Specialist.create(payload);
