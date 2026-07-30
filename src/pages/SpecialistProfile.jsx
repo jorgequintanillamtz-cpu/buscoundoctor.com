@@ -155,10 +155,6 @@ export default function SpecialistProfile() {
     ? allReviews.reduce((a, r) => a + r.rating, 0) / allReviews.length
     : specialist.rating;
 
-  const featuredReview = allReviews.length > 0
-    ? [...allReviews].sort((a, b) => b.rating - a.rating || (b.comment?.length || 0) - (a.comment?.length || 0))[0]
-    : null;
-
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
 
   return (
