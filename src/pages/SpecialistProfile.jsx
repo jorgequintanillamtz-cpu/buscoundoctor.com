@@ -197,6 +197,9 @@ export default function SpecialistProfile() {
         </p>
       )}
 
+      <div className="lg:grid lg:grid-cols-[1fr_460px] gap-8 items-start">
+      <div className="flex flex-col">
+
       {/* HERO */}
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-bluePale to-brand-blueLight shadow-xl p-6 sm:p-10">
         <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-white/60 blur-3xl" />
@@ -351,7 +354,7 @@ export default function SpecialistProfile() {
       {/* Quick-nav horizontal (móvil): equivalente en espíritu a "tabs", pero
           como enlaces ancla que hacen scroll — así todo el contenido sigue
           siempre renderizado y visible para Google (no ocultamos paneles). */}
-      <nav className="lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
+      <nav className="order-2 lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
         {NAV_SECTIONS.map((s) => (
           <a
             key={s.id}
@@ -363,18 +366,16 @@ export default function SpecialistProfile() {
         ))}
       </nav>
 
-      <div className="mt-2 lg:grid lg:grid-cols-[1fr_380px] gap-8 items-start">
-        <div className="flex flex-col">
-
+      <div className="mt-6">
           {/* OPINIONES: en el DOM permanece en el orden lógico de escritorio,
               pero en móvil se muestra primero (order-1) por conversión —
               exactamente lo que pidió Jorge: hero → opiniones → resto. */}
-          <div className="order-1 lg:order-none">
+          <div className="order-1 lg:order-7">
             <ReviewsSection specialistId={specialist.id} specialist={specialist} />
           </div>
 
           {/* INFORMACIÓN: biografía, idiomas, enfoque del tratamiento */}
-          <div id="informacion" className="order-3 lg:order-none mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+          <div id="informacion" className="order-3 lg:order-1 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
             <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
             {specialist.video_url && (
               <div className="mt-0 mb-5">
@@ -420,12 +421,12 @@ export default function SpecialistProfile() {
           </div>
 
           {/* ESPECIALIDADES */}
-          <div className="order-4 lg:order-none">
+          <div className="order-4 lg:order-2">
             <EspecialidadesSection specialist={specialist} />
           </div>
 
           {/* EXPERIENCIA */}
-          <div className="order-5 lg:order-none">
+          <div className="order-5 lg:order-3">
             <EducationTimeline
               specialistId={specialist.id}
               variant="experiencia"
@@ -435,17 +436,17 @@ export default function SpecialistProfile() {
           </div>
 
           {/* ESTUDIOS */}
-          <div className="order-6 lg:order-none">
+          <div className="order-6 lg:order-4">
             <EducationTimeline specialistId={specialist.id} variant="estudios" />
           </div>
 
           {/* HOSPITALES */}
-          <div className="order-7 lg:order-none">
+          <div className="order-7 lg:order-5">
             <PublicOfficeList specialistId={specialist.id} />
           </div>
 
           {/* SERVICIOS */}
-          <div className="order-8 lg:order-none">
+          <div className="order-8 lg:order-6">
             <SpecialistServices specialistId={specialist.id} />
           </div>
 
@@ -492,21 +493,22 @@ export default function SpecialistProfile() {
           )}
 
           {/* FAQ */}
-          <div className="order-10 lg:order-none">
+          <div className="order-10 lg:order-8">
             <FaqSection specialist={specialist} />
           </div>
 
           {/* Contenido adicional existente (se conserva para no perder SEO/indexación previa) */}
-          <div className="order-11 lg:order-none">
+          <div className="order-11 lg:order-9">
             <SpecialistCases specialistId={specialist.id} />
           </div>
-          <div className="order-12 lg:order-none">
+          <div className="order-12 lg:order-10">
             <SpecialistPosts specialistId={specialist.id} />
           </div>
-        </div>
+      </div>
+      </div>
 
-        {/* Columna de reserva sticky (escritorio) */}
-        <aside className="hidden lg:block">
+      {/* Columna de reserva sticky (escritorio), alineada desde arriba junto al hero */}
+      <aside className="hidden lg:block">
           <BookingSidebar
             specialist={specialist}
             offices={offices}
