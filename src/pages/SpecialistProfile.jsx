@@ -208,6 +208,30 @@ export default function SpecialistProfile() {
                 {primaryOffice.address_line}
               </p>
             )}
+
+            {allReviews.length > 0 && (
+              <div className="flex items-center justify-center lg:justify-start gap-2 mt-3">
+                <span className="font-heading font-bold text-lg text-foreground">{avgRating.toFixed(1)}</span>
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className={`w-3.5 h-3.5 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">({allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""})</span>
+                <a href="#opiniones" className="text-xs font-semibold text-brand-blue hover:underline">Ver todas →</a>
+              </div>
+            )}
+
+            {specialist.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed mt-4">
+                {shownDescription}
+                {isLongDescription && (
+                  <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium ml-1 hover:underline">
+                    {descExpanded ? "Leer menos" : "Leer más"}
+                  </button>
+                )}
+              </p>
+            )}
           </div>
 
           <div className="relative flex justify-center order-1">
@@ -225,27 +249,6 @@ export default function SpecialistProfile() {
           </div>
         </div>
       </div>
-
-      {/* Resumen de calificación, justo debajo del hero */}
-      {allReviews.length > 0 && (
-        <div className="mt-4 bg-card rounded-3xl border border-border/50 shadow-sm p-6 sm:p-7">
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="font-heading font-extrabold text-3xl text-foreground">{avgRating.toFixed(1)}</span>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className={`w-4 h-4 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
-                ))}
-              </div>
-            </div>
-            <span className="text-sm text-muted-foreground">{allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} de pacientes</span>
-          </div>
-          {featuredReview?.comment && (
-            <p className="text-sm text-foreground/80 italic mt-3 leading-relaxed">"{featuredReview.comment}"</p>
-          )}
-          <a href="#opiniones" className="inline-block text-sm font-semibold text-brand-blue hover:underline mt-3">Ver todas las opiniones →</a>
-        </div>
-      )}
 
       {/* Nav sticky con scroll-spy (escritorio) */}
       <ScrollSpyNav sections={NAV_SECTIONS} />
@@ -279,19 +282,6 @@ export default function SpecialistProfile() {
                 <video src={specialist.video_url} controls className="w-full rounded-2xl max-h-64 bg-black" playsInline />
               </div>
             )}
-            {specialist.description ? (
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {shownDescription}
-                {isLongDescription && (
-                  <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium ml-1 hover:underline">
-                    {descExpanded ? "Leer menos" : "Leer más"}
-                  </button>
-                )}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">Este especialista aún no agregó una biografía.</p>
-            )}
-
             {(specialist.professional_license_number || specialist.certifications) && (
               <div className="mt-5 pt-5 border-t border-border/50 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
                 {specialist.professional_license_number && (
