@@ -132,7 +132,13 @@ export default function BlogEditor() {
       ...rest,
       slug: f.slug || generateBlogSlug(f.title),
       scheduled_at: f.scheduled_at ? new Date(f.scheduled_at).toISOString() : null,
-      published: f.scheduled_at ? false : f.published,
+      // OJO: published se guarda tal cual viene en el formulario. Antes se
+      // forzaba a false cada vez que había una fecha programada, lo cual
+      // provocaba que el autoguardado (cada 30s) revirtiera a borrador un
+      // artículo recién publicado si quedaba una fecha programada vieja en
+      // el formulario. El único lugar donde "programar" debe forzar borrador
+      // es al elegir la fecha en el sidebar (ver BlogEditorSidebar).
+      published: f.published,
     };
   };
 
@@ -175,10 +181,13 @@ export default function BlogEditor() {
 
     setSaving(true);
     try {
-      const data = { ...buildSaveData(formRef.current), published: true };
+      // Publicar siempre gana sobre cualquier fecha programada pendiente,
+      // tanto en la BD como en el formulario local (si no se limpia aquí,
+      // el próximo autoguardado la volvería a leer y regresaría a borrador).
+      const data = { ...buildSaveData(formRef.current), published: true, scheduled_at: null };
       if (isEditing) {
         await base44.entities.BlogPost.update(id, data);
-        setForm(prev => ({ ...prev, published: true }));
+        setForm(prev => ({ ...prev, published: true, scheduled_at: "" }));
         toast.success("Artículo publicado");
       } else {
         const created = await base44.entities.BlogPost.create(data);
