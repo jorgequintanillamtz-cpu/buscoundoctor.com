@@ -238,6 +238,15 @@ export default function SpecialistProfile() {
               </div>
             )}
 
+            {featuredReview && (
+              <div className="mt-4 min-h-[76px] bg-brand-blueLight/50 border border-brand-blue/10 rounded-2xl px-4 py-3.5 max-w-xl mx-auto lg:mx-0">
+                <p className="text-sm text-brand-navy/80 italic leading-relaxed line-clamp-2">
+                  “{featuredReview.comment}”
+                </p>
+                <p className="text-xs text-brand-navy/50 font-medium mt-1.5">— {featuredReview.patient_name}</p>
+              </div>
+            )}
+
             {specialist.description && (
               <p className="text-sm text-muted-foreground leading-relaxed mt-4">
                 {shownDescription}
