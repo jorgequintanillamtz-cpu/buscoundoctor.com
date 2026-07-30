@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  Check, X, Minus, ShieldCheck, Users, Clock, Gift, Search, MessageCircle,
-  Star, UserPlus, FileText, Rocket, TrendingUp, Award, Globe,
+  Check, X, ShieldCheck, Users, Clock, Gift, Search, MessageCircle,
+  Star, UserPlus, FileText, Rocket, TrendingUp, Award,
   ArrowRight, MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,102 +40,36 @@ function addJsonLd(id, data) {
 
 const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
 
-const BENEFITS_WHY = [
-  "Más visibilidad cuando un paciente busca exactamente tu especialidad",
-  "Perfil profesional médico optimizado para aparecer en Google",
-  "Pacientes nuevos te contactan directo por WhatsApp, sin intermediarios",
-  "Comparte tus datos de contacto, horarios y ubicación en un solo lugar",
-  "Sube fotografías de tu consultorio y tu trabajo",
-  "Recibe y muestra las opiniones de tus pacientes",
-  "Verificación de cédula profesional incluida, sin costo",
-  "Tu perfil sigue trabajando por ti aunque no estés conectado",
-];
-
 const STEPS = [
-  {
-    icon: UserPlus,
-    title: "Crea tu cuenta",
-    desc: "Regístrate con tu correo o con Google. Solo necesitas tu nombre, especialidad y WhatsApp.",
-  },
-  {
-    icon: FileText,
-    title: "Completa tu perfil",
-    desc: "Agrega tu cédula profesional, zona, horarios y fotos. Tú decides qué información mostrar.",
-  },
-  {
-    icon: Rocket,
-    title: "Empieza a recibir pacientes",
-    desc: "Tu perfil queda visible en el directorio médico y en Google cuando busquen tu especialidad.",
-  },
+  { icon: UserPlus, title: "Crea tu cuenta", desc: "Nombre, especialidad y WhatsApp. Nada más." },
+  { icon: FileText, title: "Completa tu perfil", desc: "Cédula, zona, horarios y fotos. Tú decides qué mostrar." },
+  { icon: Rocket, title: "Recibe pacientes", desc: "Tu perfil queda visible en el directorio y en Google." },
 ];
 
 const BENEFIT_CARDS = [
-  { icon: TrendingUp, title: "Más pacientes nuevos", desc: "Aparece frente a personas que ya están buscando un especialista como tú, en el momento exacto en que lo necesitan." },
-  { icon: ShieldCheck, title: "Mayor confianza", desc: "La verificación de cédula profesional le dice al paciente, antes de escribirte, que eres quien dices ser." },
-  { icon: Star, title: "Mejor reputación", desc: "Las opiniones de tus pacientes construyen una reputación digital que trabaja por ti todo el tiempo." },
-  { icon: Search, title: "Perfil optimizado para buscadores", desc: "Tu perfil está armado para posicionar en Google por tu especialidad y tu ciudad, sin que tú tengas que hacer nada de SEO." },
-  { icon: Globe, title: "Presencia digital sin gastar en publicidad", desc: "No necesitas pagar anuncios ni administrar redes sociales para que te encuentren." },
-];
-
-const COMPARISON_ROWS = [
-  { label: "Pacientes te encuentran buscando tu especialidad", busco: true, redes: false, maps: "partial", web: "partial", directorios: "partial" },
-  { label: "Verificación de cédula profesional", busco: true, redes: false, maps: false, web: false, directorios: "partial" },
-  { label: "Contacto directo por WhatsApp", busco: true, redes: "partial", maps: false, web: "partial", directorios: false },
-  { label: "No requiere crear contenido constantemente", busco: true, redes: false, maps: true, web: true, directorios: true },
-  { label: "Optimizado para buscadores (SEO médico)", busco: true, redes: false, maps: "partial", web: "partial", directorios: false },
-  { label: "Gratis para empezar", busco: true, redes: true, maps: true, web: false, directorios: "partial" },
-];
-
-const COMPARISON_COLUMNS = [
-  { key: "busco", label: "BuscoUnDoctor", highlight: true },
-  { key: "redes", label: "Redes sociales" },
-  { key: "maps", label: "Google Maps" },
-  { key: "web", label: "Sitio web propio" },
-  { key: "directorios", label: "Directorios tradicionales" },
+  { icon: TrendingUp, title: "Más pacientes nuevos", desc: "Apareces justo cuando alguien busca tu especialidad." },
+  { icon: ShieldCheck, title: "Más confianza", desc: "La cédula verificada dice que eres quien dices ser." },
+  { icon: Star, title: "Mejor reputación", desc: "Las opiniones de tus pacientes trabajan por ti." },
+  { icon: Search, title: "Optimizado para Google", desc: "Sin que tú hagas nada de SEO." },
+  { icon: MessageCircle, title: "Contacto directo", desc: "Te escriben por WhatsApp, sin intermediarios." },
+  { icon: Gift, title: "Sin gastar en ads", desc: "No necesitas redes sociales ni sitio web propio." },
 ];
 
 const TESTIMONIALS = [
-  { name: "Dra. Ejemplo Ramírez", specialty: "Dermatóloga", city: "Monterrey", quote: "Desde que tengo mi perfil, recibo mensajes de pacientes que ya saben qué necesitan y llegan listos para agendar." },
-  { name: "Dr. Ejemplo Torres", specialty: "Cardiólogo", city: "San Pedro Garza García", quote: "Me tomó menos de diez minutos completar mi perfil. No he vuelto a pagar por publicidad." },
-  { name: "Dra. Ejemplo Salas", specialty: "Pediatra", city: "Monterrey", quote: "Los pacientes llegan a la consulta ya conociendo mi experiencia y leyendo las opiniones de otros papás." },
+  { name: "Dra. Ejemplo Ramírez", specialty: "Dermatóloga", city: "Monterrey", quote: "Recibo mensajes de pacientes que ya saben qué necesitan y llegan listos para agendar." },
+  { name: "Dr. Ejemplo Torres", specialty: "Cardiólogo", city: "San Pedro", quote: "Completé mi perfil en diez minutos. No he vuelto a pagar por publicidad." },
+  { name: "Dra. Ejemplo Salas", specialty: "Pediatra", city: "Monterrey", quote: "Los pacientes llegan ya conociendo mi experiencia y las opiniones de otros papás." },
 ];
 
 const FAQS = [
-  { q: "¿Es gratis registrarme en BuscoUnDoctor?", a: "Sí. El plan Gratis te permite tener un perfil público en el directorio médico, aparecer en tu especialidad y zona, y recibir contacto por WhatsApp, sin costo y sin límite de tiempo." },
-  { q: "¿Cuánto tiempo tarda en estar listo mi perfil?", a: "El registro toma entre 3 y 5 minutos. Tu perfil queda visible en cuanto completas los datos básicos; puedes seguir agregando fotos, horarios y consultorios después." },
-  { q: "¿Cómo verifican mi cédula profesional?", a: "Nuestro equipo revisa manualmente el número de cédula profesional que registras contra los registros oficiales antes de marcar tu perfil como verificado." },
-  { q: "¿Qué especialidades médicas aceptan?", a: "Aceptamos médicos especialistas de prácticamente cualquier área: cardiología, ginecología, dermatología, pediatría, ortopedia, oftalmología, psiquiatría, medicina interna, y muchas más." },
-  { q: "¿Necesito tener página web propia?", a: "No. Tu perfil en BuscoUnDoctor funciona como tu presencia digital: no necesitas página web, hosting ni conocimientos técnicos." },
-  { q: "¿Voy a aparecer en Google?", a: "Sí. Cada perfil médico está optimizado para buscadores, para que aparezcas cuando alguien busque tu especialidad en tu ciudad." },
-  { q: "¿Puedo editar mi perfil después de publicarlo?", a: "Sí, en cualquier momento desde tu panel: puedes actualizar tus datos, horarios, fotos y zona de atención cuando quieras." },
-  { q: "¿Los pacientes me contactan directo o pasa por ustedes?", a: "Directo. Cuando un paciente ve tu perfil, te contacta por WhatsApp sin pasar por intermediarios ni comisiones por paciente." },
-  { q: "¿Tiene algún costo oculto el plan Gratis?", a: "No. El plan Gratis es gratis para siempre. Si más adelante quieres funciones adicionales, existe un plan Premium opcional, sin ningún compromiso." },
-  { q: "¿Qué diferencia hay entre el plan Gratis y el plan Premium?", a: "El plan Gratis te da presencia básica en el directorio. El plan Premium agrega perfil destacado, galería y video, casos de antes y después, estadísticas de visitas y más. Puedes ver el detalle completo en nuestra página de planes." },
-  { q: "¿Puedo cancelar o eliminar mi perfil cuando quiera?", a: "Sí. Puedes desactivar o eliminar tu perfil cuando lo desees desde tu panel de médico, sin preguntas ni penalizaciones." },
-  { q: "¿En qué ciudades está disponible BuscoUnDoctor?", a: "Actualmente operamos en Monterrey y San Pedro Garza García, y seguimos expandiendo cobertura a más ciudades de México." },
+  { q: "¿Es gratis registrarme?", a: "Sí, el plan Gratis no tiene costo ni límite de tiempo: perfil público, tu especialidad y zona, y contacto por WhatsApp." },
+  { q: "¿Cuánto tarda el registro?", a: "Entre 3 y 5 minutos. Tu perfil queda visible de inmediato; puedes seguir completando fotos y horarios después." },
+  { q: "¿Cómo verifican mi cédula profesional?", a: "Revisamos manualmente tu número de cédula contra los registros oficiales antes de marcar tu perfil como verificado." },
+  { q: "¿Qué especialidades aceptan?", a: "Prácticamente todas: cardiología, ginecología, dermatología, pediatría, ortopedia, psiquiatría y más." },
+  { q: "¿Necesito tener página web propia?", a: "No. Tu perfil en BuscoUnDoctor es tu presencia digital, sin hosting ni conocimientos técnicos." },
+  { q: "¿Voy a aparecer en Google?", a: "Sí, cada perfil está optimizado para aparecer cuando alguien busca tu especialidad en tu ciudad." },
+  { q: "¿Puedo cancelar cuando quiera?", a: "Sí, sin preguntas ni penalizaciones, desde tu panel en cualquier momento." },
 ];
-
-function Mark({ value }) {
-  if (value === true) {
-    return (
-      <span className="inline-flex w-6 h-6 rounded-full bg-emerald-100 items-center justify-center" aria-label="Sí">
-        <Check className="w-3.5 h-3.5 text-emerald-600" />
-      </span>
-    );
-  }
-  if (value === "partial") {
-    return (
-      <span className="inline-flex w-6 h-6 rounded-full bg-amber-100 items-center justify-center" aria-label="Depende">
-        <Minus className="w-3.5 h-3.5 text-amber-600" />
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex w-6 h-6 rounded-full bg-muted items-center justify-center" aria-label="No">
-      <X className="w-3.5 h-3.5 text-muted-foreground" />
-    </span>
-  );
-}
 
 function CtaButton({ children = "Registrar mi perfil gratis", size = "lg", className = "" }) {
   return (
@@ -230,8 +164,7 @@ export default function LandingMedicos() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header mínimo: solo logo + un único CTA. Sin menú, sin buscador,
-          sin enlaces que compitan con el registro. */}
+      {/* Header mínimo: solo logo + un único CTA. */}
       <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2" aria-label="BuscoUnDoctor, ir al inicio">
@@ -247,8 +180,8 @@ export default function LandingMedicos() {
       </header>
 
       <main>
-        {/* ============ HERO ============ */}
-        <section ref={heroRef} aria-labelledby="hero-heading" className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-16">
+        {/* ============ HERO (con agitación integrada, sin sección aparte) ============ */}
+        <section ref={heroRef} aria-labelledby="hero-heading" className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-14">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-5">
@@ -258,14 +191,14 @@ export default function LandingMedicos() {
                 Consigue más pacientes nuevos, sin gastar en publicidad
               </h1>
               <p className="text-lg text-muted-foreground mt-5 leading-relaxed">
-                Únete al directorio médico gratuito donde miles de pacientes buscan un doctor especialista como tú. Crea tu perfil médico profesional en menos de 5 minutos.
+                Cada día, pacientes buscan tu especialidad en Google. Si no apareces, agendan con otro médico. Crea tu perfil gratis en menos de 5 minutos.
               </p>
 
               <ul className="mt-7 space-y-3">
                 {[
-                  "Perfil profesional optimizado para Google",
-                  "Contacto directo por WhatsApp, sin intermediarios",
-                  "Verificación de cédula profesional incluida",
+                  "Perfil optimizado para Google",
+                  "Contacto directo por WhatsApp",
+                  "Cédula profesional verificada",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm sm:text-base text-foreground font-medium">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -279,12 +212,12 @@ export default function LandingMedicos() {
               <div className="mt-8">
                 <CtaButton className="w-full sm:w-auto h-14 px-8 text-base" />
                 <p className="text-xs text-muted-foreground mt-3">
-                  Gratis para siempre · Sin tarjeta de crédito · Actívalo en 5 minutos
+                  Gratis para siempre · Sin tarjeta de crédito · 5 minutos
                 </p>
               </div>
             </div>
 
-            {/* Mockup de producto en vez de foto de stock: lo que el médico obtiene */}
+            {/* Mockup de producto en vez de foto de stock */}
             <div className="relative" aria-hidden="true">
               <div className="bg-card border border-border/50 rounded-3xl shadow-xl p-6 max-w-sm mx-auto">
                 <div className="flex items-center gap-3 pb-4 border-b border-border/50">
@@ -315,12 +248,12 @@ export default function LandingMedicos() {
           </div>
 
           {/* Barra de confianza: afirmaciones verificables, sin cifras infladas */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mt-16 pt-10 border-t border-border/50">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mt-14 pt-8 border-t border-border/50">
             {[
-              { icon: ShieldCheck, label: "Cédula profesional verificada" },
-              { icon: Users, label: "Hecho para especialistas en México" },
-              { icon: Clock, label: "Perfil listo en minutos" },
-              { icon: Gift, label: "Plan gratuito para siempre" },
+              { icon: ShieldCheck, label: "Cédula verificada" },
+              { icon: Users, label: "Hecho para especialistas" },
+              { icon: Clock, label: "Listo en minutos" },
+              { icon: Gift, label: "Gratis para siempre" },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex flex-col items-center text-center gap-2">
                 <Icon className="w-5 h-5 text-brand-blue" />
@@ -330,58 +263,36 @@ export default function LandingMedicos() {
           </div>
         </section>
 
-        {/* ============ PROBLEMA / AGITACIÓN ============ */}
-        <section aria-labelledby="problema-heading" className="bg-muted/40 py-16 sm:py-20">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-            <h2 id="problema-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-              Cada día, pacientes buscan tu especialidad en Google. ¿Te encuentran a ti?
+        {/* ============ BENEFICIOS ============ */}
+        <section aria-labelledby="beneficios-heading" className="bg-muted/40 py-14 sm:py-18">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <h2 id="beneficios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground text-center mb-10">
+              Esto es lo que ganas
             </h2>
-            <p className="text-muted-foreground mt-4 leading-relaxed">
-              "Cardiólogo cerca de mí", "ginecólogo en Monterrey", "dermatólogo especialista"... miles de búsquedas como estas pasan todos los días en México. Si tu perfil médico no aparece ahí, ese paciente nuevo agenda con otro doctor.
-            </p>
-            <p className="text-foreground font-semibold mt-4">
-              Sin presencia digital, no es que te falten pacientes: es que no te están encontrando.
-            </p>
-            <div className="mt-8">
-              <CtaButton>Registrar mi perfil gratis</CtaButton>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {BENEFIT_CARDS.map((b) => (
+                <div key={b.title} className="bg-card border border-border/50 rounded-2xl p-5">
+                  <div className="w-10 h-10 rounded-xl bg-brand-bluePale flex items-center justify-center mb-3">
+                    <b.icon className="w-5 h-5 text-brand-blue" />
+                  </div>
+                  <h3 className="font-heading font-bold text-foreground text-sm">{b.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{b.desc}</p>
+                </div>
+              ))}
             </div>
-          </div>
-        </section>
-
-        {/* ============ POR QUÉ REGISTRARTE ============ */}
-        <section aria-labelledby="porque-heading" className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 id="porque-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-              Por qué los médicos especialistas eligen tener un perfil médico online
-            </h2>
-            <p className="text-muted-foreground mt-3">
-              Un directorio médico gratuito, pensado para que un paciente nuevo te encuentre y te contacte sin fricción.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {BENEFITS_WHY.map((item) => (
-              <div key={item} className="flex items-start gap-3 bg-card border border-border/50 rounded-2xl p-4">
-                <span className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                </span>
-                <span className="text-sm text-foreground">{item}</span>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <CtaButton />
+            <div className="text-center mt-10">
+              <CtaButton />
+            </div>
           </div>
         </section>
 
         {/* ============ CÓMO FUNCIONA ============ */}
-        <section aria-labelledby="como-funciona-heading" className="bg-brand-navy py-16 sm:py-20">
+        <section aria-labelledby="como-funciona-heading" className="bg-brand-navy py-14 sm:py-18">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <h2 id="como-funciona-heading" className="font-heading font-bold text-2xl sm:text-3xl text-white">
-                Tres pasos para empezar a recibir pacientes nuevos
-              </h2>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-6">
+            <h2 id="como-funciona-heading" className="font-heading font-bold text-2xl sm:text-3xl text-white text-center mb-10">
+              Tres pasos, nada más
+            </h2>
+            <div className="grid sm:grid-cols-3 gap-5">
               {STEPS.map((step, i) => (
                 <div key={step.title} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
                   <div className="w-12 h-12 rounded-2xl bg-brand-blue flex items-center justify-center mx-auto mb-4">
@@ -393,147 +304,91 @@ export default function LandingMedicos() {
                 </div>
               ))}
             </div>
-            <div className="text-center mt-12">
+            <div className="text-center mt-10">
               <CtaButton className="bg-white text-brand-navy hover:bg-white/90" />
             </div>
           </div>
         </section>
 
-        {/* ============ BENEFICIOS (tarjetas) ============ */}
-        <section aria-labelledby="beneficios-heading" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 id="beneficios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-              Esto es lo que ganas al registrar tu perfil médico
-            </h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {BENEFIT_CARDS.map((b) => (
-              <div key={b.title} className="bg-card border border-border/50 rounded-2xl p-6">
-                <div className="w-11 h-11 rounded-xl bg-brand-bluePale flex items-center justify-center mb-4">
-                  <b.icon className="w-5 h-5 text-brand-blue" />
-                </div>
-                <h3 className="font-heading font-bold text-foreground">{b.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{b.desc}</p>
+        {/* ============ POR QUÉ NO BASTA CON REDES SOCIALES (comparativa corta) ============ */}
+        <section aria-labelledby="comparativa-heading" className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-18 text-center">
+          <h2 id="comparativa-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
+            Facebook e Instagram no fueron hechos para que te encuentre un paciente
+          </h2>
+          <div className="mt-8 space-y-3 text-left max-w-md mx-auto">
+            {[
+              { ok: false, text: "Google Maps no verifica tu cédula profesional" },
+              { ok: false, text: "Redes sociales no filtran pacientes por especialidad" },
+              { ok: false, text: "Un sitio web propio cuesta mantenerlo y no te posiciona solo" },
+              { ok: true, text: "BuscoUnDoctor hace las tres cosas, gratis" },
+            ].map((row) => (
+              <div key={row.text} className="flex items-center gap-3 bg-card border border-border/50 rounded-xl px-4 py-3">
+                <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.ok ? "bg-emerald-100" : "bg-muted"}`}>
+                  {row.ok ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-muted-foreground" />}
+                </span>
+                <span className={`text-sm ${row.ok ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{row.text}</span>
               </div>
             ))}
           </div>
-        </section>
-
-        {/* ============ COMPARATIVA ============ */}
-        <section aria-labelledby="comparativa-heading" className="bg-muted/40 py-16 sm:py-20">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <h2 id="comparativa-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-                ¿Por qué un directorio médico y no solo redes sociales?
-              </h2>
-              <p className="text-muted-foreground mt-3">
-                Facebook, Instagram, Google Maps y tu propio sitio web pueden ayudar. Pero ninguno está diseñado, específicamente, para que un paciente encuentre y verifique a un médico especialista.
-              </p>
-            </div>
-
-            <div className="bg-card border border-border/50 rounded-2xl overflow-x-auto">
-              <table className="w-full text-sm min-w-[640px]">
-                <thead>
-                  <tr className="border-b border-border/50">
-                    <th scope="col" className="text-left px-4 py-3 font-medium text-muted-foreground"></th>
-                    {COMPARISON_COLUMNS.map((col) => (
-                      <th
-                        key={col.key}
-                        scope="col"
-                        className={`px-3 py-3 text-center font-heading font-bold text-xs sm:text-sm ${col.highlight ? "text-brand-blue" : "text-foreground"}`}
-                      >
-                        {col.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {COMPARISON_ROWS.map((row) => (
-                    <tr key={row.label} className="border-b border-border/30 last:border-0">
-                      <th scope="row" className="text-left px-4 py-3 font-medium text-foreground">{row.label}</th>
-                      {COMPARISON_COLUMNS.map((col) => (
-                        <td key={col.key} className="px-3 py-3 text-center">
-                          <Mark value={row[col.key]} />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="text-center mt-10">
-              <CtaButton />
-            </div>
+          <div className="mt-9">
+            <CtaButton />
           </div>
         </section>
 
         {/* ============ TESTIMONIOS (placeholder) ============ */}
-        <section aria-labelledby="testimonios-heading" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <div className="text-center max-w-2xl mx-auto mb-4">
-            <h2 id="testimonios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-              Lo que dicen los médicos que ya tienen su perfil
+        <section aria-labelledby="testimonios-heading" className="bg-muted/40 py-14 sm:py-18">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <h2 id="testimonios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground text-center mb-2">
+              Lo que dicen los médicos registrados
             </h2>
-          </div>
-          <p className="text-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 max-w-xl mx-auto mb-10">
-            Ejemplos ilustrativos: reemplaza estos testimonios por reseñas reales de médicos registrados antes de promover esta página.
-          </p>
-          <div className="grid sm:grid-cols-3 gap-5">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="relative bg-card border border-border/50 rounded-2xl p-6">
-                <span className="absolute top-4 right-4 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                  Ejemplo
-                </span>
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400" fill="currentColor" />)}
+            <p className="text-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 max-w-md mx-auto mb-8">
+              Ejemplos ilustrativos — reemplázalos por testimonios reales.
+            </p>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {TESTIMONIALS.map((t) => (
+                <div key={t.name} className="relative bg-card border border-border/50 rounded-2xl p-5">
+                  <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                    Ejemplo
+                  </span>
+                  <div className="flex items-center gap-1 mb-2">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400" fill="currentColor" />)}
+                  </div>
+                  <p className="text-sm text-foreground leading-relaxed">"{t.quote}"</p>
+                  <p className="text-sm font-semibold text-foreground mt-3">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.specialty} · {t.city}</p>
                 </div>
-                <p className="text-sm text-foreground leading-relaxed">"{t.quote}"</p>
-                <p className="text-sm font-semibold text-foreground mt-4">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.specialty} · {t.city}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ============ FAQ ============ */}
-        <section aria-labelledby="faq-heading" className="bg-muted/40 py-16 sm:py-20">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-10">
-              <h2 id="faq-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-                Preguntas frecuentes de médicos especialistas
-              </h2>
-            </div>
-            <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
-              {FAQS.map((f, i) => (
-                <AccordionItem key={i} value={`faq-${i}`} className="px-5">
-                  <AccordionTrigger className="text-left font-heading font-semibold text-sm sm:text-base text-foreground hover:no-underline">
-                    {f.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                    {f.a}
-                    {f.q.includes("Premium") && (
-                      <>
-                        {" "}
-                        <Link to="/planes" className="text-brand-blue hover:underline font-medium">
-                          Ver planes y precios
-                        </Link>.
-                      </>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
+        <section aria-labelledby="faq-heading" className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
+          <h2 id="faq-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground text-center mb-10">
+            Preguntas frecuentes
+          </h2>
+          <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
+            {FAQS.map((f, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="px-5">
+                <AccordionTrigger className="text-left font-heading font-semibold text-sm sm:text-base text-foreground hover:no-underline">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </section>
 
         {/* ============ CTA FINAL ============ */}
-        <section aria-labelledby="cta-final-heading" className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
-          <Award className="w-10 h-10 text-brand-blue mx-auto mb-5" />
+        <section aria-labelledby="cta-final-heading" className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
+          <Award className="w-9 h-9 text-brand-blue mx-auto mb-4" />
           <h2 id="cta-final-heading" className="font-heading font-extrabold text-3xl sm:text-4xl text-foreground tracking-tight">
             Tu próximo paciente ya te está buscando en Google
           </h2>
           <p className="text-muted-foreground mt-4 text-lg">
-            Crear tu perfil médico es gratis y toma menos de 5 minutos.
+            Crear tu perfil es gratis y toma menos de 5 minutos.
           </p>
           <div className="mt-8">
             <CtaButton className="h-14 px-10 text-base" />
@@ -544,7 +399,7 @@ export default function LandingMedicos() {
         </section>
       </main>
 
-      {/* Footer mínimo: sin menú de navegación, para no distraer del registro. */}
+      {/* Footer mínimo */}
       <footer className="border-t border-border/50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <Link to="/" className="flex items-center gap-2">
@@ -561,7 +416,7 @@ export default function LandingMedicos() {
         </div>
       </footer>
 
-      {/* Sticky CTA móvil: aparece al pasar el hero, siempre visible en desktop en el header */}
+      {/* Sticky CTA móvil */}
       {showStickyCta && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border/50 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
           <CtaButton className="w-full h-12" />
