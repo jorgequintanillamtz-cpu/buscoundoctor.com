@@ -141,9 +141,6 @@ export default function SpecialistProfile() {
     .filter(Boolean);
 
   const primaryOffice = offices.find(o => o.is_primary) || offices[0];
-  const whatsappHref = specialist.whatsapp
-    ? `https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, encontré su perfil en BuscoUnDoctor y me gustaría agendar una cita.")}`
-    : null;
 
   const description = specialist.description || "";
   const isLongDescription = description.length > 300;
@@ -461,7 +458,6 @@ export default function SpecialistProfile() {
             offices={offices}
             services={services}
             resolvedInsurers={resolvedInsurers}
-            whatsappHref={whatsappHref}
           />
         </aside>
       </div>
