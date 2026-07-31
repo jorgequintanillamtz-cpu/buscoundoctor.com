@@ -261,9 +261,7 @@ export default function Home() {
                       </div>
                     )}
                     <p className="text-xs sm:text-sm text-white/80 leading-snug">
-                      {item.key === "perfiles" && totalSpecialists > 0
-                        ? `Perfiles verificados de ${totalSpecialists} especialistas`
-                        : item.label}
+                      {item.key === "perfiles" ? "Perfiles verificados de especialistas" : item.label}
                     </p>
                   </div>
                 ))}
