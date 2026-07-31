@@ -5,7 +5,7 @@ const DEFAULT_OG_IMAGE = "https://media.base44.com/images/public/69daf616236dcba
 // Generic site-level fallback values (applied by the global Layout).
 export const SITE_OG = {
   title: "BuscoUnDoctor — Directorio Médico Verificado en Monterrey",
-  description: "Encuentra especialistas verificados en Monterrey y San Pedro Garza García. Busca por especialidad y zona, compara perfiles con cédula profesional verificada y contacta directo.",
+  description: "BuscoUnDoctor es el directorio médico verificado de Monterrey y San Pedro Garza García: encuentra especialistas por especialidad y zona, compara perfiles con cédula profesional verificada y reseñas reales, y contacta directo por WhatsApp.",
   image: DEFAULT_OG_IMAGE,
   type: "website",
   twitterCard: "summary_large_image",
