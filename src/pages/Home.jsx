@@ -209,7 +209,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden pb-24 sm:pb-28">
+      <section className="relative bg-brand-navy overflow-hidden pb-10 sm:pb-28">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -222,15 +222,15 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-20">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             {/* Left: título + iconos de confianza */}
             <div className="text-left">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-5">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-3 sm:mb-5">
                 <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
                 <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
               </div>
-              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-8">
+              <h1 className="font-heading font-extrabold text-2xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-4 sm:mb-8">
                 <span className="text-white block">
                   Encuentra a tu especialista
                 </span>
@@ -240,18 +240,18 @@ export default function Home() {
               </h1>
 
               {/* Iconos de confianza, estilo referencia */}
-              <div className="flex flex-wrap gap-x-8 gap-y-6">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-6">
                 {TRUST_STRIP.map((item) => (
-                  <div key={item.key} className="flex flex-col items-start gap-2 max-w-[160px]">
+                  <div key={item.key} className="flex flex-col items-start gap-1.5 sm:gap-2 max-w-[160px]">
                     {item.key === "resenas" ? (
-                      <div className="h-11 flex items-center gap-0.5">
+                      <div className="h-9 sm:h-11 flex items-center gap-0.5">
                         {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                          <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
                     ) : (
-                      <div className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center">
-                        <item.icon className="w-5 h-5 text-white" />
+                      <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-white/30 flex items-center justify-center">
+                        <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </div>
                     )}
                     <p className="text-xs sm:text-sm text-white/80 leading-snug">
