@@ -379,8 +379,24 @@ export default function Home() {
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Aseguradoras en nuestro sistema</h2>
           <p className="text-sm text-muted-foreground mt-1">Cada médico indica en su perfil cuáles acepta — no todos aceptan todas.</p>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-          {insurers.filter((ins) => ins.logo_url).map((ins) => (
+        {/* Móvil: lista recortada + chip de "+N más" para no ocupar tanto espacio */}
+        <div className="flex sm:hidden flex-wrap items-center justify-center gap-2">
+          {insurersMobileVisible.map((ins) => (
+            <div key={ins.id} className="flex items-center gap-1.5 bg-card border border-border/50 rounded-full px-3 py-1.5">
+              <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />
+              <span className="text-xs font-medium text-foreground">{ins.name}</span>
+            </div>
+          ))}
+          {insurersMobileHiddenCount > 0 && (
+            <span className="text-xs font-semibold text-brand-blue bg-brand-bluePale rounded-full px-3 py-1.5">
+              +{insurersMobileHiddenCount} más
+            </span>
+          )}
+        </div>
+
+        {/* Desktop/tablet: lista completa */}
+        <div className="hidden sm:flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          {insurersWithLogo.map((ins) => (
             <div key={ins.id} className="flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-2.5">
               <img src={ins.logo_url} alt={ins.name} className="w-5 h-5 object-contain" />
               <span className="text-sm font-medium text-foreground">{ins.name}</span>
