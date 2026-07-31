@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Upload, X, Plus, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -64,11 +65,17 @@ export default function DoctorEditorPerfil({ form, update }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showEspecialidadList, setShowEspecialidadList] = useState(false);
   const [especialidades, setEspecialidades] = useState([]);
+  const [zones, setZones] = useState([]);
 
   useEffect(() => {
     base44.entities.Specialty.filter({ active: true }).then((list) => {
       setEspecialidades(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
     }).catch(() => {});
+    // La zona debe salir del mismo catálogo que usan las páginas
+    // /especialidad/:slug/:zona (antes era texto libre y el valor nunca
+    // hacía match con el nombre real de la Zona, así que esos filtros
+    // nunca encontraban al doctor aunque sí estuviera en esa zona).
+    base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
   }, []);
 
   const words = (form.description || "").trim().split(/\s+/).filter(Boolean).length;
@@ -304,7 +311,12 @@ export default function DoctorEditorPerfil({ form, update }) {
           </div>
           <div>
             <label className="text-sm font-medium mb-1.5 block">Zona</label>
-            <Input value={form.zone} onChange={e => update("zone", e.target.value)} className="rounded-xl" placeholder="Valle Oriente" />
+            <Select value={form.zone} onValueChange={v => update("zone", v)}>
+              <SelectTrigger className="rounded-xl"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectContent>
+                {zones.map(z => <SelectItem key={z.id} value={z.name}>{z.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="text-sm font-medium mb-1.5 block">WhatsApp *</label>
