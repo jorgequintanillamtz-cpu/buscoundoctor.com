@@ -67,7 +67,7 @@ const PLATFORM_TESTIMONIALS = [
 const TRUST_STRIP = [
   { icon: Users, label: "Perfiles para cada especialista", key: "perfiles" },
   { icon: Star, label: "Reseñas verificadas de pacientes reales", key: "resenas" },
-  { icon: Search, label: "Busca por lo que más te importa: especialidad y zona", key: "busca" },
+  { icon: ShieldCheck, label: "Cédulas profesionales verificadas a mano", key: "cedula" },
 ];
 
 // Orden por demanda típica en un directorio médico (no por fecha de creación en la base de datos)
