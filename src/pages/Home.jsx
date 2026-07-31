@@ -98,7 +98,6 @@ export default function Home() {
   const [zones, setZones] = useState([]);
   const specialtyOptions = useMemo(() => specialties.map((s) => ({ id: s.name, name: s.name })), [specialties]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
-  const [testimonials, setTestimonials] = useState([]);
   const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
@@ -132,12 +131,11 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, topReviews, allActive, insurerList, siteSettings] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, allActive, insurerList, siteSettings] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
-      base44.entities.Review.filter({ approved: true }, "-rating", 3),
       base44.entities.Specialist.filter({ active: true }),
       base44.entities.Insurer.list('name', 50).catch(() => []),
       base44.entities.SiteSettings.list().catch(() => [])]
@@ -154,15 +152,6 @@ export default function Home() {
         if (b.name === "Particular/Sin seguro") return -1;
         return 0;
       }));
-
-      if (topReviews.length >= 3) {
-        const specialistIds = [...new Set(topReviews.map((r) => r.specialist_id).filter(Boolean))];
-        const reviewedSpecialists = specialistIds.length ?
-        await base44.entities.Specialist.filter({ id: { $in: specialistIds } }) :
-        [];
-        const specialtyById = Object.fromEntries(reviewedSpecialists.map((s) => [s.id, s.specialty]));
-        setTestimonials(topReviews.map((r) => ({ ...r, specialistSpecialty: specialtyById[r.specialist_id] || "" })));
-      }
 
       setLoading(false);
     }
