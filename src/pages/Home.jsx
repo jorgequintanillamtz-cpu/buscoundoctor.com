@@ -357,7 +357,20 @@ export default function Home() {
             <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Especialidades</p>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Atención médica integral para cada necesidad</h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-10 gap-y-8">
+          {/* Móvil: slider horizontal para no ocupar tanto espacio vertical */}
+          <div
+            className="sm:hidden flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {sortByPopularity(specialties).slice(0, 8).map((s) =>
+            <div key={s.id} className="snap-start">
+              <SpecialtyCard specialty={s} mobile />
+            </div>
+            )}
+          </div>
+
+          {/* Tablet/desktop: grid como antes */}
+          <div className="hidden sm:flex flex-wrap justify-center gap-x-6 sm:gap-x-10 gap-y-8">
             {sortByPopularity(specialties).slice(0, 8).map((s) =>
             <SpecialtyCard key={s.id} specialty={s} />
             )}
