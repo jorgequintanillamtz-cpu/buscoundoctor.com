@@ -337,15 +337,22 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mt-4 text-xs sm:text-sm">
-              {sortByPopularity(specialties).slice(0, 5).map((s, i) => (
-                <span key={s.id} className="flex items-center gap-2">
-                  {i > 0 && <span className="text-border">|</span>}
-                  <Link to={`/especialidad/${s.slug}`} className="text-brand-blue font-medium hover:underline">{s.name}</Link>
-                </span>
+            <div className="flex flex-wrap items-center gap-2 mt-4">
+              {sortByPopularity(specialties).slice(0, 5).map((s) => (
+                <Link
+                  key={s.id}
+                  to={`/especialidad/${s.slug}`}
+                  className="text-xs sm:text-sm font-medium text-brand-blue bg-brand-bluePale hover:bg-brand-blue hover:text-white transition-colors rounded-full px-3 py-1.5"
+                >
+                  {s.name}
+                </Link>
               ))}
-              <span className="text-border">|</span>
-              <Link to="/especialistas" className="text-brand-blue font-medium hover:underline">+ Ver más</Link>
+              <Link
+                to="/especialistas"
+                className="text-xs sm:text-sm font-medium text-brand-navy bg-muted hover:bg-accent transition-colors rounded-full px-3 py-1.5"
+              >
+                Ver más
+              </Link>
             </div>
           </div>
         </div>
