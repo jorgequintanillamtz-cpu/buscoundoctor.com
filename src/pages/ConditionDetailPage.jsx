@@ -119,12 +119,33 @@ export default function ConditionDetailPage() {
   useEffect(() => {
     if (!condition) return;
     const scripts = [];
+    // Síntomas/tratamiento/causas se escriben como listas de una línea por
+    // punto, así que se parten por salto de línea simple (no por párrafo) para
+    // declarar cada uno como su propia entidad en el schema — esto es lo que
+    // le da a Google datos verificables en vez de un bloque de texto suelto.
+    const toItems = (text) => (text ? text.split("\n").map((s) => s.trim()).filter(Boolean) : []);
+    const symptomItems = toItems(condition.symptoms);
+    const treatmentItems = toItems(condition.treatment);
+    const riskFactorItems = toItems(condition.causes);
+
     const medicalLd = {
       "@context": "https://schema.org",
       "@type": "MedicalWebPage",
       "name": condition.name,
       "description": condition.description || condition.meta_description || `${condition.name} en Monterrey y San Pedro Garza García.`,
-      "about": { "@type": "MedicalCondition", "name": condition.name },
+      "about": {
+        "@type": "MedicalCondition",
+        "name": condition.name,
+        ...(symptomItems.length > 0 && {
+          "signOrSymptom": symptomItems.map((s) => ({ "@type": "MedicalSignOrSymptom", "name": s })),
+        }),
+        ...(treatmentItems.length > 0 && {
+          "possibleTreatment": treatmentItems.map((t) => ({ "@type": "MedicalTherapy", "name": t })),
+        }),
+        ...(riskFactorItems.length > 0 && {
+          "riskFactor": riskFactorItems.map((c) => ({ "@type": "MedicalRiskFactor", "name": c })),
+        }),
+      },
     };
     const medScript = document.createElement("script");
     medScript.type = "application/ld+json";
