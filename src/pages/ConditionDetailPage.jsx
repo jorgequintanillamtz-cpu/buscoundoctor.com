@@ -220,6 +220,21 @@ export default function ConditionDetailPage() {
       .filter((s) => s.items.length > 0);
   }, [condition]);
 
+  // Chips "[Especialidad] en [Zona]" para dirigir la búsqueda local (Monterrey,
+  // San Pedro Garza García, y cualquier zona que se agregue después) hacia las
+  // páginas /especialidad/:slug/:zonaSlug ya existentes. Ordenadas por cuántos
+  // especialistas de esta condición hay en cada zona, para mostrar primero la
+  // más relevante.
+  const zoneStats = useMemo(() => {
+    return zones
+      .map((z) => ({
+        zone: z,
+        slug: slugify(z.name),
+        count: specialists.filter((s) => s.zone === z.name || s.location === z.name).length,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [zones, specialists]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -266,6 +281,22 @@ export default function ConditionDetailPage() {
         >
           Atendida por: {condition.specialty}
         </Link>
+
+        {specialtySlug && zoneStats.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {zoneStats.map(({ zone, slug, count }) => (
+              <Link
+                key={zone.id}
+                to={`/especialidad/${specialtySlug}/${slug}`}
+                className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue hover:bg-brand-blue hover:text-white transition-colors rounded-full pl-3 pr-3.5 py-1.5 text-xs font-medium"
+              >
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                {condition.specialty} en {zone.name}
+                {count > 0 && <span className="opacity-70">· {count}</span>}
+              </Link>
+            ))}
+          </div>
+        )}
 
         <section className="mt-4">
           <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8">
