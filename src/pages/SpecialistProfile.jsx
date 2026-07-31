@@ -67,8 +67,13 @@ export default function SpecialistProfile() {
           }
         } catch {}
 
+        // Declarada fuera del try para poder reusarla más abajo al armar el
+        // JSON-LD (el estado de React vía setAllReviews no se refleja de
+        // inmediato dentro de este mismo efecto async).
+        let reviewsForSchema = [];
         try {
           const revs = await base44.entities.Review.filter({ specialist_id: specialist.id, approved: true });
+          reviewsForSchema = revs;
           setAllReviews(revs);
         } catch {}
 
@@ -86,7 +91,7 @@ export default function SpecialistProfile() {
         // reales (no solo el promedio) e Instagram si lo tiene — más señales
         // verificables ayudan tanto al SEO tradicional como a que asistentes
         // de IA (ChatGPT, Perplexity, etc.) tengan datos concretos que citar.
-        const realReviews = allReviewsForSchema.filter((r) => r.comment?.trim());
+        const realReviews = reviewsForSchema.filter((r) => r.comment?.trim());
         const schema = {
           "@context": "https://schema.org",
           "@type": "Physician",
@@ -108,7 +113,7 @@ export default function SpecialistProfile() {
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": specialist.rating,
-              "reviewCount": allReviewsForSchema.length || 1,
+              "reviewCount": reviewsForSchema.length || 1,
               "bestRating": "5",
               "worstRating": "1"
             }
