@@ -80,13 +80,15 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3">
+        {/* Sin link público a /admin a propósito: aunque robots.txt lo
+            bloquea, un link presente en el footer de TODAS las páginas hacía
+            que Google descubriera y listara la URL de todos modos (indexada
+            aunque bloqueada), solo generando ruido en el índice. El acceso
+            admin no depende de tener un link visible aquí. */}
+        <div className="border-t border-white/10 mt-10 pt-6 flex items-center justify-center">
           <p className="text-xs text-white/50">
             © {new Date().getFullYear()} buscoundoctor.com — Todos los derechos reservados
           </p>
-          <Link to="/admin" className="text-xs text-white/40 hover:text-white/70 transition-colors">
-            Iniciar sesión
-          </Link>
         </div>
       </div>
     </footer>
