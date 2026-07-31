@@ -461,9 +461,7 @@ export default function SpecialistProfile() {
             offices={offices}
             services={services}
             resolvedInsurers={resolvedInsurers}
-            languageNames={languageNames}
             whatsappHref={whatsappHref}
-            displayPhone={displayPhone}
           />
         </aside>
       </div>
