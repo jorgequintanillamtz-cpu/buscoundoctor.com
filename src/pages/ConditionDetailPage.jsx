@@ -153,9 +153,27 @@ export default function ConditionDetailPage() {
     return () => { scripts.forEach((s) => s.remove()); };
   }, [condition, faqs]);
 
-  const paragraphs = useMemo(() => {
-    if (!condition?.description) return [];
-    return condition.description.split(/\n{2,}/).filter(Boolean);
+  // Cada campo de contenido se parte en párrafos (separados por línea en
+  // blanco) y se renderiza bajo su propio H2. Las condiciones que aún no se
+  // migraron a los campos nuevos (symptoms/causes/...) simplemente no
+  // muestran esas secciones — solo "¿Qué es?" con el description de siempre,
+  // así que nada se rompe mientras se va reescribiendo el resto del catálogo.
+  const splitParagraphs = (text) => (text ? text.split(/\n{2,}/).filter(Boolean) : []);
+
+  const CONTENT_SECTIONS = [
+    { key: "description", title: `¿Qué es ${condition?.name?.toLowerCase() || "esta condición"}?` },
+    { key: "symptoms", title: "Síntomas" },
+    { key: "causes", title: "Causas y factores de riesgo" },
+    { key: "when_to_consult", title: "¿Cuándo consultar a un especialista?" },
+    { key: "treatment", title: "Tratamiento" },
+    { key: "prevention", title: "Prevención" },
+  ];
+
+  const contentSections = useMemo(() => {
+    if (!condition) return [];
+    return CONTENT_SECTIONS
+      .map((s) => ({ ...s, paragraphs: splitParagraphs(condition[s.key]) }))
+      .filter((s) => s.paragraphs.length > 0);
   }, [condition]);
 
   if (loading) {
