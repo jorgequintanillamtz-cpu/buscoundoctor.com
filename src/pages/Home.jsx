@@ -60,7 +60,7 @@ function DoctorHeroIllustration({ className = "" }) {
 // la UI, mismo patrón usado en /para-medicos.
 const PLATFORM_TESTIMONIALS = [
   { name: "Paciente de Monterrey", role: "Encontró especialista por WhatsApp", quote: "Busqué por zona y especialidad, vi la cédula verificada en el perfil y agendé directo por WhatsApp. Sin llamadas ni esperas." },
-  { name: "Paciente de San Pedro", role: "Comparó varios perfiles", quote: "Me gustó poder comparar varios doctores de la misma especialidad antes de decidir, con reñas reales de otros pacientes." },
+  { name: "Paciente de San Pedro", role: "Comparó varios perfiles", quote: "Me gustó poder comparar varios doctores de la misma especialidad antes de decidir, con reseñas reales de otros pacientes." },
   { name: "Paciente de Monterrey", role: "Usó el filtro de zona", quote: "Filtré por San Pedro y me salió justo lo que necesitaba, sin batallar buscando en Google página por página." },
 ];
 
