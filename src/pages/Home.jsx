@@ -54,6 +54,16 @@ function DoctorHeroIllustration({ className = "" }) {
   );
 }
 
+// Testimonios sobre la PLATAFORMA (no sobre un doctor en particular).
+// Son ejemplos ilustrativos hasta tener citas reales de pacientes/doctores
+// sobre la experiencia de usar BuscoUnDoctor — se marcan como "Ejemplo" en
+// la UI, mismo patrón usado en /para-medicos.
+const PLATFORM_TESTIMONIALS = [
+  { name: "Paciente de Monterrey", role: "Encontró especialista por WhatsApp", quote: "Busqué por zona y especialidad, vi la cédula verificada en el perfil y agendé directo por WhatsApp. Sin llamadas ni esperas." },
+  { name: "Paciente de San Pedro", role: "Comparó varios perfiles", quote: "Me gustó poder comparar varios doctores de la misma especialidad antes de decidir, con reñas reales de otros pacientes." },
+  { name: "Paciente de Monterrey", role: "Usó el filtro de zona", quote: "Filtré por San Pedro y me salió justo lo que necesitaba, sin batallar buscando en Google página por página." },
+];
+
 const TRUST_STRIP = [
   { icon: Users, label: "Perfiles para cada especialista", key: "perfiles" },
   { icon: Star, label: "Reseñas verificadas de pacientes reales", key: "resenas" },
