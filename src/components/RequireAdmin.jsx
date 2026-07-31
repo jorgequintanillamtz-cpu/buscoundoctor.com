@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { Stethoscope } from "lucide-react";
 
 // Bloquea el acceso a rutas exclusivas de administrador.
 // - Si no hay un usuario real (sin sesión, o sesión anónima de app pública): lo manda a iniciar sesión.
@@ -26,7 +27,7 @@ export default function RequireAdmin() {
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }
@@ -35,7 +36,7 @@ export default function RequireAdmin() {
     base44.auth.redirectToLogin(window.location.href);
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

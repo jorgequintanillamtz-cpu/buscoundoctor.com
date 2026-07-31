@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import {
+import { Stethoscope } from "lucide-react";
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
@@ -71,7 +72,7 @@ export default function SpecialtyZonePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Eye, MousePointerClick } from "lucide-react";
+import { Eye, MousePointerClick, Stethoscope } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, Tooltip } from "recharts";
 import { eachDayOfInterval, subDays, format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -41,7 +41,7 @@ export default function DoctorHomeSummary({ specialistId }) {
   if (loading) {
     return (
       <div className="bg-card rounded-2xl border border-border/50 p-5 flex items-center justify-center h-[140px]">
-        <div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

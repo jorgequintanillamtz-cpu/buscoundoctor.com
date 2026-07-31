@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { setOpenGraph } from "@/lib/seoMeta";
 
@@ -107,7 +107,7 @@ export default function PricingPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : plans.length === 0 ? (
         <p className="text-center text-muted-foreground py-16">Los planes estarán disponibles muy pronto.</p>

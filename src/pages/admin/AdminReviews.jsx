@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Check, Trash2, Star } from "lucide-react";
+import { Check, Trash2, Star, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -47,7 +47,7 @@ export default function AdminReviews() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

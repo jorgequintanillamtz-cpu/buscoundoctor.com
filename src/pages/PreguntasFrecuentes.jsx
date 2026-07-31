@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, ChevronDown, ArrowRight, MessageCircleQuestion } from "lucide-react";
+import { Sparkles, ChevronDown, ArrowRight, MessageCircleQuestion, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
@@ -90,7 +90,7 @@ export default function PreguntasFrecuentes() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

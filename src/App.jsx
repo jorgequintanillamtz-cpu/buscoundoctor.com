@@ -39,6 +39,7 @@ import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
 import PricingPage from './pages/PricingPage';
 import AdminPlanes from './pages/admin/AdminPlanes';
 import LandingMedicos from './pages/LandingMedicos';
+import { Stethoscope } from "lucide-react";
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -47,7 +48,7 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

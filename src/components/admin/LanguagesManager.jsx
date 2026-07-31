@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Languages, Plus } from "lucide-react";
+import { Languages, Plus, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -101,7 +101,7 @@ export default function LanguagesManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : (
         <>

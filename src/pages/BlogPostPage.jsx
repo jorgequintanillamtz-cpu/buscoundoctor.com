@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Tag, ChevronDown } from "lucide-react";
+import { ChevronLeft, Tag, ChevronDown, Stethoscope } from "lucide-react";
 import moment from "moment";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -198,7 +198,7 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

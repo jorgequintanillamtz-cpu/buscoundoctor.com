@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Save, FileEdit, Clock, Sparkles } from "lucide-react";
+import { ChevronLeft, Save, FileEdit, Clock, Sparkles, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import BlogEditorMain from "@/components/admin/BlogEditorMain";
@@ -204,7 +204,7 @@ export default function BlogEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

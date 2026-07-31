@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Loader2, Send, Clock, CheckCircle2, XCircle, Image as ImageIcon, Bold, Heading2, List, CheckCircle, Circle } from "lucide-react";
+import { FileText, Loader2, Send, Clock, CheckCircle2, XCircle, Image as ImageIcon, Bold, Heading2, List, CheckCircle, Circle, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -248,7 +248,7 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : drafts.length > 0 && (
         <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-2">

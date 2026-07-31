@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Filter, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap } from "lucide-react";
+import { Plus, Search, Filter, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import FaqGeneratorModal from "@/components/admin/FaqGeneratorModal";
@@ -157,7 +157,7 @@ export default function AdminFaqs() {
       <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+            <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">

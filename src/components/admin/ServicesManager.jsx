@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Pencil, DollarSign } from "lucide-react";
+import { Plus, Trash2, Pencil, DollarSign, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -115,7 +115,7 @@ export default function ServicesManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : (
         <div className="space-y-3">

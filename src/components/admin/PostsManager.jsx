@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Trash2, Loader2, Image as ImageIcon, Send } from "lucide-react";
+import { Trash2, Loader2, Image as ImageIcon, Send, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -104,7 +104,7 @@ export default function PostsManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="w-6 h-6 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : posts.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">Aún no tienes publicaciones.</p>

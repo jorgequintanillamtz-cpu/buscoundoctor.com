@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { UserRound } from "lucide-react";
+import { UserRound, Stethoscope } from "lucide-react";
 
 export default function MiPerfil() {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ export default function MiPerfil() {
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }
