@@ -70,7 +70,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
-      <div className="bg-brand-blueLight w-full px-4 sm:px-6">
+      <div className="bg-brand-blueLight w-full px-4 sm:px-6 pb-3 lg:pb-0">
         <div className="flex items-center justify-between h-20 gap-4">
           <Link to="/" className="flex items-center flex-shrink-0">
             <span className="font-heading font-extrabold text-[23px] sm:text-[26px] whitespace-nowrap">
@@ -142,7 +142,7 @@ export default function Header() {
 
         {/* Buscador compacto en móvil: debajo del header, en todas las páginas */}
         {
-          <div className="lg:hidden flex items-center gap-2 mb-3">
+          <div className="lg:hidden flex items-center gap-2">
             <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
               <SearchableSelect
                 options={searchOptions}
