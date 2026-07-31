@@ -61,12 +61,24 @@ function setMeta(name, content) {
   el.setAttribute("content", content);
 }
 
+// Mismo slugify que usan SpecialtyZonePage/Header/Home para armar las URLs
+// /especialidad/:slug/:zonaSlug — se duplica aquí porque no hay un util
+// compartido en el proyecto (patrón ya existente en el resto del código).
+const slugify = (s) => (s || "")
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[̀-ͯ]/g, "")
+  .replace(/[^a-z0-9\s-]/g, "")
+  .trim()
+  .replace(/\s+/g, "-")
+  .replace(/-+/g, "-");
 
 export default function ConditionDetailPage() {
   const { slug } = useParams();
   const [condition, setCondition] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [specialists, setSpecialists] = useState([]);
+  const [zones, setZones] = useState([]);
   const [relatedConditions, setRelatedConditions] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [specialtySlug, setSpecialtySlug] = useState(null);
@@ -81,10 +93,11 @@ export default function ConditionDetailPage() {
       if (!active) return;
       if (!found) { setNotFound(true); setLoading(false); return; }
 
-      const [specialtyList, allSpecialists, allConditions] = await Promise.all([
+      const [specialtyList, allSpecialists, allConditions, zoneList] = await Promise.all([
         base44.entities.Specialty.filter({ name: found.specialty }),
         base44.entities.Specialist.filter({ specialty: found.specialty, active: true, publication_status: "published" }),
         base44.entities.Condition.filter({ specialty: found.specialty, active: true }),
+        base44.entities.Zone.filter({ active: true }),
       ]);
       if (!active) return;
 
@@ -97,6 +110,7 @@ export default function ConditionDetailPage() {
 
       setCondition(found);
       setSpecialists(allSpecialists);
+      setZones(zoneList);
       setRelatedConditions(allConditions.filter((c) => c.slug !== found.slug).slice(0, 8));
       setRelatedPosts(blogPosts.slice(0, 3));
       setSpecialtySlug(specialtyRecord?.slug || null);
