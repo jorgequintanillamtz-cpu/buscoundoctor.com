@@ -1,10 +1,10 @@
-import { MessageCircle } from "lucide-react";
 import BookingFlow from "./BookingFlow";
 
-// Columna derecha (30%), sticky: la pieza que convierte pacientes. Se dejó
-// solo el botón de WhatsApp (sin Llamar/Mensaje/Compartir/Guardar) para
-// achicar el alto de la tarjeta.
-export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [], whatsappHref }) {
+// Columna derecha (30%), sticky: la pieza que convierte pacientes. El único
+// botón de acción ("Consultar horarios", con logo de WhatsApp) vive dentro
+// de BookingFlow, porque es el que arma el mensaje con todo el contexto que
+// el paciente fue llenando (tipo de paciente, consulta, seguro, nombre).
+export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [] }) {
   return (
     <div className="sticky top-24 space-y-5 pb-2">
       {/* Sin scroll interno a propósito: Jorge quiere que la caja completa
@@ -18,20 +18,6 @@ export default function BookingSidebar({ specialist, offices, services, resolved
         </p>
 
         <BookingFlow specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
-
-        {whatsappHref && (
-          <div className="mt-6 pt-6 border-t border-border/50">
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] rounded-full shadow-sm transition-colors"
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </a>
-          </div>
-        )}
 
         <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
           El contacto y la solicitud de cita son gratuitos.
