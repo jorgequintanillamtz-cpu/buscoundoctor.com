@@ -7,8 +7,7 @@ export default function ScrollSpyNav({ sections }) {
   const observerRef = useRef(null);
 
   useEffect(() => {
-    const elements = sections.map((s) => document.getElementById(s.id)).filter(Boolean);
-    if (elements.length === 0) return;
+    const observed = new Set();
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -20,8 +19,33 @@ export default function ScrollSpyNav({ sections }) {
       { rootMargin: "-150px 0px -60% 0px", threshold: 0 }
     );
 
-    elements.forEach((el) => observerRef.current.observe(el));
-    return () => observerRef.current?.disconnect();
+    // Varias secciones (reseñas, servicios, hospitales, especialidades...)
+    // cargan su contenido de forma asíncrona y solo entonces montan su div
+    // con el id correspondiente. Si escáneamos el DOM una sola vez al montar
+    // (como antes), cualquier sección que aún no hubiera terminado de cargar
+    // se quedaba sin observar para siempre — por eso la barra "a veces
+      // funcionaba y otras no", según qué tan rápido respondiera cada fetch.
+    // Con un MutationObserver reescaneamos cada vez que cambia el DOM y
+    // vamos sumando a observar las secciones que van apareciendo.
+    const scan = () => {
+      sections.forEach((s) => {
+        if (observed.has(s.id)) return;
+        const el = document.getElementById(s.id);
+        if (el) {
+          observed.add(s.id);
+          observerRef.current.observe(el);
+        }
+      });
+    };
+
+    scan();
+    const mutationObserver = new MutationObserver(scan);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observerRef.current?.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [sections]);
 
   return (
