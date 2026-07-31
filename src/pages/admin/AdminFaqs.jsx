@@ -157,7 +157,7 @@ export default function AdminFaqs() {
       <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
+            <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">

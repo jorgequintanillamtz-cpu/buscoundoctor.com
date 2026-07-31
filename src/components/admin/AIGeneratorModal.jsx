@@ -63,7 +63,7 @@ const STEPS = [
 function GeneratingOverlay({ step }) {
   return (
     <div className="absolute inset-0 bg-white/95 rounded-2xl flex flex-col items-center justify-center z-10 gap-5 px-8">
-      <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+      <Stethoscope className="w-[72px] h-[72px] text-primary animate-bounce" strokeWidth={1.75} />
       <div className="text-center space-y-1">
         <p className="font-heading font-semibold text-foreground">Generando artículo...</p>
         <p className="text-sm text-muted-foreground">{STEPS[step % STEPS.length]}</p>

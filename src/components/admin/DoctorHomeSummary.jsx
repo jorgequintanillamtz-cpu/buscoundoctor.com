@@ -41,7 +41,7 @@ export default function DoctorHomeSummary({ specialistId }) {
   if (loading) {
     return (
       <div className="bg-card rounded-2xl border border-border/50 p-5 flex items-center justify-center h-[140px]">
-        <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
+        <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }

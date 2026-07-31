@@ -104,7 +104,7 @@ export default function PostsManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Stethoscope className="w-6 h-6 text-primary animate-bounce" strokeWidth={1.75} />
+          <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : posts.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">Aún no tienes publicaciones.</p>

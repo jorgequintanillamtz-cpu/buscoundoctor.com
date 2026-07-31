@@ -107,7 +107,7 @@ export default function PricingPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
+          <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
         </div>
       ) : plans.length === 0 ? (
         <p className="text-center text-muted-foreground py-16">Los planes estarán disponibles muy pronto.</p>

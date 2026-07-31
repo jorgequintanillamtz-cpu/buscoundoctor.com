@@ -48,7 +48,7 @@ const AuthenticatedApp = () => {
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
-        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
+        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }
