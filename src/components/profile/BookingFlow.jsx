@@ -34,7 +34,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [flexibleTime, setFlexibleTime] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -49,7 +48,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const dateInQuickList = next7.some((d) => formatDateValue(d) === date);
 
   const canConfirm =
-    name.trim() && phone.trim() && date && time &&
+    name.trim() && date && time &&
     (offices.length === 0 || !!office) &&
     (services.length === 0 || !!service);
 
@@ -62,7 +61,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     setTime("");
     setFlexibleTime(false);
     setName("");
-    setPhone("");
   };
 
   const handleConfirm = async () => {
@@ -74,7 +72,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
       await base44.entities.AppointmentRequest.create({
         patient_name: name,
-        phone,
         reason: reasonText,
         preferred_date: date,
         preferred_time: time,
@@ -94,7 +91,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         `Hola, me gustaría agendar una cita con ${specialist.full_name}.`,
         "",
         `Nombre: ${name}`,
-        `Teléfono: ${phone}`,
         `Tipo de paciente: ${patientType === "existente" ? "Ya soy paciente" : "Primera cita"}`,
         office ? `Hospital/consultorio: ${office.name || office.address_line}` : null,
         `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}`,
@@ -327,20 +323,12 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         <p className="text-xs text-muted-foreground mt-1.5">Horarios sugeridos — confirma disponibilidad real con el consultorio por WhatsApp.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Tu nombre"
-          className="h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
-        />
-        <input
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Tu teléfono"
-          className="h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
-        />
-      </div>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Tu nombre"
+        className="w-full h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
+      />
 
       <button
         type="button"
