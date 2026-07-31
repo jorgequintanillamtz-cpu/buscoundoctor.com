@@ -259,11 +259,19 @@ export default function ConditionDetailPage() {
               contentSections.map((s, i) => (
                 <div key={s.key} className={i > 0 ? "mt-6 pt-6 border-t border-border/50" : ""}>
                   <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-3">{s.title}</h2>
-                  <div className="space-y-3">
-                    {s.paragraphs.map((para, j) => (
-                      <p key={j} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
-                    ))}
-                  </div>
+                  {s.type === "list" ? (
+                    <ul className="space-y-2 list-disc list-outside pl-5">
+                      {s.items.map((item, j) => (
+                        <li key={j} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="space-y-3">
+                      {s.items.map((para, j) => (
+                        <p key={j} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
