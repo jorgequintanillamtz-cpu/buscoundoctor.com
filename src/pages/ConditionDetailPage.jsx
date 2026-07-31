@@ -181,20 +181,29 @@ export default function ConditionDetailPage() {
   // así que nada se rompe mientras se va reescribiendo el resto del catálogo.
   const splitParagraphs = (text) => (text ? text.split(/\n{2,}/).filter(Boolean) : []);
 
+  // Síntomas, causas y prevención se escriben como listas (una idea por
+  // línea) y se muestran con bullets; el resto es prosa normal separada por
+  // párrafos. El mismo texto de listas es el que se parte por línea más
+  // arriba para armar el JSON-LD, así que ambos usan la misma fuente.
+  const splitLines = (text) => (text ? text.split("\n").map((s) => s.trim()).filter(Boolean) : []);
+
   const CONTENT_SECTIONS = [
-    { key: "description", title: `¿Qué es ${condition?.name?.toLowerCase() || "esta condición"}?` },
-    { key: "symptoms", title: "Síntomas" },
-    { key: "causes", title: "Causas y factores de riesgo" },
-    { key: "when_to_consult", title: "¿Cuándo consultar a un especialista?" },
-    { key: "treatment", title: "Tratamiento" },
-    { key: "prevention", title: "Prevención" },
+    { key: "description", title: `¿Qué es ${condition?.name?.toLowerCase() || "esta condición"}?`, type: "prose" },
+    { key: "symptoms", title: "Síntomas", type: "list" },
+    { key: "causes", title: "Causas y factores de riesgo", type: "list" },
+    { key: "when_to_consult", title: "¿Cuándo consultar a un especialista?", type: "prose" },
+    { key: "treatment", title: "Tratamiento", type: "prose" },
+    { key: "prevention", title: "Prevención", type: "list" },
   ];
 
   const contentSections = useMemo(() => {
     if (!condition) return [];
     return CONTENT_SECTIONS
-      .map((s) => ({ ...s, paragraphs: splitParagraphs(condition[s.key]) }))
-      .filter((s) => s.paragraphs.length > 0);
+      .map((s) => ({
+        ...s,
+        items: s.type === "list" ? splitLines(condition[s.key]) : splitParagraphs(condition[s.key]),
+      }))
+      .filter((s) => s.items.length > 0);
   }, [condition]);
 
   if (loading) {
