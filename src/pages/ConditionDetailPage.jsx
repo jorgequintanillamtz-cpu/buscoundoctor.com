@@ -224,10 +224,21 @@ export default function ConditionDetailPage() {
         </Link>
 
         <section className="mt-4">
-          <div className="bg-card border border-border/50 rounded-2xl p-6 space-y-3">
-            {(paragraphs.length > 0 ? paragraphs : ["Contenido en preparación."]).map((para, i) => (
-              <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
-            ))}
+          <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8">
+            {contentSections.length > 0 ? (
+              contentSections.map((s, i) => (
+                <div key={s.key} className={i > 0 ? "mt-6 pt-6 border-t border-border/50" : ""}>
+                  <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-3">{s.title}</h2>
+                  <div className="space-y-3">
+                    {s.paragraphs.map((para, j) => (
+                      <p key={j} className="text-muted-foreground leading-relaxed text-sm sm:text-base">{para}</p>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">Contenido en preparación.</p>
+            )}
           </div>
         </section>
       </div>
