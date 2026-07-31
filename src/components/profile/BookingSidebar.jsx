@@ -13,15 +13,11 @@ export default function BookingSidebar({ specialist, offices, services, resolved
 
   return (
     <div className="sticky top-24 space-y-5 pb-2">
-      {/* La tarjeta ahora tiene su propio scroll interno (max-height acotado
-          al viewport) porque el formulario creció mucho con los nuevos
-          pasos (tipo de paciente, padecimiento, seguro, calendario, horario
-          flexible) y en pantallas más chicas ya no cabía completo: sin esto,
-          los campos de abajo y el botón de Confirmar quedaban inalcanzables
-          porque el sticky los "congelaba" fuera de la vista. El scroll va en
-          este div hijo, no en el contenedor sticky de arriba, para no romper
-          de nuevo el sticky del padre. */}
-      <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-7 sm:p-8 max-h-[calc(100vh-7rem)] overflow-y-auto">
+      {/* Sin scroll interno a propósito: Jorge quiere que la caja completa
+          acompañe el scroll de la página (subiendo y bajando junto con el
+          contenido principal) hasta llegar al final de la columna, no que
+          se quede fija con una barra de scroll propia adentro. */}
+      <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-7 sm:p-8">
         <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
         <p className="text-sm text-muted-foreground mt-1.5 mb-6">
           Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
