@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, X, ChevronDown, ChevronRight, Zap, Clock, BarChart2, Target, CheckCircle2 } from "lucide-react";
+import { Sparkles, X, ChevronDown, ChevronRight, Zap, Clock, BarChart2, Target, CheckCircle2, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { generateBlogSlug } from "@/pages/admin/BlogEditor";
@@ -63,7 +63,7 @@ const STEPS = [
 function GeneratingOverlay({ step }) {
   return (
     <div className="absolute inset-0 bg-white/95 rounded-2xl flex flex-col items-center justify-center z-10 gap-5 px-8">
-      <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
       <div className="text-center space-y-1">
         <p className="font-heading font-semibold text-foreground">Generando artículo...</p>
         <p className="text-sm text-muted-foreground">{STEPS[step % STEPS.length]}</p>
