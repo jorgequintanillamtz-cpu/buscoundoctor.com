@@ -77,13 +77,23 @@ export default function SpecialistProfile() {
           setServices(svcList.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
         } catch {}
 
-        // JSON-LD Physician — se conserva exactamente igual que antes del rediseño.
+        // JSON-LD Physician. El teléfono llevaba un bug: specialist.whatsapp
+        // ya viene guardado CON el 52 de México (ej. "528113456789"), pero
+        // aquí se le anteponia otro "+52" encima, generando un teléfono
+        // duplicado/inválido ("+52528113456789") tanto para los resultados
+        // enriquecidos de Google como para cualquier sistema de IA que lea
+        // este dato estructurado. También se agrega la foto, las reseñas
+        // reales (no solo el promedio) e Instagram si lo tiene — más señales
+        // verificables ayudan tanto al SEO tradicional como a que asistentes
+        // de IA (ChatGPT, Perplexity, etc.) tengan datos concretos que citar.
+        const realReviews = allReviewsForSchema.filter((r) => r.comment?.trim());
         const schema = {
           "@context": "https://schema.org",
           "@type": "Physician",
           "name": specialist.full_name,
           "description": specialist.description || specialist.specialty,
           "medicalSpecialty": specialist.specialty,
+          ...(specialist.profile_photo && { "image": specialist.profile_photo }),
           "address": {
             "@type": "PostalAddress",
             "streetAddress": specialist.address || "",
@@ -91,15 +101,25 @@ export default function SpecialistProfile() {
             "addressRegion": "Nuevo León",
             "addressCountry": "MX"
           },
-          "telephone": specialist.whatsapp ? `+52${specialist.whatsapp}` : "",
+          "telephone": specialist.whatsapp ? `+${specialist.whatsapp}` : "",
           "url": window.location.href,
+          ...(specialist.instagram && { "sameAs": [`https://instagram.com/${specialist.instagram.replace(/^@/, "")}`] }),
           ...(specialist.rating && {
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": specialist.rating,
+              "reviewCount": allReviewsForSchema.length || 1,
               "bestRating": "5",
               "worstRating": "1"
             }
+          }),
+          ...(realReviews.length > 0 && {
+            "review": realReviews.slice(0, 10).map((r) => ({
+              "@type": "Review",
+              "author": { "@type": "Person", "name": r.patient_name || "Paciente" },
+              "reviewBody": r.comment,
+              "reviewRating": { "@type": "Rating", "ratingValue": r.rating, "bestRating": "5", "worstRating": "1" }
+            }))
           })
         };
 
