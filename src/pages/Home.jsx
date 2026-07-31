@@ -209,7 +209,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden pb-10 sm:pb-28">
+      <section className="relative bg-brand-navy overflow-hidden pb-16 sm:pb-28">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -240,9 +240,9 @@ export default function Home() {
               </h1>
 
               {/* Iconos de confianza, estilo referencia */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-6">
+              <div className="grid grid-cols-3 gap-x-3 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-6">
                 {TRUST_STRIP.map((item) => (
-                  <div key={item.key} className="flex flex-col items-start gap-1.5 sm:gap-2 max-w-[160px]">
+                  <div key={item.key} className="flex flex-col items-start gap-1.5 sm:gap-2 max-w-none sm:max-w-[160px]">
                     {item.key === "resenas" ? (
                       <div className="h-9 sm:h-11 flex items-center gap-0.5">
                         {[1, 2, 3, 4, 5].map((i) => (
@@ -292,7 +292,7 @@ export default function Home() {
       </section>
 
       {/* Tarjeta blanca de búsqueda, superpuesta al borde entre el hero y la siguiente sección */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-14 sm:-mt-16 mb-10 sm:mb-14">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-16 mb-10 sm:mb-14">
           <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
             <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
