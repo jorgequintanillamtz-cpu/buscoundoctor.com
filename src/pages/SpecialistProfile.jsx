@@ -144,7 +144,6 @@ export default function SpecialistProfile() {
   const whatsappHref = specialist.whatsapp
     ? `https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent("Hola, encontré su perfil en BuscoUnDoctor y me gustaría agendar una cita.")}`
     : null;
-  const displayPhone = primaryOffice?.phone;
 
   const description = specialist.description || "";
   const isLongDescription = description.length > 300;
