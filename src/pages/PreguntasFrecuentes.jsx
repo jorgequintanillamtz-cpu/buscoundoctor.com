@@ -49,31 +49,29 @@ export default function PreguntasFrecuentes() {
   const specialtyMatch = specialties.find((s) => s.name === activeGroup);
 
   useEffect(() => {
-    document.title = "Preguntas Frecuentes sobre Especialistas Médicos | BuscoUnDoctor";
+    const title = "Preguntas Frecuentes sobre Doctores y Especialistas en Monterrey | BuscoUnDoctor";
+    const description = "Respuestas a las preguntas más frecuentes sobre especialidades médicas en Monterrey y San Pedro Garza García: síntomas, tratamientos, costos y ubicación de consultorios.";
+    document.title = title;
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
       metaDesc = document.createElement("meta");
       metaDesc.setAttribute("name", "description");
       document.head.appendChild(metaDesc);
     }
-    metaDesc.setAttribute(
-      "content",
-      "Respuestas a las preguntas más frecuentes sobre especialidades médicas en Monterrey y San Pedro Garza García: síntomas, tratamientos, costos y ubicación de consultorios."
-    );
-    setOpenGraph({
-      title: "Preguntas Frecuentes sobre Especialistas Médicos | BuscoUnDoctor",
-      description: "Respuestas a las preguntas más frecuentes sobre especialidades médicas en Monterrey y San Pedro Garza García.",
-      image: SITE_OG.image,
-    });
+    metaDesc.setAttribute("content", description);
+    setOpenGraph({ title, description, image: SITE_OG.image });
   }, []);
 
-  // JSON-LD FAQPage del grupo actualmente visible
+  // JSON-LD FAQPage: se arma con TODAS las preguntas publicadas (no solo las
+  // del grupo/especialidad seleccionado en pantalla). Antes solo mandaba el
+  // grupo activo, así que Google nunca veía el resto del contenido como
+  // datos estructurados aunque estuviera renderizado en el DOM.
   useEffect(() => {
-    if (!currentGroup) return;
+    if (faqs.length === 0) return;
     const faqLd = {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      mainEntity: currentGroup.items.map((f) => ({
+      mainEntity: faqs.map((f) => ({
         "@type": "Question",
         name: f.question,
         acceptedAnswer: { "@type": "Answer", text: f.answer },
@@ -85,7 +83,25 @@ export default function PreguntasFrecuentes() {
     script.text = JSON.stringify(faqLd);
     document.head.appendChild(script);
     return () => { script.remove(); };
-  }, [currentGroup]);
+  }, [faqs]);
+
+  // JSON-LD BreadcrumbList: mismo patrón que ya usa BlogPostPage.
+  useEffect(() => {
+    const breadcrumbLd = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: "https://buscoundoctor.com/" },
+        { "@type": "ListItem", position: 2, name: "Preguntas frecuentes", item: "https://buscoundoctor.com/preguntas-frecuentes" },
+      ],
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "faq-breadcrumb-jsonld";
+    script.text = JSON.stringify(breadcrumbLd);
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, []);
 
   if (loading) {
     return (
