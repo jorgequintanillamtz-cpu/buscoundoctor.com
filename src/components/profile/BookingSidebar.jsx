@@ -19,41 +19,19 @@ export default function BookingSidebar({ specialist, offices, services, resolved
 
         <BookingFlow specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
 
-        <div className="mt-6 pt-6 border-t border-border/50 flex flex-wrap gap-2">
-          {whatsappHref && (
+        {whatsappHref && (
+          <div className="mt-6 pt-6 border-t border-border/50">
             <a
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 basis-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] rounded-full shadow-sm transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2.5 min-h-[44px] rounded-full shadow-sm transition-colors"
             >
               <MessageCircle className="w-4 h-4" />
               WhatsApp
             </a>
-          )}
-          {displayPhone && (
-            <a
-              href={`tel:${displayPhone.replace(/[^\d+]/g, "")}`}
-              className="flex-1 basis-[47%] inline-flex items-center justify-center gap-2 border border-border/60 text-foreground text-sm font-medium px-4 py-2.5 min-h-[44px] rounded-full hover:border-brand-blue/40 transition-colors"
-            >
-              <Phone className="w-4 h-4" />
-              Llamar
-            </a>
-          )}
-          {messageHref && (
-            <a
-              href={messageHref}
-              target={specialist.email ? undefined : "_blank"}
-              rel={specialist.email ? undefined : "noopener noreferrer"}
-              className="flex-1 basis-[47%] inline-flex items-center justify-center gap-2 border border-border/60 text-foreground text-sm font-medium px-4 py-2.5 min-h-[44px] rounded-full hover:border-brand-blue/40 transition-colors"
-            >
-              <Mail className="w-4 h-4" />
-              Mensaje
-            </a>
-          )}
-          <ShareProfileButton specialist={specialist} className="flex-1 basis-[47%]" />
-          <SaveDoctorButton specialistId={specialist.id} className="flex-1 basis-[47%]" />
-        </div>
+          </div>
+        )}
 
         <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
           El contacto y la solicitud de cita son gratuitos.
