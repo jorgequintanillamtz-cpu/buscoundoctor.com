@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import {
-import { Stethoscope } from "lucide-react";
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Stethoscope } from "lucide-react";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
