@@ -206,6 +206,12 @@ export default function Home() {
 
   }
 
+  // Aseguradoras: en móvil solo mostramos las primeras 6 (con logo) para no
+  // ocupar tanto espacio vertical, con un chip de "+N más" al final.
+  const insurersWithLogo = insurers.filter((ins) => ins.logo_url);
+  const insurersMobileVisible = insurersWithLogo.slice(0, 6);
+  const insurersMobileHiddenCount = insurers.length - insurersMobileVisible.length;
+
   return (
     <div>
       {/* Hero */}
