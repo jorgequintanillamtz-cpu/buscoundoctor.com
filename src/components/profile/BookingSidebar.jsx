@@ -1,16 +1,10 @@
-import { MessageCircle, Phone, Mail } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import BookingFlow from "./BookingFlow";
-import SaveDoctorButton from "./SaveDoctorButton";
-import ShareProfileButton from "./ShareProfileButton";
 
-// Columna derecha (30%), sticky: la pieza que convierte pacientes.
-export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [], whatsappHref, displayPhone }) {
-  const messageHref = specialist.email
-    ? `mailto:${specialist.email}?subject=${encodeURIComponent("Pregunta desde BuscoUnDoctor")}&body=${encodeURIComponent(`Hola ${specialist.full_name}, tengo una pregunta antes de agendar mi cita.`)}`
-    : specialist.whatsapp
-    ? `https://wa.me/${specialist.whatsapp.replace(/[^\d]/g, "")}?text=${encodeURIComponent(`Hola, tengo una pregunta antes de agendar mi cita con ${specialist.full_name}.`)}`
-    : null;
-
+// Columna derecha (30%), sticky: la pieza que convierte pacientes. Se dejó
+// solo el botón de WhatsApp (sin Llamar/Mensaje/Compartir/Guardar) para
+// achicar el alto de la tarjeta.
+export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [], whatsappHref }) {
   return (
     <div className="sticky top-24 space-y-5 pb-2">
       {/* Sin scroll interno a propósito: Jorge quiere que la caja completa
