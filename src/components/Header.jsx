@@ -221,7 +221,6 @@ export default function Header() {
             </Link>
           </nav>
         </div>
-      }
     </header>);
 
 }
