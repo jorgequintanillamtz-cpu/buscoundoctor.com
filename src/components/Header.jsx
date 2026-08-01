@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus } from "lucide-react";
+import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -132,21 +132,12 @@ export default function Header() {
             </Link>
           </div>
 
-          <div className="md:hidden flex items-center gap-2 flex-shrink-0">
-            <Link
-              to="/registro-medico"
-              className="flex items-center gap-1.5 bg-brand-navy text-white text-xs font-semibold rounded-full pl-3 pr-3.5 py-2 hover:bg-brand-navy/90 transition-colors whitespace-nowrap"
-            >
-              <UserPlus className="w-3.5 h-3.5 flex-shrink-0" />
-              Para médicos
-            </Link>
-            <button
-              onClick={() => setOpen(!open)}
-              aria-label={open ? "Cerrar menú" : "Abrir menú"}
-              className="p-2 rounded-lg hover:bg-brand-bluePale transition-colors text-brand-navy flex-shrink-0">
-              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+          <button
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+            className="md:hidden p-2 rounded-lg hover:bg-brand-bluePale transition-colors text-brand-navy flex-shrink-0">
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Buscador compacto en móvil: debajo del header, en todas las páginas */}
@@ -187,13 +178,23 @@ export default function Header() {
 
       {open &&
       <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
-          <nav className="flex flex-col gap-2 px-4 py-3">
+          <nav className="flex flex-col px-4">
             <Link
               to="/panel-medico"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-accent hover:text-brand-navy transition-colors">
-              <LogIn className="w-4 h-4 flex-shrink-0" />
+              className="flex items-center gap-2.5 py-3.5 border-b border-border/50 text-sm font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <LogIn className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
               Iniciar sesión
+            </Link>
+            <Link
+              to="/registro-medico"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-between py-3.5 text-sm font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <span className="flex items-center gap-2.5">
+                <UserPlus className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+                ¿Eres profesional de la salud?
+              </span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             </Link>
           </nav>
         </div>
