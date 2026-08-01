@@ -215,7 +215,7 @@ export default function Header() {
               className="flex items-center justify-between py-4 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
               <span className="flex items-center gap-3">
                 <UserPlus className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
-                ¿Eres profesional de la salud?
+                Crear cuenta nueva
               </span>
               <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             </Link>
