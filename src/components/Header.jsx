@@ -183,24 +183,37 @@ export default function Header() {
       </div>
 
       {open &&
-      <div className="md:hidden border-t border-border/50 bg-card/95 backdrop-blur-lg">
-          <nav className="flex flex-col px-4">
+      <div className="md:hidden fixed inset-0 z-[60] bg-white flex flex-col">
+          <div className="flex items-center justify-between h-20 px-4 sm:px-6 bg-brand-blueLight border-b border-border/50 flex-shrink-0">
+            <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
+              <span className="font-heading font-extrabold text-[23px] whitespace-nowrap">
+                <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
+              </span>
+            </Link>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Cerrar menú"
+              className="p-2 rounded-lg hover:bg-white/50 transition-colors text-brand-navy flex-shrink-0">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <nav className="flex flex-col px-4 sm:px-6 overflow-y-auto flex-1">
             <Link
               to="/panel-medico"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 py-3.5 border-b border-border/50 text-sm font-medium text-brand-navy hover:text-brand-blue transition-colors">
-              <LogIn className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+              className="flex items-center gap-3 py-4 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <LogIn className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
               Iniciar sesión
             </Link>
             <Link
               to="/registro-medico"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-between py-3.5 text-sm font-medium text-brand-navy hover:text-brand-blue transition-colors">
-              <span className="flex items-center gap-2.5">
-                <UserPlus className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+              className="flex items-center justify-between py-4 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <span className="flex items-center gap-3">
+                <UserPlus className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
                 ¿Eres profesional de la salud?
               </span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             </Link>
           </nav>
         </div>
