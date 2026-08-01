@@ -28,6 +28,12 @@ export default function Header() {
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
 
+  // Bloquea el scroll del fondo mientras el menú móvil a pantalla completa está abierto
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   useEffect(() => {
     Promise.all([
       base44.entities.Zone.filter({ active: true }).catch(() => []),
