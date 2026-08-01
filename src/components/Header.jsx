@@ -182,8 +182,12 @@ export default function Header() {
         }
       </div>
 
-      {open &&
-      <div className="md:hidden fixed inset-0 z-[60] bg-white flex flex-col">
+      <div
+        className={`md:hidden fixed inset-0 z-[60] bg-white flex flex-col transform transition-transform duration-300 ease-in-out will-change-transform ${
+          open ? "translate-x-0" : "translate-x-full pointer-events-none"
+        }`}
+        aria-hidden={!open}
+      >
           <div className="flex items-center justify-between h-20 px-4 sm:px-6 bg-brand-blueLight border-b border-border/50 flex-shrink-0">
             <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
               <span className="font-heading font-extrabold text-[23px] whitespace-nowrap">
