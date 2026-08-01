@@ -256,7 +256,7 @@ export default function Home() {
                       </div>
                     ) : (
                       <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-white/30 flex items-center justify-center">
-                        <item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${item.key === "cedula" ? "text-emerald-400" : "text-white"}`} />
                       </div>
                     )}
                     <p className="text-xs sm:text-sm text-white/80 leading-snug">
