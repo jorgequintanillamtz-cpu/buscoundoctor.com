@@ -132,12 +132,21 @@ export default function Header() {
             </Link>
           </div>
 
-          <button
-            onClick={() => setOpen(!open)}
-            aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            className="md:hidden p-2 rounded-lg hover:bg-brand-bluePale transition-colors text-brand-navy flex-shrink-0">
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="md:hidden flex items-center gap-2 flex-shrink-0">
+            <Link
+              to="/registro-medico"
+              className="flex items-center gap-1.5 bg-brand-navy text-white text-xs font-semibold rounded-full pl-3 pr-3.5 py-2 hover:bg-brand-navy/90 transition-colors whitespace-nowrap"
+            >
+              <UserPlus className="w-3.5 h-3.5 flex-shrink-0" />
+              Para médicos
+            </Link>
+            <button
+              onClick={() => setOpen(!open)}
+              aria-label={open ? "Cerrar menú" : "Abrir menú"}
+              className="p-2 rounded-lg hover:bg-brand-bluePale transition-colors text-brand-navy flex-shrink-0">
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {/* Buscador compacto en móvil: debajo del header, en todas las páginas */}
@@ -185,13 +194,6 @@ export default function Header() {
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-accent hover:text-brand-navy transition-colors">
               <LogIn className="w-4 h-4 flex-shrink-0" />
               Iniciar sesión
-            </Link>
-            <Link
-              to="/registro-medico"
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold bg-brand-navy text-white hover:bg-brand-navy/90 transition-colors">
-              <UserPlus className="w-4 h-4 flex-shrink-0" />
-              ¿Eres profesional de la salud?
             </Link>
           </nav>
         </div>
