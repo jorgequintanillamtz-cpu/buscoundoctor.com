@@ -18,6 +18,12 @@ import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 
+function setMeta(name, content) {
+  let el = document.querySelector(`meta[name="${name}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
+
 const NAV_SECTIONS = [
   { id: "informacion", label: "Información" },
   { id: "especialidades", label: "Especialidades" },
@@ -133,11 +139,24 @@ export default function SpecialistProfile() {
         script.innerHTML = JSON.stringify(schema);
         document.head.appendChild(script);
 
+        const zoneLabel = specialist.zone || specialist.location || "Monterrey";
+        const pageTitle = `${specialist.full_name} — ${specialist.specialty} en ${zoneLabel} | BuscoUnDoctor`;
+        const pageDescription = specialist.description
+          ? specialist.description.slice(0, 160)
+          : `Especialista en ${specialist.specialty} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
+
+        // Cada perfil necesita su propio <title> y meta description únicos — sin
+        // esto, Google ve todos los perfiles con el mismo título genérico del
+        // sitio y ninguno puede posicionar por el nombre del doctor.
+        document.title = pageTitle;
+        setMeta("description", pageDescription);
+        // Perfiles aún no publicados (borrador, en revisión, suspendidos o
+        // rechazados) no se indexan hasta que pasen a "published".
+        setMeta("robots", specialist.publication_status === "published" ? "index,follow" : "noindex,follow");
+
         setOpenGraph({
-          title: `${specialist.full_name} — ${specialist.specialty} | BuscoUnDoctor`,
-          description: specialist.description
-            ? specialist.description.slice(0, 160)
-            : `Especialista en ${specialist.specialty} en ${specialist.zone || specialist.location || 'Monterrey'}. Cédula profesional verificada. Contacta directo y agenda tu cita.`,
+          title: pageTitle,
+          description: pageDescription,
           image: specialist.profile_photo || SITE_OG.image,
         });
       }
