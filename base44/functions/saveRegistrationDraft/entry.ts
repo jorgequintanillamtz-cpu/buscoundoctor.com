@@ -15,6 +15,19 @@ function withPrefix(title, name) {
   return `${prefix} ${trimmed}`;
 }
 
+// Compone el campo plano "address" (usado como fallback en JSON-LD y en el
+// resto del sitio) a partir de los campos estructurados que llena el doctor
+// en el paso de ubicación del wizard.
+function composeAddress({ street, ext_number, int_number, floor, neighborhood, postal_code }) {
+  const parts = [];
+  if (street) parts.push(ext_number ? `${street} ${ext_number}` : street);
+  if (int_number) parts.push(`Int. ${int_number}`);
+  if (floor) parts.push(`Piso ${floor}`);
+  if (neighborhood) parts.push(`Col. ${neighborhood}`);
+  if (postal_code) parts.push(`CP ${postal_code}`);
+  return parts.join(', ');
+}
+
 function slugify(s) {
   return (s || '')
     .toLowerCase()
@@ -58,8 +71,21 @@ Deno.serve(async (req) => {
       const years = Number(body.years_experience);
       if (!Number.isNaN(years)) fields.years_experience = years;
     }
-    if (body.address) fields.address = body.address;
-    if (body.maps_url) fields.maps_url = body.maps_url;
+    if (body.address_street) fields.address_street = body.address_street;
+    if (body.address_neighborhood) fields.address_neighborhood = body.address_neighborhood;
+    if (body.address_ext_number) fields.address_ext_number = body.address_ext_number;
+    if (body.address_int_number) fields.address_int_number = body.address_int_number;
+    if (body.address_floor) fields.address_floor = body.address_floor;
+    if (body.address_postal_code) fields.address_postal_code = body.address_postal_code;
+    const composedAddress = composeAddress({
+      street: body.address_street,
+      ext_number: body.address_ext_number,
+      int_number: body.address_int_number,
+      floor: body.address_floor,
+      neighborhood: body.address_neighborhood,
+      postal_code: body.address_postal_code,
+    });
+    if (composedAddress) fields.address = composedAddress;
     if (body.profile_photo) fields.profile_photo = body.profile_photo;
     if (Array.isArray(body.gallery) && body.gallery.length > 0) fields.gallery = body.gallery;
 
@@ -102,7 +128,6 @@ Deno.serve(async (req) => {
       }
     }
     if (body.service_price) await upsertService('Consulta de primera vez', body.service_price);
-    if (body.service_price_follow_up) await upsertService('Consulta de seguimiento', body.service_price_follow_up);
 
     // Sincroniza los idiomas seleccionados hasta el momento (si el wizard ya
     // llegó a ese paso). No se eliminan los que el usuario deseleccione a
