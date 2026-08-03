@@ -301,77 +301,134 @@ export default function RegistroMedico() {
               </div>
             </div>
 
-            {stepKey === "nombre" && (
-              <StepShell icon={User} title="¿Cómo te llamas?" subtitle="Así aparecerás en tu perfil público" error={error}>
-                <div className="grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => update("title", "Dr.")}
-                    className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                    Dr.
-                  </button>
-                  <button type="button" onClick={() => update("title", "Dra.")}
-                    className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                    Dra.
-                  </button>
-                </div>
-                <Input value={data.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Nombre completo" className="rounded-xl" />
-              </StepShell>
-            )}
-
-            {stepKey === "whatsapp" && (
-              <StepShell icon={Phone} title="Tu número de WhatsApp" subtitle="Aquí te contactarán tus pacientes directamente" error={error}>
-                <Input value={data.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Ej: 8181234567" type="tel" className="rounded-xl" />
-              </StepShell>
-            )}
-
-            {stepKey === "especialidad" && (
-              <StepShell icon={Stethoscope} title="Tu especialidad" subtitle="Y tu subespecialidad, si tienes una" error={error}>
-                <select value={specialties.some((s) => s.name === data.specialty) ? data.specialty : (data.specialty ? "__otra__" : "")}
-                  onChange={(e) => update("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
-                  className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
-                  <option value="">Selecciona tu especialidad</option>
-                  {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
-                  <option value="__otra__">Otra (no está en la lista)</option>
-                </select>
-                {(data.specialty === " " || (!specialties.some((s) => s.name === data.specialty) && data.specialty)) && (
-                  <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl" />
-                )}
-                <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
-              </StepShell>
-            )}
-
-            {stepKey === "modalidad" && (
-              <StepShell icon={Monitor} title="¿Cómo atiendes?" subtitle="Puedes cambiar esto después" error={error}>
-                <div className="grid grid-cols-1 gap-2">
-                  {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
-                    <button key={val} type="button" onClick={() => update("modality", val)}
-                      className={`h-11 rounded-xl border text-sm font-semibold transition-colors ${data.modality === val ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                      {label}
+            {stepKey === "datos" && (
+              <StepShell icon={User} title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre completo</label>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <button type="button" onClick={() => update("title", "Dr.")}
+                      className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                      Dr.
                     </button>
-                  ))}
+                    <button type="button" onClick={() => update("title", "Dra.")}
+                      className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                      Dra.
+                    </button>
+                  </div>
+                  <Input value={data.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Nombre completo" className="rounded-xl" />
                 </div>
-              </StepShell>
-            )}
 
-            {stepKey === "idiomas" && (
-              <StepShell icon={Languages} title="Idiomas en los que atiendes" subtitle="Selecciona todos los que apliquen (opcional)" error={error}>
-                <div className="grid grid-cols-2 gap-1.5 max-h-64 overflow-y-auto pr-1">
-                  {languageOptions.map((lang) => (
-                    <label key={lang.id} className="flex items-center gap-2 cursor-pointer border border-border/50 rounded-xl px-2.5 py-2 hover:bg-accent/30 transition-colors">
-                      <input type="checkbox" checked={data.languages.includes(lang.id)} onChange={() => toggleLanguage(lang.id)} className="w-3.5 h-3.5 accent-primary flex-shrink-0" />
-                      <span className="text-xs text-foreground truncate">{lang.name}</span>
-                    </label>
-                  ))}
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">WhatsApp</label>
+                  <Input value={data.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Ej: 8181234567" type="tel" className="rounded-xl" />
+                  <p className="text-xs text-muted-foreground mt-1">Aquí te contactarán tus pacientes directamente</p>
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
+                  <select value={specialties.some((s) => s.name === data.specialty) ? data.specialty : (data.specialty ? "__otra__" : "")}
+                    onChange={(e) => update("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
+                    className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl mb-2">
+                    <option value="">Selecciona tu especialidad</option>
+                    {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                    <option value="__otra__">Otra (no está en la lista)</option>
+                  </select>
+                  {(data.specialty === " " || (!specialties.some((s) => s.name === data.specialty) && data.specialty)) && (
+                    <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl mb-2" />
+                  )}
+                  <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Años de experiencia (opcional)</label>
+                  <Input value={data.years_experience} onChange={(e) => update("years_experience", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 8" inputMode="numeric" className="rounded-xl" />
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">¿Cómo atiendes?</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
+                      <button key={val} type="button" onClick={() => update("modality", val)}
+                        className={`h-11 rounded-xl border text-xs font-semibold transition-colors ${data.modality === val ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </StepShell>
             )}
 
             {stepKey === "ubicacion" && (
-              <StepShell icon={MapPin} title="¿Dónde atiendes?" subtitle="Podrás agregar el consultorio completo después" error={error}>
-                <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
-                  className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
-                  <option value="">Selecciona tu zona</option>
-                  {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
-                </select>
+              <StepShell icon={MapPin} title="¿Dónde atiendes?" subtitle="Podrás agregar más consultorios después" error={error}>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
+                  <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
+                    className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
+                    <option value="">Selecciona tu zona</option>
+                    {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Dirección de tu consultorio</label>
+                  <Input value={data.address} onChange={(e) => update("address", e.target.value)} placeholder="Calle, número, colonia" className="rounded-xl" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Enlace de Google Maps (opcional)</label>
+                  <Input value={data.maps_url} onChange={(e) => update("maps_url", e.target.value)} placeholder="https://maps.app.goo.gl/..." className="rounded-xl" />
+                </div>
+              </StepShell>
+            )}
+
+            {stepKey === "servicios" && (
+              <StepShell icon={DollarSign} title="Precios de consulta" subtitle="Ayuda a tus pacientes a saber qué esperar" error={error}>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta de primera vez (MXN)</label>
+                  <Input value={data.service_price} onChange={(e) => update("service_price", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 800" inputMode="decimal" className="rounded-xl" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta de seguimiento (opcional)</label>
+                  <Input value={data.service_price_follow_up} onChange={(e) => update("service_price_follow_up", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 600" inputMode="decimal" className="rounded-xl" />
+                </div>
+                <p className="text-xs text-muted-foreground">Podrás agregar más servicios y precios después desde tu panel.</p>
+              </StepShell>
+            )}
+
+            {stepKey === "fotos" && (
+              <StepShell icon={Camera} title="Agrega tus fotos" subtitle="Los perfiles con foto generan más confianza — todo esto es opcional, puedes hacerlo después" error={error}>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foto de perfil (opcional)</label>
+                  {data.profile_photo ? (
+                    <div className="flex items-center gap-3">
+                      <img src={data.profile_photo} alt="" className="w-16 h-16 rounded-xl object-cover" />
+                      <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={() => update("profile_photo", "")}>Quitar</Button>
+                    </div>
+                  ) : (
+                    <label className="flex items-center justify-center gap-2 h-11 rounded-xl border border-dashed border-border text-sm text-muted-foreground cursor-pointer hover:bg-accent/30 transition-colors">
+                      {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                      {uploadingPhoto ? "Subiendo..." : "Subir foto de perfil"}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleProfilePhotoUpload} disabled={uploadingPhoto} />
+                    </label>
+                  )}
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Fotos de tu consultorio o trabajo (opcional)</label>
+                  {data.gallery.length > 0 && (
+                    <div className="grid grid-cols-4 gap-2 mb-2">
+                      {data.gallery.map((url, i) => (
+                        <div key={url + i} className="relative">
+                          <img src={url} alt="" className="w-full aspect-square rounded-lg object-cover" />
+                          <button type="button" onClick={() => update("gallery", data.gallery.filter((_, idx) => idx !== i))}
+                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-foreground text-background text-xs flex items-center justify-center">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <label className="flex items-center justify-center gap-2 h-11 rounded-xl border border-dashed border-border text-sm text-muted-foreground cursor-pointer hover:bg-accent/30 transition-colors">
+                    {uploadingGallery ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                    {uploadingGallery ? "Subiendo..." : "Agregar fotos"}
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} disabled={uploadingGallery} />
+                  </label>
+                </div>
               </StepShell>
             )}
 
