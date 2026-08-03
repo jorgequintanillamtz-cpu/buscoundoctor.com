@@ -295,7 +295,9 @@ export default function RegistroMedico() {
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const slug = generateSlug(data.full_name) || "doctor";
+      const webpFile = await fileToWebP(file, `${slug}-foto-perfil.webp`);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: webpFile });
       update("profile_photo", file_url);
     } catch { toast.error("Error al subir la foto"); }
     setUploadingPhoto(false);
@@ -306,7 +308,10 @@ export default function RegistroMedico() {
     if (!files.length) return;
     setUploadingGallery(true);
     try {
-      const urls = await Promise.all(files.map((f) => base44.integrations.Core.UploadFile({ file: f }).then((r) => r.file_url)));
+      const slug = generateSlug(data.full_name) || "doctor";
+      const startIndex = (data.gallery || []).length;
+      const webpFiles = await Promise.all(files.map((f, i) => fileToWebP(f, `${slug}-foto-${startIndex + i + 1}.webp`)));
+      const urls = await Promise.all(webpFiles.map((f) => base44.integrations.Core.UploadFile({ file: f }).then((r) => r.file_url)));
       update("gallery", [...(data.gallery || []), ...urls]);
     } catch { toast.error("Error al subir las fotos"); }
     setUploadingGallery(false);
