@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, DollarSign } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, DollarSign, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -15,11 +15,13 @@ import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
+import SeoScoreManager from "@/components/admin/SeoScoreManager";
 import { EMPTY_FORM, generateSlug } from "@/pages/admin/AdminDoctorEditor";
 
 const SECTION_GROUPS = [
   { group: "Inicio", items: [
     { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
+    { key: "seo", label: "Score SEO", icon: TrendingUp, requiresSaved: true },
   ]},
   { group: "Mi perfil", items: [
     { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
@@ -48,6 +50,7 @@ export default function DoctorPanel() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [section, setSection] = useState("resumen");
+  const [seoChecklist, setSeoChecklist] = useState(null);
   const autoSaveRef = useRef(null);
   const formRef = useRef(form);
 
@@ -82,8 +85,11 @@ export default function DoctorPanel() {
         gallery: specialist.gallery || [],
       });
       setStatus("ready");
+      // Calcula el score/checklist de SEO desde el primer momento, no solo tras guardar.
+      recalculateScore(specialist.id);
     })();
     return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -128,13 +134,16 @@ export default function DoctorPanel() {
     return data;
   };
 
-  const recalculateScore = async () => {
+  const recalculateScore = async (idOverride) => {
+    const id = idOverride || specialistId;
+    if (!id) return;
     try {
-      const res = await base44.functions.invoke("recalculateSpecialistScore", { specialist_id: specialistId });
+      const res = await base44.functions.invoke("recalculateSpecialistScore", { specialist_id: id });
       const data = res.data || res;
       if (typeof data.completeness_score === "number") {
         setForm((prev) => ({ ...prev, completeness_score: data.completeness_score, seo_score: data.seo_score ?? prev.seo_score }));
       }
+      if (data.checklist) setSeoChecklist(data.checklist);
     } catch {}
   };
 
@@ -342,6 +351,7 @@ export default function DoctorPanel() {
             </div>
 
             {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} />}
+            {section === "seo" && <SeoScoreManager seoScore={form.seo_score || 0} checklist={seoChecklist} onNavigate={setSection} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
             {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={specialistId} />}
             {section === "formacion" && <EducationManager specialistId={specialistId} />}
