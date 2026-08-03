@@ -389,6 +389,12 @@ export default function RegistroMedico() {
                 </div>
 
                 <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta de primera vez (MXN)</label>
+                  <Input value={data.service_price} onChange={(e) => update("service_price", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 800" inputMode="decimal" className="rounded-xl" />
+                  <p className="text-xs text-muted-foreground mt-1">Ayuda a tus pacientes a saber qué esperar. Podrás agregar más precios y servicios después desde tu panel.</p>
+                </div>
+
+                <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">¿Cómo atiendes?</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
@@ -403,7 +409,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "ubicacion" && (
-              <StepShell icon={MapPin} title="¿Dónde atiendes?" subtitle="Podrás agregar más consultorios después" error={error}>
+              <StepShell icon={MapPin} title="Dirección de tu consultorio principal" subtitle="Podrás agregar más consultorios después" error={error}>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
                   <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
@@ -412,28 +418,34 @@ export default function RegistroMedico() {
                     {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Dirección de tu consultorio</label>
-                  <Input value={data.address} onChange={(e) => update("address", e.target.value)} placeholder="Calle, número, colonia" className="rounded-xl" />
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-2">
+                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Calle</label>
+                    <Input value={data.address_street} onChange={(e) => update("address_street", e.target.value)} placeholder="Ej: Av. Vasconcelos" className="rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Número ext.</label>
+                    <Input value={data.address_ext_number} onChange={(e) => update("address_ext_number", e.target.value)} placeholder="Ej: 350" className="rounded-xl" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Número int. (opcional)</label>
+                    <Input value={data.address_int_number} onChange={(e) => update("address_int_number", e.target.value)} placeholder="Ej: 4B" className="rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Piso (opcional)</label>
+                    <Input value={data.address_floor} onChange={(e) => update("address_floor", e.target.value)} placeholder="Ej: 3" className="rounded-xl" />
+                  </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Enlace de Google Maps (opcional)</label>
-                  <Input value={data.maps_url} onChange={(e) => update("maps_url", e.target.value)} placeholder="https://maps.app.goo.gl/..." className="rounded-xl" />
-                </div>
-              </StepShell>
-            )}
-
-            {stepKey === "servicios" && (
-              <StepShell icon={DollarSign} title="Precios de consulta" subtitle="Ayuda a tus pacientes a saber qué esperar" error={error}>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta de primera vez (MXN)</label>
-                  <Input value={data.service_price} onChange={(e) => update("service_price", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 800" inputMode="decimal" className="rounded-xl" />
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Colonia</label>
+                  <Input value={data.address_neighborhood} onChange={(e) => update("address_neighborhood", e.target.value)} placeholder="Ej: Valle Oriente" className="rounded-xl" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta de seguimiento (opcional)</label>
-                  <Input value={data.service_price_follow_up} onChange={(e) => update("service_price_follow_up", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 600" inputMode="decimal" className="rounded-xl" />
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Código postal</label>
+                  <Input value={data.address_postal_code} onChange={(e) => update("address_postal_code", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 66269" inputMode="numeric" className="rounded-xl" />
                 </div>
-                <p className="text-xs text-muted-foreground">Podrás agregar más servicios y precios después desde tu panel.</p>
               </StepShell>
             )}
 
