@@ -3,8 +3,40 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, MapPin, DollarSign, Camera } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, MapPin, DollarSign, Camera, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
+import { generateSlug } from "@/pages/admin/AdminDoctorEditor";
+
+// Convierte una imagen a WebP (más liviana) y la renombra antes de subirla,
+// usando canvas en el navegador. Si algo falla (formato no soportado, etc.),
+// se sube el archivo original tal cual en vez de bloquear el registro.
+function fileToWebP(file, filename) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1600;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url);
+        if (!blob) { resolve(file); return; }
+        resolve(new File([blob], filename, { type: "image/webp" }));
+      }, "image/webp", 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
 const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
@@ -20,7 +52,7 @@ function GoogleIcon(props) {
   );
 }
 
-const STEP_KEYS = ["datos", "ubicacion", "servicios", "fotos", "cuenta"];
+const STEP_KEYS = ["datos", "ubicacion", "fotos", "cuenta"];
 
 const EMPTY_DATA = {
   title: "",
@@ -30,12 +62,15 @@ const EMPTY_DATA = {
   subspecialty: "",
   cedula: "",
   years_experience: "",
+  service_price: "",
   modality: "presencial",
   zone: "",
-  address: "",
-  maps_url: "",
-  service_price: "",
-  service_price_follow_up: "",
+  address_street: "",
+  address_neighborhood: "",
+  address_ext_number: "",
+  address_int_number: "",
+  address_floor: "",
+  address_postal_code: "",
   profile_photo: "",
   gallery: [],
 };
