@@ -54,6 +54,14 @@ Deno.serve(async (req) => {
       registration_step: body.step || '',
     };
     if (body.cedula) fields.professional_license_number = body.cedula;
+    if (body.years_experience) {
+      const years = Number(body.years_experience);
+      if (!Number.isNaN(years)) fields.years_experience = years;
+    }
+    if (body.address) fields.address = body.address;
+    if (body.maps_url) fields.maps_url = body.maps_url;
+    if (body.profile_photo) fields.profile_photo = body.profile_photo;
+    if (Array.isArray(body.gallery) && body.gallery.length > 0) fields.gallery = body.gallery;
 
     let specialistId = body.draft_id || null;
 
@@ -78,6 +86,23 @@ Deno.serve(async (req) => {
       });
       specialistId = created.id;
     }
+
+    // Precios de consulta (paso "servicios" del wizard): upsert por nombre fijo
+    // para no duplicar el registro si el usuario retrocede y vuelve a avanzar.
+    async function upsertService(name, priceRaw) {
+      const price = Number(priceRaw);
+      if (!priceRaw || Number.isNaN(price) || price <= 0) return;
+      const existingServices = await base44.asServiceRole.entities.SpecialistService
+        .filter({ specialist_id: specialistId, name })
+        .catch(() => []);
+      if (existingServices.length > 0) {
+        await base44.asServiceRole.entities.SpecialistService.update(existingServices[0].id, { price }).catch(() => {});
+      } else {
+        await base44.asServiceRole.entities.SpecialistService.create({ specialist_id: specialistId, name, price, display_order: 0 }).catch(() => {});
+      }
+    }
+    if (body.service_price) await upsertService('Consulta de primera vez', body.service_price);
+    if (body.service_price_follow_up) await upsertService('Consulta de seguimiento', body.service_price_follow_up);
 
     // Sincroniza los idiomas seleccionados hasta el momento (si el wizard ya
     // llegó a ese paso). No se eliminan los que el usuario deseleccione a
