@@ -352,7 +352,7 @@ export default function RegistroMedico() {
 
             {stepKey === "datos" && (
               <StepShell icon={User} title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre completo</label>
                   <div className="grid grid-cols-2 gap-2 mb-2">
                     <button type="button" onClick={() => update("title", "Dr.")}
@@ -367,13 +367,13 @@ export default function RegistroMedico() {
                   <Input value={data.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Nombre completo" className="rounded-xl" />
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">WhatsApp</label>
                   <Input value={data.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Ej: 8181234567" type="tel" className="rounded-xl" />
                   <p className="text-xs text-muted-foreground mt-1">Aquí te contactarán tus pacientes directamente</p>
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
                   <select value={specialties.some((s) => s.name === data.specialty) ? data.specialty : (data.specialty ? "__otra__" : "")}
                     onChange={(e) => update("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
@@ -399,7 +399,7 @@ export default function RegistroMedico() {
                   <p className="text-xs text-muted-foreground mt-1">Ayuda a tus pacientes a saber qué esperar. Podrás agregar más precios y servicios después desde tu panel.</p>
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">¿Cómo atiendes?</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
@@ -415,7 +415,7 @@ export default function RegistroMedico() {
 
             {stepKey === "ubicacion" && (
               <StepShell icon={MapPin} title="Dirección de tu consultorio principal" subtitle="Podrás agregar más consultorios después" error={error}>
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
                   <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
                     className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
@@ -423,7 +423,7 @@ export default function RegistroMedico() {
                     {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
                   </select>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="sm:col-span-2 grid grid-cols-3 gap-2">
                   <div className="col-span-2">
                     <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Calle</label>
                     <Input value={data.address_street} onChange={(e) => update("address_street", e.target.value)} placeholder="Ej: Av. Vasconcelos" className="rounded-xl" />
@@ -433,7 +433,7 @@ export default function RegistroMedico() {
                     <Input value={data.address_ext_number} onChange={(e) => update("address_ext_number", e.target.value)} placeholder="Ej: 350" className="rounded-xl" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="sm:col-span-2 grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Número int. (opcional)</label>
                     <Input value={data.address_int_number} onChange={(e) => update("address_int_number", e.target.value)} placeholder="Ej: 4B" className="rounded-xl" />
