@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, MapPin, Camera, Sparkles, Star } from "lucide-react";
+import { Loader2, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Camera, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/pages/admin/AdminDoctorEditor";
 
@@ -75,12 +75,12 @@ const EMPTY_DATA = {
   gallery: [],
 };
 
-const StepShell = ({ icon: Icon, title, subtitle, error, children }) => (
+const StepShell = ({ title, subtitle, error, children }) => (
   <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm">
     <div className="text-center mb-5">
-      <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-        <Icon className="w-6 h-6 text-primary" />
-      </div>
+      <span className="font-heading font-extrabold text-xl block mb-3">
+        <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
+      </span>
       <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
       {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
     </div>
@@ -351,7 +351,7 @@ export default function RegistroMedico() {
             </div>
 
             {stepKey === "datos" && (
-              <StepShell icon={User} title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
+              <StepShell title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre completo</label>
                   <div className="grid grid-cols-2 gap-2 mb-2">
@@ -414,7 +414,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "ubicacion" && (
-              <StepShell icon={MapPin} title="Dirección de tu consultorio principal" subtitle="Podrás agregar más consultorios después" error={error}>
+              <StepShell title="Dirección de tu consultorio principal" subtitle="Podrás agregar más consultorios después" error={error}>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
                   <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
@@ -455,7 +455,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "fotos" && (
-              <StepShell icon={Camera} title="Agrega tus fotos" subtitle="Los perfiles con foto generan más confianza — todo esto es opcional, puedes hacerlo después" error={error}>
+              <StepShell title="Agrega tus fotos" subtitle="Los perfiles con foto generan más confianza — todo esto es opcional, puedes hacerlo después" error={error}>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foto de perfil</label>
                   <p className="text-xs text-muted-foreground mb-2">Es la foto que ven los pacientes junto a tu nombre en tarjetas y resultados de búsqueda — así se vería:</p>
@@ -509,7 +509,7 @@ export default function RegistroMedico() {
             )}
 
             {stepKey === "cuenta" && (
-              <StepShell icon={ShieldCheck} title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
+              <StepShell title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
                 <Button type="button" onClick={continueWithGoogle} variant="outline" className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2 border-border">
                   <GoogleIcon />
                   Continuar con Google
