@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Camera, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/pages/admin/AdminDoctorEditor";
+import Logo from "@/components/Logo";
 
 // Convierte una imagen a WebP (más liviana) y la renombra antes de subirla,
 // usando canvas en el navegador. Si algo falla (formato no soportado, etc.),
@@ -78,9 +79,7 @@ const EMPTY_DATA = {
 const StepShell = ({ title, subtitle, error, children }) => (
   <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm">
     <div className="text-center mb-5">
-      <span className="font-heading font-extrabold text-xl block mb-3">
-        <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-      </span>
+      <Logo to="/" className="h-9 mx-auto mb-3" />
       <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
       {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
     </div>
@@ -550,9 +549,7 @@ export default function RegistroMedico() {
         {phase === "email-form" && (
           <form onSubmit={submitEmailForm} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
             <div className="text-center mb-2">
-              <span className="font-heading font-extrabold text-xl block mb-3">
-                <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-              </span>
+              <Logo to="/" className="h-9 mx-auto mb-3" />
               <h1 className="font-heading font-bold text-xl text-foreground">Crea tu contraseña</h1>
               <p className="text-sm text-muted-foreground">Ya casi termina, {data.title} {data.full_name}</p>
             </div>
@@ -578,9 +575,7 @@ export default function RegistroMedico() {
         {phase === "otp" && (
           <form onSubmit={submitOtp} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
             <div className="text-center mb-2">
-              <span className="font-heading font-extrabold text-xl block mb-3">
-                <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-              </span>
+              <Logo to="/" className="h-9 mx-auto mb-3" />
               <h1 className="font-heading font-bold text-xl text-foreground">Verifica tu correo</h1>
               <p className="text-sm text-muted-foreground">
                 Ingresa el código de 6 dígitos que enviamos a <span className="font-medium text-foreground">{emailForm.email}</span>
