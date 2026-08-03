@@ -137,12 +137,15 @@ export default function RegistroMedico() {
         subspecialty: payload.subspecialty,
         cedula: payload.cedula,
         years_experience: payload.years_experience,
+        service_price: payload.service_price,
         modality: payload.modality,
         zone: payload.zone,
-        address: payload.address,
-        maps_url: payload.maps_url,
-        service_price: payload.service_price,
-        service_price_follow_up: payload.service_price_follow_up,
+        address_street: payload.address_street,
+        address_neighborhood: payload.address_neighborhood,
+        address_ext_number: payload.address_ext_number,
+        address_int_number: payload.address_int_number,
+        address_floor: payload.address_floor,
+        address_postal_code: payload.address_postal_code,
         profile_photo: payload.profile_photo,
         gallery: payload.gallery,
         step: stepJustCompleted,
@@ -227,13 +230,14 @@ export default function RegistroMedico() {
       if (!data.full_name.trim()) return "Escribe tu nombre completo";
       if (data.whatsapp.replace(/\D/g, "").length < 10) return "Ingresa un número de WhatsApp válido (10 dígitos)";
       if (!data.specialty.trim()) return "Selecciona o escribe tu especialidad";
+      if (!data.service_price || Number(data.service_price) <= 0) return "Ingresa el precio de tu consulta de primera vez";
     }
     if (stepKey === "ubicacion") {
       if (!data.zone) return "Selecciona tu zona";
-      if (!data.address.trim()) return "Escribe la dirección de tu consultorio";
-    }
-    if (stepKey === "servicios" && (!data.service_price || Number(data.service_price) <= 0)) {
-      return "Ingresa el precio de tu consulta de primera vez";
+      if (!data.address_street.trim()) return "Escribe el nombre de la calle";
+      if (!data.address_ext_number.trim()) return "Escribe el número exterior";
+      if (!data.address_neighborhood.trim()) return "Escribe la colonia";
+      if (!data.address_postal_code.trim()) return "Escribe el código postal";
     }
     return "";
   };
