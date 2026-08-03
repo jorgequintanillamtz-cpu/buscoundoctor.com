@@ -452,12 +452,26 @@ export default function RegistroMedico() {
             {stepKey === "fotos" && (
               <StepShell icon={Camera} title="Agrega tus fotos" subtitle="Los perfiles con foto generan más confianza — todo esto es opcional, puedes hacerlo después" error={error}>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foto de perfil (opcional)</label>
-                  {data.profile_photo ? (
-                    <div className="flex items-center gap-3">
-                      <img src={data.profile_photo} alt="" className="w-16 h-16 rounded-xl object-cover" />
-                      <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={() => update("profile_photo", "")}>Quitar</Button>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foto de perfil</label>
+                  <p className="text-xs text-muted-foreground mb-2">Es la foto que ven los pacientes junto a tu nombre en tarjetas y resultados de búsqueda — así se vería:</p>
+                  {/* Vista previa en vivo, con los datos que ya escribió en el paso 1 */}
+                  <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-3 flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0 border border-border/50 flex items-center justify-center">
+                      {data.profile_photo ? (
+                        <img src={data.profile_photo} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-5 h-5 text-muted-foreground" />
+                      )}
                     </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">{data.title} {data.full_name || "Tu nombre"}</p>
+                      <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
+                        {data.specialty.trim() || "Tu especialidad"} <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" /> 4.9
+                      </p>
+                    </div>
+                  </div>
+                  {data.profile_photo ? (
+                    <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={() => update("profile_photo", "")}>Quitar foto</Button>
                   ) : (
                     <label className="flex items-center justify-center gap-2 h-11 rounded-xl border border-dashed border-border text-sm text-muted-foreground cursor-pointer hover:bg-accent/30 transition-colors">
                       {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
@@ -467,7 +481,8 @@ export default function RegistroMedico() {
                   )}
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Fotos de tu consultorio o trabajo (opcional)</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Fotos de tu consultorio o trabajo</label>
+                  <p className="text-xs text-muted-foreground mb-2">Se muestran en una galería dentro de tu perfil público. Fotos de tu consultorio, equipo o certificados le dan confianza a pacientes que no te conocen todavía.</p>
                   {data.gallery.length > 0 && (
                     <div className="grid grid-cols-4 gap-2 mb-2">
                       {data.gallery.map((url, i) => (
