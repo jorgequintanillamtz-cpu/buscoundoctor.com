@@ -510,19 +510,19 @@ export default function RegistroMedico() {
 
             {stepKey === "cuenta" && (
               <StepShell icon={ShieldCheck} title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
-                <Button type="button" onClick={continueWithGoogle} variant="outline" className="w-full min-h-[44px] rounded-xl gap-2 border-border">
+                <Button type="button" onClick={continueWithGoogle} variant="outline" className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2 border-border">
                   <GoogleIcon />
                   Continuar con Google
                 </Button>
-                <div className="flex items-center gap-3 py-1">
+                <div className="sm:col-span-2 flex items-center gap-3 py-1">
                   <div className="h-px bg-border flex-1" />
                   <span className="text-xs text-muted-foreground">o con tu correo</span>
                   <div className="h-px bg-border flex-1" />
                 </div>
-                <Button type="button" onClick={() => setPhase("email-form")} className="w-full min-h-[44px] rounded-xl">
+                <Button type="button" onClick={() => setPhase("email-form")} className="sm:col-span-2 w-full min-h-[44px] rounded-xl">
                   Registrarme con correo electrónico
                 </Button>
-                <Link to="/planes" className="block text-center text-xs text-muted-foreground hover:text-foreground">
+                <Link to="/planes" className="sm:col-span-2 block text-center text-xs text-muted-foreground hover:text-foreground">
                   Ver planes y precios
                 </Link>
               </StepShell>
