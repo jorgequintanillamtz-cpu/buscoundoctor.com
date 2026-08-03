@@ -76,16 +76,21 @@ const EMPTY_DATA = {
 };
 
 const StepShell = ({ icon: Icon, title, subtitle, error, children }) => (
-  <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
-    <div className="text-center">
+  <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm">
+    <div className="text-center mb-5">
       <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
         <Icon className="w-6 h-6 text-primary" />
       </div>
       <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
       {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
     </div>
-    {children}
-    {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+    {/* En pantallas más anchas (escritorio), los campos cortos se acomodan de
+        a 2 por fila en vez de una sola columna larga — los bloques que deben
+        ocupar todo el ancho llevan sm:col-span-2. */}
+    <div className="grid gap-5 sm:grid-cols-2">
+      {children}
+    </div>
+    {error && <p className="text-sm text-red-500 text-center mt-5">{error}</p>}
   </div>
 );
 
