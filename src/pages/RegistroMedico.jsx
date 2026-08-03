@@ -597,8 +597,14 @@ export default function RegistroMedico() {
             </div>
             <h1 className="font-heading font-bold text-xl text-foreground">¡Cuenta creada!</h1>
             <p className="text-sm text-muted-foreground">
-              Tu perfil ya tiene tu información básica. Termina de completarlo (fotos, consultorios, documentos) para que podamos verificarte y publicarlo.
+              Tu perfil ya tiene tu información básica y va a pasar a revisión. Esto apenas empieza.
             </p>
+            <div className="bg-accent/40 border border-accent rounded-2xl p-4 text-left flex gap-3">
+              <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground">
+                Aún puedes dar de alta muchas cosas más: formación académica, documentos y cédula, más servicios y precios, idiomas, aseguradoras que aceptas, y hasta publicaciones y casos de éxito. Entre más completo esté tu perfil, más confianza le genera a tus pacientes — y mejor te posiciona Google. Revisa tu “Score de SEO” en el panel para ver exactamente qué te falta.
+              </p>
+            </div>
             <Button onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl">
               Ir a mi panel
             </Button>
