@@ -101,9 +101,15 @@ export default function RegistroMedico() {
         specialty: payload.specialty,
         subspecialty: payload.subspecialty,
         cedula: payload.cedula,
+        years_experience: payload.years_experience,
         modality: payload.modality,
         zone: payload.zone,
-        languages: payload.languages,
+        address: payload.address,
+        maps_url: payload.maps_url,
+        service_price: payload.service_price,
+        service_price_follow_up: payload.service_price_follow_up,
+        profile_photo: payload.profile_photo,
+        gallery: payload.gallery,
         step: stepJustCompleted,
       });
       const newId = res?.data?.id || res?.id;
@@ -181,18 +187,18 @@ export default function RegistroMedico() {
   const stepKey = STEP_KEYS[stepIndex];
 
   const validateStep = () => {
-    if (stepKey === "nombre") {
+    if (stepKey === "datos") {
       if (!data.title) return "Selecciona Dr. o Dra.";
       if (!data.full_name.trim()) return "Escribe tu nombre completo";
+      if (data.whatsapp.replace(/\D/g, "").length < 10) return "Ingresa un número de WhatsApp válido (10 dígitos)";
+      if (!data.specialty.trim()) return "Selecciona o escribe tu especialidad";
     }
-    if (stepKey === "whatsapp" && data.whatsapp.replace(/\D/g, "").length < 10) {
-      return "Ingresa un número de WhatsApp válido (10 dígitos)";
+    if (stepKey === "ubicacion") {
+      if (!data.zone) return "Selecciona tu zona";
+      if (!data.address.trim()) return "Escribe la dirección de tu consultorio";
     }
-    if (stepKey === "especialidad" && !data.specialty.trim()) {
-      return "Selecciona o escribe tu especialidad";
-    }
-    if (stepKey === "ubicacion" && !data.zone) {
-      return "Selecciona tu zona";
+    if (stepKey === "servicios" && (!data.service_price || Number(data.service_price) <= 0)) {
+      return "Ingresa el precio de tu consulta de primera vez";
     }
     return "";
   };
@@ -245,11 +251,26 @@ export default function RegistroMedico() {
     setLoading(false);
   };
 
-  const toggleLanguage = (id) => {
-    setData((prev) => ({
-      ...prev,
-      languages: prev.languages.includes(id) ? prev.languages.filter((l) => l !== id) : [...prev.languages, id],
-    }));
+  const handleProfilePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      update("profile_photo", file_url);
+    } catch { toast.error("Error al subir la foto"); }
+    setUploadingPhoto(false);
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploadingGallery(true);
+    try {
+      const urls = await Promise.all(files.map((f) => base44.integrations.Core.UploadFile({ file: f }).then((r) => r.file_url)));
+      update("gallery", [...(data.gallery || []), ...urls]);
+    } catch { toast.error("Error al subir las fotos"); }
+    setUploadingGallery(false);
   };
 
   const progressPct = Math.round(((stepIndex + 1) / STEP_KEYS.length) * 100);
