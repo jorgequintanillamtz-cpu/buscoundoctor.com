@@ -3,6 +3,7 @@ import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight } f
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
+import Logo from "@/components/Logo";
 import { buildSearchOptions } from "@/lib/searchOptions";
 
 const triggerClass =
@@ -78,11 +79,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
       <div className="bg-brand-blueLight w-full px-4 sm:px-6 pb-3 lg:pb-0">
         <div className="flex items-center justify-between h-20 gap-4">
-          <Link to="/" className="flex items-center flex-shrink-0">
-            <span className="font-heading font-extrabold text-[23px] sm:text-[26px] whitespace-nowrap">
-              <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-            </span>
-          </Link>
+          <Logo to="/" className="h-9 sm:h-10" blend />
 
           {/* Buscador compacto: en todas las páginas, incluido el Home */}
           {
@@ -189,11 +186,7 @@ export default function Header() {
         aria-hidden={!open}
       >
           <div className="flex items-center justify-between h-20 px-4 sm:px-6 bg-brand-blueLight border-b border-border/50 flex-shrink-0">
-            <Link to="/" onClick={() => setOpen(false)} className="flex items-center">
-              <span className="font-heading font-extrabold text-[23px] whitespace-nowrap">
-                <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-              </span>
-            </Link>
+            <Logo to="/" onClick={() => setOpen(false)} className="h-9" blend />
             <button
               onClick={() => setOpen(false)}
               aria-label="Cerrar menú"

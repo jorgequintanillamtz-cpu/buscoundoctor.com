@@ -14,13 +14,12 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-brand-blue flex items-center justify-center">
-                <span className="text-white font-heading font-bold text-xs">B</span>
-              </div>
-              <span className="font-heading font-bold text-white">
-                busco<span className="text-brand-blue">undoctor</span>
-              </span>
+            <Link to="/" className="flex items-center mb-4">
+              <img
+                src="https://media.base44.com/images/public/69daf616236dcba44672309d/9f4cfcd01_buscoundoctor.webp"
+                alt="BuscoUnDoctor"
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="text-sm text-white/60 leading-relaxed">
               Encuentra doctores y especialistas en Monterrey de forma rápida y sencilla.
