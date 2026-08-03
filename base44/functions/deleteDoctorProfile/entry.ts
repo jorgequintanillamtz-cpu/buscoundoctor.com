@@ -28,6 +28,11 @@ Deno.serve(async (req) => {
 
     const svc = base44.asServiceRole.entities;
 
+    // Guardamos quién era el dueño de la cuenta ANTES de borrar el perfil,
+    // para poder limpiar también esa cuenta al final (ver más abajo).
+    const specialistRecord = await svc.Specialist.get(specialistId).catch(() => null);
+    const ownerUserId = specialistRecord?.owner_user_id || null;
+
     // Consultorios: primero sus horarios (dependen del id del consultorio),
     // luego los consultorios mismos.
     const offices = await svc.Office.filter({ specialist_id: specialistId }).catch(() => []);
