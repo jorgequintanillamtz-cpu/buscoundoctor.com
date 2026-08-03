@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Stethoscope, Monitor, MapPin, DollarSign, Camera } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, MapPin, DollarSign, Camera } from "lucide-react";
 import { toast } from "sonner";
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
