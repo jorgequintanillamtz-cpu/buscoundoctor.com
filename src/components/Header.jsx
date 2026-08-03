@@ -79,7 +79,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
       <div className="bg-brand-blueLight w-full px-4 sm:px-6 pb-3 lg:pb-0">
         <div className="flex items-center justify-between h-20 gap-4">
-          <Logo to="/" className="h-9 sm:h-10" />
+          <Logo to="/" className="h-[47px] sm:h-[52px]" />
 
           {/* Buscador compacto: en todas las páginas, incluido el Home */}
           {
@@ -186,7 +186,7 @@ export default function Header() {
         aria-hidden={!open}
       >
           <div className="flex items-center justify-between h-20 px-4 sm:px-6 bg-brand-blueLight border-b border-border/50 flex-shrink-0">
-            <Logo to="/" onClick={() => setOpen(false)} className="h-9" />
+            <Logo to="/" onClick={() => setOpen(false)} className="h-[47px]" />
             <button
               onClick={() => setOpen(false)}
               aria-label="Cerrar menú"

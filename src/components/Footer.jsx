@@ -18,7 +18,7 @@ export default function Footer() {
               <img
                 src="https://media.base44.com/images/public/69daf616236dcba44672309d/9f4cfcd01_buscoundoctor.webp"
                 alt="BuscoUnDoctor"
-                className="h-8 w-auto"
+                className="h-[42px] w-auto"
               />
             </Link>
             <p className="text-sm text-white/60 leading-relaxed">
