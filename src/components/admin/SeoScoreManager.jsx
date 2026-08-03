@@ -43,9 +43,9 @@ const CHECKLIST_ITEMS = [
 ];
 
 function scoreColor(score) {
-  if (score >= 80) return { text: "text-emerald-600", bg: "bg-emerald-500", soft: "bg-emerald-50", ring: "text-emerald-500" };
-  if (score >= 50) return { text: "text-amber-600", bg: "bg-amber-500", soft: "bg-amber-50", ring: "text-amber-500" };
-  return { text: "text-red-600", bg: "bg-red-500", soft: "bg-red-50", ring: "text-red-500" };
+  if (score >= 80) return { text: "text-emerald-400", border: "border-emerald-400/40" };
+  if (score >= 50) return { text: "text-amber-400", border: "border-amber-400/40" };
+  return { text: "text-red-400", border: "border-red-400/40" };
 }
 
 export default function SeoScoreManager({ seoScore = 0, checklist, onNavigate }) {
@@ -58,8 +58,8 @@ export default function SeoScoreManager({ seoScore = 0, checklist, onNavigate })
       <div className="bg-brand-navy rounded-3xl p-6 sm:p-8 relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-48 h-48 bg-brand-blue/20 rounded-full pointer-events-none" />
         <div className="relative flex flex-col sm:flex-row sm:items-center gap-6">
-          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/10 border-4 border-white/15 flex-shrink-0">
-            <span className="font-heading font-extrabold text-3xl text-white">{seoScore}%</span>
+          <div className={`flex items-center justify-center w-24 h-24 rounded-full bg-white/10 border-4 ${colors.border} flex-shrink-0`}>
+            <span className={`font-heading font-extrabold text-3xl ${colors.text}`}>{seoScore}%</span>
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1.5">
