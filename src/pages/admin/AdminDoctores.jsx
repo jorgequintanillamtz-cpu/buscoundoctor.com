@@ -60,12 +60,10 @@ export default function AdminDoctores() {
   );
 
   const STEP_LABELS = {
-    nombre: "Nombre",
-    whatsapp: "WhatsApp",
-    especialidad: "Especialidad",
-    modalidad: "Modalidad",
-    idiomas: "Idiomas",
-    ubicacion: "Datos completos (falta crear cuenta)",
+    datos: "Datos básicos",
+    ubicacion: "Ubicación",
+    servicios: "Precios",
+    fotos: "Datos completos (falta crear cuenta)",
   };
 
   const waLink = (whatsapp) => {
