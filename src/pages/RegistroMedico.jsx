@@ -550,9 +550,9 @@ export default function RegistroMedico() {
         {phase === "email-form" && (
           <form onSubmit={submitEmailForm} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
             <div className="text-center mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-                <Mail className="w-6 h-6 text-primary" />
-              </div>
+              <span className="font-heading font-extrabold text-xl block mb-3">
+                <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
+              </span>
               <h1 className="font-heading font-bold text-xl text-foreground">Crea tu contraseña</h1>
               <p className="text-sm text-muted-foreground">Ya casi termina, {data.title} {data.full_name}</p>
             </div>
@@ -578,9 +578,9 @@ export default function RegistroMedico() {
         {phase === "otp" && (
           <form onSubmit={submitOtp} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
             <div className="text-center mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-3">
-                <Mail className="w-6 h-6 text-primary" />
-              </div>
+              <span className="font-heading font-extrabold text-xl block mb-3">
+                <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
+              </span>
               <h1 className="font-heading font-bold text-xl text-foreground">Verifica tu correo</h1>
               <p className="text-sm text-muted-foreground">
                 Ingresa el código de 6 dígitos que enviamos a <span className="font-medium text-foreground">{emailForm.email}</span>
