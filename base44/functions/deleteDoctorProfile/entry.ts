@@ -75,6 +75,28 @@ Deno.serve(async (req) => {
     // Por último, el perfil mismo.
     await svc.Specialist.delete(specialistId);
 
+    // Si el perfil tenía cuenta propia, la limpiamos también. Sin esto, el
+    // correo/cuenta de Google quedaba "fantasma" y bloqueaba que la misma
+    // persona pudiera registrarse de nuevo con la misma información (el
+    // registro con correo fallaba con "ya existe una cuenta"). Nunca se toca
+    // una cuenta que no sea de rol "doctor" (por seguridad, ej. un admin).
+    if (ownerUserId) {
+      try {
+        const ownerUser = await svc.User.get(ownerUserId).catch(() => null);
+        if (ownerUser && ownerUser.role === 'doctor') {
+          try {
+            await svc.User.delete(ownerUserId);
+          } catch {
+            // Si la plataforma no permite borrar la cuenta directamente, al
+            // menos le quitamos el rol de "doctor" para que no quede huérfana.
+            await svc.User.update(ownerUserId, { role: 'user' }).catch(() => {});
+          }
+        }
+      } catch {
+        // Best-effort: un fallo aquí no debe impedir que el perfil ya se haya borrado.
+      }
+    }
+
     return Response.json({ ok: true });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
