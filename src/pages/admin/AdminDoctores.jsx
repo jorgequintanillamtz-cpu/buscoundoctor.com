@@ -62,7 +62,6 @@ export default function AdminDoctores() {
   const STEP_LABELS = {
     datos: "Datos básicos",
     ubicacion: "Ubicación",
-    servicios: "Precios",
     fotos: "Datos completos (falta crear cuenta)",
   };
 
