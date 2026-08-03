@@ -19,7 +19,7 @@ export default function Logo({ to = "/", className = "h-8", blend = false, onCli
       <img
         src={LOGO_URL}
         alt="BuscoUnDoctor"
-        className={`${className} w-auto ${blend ? "mix-blend-screen" : ""}`}
+        className={`${className} w-auto`}
       />
     </Link>
   );
