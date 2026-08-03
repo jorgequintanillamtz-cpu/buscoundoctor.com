@@ -456,7 +456,7 @@ export default function RegistroMedico() {
 
             {stepKey === "fotos" && (
               <StepShell icon={Camera} title="Agrega tus fotos" subtitle="Los perfiles con foto generan más confianza — todo esto es opcional, puedes hacerlo después" error={error}>
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foto de perfil</label>
                   <p className="text-xs text-muted-foreground mb-2">Es la foto que ven los pacientes junto a tu nombre en tarjetas y resultados de búsqueda — así se vería:</p>
                   {/* Vista previa en vivo, con los datos que ya escribió en el paso 1 */}
@@ -485,7 +485,7 @@ export default function RegistroMedico() {
                     </label>
                   )}
                 </div>
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Fotos de tu consultorio o trabajo</label>
                   <p className="text-xs text-muted-foreground mb-2">Se muestran en una galería dentro de tu perfil público. Fotos de tu consultorio, equipo o certificados le dan confianza a pacientes que no te conocen todavía.</p>
                   {data.gallery.length > 0 && (
