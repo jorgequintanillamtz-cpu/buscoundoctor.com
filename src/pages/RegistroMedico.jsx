@@ -3,7 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Phone, Stethoscope, Monitor, Languages, MapPin } from "lucide-react";
+import { Loader2, ShieldCheck, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Stethoscope, Monitor, MapPin, DollarSign, Camera } from "lucide-react";
+import { toast } from "sonner";
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
 const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
@@ -19,7 +20,7 @@ function GoogleIcon(props) {
   );
 }
 
-const STEP_KEYS = ["nombre", "whatsapp", "especialidad", "modalidad", "idiomas", "ubicacion", "cuenta"];
+const STEP_KEYS = ["datos", "ubicacion", "servicios", "fotos", "cuenta"];
 
 const EMPTY_DATA = {
   title: "",
@@ -28,9 +29,15 @@ const EMPTY_DATA = {
   specialty: "",
   subspecialty: "",
   cedula: "",
+  years_experience: "",
   modality: "presencial",
-  languages: [], // array de Language IDs
   zone: "",
+  address: "",
+  maps_url: "",
+  service_price: "",
+  service_price_follow_up: "",
+  profile_photo: "",
+  gallery: [],
 };
 
 const StepShell = ({ icon: Icon, title, subtitle, error, children }) => (
@@ -59,7 +66,8 @@ export default function RegistroMedico() {
 
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
-  const [languageOptions, setLanguageOptions] = useState([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   // Id del perfil Specialist en borrador que se va guardando paso a paso,
   // antes incluso de que exista una cuenta. Persistido en localStorage para
   // sobrevivir el redirect de Google OAuth y recargas de página.
@@ -69,19 +77,9 @@ export default function RegistroMedico() {
     Promise.all([
       base44.entities.Specialty.filter({ active: true }).catch(() => []),
       base44.entities.Zone.filter({ active: true }).catch(() => []),
-      base44.entities.Language.list().catch(() => []),
-    ]).then(([specs, zoneList, langs]) => {
+    ]).then(([specs, zoneList]) => {
       setSpecialties([...specs].sort((a, b) => a.name.localeCompare(b.name, "es")));
       setZones([...zoneList].sort((a, b) => a.name.localeCompare(b.name, "es")));
-      // Español e Inglés siempre primero, el resto en orden alfabético
-      const priority = ["Español", "Inglés"];
-      const sortedLangs = [...langs].sort((a, b) => {
-        const ia = priority.indexOf(a.name);
-        const ib = priority.indexOf(b.name);
-        if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
-        return a.name.localeCompare(b.name, "es");
-      });
-      setLanguageOptions(sortedLangs);
     });
   }, []);
 
