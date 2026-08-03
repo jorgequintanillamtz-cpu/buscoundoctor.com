@@ -326,7 +326,7 @@ export default function RegistroMedico() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
+      <div className={`w-full ${phase === "wizard" ? "max-w-md sm:max-w-xl lg:max-w-2xl" : "max-w-md"}`}>
         <Link to="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
         </Link>
