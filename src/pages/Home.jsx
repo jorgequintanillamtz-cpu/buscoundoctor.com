@@ -213,7 +213,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden pb-10 sm:pb-28">
+      <section className="relative bg-brand-navy overflow-hidden pb-24 sm:pb-40">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -296,16 +296,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Curva ondulada en el borde inferior del hero, en vez de un corte recto */}
-        <div className="absolute bottom-0 left-0 w-full leading-none pointer-events-none">
-          <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-14 sm:h-20" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0,40 C240,90 480,0 720,25 C960,50 1200,95 1440,35 L1440,100 L0,100 Z" fill="white" />
-          </svg>
-        </div>
-      </section>
-
-      {/* Tarjeta blanca de búsqueda, superpuesta al borde entre el hero y la siguiente sección */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-3 sm:-mt-16 mb-10 sm:mb-14">
+        {/* Tarjeta blanca de búsqueda: vive DENTRO del hero azul (no superpuesta
+            al borde), con azul visible arriba y abajo de ella — el azul se
+            extiende (pb-24/pb-40 arriba) para dejarle espacio antes de la curva. */}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 mt-8 sm:mt-12">
           <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
             {/* En móvil se omite este encabezado: el título y subtítulo del hero ya
                 cumplen ese rol, y la tarjeta queda como "caja de buscar" pura. */}
@@ -367,6 +361,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Curva ondulada en el borde inferior del hero, ahora DESPUÉS de la
+            tarjeta, para que el azul quede visible también por debajo de ella
+            antes de pasar a blanco. */}
+        <div className="absolute bottom-0 left-0 w-full leading-none pointer-events-none">
+          <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-14 sm:h-20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,40 C240,90 480,0 720,25 C960,50 1200,95 1440,35 L1440,100 L0,100 Z" fill="white" />
+          </svg>
+        </div>
+      </section>
 
       {/* Specialties: las 8 más buscadas */}
       <section>
