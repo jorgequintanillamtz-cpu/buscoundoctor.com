@@ -81,22 +81,27 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
       {showDoctorBanner && (
-        <Link
-          to="/registro-medico"
-          className="relative flex items-center justify-center gap-1.5 bg-brand-navy text-white text-xs sm:text-sm font-medium py-2 px-9 sm:px-10 hover:bg-brand-navy/90 transition-colors"
-        >
-          <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale flex-shrink-0" />
-          <span>¿Eres médico? Regístrate aquí</span>
-          <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+        // Nota: el botón de cerrar NO va anidado dentro del <Link> (eso es HTML
+        // inválido -- botón dentro de enlace -- y en móvil hacía que el tap no
+        // se registrara bien). Ahora son hermanos dentro de un contenedor relativo.
+        <div className="relative flex items-center bg-brand-navy">
+          <Link
+            to="/registro-medico"
+            className="flex-1 flex items-center justify-center gap-1.5 text-white text-xs sm:text-sm font-medium py-2 px-9 sm:px-10 hover:bg-brand-navy/90 transition-colors"
+          >
+            <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale flex-shrink-0" />
+            <span>¿Eres médico? Regístrate aquí</span>
+            <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+          </Link>
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDoctorBanner(false); }}
+            onClick={() => setShowDoctorBanner(false)}
             aria-label="Cerrar aviso"
-            className="absolute right-2 sm:right-4 p-1 rounded-full hover:bg-white/15 transition-colors"
+            className="absolute right-2 sm:right-4 p-1 rounded-full hover:bg-white/15 transition-colors text-white"
           >
             <X className="w-3.5 h-3.5" />
           </button>
-        </Link>
+        </div>
       )}
       <div className="bg-brand-blueLight w-full px-4 sm:px-6 pb-3 lg:pb-0">
         <div className="flex items-center justify-between h-20 gap-4">
