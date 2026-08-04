@@ -39,6 +39,8 @@ import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
 import PricingPage from './pages/PricingPage';
 import AdminPlanes from './pages/admin/AdminPlanes';
 import LandingMedicos from './pages/LandingMedicos';
+import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
+import CondicionesGenerales from './pages/CondicionesGenerales';
 import { Stethoscope } from "lucide-react";
 
 const AuthenticatedApp = () => {
@@ -82,6 +84,8 @@ const AuthenticatedApp = () => {
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
         <Route path="/planes" element={<PricingPage />} />
+        <Route path="/aviso-de-privacidad" element={<AvisoDePrivacidad />} />
+        <Route path="/terminos-y-condiciones" element={<CondicionesGenerales />} />
         {/* Redirección de la URL vieja, por si alguien la tiene guardada */}
         <Route path="/admin/mi-perfil" element={<Navigate to="/panel-medico" replace />} />
       </Route>
