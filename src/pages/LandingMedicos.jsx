@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Check, ShieldCheck, Users, Search, MessageCircle,
-  Star, TrendingUp, Award, Sparkles, Plus,
+  Check, ShieldCheck, MessageCircle,
+  Star, Award, Sparkles, Plus,
   ArrowRight, MapPin, BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
