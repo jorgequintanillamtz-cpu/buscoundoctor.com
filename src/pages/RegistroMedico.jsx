@@ -41,6 +41,9 @@ function fileToWebP(file, filename) {
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
 const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
+// Misma clave que escribe LandingMedicos.jsx (página /para-medicos) cuando
+// alguien llena el paso 1 embebido ahí y da clic en "Continuar".
+const LANDING_PREFILL_KEY = "buscoundoctor_landing_prefill";
 
 function GoogleIcon(props) {
   return (
@@ -120,6 +123,20 @@ export default function RegistroMedico() {
       setSpecialties([...specs].sort((a, b) => a.name.localeCompare(b.name, "es")));
       setZones([...zoneList].sort((a, b) => a.name.localeCompare(b.name, "es")));
     });
+  }, []);
+
+  // Si viene de la landing "/para-medicos" con el paso 1 ya lleno (nombre,
+  // WhatsApp, especialidad, cédula, etc.), lo precarga y salta directo al
+  // paso 2 (dirección) para que no tenga que volver a escribirlo.
+  useEffect(() => {
+    const raw = localStorage.getItem(LANDING_PREFILL_KEY);
+    if (!raw) return;
+    localStorage.removeItem(LANDING_PREFILL_KEY);
+    try {
+      const prefill = JSON.parse(raw);
+      setData((prev) => ({ ...prev, ...prefill }));
+      setStepIndex(1);
+    } catch {}
   }, []);
 
   const update = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
