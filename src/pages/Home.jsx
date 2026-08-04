@@ -776,7 +776,7 @@ export default function Home() {
             style={{ borderRadius: '42% 58% 35% 65% / 45% 55% 45% 55%' }}
           />
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-9 sm:py-16">
           <div className="grid md:grid-cols-3 gap-8 md:gap-10 items-center">
             <div className="md:col-span-2 text-center md:text-left">
               {/* Badge, párrafo y checklist: solo desktop. En móvil la sección se
