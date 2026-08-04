@@ -410,6 +410,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Por qué BuscoUnDoctor: mensaje único y directo sobre precio, justo
+          arriba de aseguradoras.
+          Móvil: banner compacto y llamativo (tarjeta de color, una línea).
+          Desktop: bloque centrado original, sin cambios. */}
+      <section className="sm:bg-brand-blueLight/60">
+        {/* Móvil */}
+        <div className="sm:hidden px-4 py-6">
+          <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl px-4 py-3.5 shadow-lg shadow-emerald-500/25">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-heading font-extrabold text-sm text-white leading-tight">Sin sobreprecio por agendar aquí</p>
+              <p className="text-xs text-white/90 leading-snug mt-0.5">Pagas igual que yendo directo con el médico.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop */}
+        <div className="hidden sm:block max-w-2xl mx-auto px-6 py-12 text-center">
+          <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
+            <CheckCircle className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
+          </div>
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
+            Sin sobreprecio por agendar aquí
+          </h2>
+          <p className="text-muted-foreground mt-2 max-w-lg mx-auto">
+            Pagas exactamente lo mismo que si agendaras directo con el médico. BuscoUnDoctor no le suma ni un peso a tu consulta.
+          </p>
+        </div>
+      </section>
+
       {/* Aseguradoras en nuestro sistema */}
       {insurers.length > 0 && (
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
@@ -612,38 +645,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Por qué BuscoUnDoctor: mensaje único y directo sobre precio.
-          Móvil: banner compacto y llamativo (tarjeta de color, una línea).
-          Desktop: bloque centrado original, sin cambios. */}
-      <section className="sm:bg-brand-blueLight/60">
-        {/* Móvil */}
-        <div className="sm:hidden px-4 py-6">
-          <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl px-4 py-3.5 shadow-lg shadow-emerald-500/25">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-              <CheckCircle className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-heading font-extrabold text-sm text-white leading-tight">Sin sobreprecio por agendar aquí</p>
-              <p className="text-xs text-white/90 leading-snug mt-0.5">Pagas igual que yendo directo con el médico.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop */}
-        <div className="hidden sm:block max-w-2xl mx-auto px-6 py-12 text-center">
-          <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
-            <CheckCircle className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
-          </div>
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
-            Sin sobreprecio por agendar aquí
-          </h2>
-          <p className="text-muted-foreground mt-2 max-w-lg mx-auto">
-            Pagas exactamente lo mismo que si agendaras directo con el médico. BuscoUnDoctor no le suma ni un peso a tu consulta.
-          </p>
         </div>
       </section>
 
