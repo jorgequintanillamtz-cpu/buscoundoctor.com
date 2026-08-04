@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Check, Star, Award, Sparkles, Plus,
+  Star, Award, Sparkles, Plus, Gift, ShieldCheck,
   ArrowRight, BadgeCheck, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -238,19 +238,19 @@ export default function LandingMedicos() {
                 </span>
               </h1>
               {/* Subtítulo como bullets: lo importante que un médico necesita
-                  saber antes de registrarse, en vez de un párrafo largo. */}
+                  saber antes de registrarse. Cada uno con un ícono que hace
+                  referencia a su contenido, en vez de una paloma genérica. */}
               <ul className="mt-6 space-y-2.5 inline-block text-left">
                 {[
-                  "Gratis, sin tarjeta de crédito",
-                  "Tu perfil queda listo en menos de 5 minutos",
-                  "Cédula profesional verificada, le da confianza a tus pacientes",
-                  "Contacto directo por WhatsApp, sin intermediarios",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-base text-foreground font-medium">
-                    <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-emerald-600" />
+                  { icon: Gift, text: "Gratis, sin tarjeta de crédito" },
+                  { icon: ShieldCheck, text: "Cédula profesional verificada, le da confianza a tus pacientes" },
+                  { icon: MessageCircle, text: "Contacto directo por WhatsApp, sin intermediarios" },
+                ].map(({ icon: Icon, text }) => (
+                  <li key={text} className="flex items-center gap-3 text-base text-foreground font-medium">
+                    <span className="w-7 h-7 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-3.5 h-3.5 text-brand-blue" />
                     </span>
-                    {item}
+                    {text}
                   </li>
                 ))}
               </ul>
