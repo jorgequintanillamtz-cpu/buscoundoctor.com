@@ -451,7 +451,41 @@ export default function Home() {
             <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Nuestro equipo</p>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Especialistas destacados</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 sm:gap-x-6 gap-y-9 justify-items-center">
+          {/* Móvil: slider horizontal para no ocupar tanto espacio vertical */}
+          <div
+            className="sm:hidden flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {featured.slice(0, 6).map((s) =>
+            <Link
+              key={s.id}
+              to={`/especialista/${s.slug}`}
+              className="group flex flex-col items-center flex-shrink-0 w-28 snap-start"
+            >
+              <div className="w-28 h-28 rounded-xl bg-muted overflow-hidden flex-shrink-0">
+                {s.profile_photo ? (
+                  <img src={s.profile_photo} alt={s.full_name} className="w-full h-full object-cover object-top" />
+                ) : (
+                  <div className="w-full h-full bg-brand-bluePale flex items-center justify-center">
+                    <span className="font-heading font-bold text-2xl text-brand-blue/50">
+                      {s.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="pt-3 text-center">
+                <h3 className="font-heading font-bold text-sm text-foreground leading-tight">{s.full_name}</h3>
+                <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
+                {s.years_experience &&
+                <p className="text-muted-foreground text-[11px] mt-1">{s.years_experience}+ años</p>
+                }
+              </div>
+            </Link>
+            )}
+          </div>
+
+          {/* Tablet/desktop: grid como antes */}
+          <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-x-4 sm:gap-x-6 gap-y-9 justify-items-center">
             {featured.slice(0, 6).map((s) =>
             <Link
               key={s.id}
