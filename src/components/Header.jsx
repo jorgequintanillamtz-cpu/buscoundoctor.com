@@ -20,6 +20,9 @@ const slugify = (s) => (s || "")
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  // Barra fija "¿Eres médico?": visible en todas las páginas, no interrumpe la
+  // navegación (no es un popup) y el usuario puede cerrarla si no le interesa.
+  const [showDoctorBanner, setShowDoctorBanner] = useState(true);
   const [zones, setZones] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
@@ -77,6 +80,24 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
+      {showDoctorBanner && (
+        <Link
+          to="/registro-medico"
+          className="relative flex items-center justify-center gap-1.5 bg-brand-navy text-white text-xs sm:text-sm font-medium py-2 px-9 sm:px-10 hover:bg-brand-navy/90 transition-colors"
+        >
+          <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale flex-shrink-0" />
+          <span>¿Eres médico? Regístrate aquí</span>
+          <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowDoctorBanner(false); }}
+            aria-label="Cerrar aviso"
+            className="absolute right-2 sm:right-4 p-1 rounded-full hover:bg-white/15 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </Link>
+      )}
       <div className="bg-brand-blueLight w-full px-4 sm:px-6 pb-3 lg:pb-0">
         <div className="flex items-center justify-between h-20 gap-4">
           <Logo to="/" className="h-[47px] sm:h-[52px]" />
