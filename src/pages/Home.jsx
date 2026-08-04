@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, MessageCircle, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, CheckCircle, X } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 const COMPARISON_ROWS = [
   { us: "Cédula profesional verificada", them: "Confías sin comprobar nada" },
