@@ -105,7 +105,6 @@ export default function LandingMedicos() {
   const [specialties, setSpecialties] = useState([]);
   const [step1, setStep1] = useState({
     title: "", full_name: "", whatsapp: "", specialty: "", subspecialty: "",
-    cedula: "", years_experience: "", service_price: "", modality: "presencial",
   });
   const [step1Error, setStep1Error] = useState("");
 
@@ -122,8 +121,6 @@ export default function LandingMedicos() {
     if (!step1.full_name.trim()) return "Escribe tu nombre completo";
     if (step1.whatsapp.replace(/\D/g, "").length < 10) return "Ingresa un número de WhatsApp válido (10 dígitos)";
     if (!step1.specialty.trim()) return "Selecciona o escribe tu especialidad";
-    if (!step1.cedula.trim()) return "Ingresa tu número de cédula profesional";
-    if (!step1.service_price || Number(step1.service_price) <= 0) return "Ingresa el precio de tu consulta de primera vez";
     return "";
   };
 
@@ -327,7 +324,7 @@ export default function LandingMedicos() {
             <h2 id="paso1-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
               Empieza tu registro ahora mismo
             </h2>
-            <p className="text-muted-foreground mt-2">Cuéntanos sobre ti. Toma menos de un minuto.</p>
+            <p className="text-muted-foreground mt-2">Cuéntanos lo básico. Toma 20 segundos.</p>
           </div>
 
           <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm">
@@ -367,42 +364,14 @@ export default function LandingMedicos() {
                   <Input value={step1.specialty.trim()} onChange={(e) => updateStep1("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl" />
                 )}
               </div>
-
-              <div className="sm:col-span-2">
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Cédula profesional</label>
-                <Input value={step1.cedula} onChange={(e) => updateStep1("cedula", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 12345678" inputMode="numeric" className="rounded-xl" />
-                <p className="text-xs text-muted-foreground mt-1">La verificamos manualmente antes de publicar tu perfil.</p>
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Años de experiencia (opcional)</label>
-                <Input value={step1.years_experience} onChange={(e) => updateStep1("years_experience", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 8" inputMode="numeric" className="rounded-xl" />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta (MXN)</label>
-                <Input value={step1.service_price} onChange={(e) => updateStep1("service_price", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 800" inputMode="decimal" className="rounded-xl" />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">¿Cómo atiendes?</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
-                    <button key={val} type="button" onClick={() => updateStep1("modality", val)}
-                      className={`h-11 rounded-xl border text-xs font-semibold transition-colors ${step1.modality === val ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {step1Error && <p className="text-sm text-red-500 text-center mt-5">{step1Error}</p>}
 
             <Button type="button" onClick={handleContinueStep1} className="w-full min-h-[48px] rounded-xl gap-1.5 mt-6 bg-brand-blue hover:bg-brand-blue/90 text-white">
-              Continuar <ArrowRight className="w-4 h-4" />
+              Siguiente <ArrowRight className="w-4 h-4" />
             </Button>
-            <p className="text-xs text-muted-foreground text-center mt-3">Faltan 3 pasos más: dirección, fotos y crear tu cuenta.</p>
+            <p className="text-xs text-muted-foreground text-center mt-3">Sigues llenando el resto (cédula, precio, dirección...) en la siguiente pantalla.</p>
           </div>
         </section>
 
