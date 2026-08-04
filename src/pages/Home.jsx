@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, CheckCircle, X } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, CheckCircle, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
@@ -770,28 +770,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA: banner navy de ancho completo */}
+      {/* CTA: banner navy de ancho completo, rediseñado para vender mejor el
+          registro al doctor — badge, checklist de beneficios concretos, prueba
+          social real (número de especialistas ya inscritos) y CTA más fuerte,
+          con el mismo lenguaje ya validado en /para-medicos. */}
       <section className="relative bg-brand-navy overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
             className="absolute -bottom-16 -right-10 w-[280px] h-[280px] bg-brand-blue/20"
             style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
           />
+          <div
+            className="absolute -top-16 -left-10 w-[200px] h-[200px] bg-brand-blue/10"
+            style={{ borderRadius: '42% 58% 35% 65% / 45% 55% 45% 55%' }}
+          />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-          <div className="grid md:grid-cols-3 gap-8 items-center">
+          <div className="grid md:grid-cols-3 gap-8 md:gap-10 items-center">
             <div className="md:col-span-2 text-center md:text-left">
-              <h2 className="font-heading font-bold text-2xl sm:text-3xl text-white">
-                Únete como especialista y llega a más pacientes
+              <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+                <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale" />
+                Para especialistas de la salud
+              </span>
+              <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-white leading-tight">
+                Que los pacientes que buscan tu especialidad te encuentren a ti primero
               </h2>
               <p className="text-white/80 mt-3 max-w-lg mx-auto md:mx-0">
-                Crea tu perfil verificado en minutos, sin costo, y deja que los pacientes te contacten directamente por WhatsApp.
+                {totalSpecialists > 0
+                  ? `Únete a los ${totalSpecialists} especialistas que ya tienen su perfil verificado en BuscoUnDoctor.`
+                  : "Crea tu perfil verificado y aparece cuando un paciente busque tu especialidad."}
               </p>
-              <Button size="lg" variant="secondary" className="mt-6 min-h-[44px] font-heading font-semibold bg-white text-brand-navy hover:bg-white/90" asChild>
-                <Link to="/registro-medico">
-                  Registrarme como especialista
-                </Link>
-              </Button>
+
+              <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2.5 justify-center md:justify-start">
+                {["Perfil verificado gratis", "Contacto directo por WhatsApp", "Apareces en Google"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-white/90 font-medium">
+                    <span className="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-emerald-400" />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-7">
+                <Button size="lg" variant="secondary" className="min-h-[48px] font-heading font-semibold bg-white text-brand-navy hover:bg-white/90 gap-2" asChild>
+                  <Link to="/registro-medico">
+                    Crear mi perfil gratis
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+                <p className="text-xs text-white/60 mt-3">Empieza gratis · Sin tarjeta de crédito · Actívalo en 5 minutos</p>
+              </div>
             </div>
             <div className="hidden md:flex justify-center">
               <div className="w-28 h-28 rounded-full bg-brand-blue/20 flex items-center justify-center">
