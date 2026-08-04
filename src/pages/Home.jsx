@@ -8,15 +8,18 @@ import SearchableSelect from "../components/SearchableSelect";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
 
+// `mobile: true` marca las 5 filas más importantes, que son las únicas que
+// se muestran en el slider/tabla recortada de móvil (el resto solo aparece
+// en la comparativa completa de escritorio).
 const COMPARISON_ROWS = [
-  { us: "Cédula profesional verificada", them: "Confías sin comprobar nada" },
-  { us: "Varios especialistas para comparar", them: "Normalmente solo 1 o 2 nombres" },
+  { us: "Cédula profesional verificada", them: "Confías sin comprobar nada", mobile: true },
+  { us: "Varios especialistas para comparar", them: "Normalmente solo 1 o 2 nombres", mobile: true },
   { us: "Experiencia, precios y horarios en un lugar", them: "Depende de lo que recuerden" },
-  { us: "Reseñas de varios pacientes reales", them: "La opinión de una sola persona" },
+  { us: "Reseñas de varios pacientes reales", them: "La opinión de una sola persona", mobile: true },
   { us: "Encuentras opciones en minutos", them: "Esperas días a que te recomienden" },
-  { us: "Precio visible antes de agendar", them: "No lo sabes hasta llegar" },
+  { us: "Precio visible antes de agendar", them: "No lo sabes hasta llegar", mobile: true },
   { us: "Filtras por tu zona exacta", them: "Puede estar lejos sin saberlo" },
-  { us: "Contacto directo por WhatsApp", them: "Depende de que te compartan el contacto" },
+  { us: "Contacto directo por WhatsApp", them: "Depende de que te compartan el contacto", mobile: true },
   { us: "Perfil actualizado por el médico", them: "Información desactualizada" },
   { us: "Filtras por tu necesidad específica", them: "La recomendación era para alguien más" },
 ];
