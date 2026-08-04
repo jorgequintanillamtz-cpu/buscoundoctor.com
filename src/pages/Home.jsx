@@ -779,9 +779,10 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-9 sm:py-16">
           <div className="grid md:grid-cols-3 gap-8 md:gap-10 items-center">
             <div className="md:col-span-2 text-center md:text-left">
-              {/* Badge, párrafo y checklist: solo desktop. En móvil la sección se
-                  reduce a título + botón para ir directo al call to action. */}
-              <span className="hidden sm:inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              {/* Badge "Para especialistas de la salud": visible también en móvil,
+                  para que quede claro que esta sección es para los médicos y no
+                  para los pacientes. El párrafo y el checklist siguen solo en desktop. */}
+              <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale" />
                 Para especialistas de la salud
               </span>
