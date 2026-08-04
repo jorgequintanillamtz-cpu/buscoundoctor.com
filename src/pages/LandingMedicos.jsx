@@ -52,14 +52,14 @@ const TESTIMONIALS = [
   { name: "Dra. Ejemplo Salas", specialty: "Pediatra", city: "Monterrey", quote: "Los pacientes llegan ya conociendo mi experiencia y las opiniones de otros papás." },
 ];
 
+// Refleja los planes reales configurados en /planes (entidad Plan): Gratis
+// ($0, incluye hasta 3 cotizaciones y lo básico del directorio) y Premium
+// ($999 MXN/mes o $10,989 MXN/año, con perfil destacado, galería, reseñas
+// verificadas y estadísticas). Actualizar este texto si cambian los planes.
 const FAQS = [
-  { q: "¿Tiene costo crear mi perfil?", a: "Crear tu perfil básico no tiene costo: quedas en el directorio, con tu especialidad, zona y contacto por WhatsApp. Si más adelante quieres funciones adicionales (perfil destacado, galería, estadísticas), existe un plan Premium opcional — tú decides si lo usas." },
+  { q: "¿Cuánto cuesta y qué planes tienen?", a: "Tenemos dos planes. El Gratis no tiene costo: quedas en el directorio con tu especialidad, zona, contacto por WhatsApp y hasta 3 cotizaciones. El Premium cuesta $999 MXN al mes (o $10,989 MXN al año) e incluye perfil destacado en búsquedas, galería de fotos y video, reseñas verificadas, estadísticas de visitas y contactos, múltiples consultorios y soporte prioritario. Puedes ver el detalle completo en la página de planes y precios." },
   { q: "¿Cuánto tarda el registro?", a: "Entre 3 y 5 minutos. Tu perfil queda visible de inmediato; puedes seguir completando fotos y horarios después." },
   { q: "¿Cómo verifican mi cédula profesional?", a: "Revisamos manualmente tu número de cédula contra los registros oficiales antes de marcar tu perfil como verificado." },
-  { q: "¿Qué especialidades aceptan?", a: "Prácticamente todas: cardiología, ginecología, dermatología, pediatría, ortopedia, psiquiatría y más." },
-  { q: "¿Necesito tener página web propia?", a: "No. Tu perfil en BuscoUnDoctor es tu presencia digital, sin hosting ni conocimientos técnicos." },
-  { q: "¿Voy a aparecer en Google?", a: "Sí, cada perfil está optimizado para aparecer cuando alguien busca tu especialidad en tu ciudad." },
-  { q: "¿Puedo cancelar cuando quiera?", a: "Sí, sin preguntas ni penalizaciones, desde tu panel en cualquier momento." },
 ];
 
 function CtaButton({ children = "Registrar mi perfil gratis", size = "lg", className = "" }) {
