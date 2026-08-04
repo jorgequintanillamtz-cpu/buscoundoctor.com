@@ -308,7 +308,9 @@ export default function Home() {
       {/* Tarjeta blanca de búsqueda, superpuesta al borde entre el hero y la siguiente sección */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 -mt-3 sm:-mt-16 mb-10 sm:mb-14">
           <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
-            <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
+            {/* En móvil se omite este encabezado: el título y subtítulo del hero ya
+                cumplen ese rol, y la tarjeta queda como "caja de buscar" pura. */}
+            <h2 className="hidden sm:block font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
@@ -345,7 +347,9 @@ export default function Home() {
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 mt-4">
+            {/* Pills de especialidades populares: solo desktop, para que el buscador
+                móvil quede limpio (título + subtítulo + buscador, sin más). */}
+            <div className="hidden sm:flex flex-wrap items-center gap-2 mt-4">
               {sortByPopularity(specialties).slice(0, 5).map((s) => (
                 <Link
                   key={s.id}
