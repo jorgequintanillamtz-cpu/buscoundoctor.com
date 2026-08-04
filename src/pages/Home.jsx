@@ -299,7 +299,7 @@ export default function Home() {
         {/* Tarjeta blanca de búsqueda: vive DENTRO del hero azul (no superpuesta
             al borde), con azul visible arriba y abajo de ella — el azul se
             extiende (pb-24/pb-40 arriba) para dejarle espacio antes de la curva. */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 mt-5 sm:mt-8">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 mt-2 sm:mt-4">
           <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
             {/* En móvil se omite este encabezado: el título y subtítulo del hero ya
                 cumplen ese rol, y la tarjeta queda como "caja de buscar" pura. */}
