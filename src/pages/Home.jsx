@@ -779,20 +779,22 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <div className="grid md:grid-cols-3 gap-8 md:gap-10 items-center">
             <div className="md:col-span-2 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              {/* Badge, párrafo y checklist: solo desktop. En móvil la sección se
+                  reduce a título + botón para ir directo al call to action. */}
+              <span className="hidden sm:inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                 <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale" />
                 Para especialistas de la salud
               </span>
               <h2 className="font-heading font-extrabold text-2xl sm:text-3xl lg:text-4xl text-white leading-tight">
                 Que los pacientes que buscan tu especialidad te encuentren a ti primero
               </h2>
-              <p className="text-white/80 mt-3 max-w-lg mx-auto md:mx-0">
+              <p className="hidden sm:block text-white/80 mt-3 max-w-lg mx-auto md:mx-0">
                 {totalSpecialists > 0
                   ? `Únete a los ${totalSpecialists} especialistas que ya tienen su perfil verificado en BuscoUnDoctor.`
                   : "Crea tu perfil verificado y aparece cuando un paciente busque tu especialidad."}
               </p>
 
-              <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2.5 justify-center md:justify-start">
+              <ul className="hidden sm:flex mt-5 flex-wrap gap-x-5 gap-y-2.5 justify-center md:justify-start">
                 {["Perfil verificado gratis", "Contacto directo por WhatsApp", "Apareces en Google"].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-white/90 font-medium">
                     <span className="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center flex-shrink-0">
@@ -803,7 +805,7 @@ export default function Home() {
                 ))}
               </ul>
 
-              <div className="mt-7">
+              <div className="mt-5 sm:mt-7">
                 <Button size="lg" variant="secondary" className="min-h-[48px] font-heading font-semibold bg-white text-brand-navy hover:bg-white/90 gap-2" asChild>
                   <Link to="/registro-medico">
                     Crear mi perfil gratis
