@@ -84,10 +84,14 @@ export default function Footer() {
             que Google descubriera y listara la URL de todos modos (indexada
             aunque bloqueada), solo generando ruido en el índice. El acceso
             admin no depende de tener un link visible aquí. */}
-        <div className="border-t border-white/10 mt-10 pt-6 flex items-center justify-center">
+        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
           <p className="text-xs text-white/50">
             © {new Date().getFullYear()} buscoundoctor.com — Todos los derechos reservados
           </p>
+          <div className="flex items-center gap-4">
+            <Link to="/aviso-de-privacidad" className="text-xs text-white/50 hover:text-white/80 transition-colors">Aviso de privacidad</Link>
+            <Link to="/terminos-y-condiciones" className="text-xs text-white/50 hover:text-white/80 transition-colors">Términos y condiciones</Link>
+          </div>
         </div>
       </div>
     </footer>
