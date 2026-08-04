@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Star, Award, Sparkles, Plus,
+  Check, Star, Award, Sparkles, Plus,
   ArrowRight, BadgeCheck, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -237,9 +237,23 @@ export default function LandingMedicos() {
                   ChatGPT
                 </span>
               </h1>
-              <p className="text-lg text-muted-foreground mt-5 leading-relaxed">
-                Crea tu perfil en el directorio médico de México y aparece en Google cuando alguien busque un especialista como tú. Empieza gratis, en menos de 5 minutos.
-              </p>
+              {/* Subtítulo como bullets: lo importante que un médico necesita
+                  saber antes de registrarse, en vez de un párrafo largo. */}
+              <ul className="mt-6 space-y-2.5 inline-block text-left">
+                {[
+                  "Gratis, sin tarjeta de crédito",
+                  "Tu perfil queda listo en menos de 5 minutos",
+                  "Cédula profesional verificada, le da confianza a tus pacientes",
+                  "Contacto directo por WhatsApp, sin intermediarios",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-base text-foreground font-medium">
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             {/* Mockup de producto: perfil de ejemplo completo, mismo estilo
