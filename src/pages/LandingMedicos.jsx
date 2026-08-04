@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Star, Award, Sparkles, Plus,
-  ArrowRight,
+  ArrowRight, BadgeCheck, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,9 @@ function addJsonLd(id, data) {
 }
 
 const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
+// Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar
+// cómo se ve un perfil; el perfil completo es ficticio.
+const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
 
 const TESTIMONIALS = [
   { name: "Dra. Ejemplo Ramírez", specialty: "Dermatóloga", city: "Monterrey", quote: "Recibo mensajes de pacientes que ya saben qué necesitan y llegan listos para agendar." },
@@ -207,16 +210,71 @@ export default function LandingMedicos() {
               style={{ borderRadius: '42% 58% 35% 65% / 45% 55% 45% 55%' }}
             />
           </div>
-          {/* Hero reducido a título + subtítulo: sin badge, checklist, botón ni
-              mockup. La conversión real pasa en el formulario del Paso 1, justo
-              abajo -- aquí solo se busca que entienda la propuesta en 2 líneas. */}
-          <div className="relative max-w-2xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-10 text-center">
-            <h1 id="hero-heading" className="font-heading font-extrabold text-4xl sm:text-5xl leading-[1.1] text-foreground tracking-tight">
-              Que los pacientes que buscan tu especialidad, te encuentren primero a ti
-            </h1>
-            <p className="text-lg text-muted-foreground mt-5 leading-relaxed">
-              Crea tu perfil en el directorio médico de México y aparece en Google cuando alguien busque un especialista como tú. Empieza gratis, en menos de 5 minutos.
-            </p>
+          {/* Título + subtítulo a la izquierda (sin badge, checklist ni botón --
+              la conversión real pasa en el Paso 1 justo abajo) y, al lado, un
+              perfil de ejemplo lo más completo posible: foto, nombre,
+              especialidad, sello de verificado, calificación, reseña, precio
+              y botón de contacto -- tal como se ve un perfil real en el sitio. */}
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-12">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <h1 id="hero-heading" className="font-heading font-extrabold text-4xl sm:text-5xl leading-[1.1] text-foreground tracking-tight">
+                Que los pacientes que buscan tu especialidad, te encuentren primero a ti
+              </h1>
+              <p className="text-lg text-muted-foreground mt-5 leading-relaxed">
+                Crea tu perfil en el directorio médico de México y aparece en Google cuando alguien busque un especialista como tú. Empieza gratis, en menos de 5 minutos.
+              </p>
+            </div>
+
+            {/* Mockup de producto: perfil de ejemplo completo, mismo estilo
+                visual que el perfil público real (sello "Verificado",
+                calificación, reseña, precio y botón de contacto). */}
+            <div className="relative">
+              <span className="absolute -top-3 -left-3 z-10 bg-foreground text-background text-[10px] font-bold tracking-wide uppercase px-3 py-1 rounded-full shadow">
+                Ejemplo de perfil
+              </span>
+              <div className="bg-card border border-border/50 rounded-3xl shadow-2xl p-6 max-w-sm mx-auto" aria-hidden="true">
+                <div className="flex items-start gap-3 pb-4 border-b border-border/50">
+                  <img
+                    src={EXAMPLE_DOCTOR_PHOTO}
+                    alt=""
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-white shadow flex-shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-heading font-bold text-foreground truncate">Dr. Alejandro Mendoza</p>
+                    <p className="text-sm text-muted-foreground truncate">Cardiólogo · Monterrey, N.L.</p>
+                    <span className="inline-flex items-center gap-1.5 pl-2 pr-3 py-1 mt-1.5 rounded-full bg-brand-blue text-white font-heading font-bold text-[10px] tracking-tight shadow-sm">
+                      <BadgeCheck className="w-3 h-3" strokeWidth={2.5} /> Verificado
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-b border-border/50">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                    <span className="text-xs font-semibold text-foreground ml-1">4.9</span>
+                  </div>
+                  <span className="text-xs font-semibold text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                    32 opiniones
+                  </span>
+                </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed py-3 border-b border-border/50">
+                  “Excelente atención, muy profesional y explica todo con calma.” — paciente real
+                </p>
+
+                <div className="flex items-center justify-between py-3 border-b border-border/50">
+                  <span className="text-sm text-foreground font-medium">Consulta de primera vez</span>
+                  <span className="text-sm font-bold text-brand-navy">$800 MXN</span>
+                </div>
+
+                <Button className="w-full rounded-xl mt-4 bg-green-600 hover:bg-green-700 gap-2" tabIndex={-1}>
+                  <MessageCircle className="w-4 h-4" /> Consultar horarios
+                </Button>
+              </div>
+              <p className="text-center text-xs text-muted-foreground mt-3">Así se ve un perfil completo en BuscoUnDoctor</p>
+            </div>
+          </div>
           </div>
         </section>
 
