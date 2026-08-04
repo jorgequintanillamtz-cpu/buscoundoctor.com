@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
+import Logo from "../components/Logo";
 
 // `mobile: true` marca las 5 filas más importantes, que son las únicas que
 // se muestran en el slider/tabla recortada de móvil (el resto solo aparece
