@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Check, X, ShieldCheck, Users, Clock, Search, MessageCircle,
+  Check, ShieldCheck, Users, Search, MessageCircle,
   Star, TrendingUp, Award, Sparkles, Plus,
   ArrowRight, MapPin, BadgeCheck,
 } from "lucide-react";
@@ -46,24 +46,6 @@ const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba446723
 // Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar
 // cómo se ve un perfil; el perfil completo es ficticio.
 const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
-
-// Beneficios como lista dividida (sin tarjetas/cuadros).
-const BENEFITS = [
-  { icon: TrendingUp, color: "blue", title: "Más pacientes nuevos, cada mes", desc: "Apareces justo cuando alguien en tu ciudad busca un especialista como tú, todos los días." },
-  { icon: ShieldCheck, color: "emerald", title: "Más confianza", desc: "La cédula verificada dice que eres quien dices ser." },
-  { icon: Star, color: "amber", title: "Mejor reputación", desc: "Las opiniones de tus pacientes trabajan por ti." },
-  { icon: Search, color: "violet", title: "Optimizado para Google", desc: "Sin que tú hagas nada de SEO." },
-  { icon: MessageCircle, color: "cyan", title: "Contacto directo", desc: "Te escriben por WhatsApp, sin intermediarios." },
-  { icon: Users, color: "rose", title: "Hecho para especialistas", desc: "Pensado para médicos, no es un directorio genérico." },
-];
-const COLOR_MAP = {
-  blue: "bg-brand-bluePale text-brand-blue",
-  emerald: "bg-emerald-50 text-emerald-600",
-  amber: "bg-amber-50 text-amber-600",
-  violet: "bg-violet-50 text-violet-600",
-  cyan: "bg-cyan-50 text-cyan-600",
-  rose: "bg-rose-50 text-rose-600",
-};
 
 const TESTIMONIALS = [
   { name: "Dra. Ejemplo Ramírez", specialty: "Dermatóloga", city: "Monterrey", quote: "Recibo mensajes de pacientes que ya saben qué necesitan y llegan listos para agendar." },
