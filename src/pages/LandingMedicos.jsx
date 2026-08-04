@@ -191,7 +191,7 @@ export default function LandingMedicos() {
       {/* Header mínimo: solo logo + un único CTA. */}
       <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Logo to="/" className="h-9" />
+          <Logo to="/" className="h-[47px] sm:h-[52px]" />
           <CtaButton size="sm">Registrar mi perfil</CtaButton>
         </div>
       </header>
