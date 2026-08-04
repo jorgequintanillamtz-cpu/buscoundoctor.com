@@ -211,86 +211,16 @@ export default function LandingMedicos() {
               style={{ borderRadius: '42% 58% 35% 65% / 45% 55% 45% 55%' }}
             />
           </div>
-          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-12">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-5">
-                Directorio médico de México
-              </span>
-              <h1 id="hero-heading" className="font-heading font-extrabold text-4xl sm:text-5xl leading-[1.1] text-foreground tracking-tight">
-                Que los pacientes que buscan tu especialidad, te encuentren primero a ti
-              </h1>
-              <p className="text-lg text-muted-foreground mt-5 leading-relaxed">
-                Crea tu perfil en el directorio médico de México y aparece en Google cuando alguien busque un especialista como tú. Empieza gratis, en menos de 5 minutos.
-              </p>
-
-              <ul className="mt-7 space-y-3">
-                {[
-                  "Perfil optimizado para Google",
-                  "Contacto directo por WhatsApp",
-                  "Cédula profesional verificada",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-sm sm:text-base text-foreground font-medium">
-                    <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-emerald-600" />
-                    </span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-8">
-                <CtaButton className="w-full sm:w-auto h-14 px-8 text-base">Registrar mi perfil gratis</CtaButton>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Empieza gratis · Sin tarjeta de crédito · Actívalo en 5 minutos
-                </p>
-              </div>
-            </div>
-
-            {/* Mockup de producto: perfil de ejemplo, mejor presentado */}
-            <div className="relative">
-              <span className="absolute -top-3 -left-3 z-10 bg-foreground text-background text-[10px] font-bold tracking-wide uppercase px-3 py-1 rounded-full shadow">
-                Ejemplo de perfil
-              </span>
-              <div className="bg-card border border-border/50 rounded-3xl shadow-2xl p-6 max-w-sm mx-auto" aria-hidden="true">
-                <div className="flex items-center gap-3 pb-4 border-b border-border/50">
-                  <div className="relative flex-shrink-0">
-                    <img
-                      src={EXAMPLE_DOCTOR_PHOTO}
-                      alt=""
-                      className="w-16 h-16 rounded-full object-cover ring-2 ring-white shadow"
-                    />
-                    <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-card flex items-center justify-center">
-                      <BadgeCheck className="w-3.5 h-3.5 text-white" />
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-heading font-bold text-foreground truncate">Dr. Alejandro Mendoza</p>
-                    <p className="text-sm text-muted-foreground truncate">Cardiólogo · Monterrey, N.L.</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-amber-400" fill="currentColor" />)}
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-                    12 años de experiencia
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground py-1">
-                  <MapPin className="w-4 h-4 flex-shrink-0" /> San Pedro Garza García
-                </div>
-                <div className="flex items-center gap-2 text-sm font-medium py-1">
-                  <ShieldCheck className="w-4 h-4 flex-shrink-0 text-emerald-600" />
-                  <span className="text-emerald-700">Cédula profesional verificada</span>
-                </div>
-                <Button className="w-full rounded-xl mt-4 bg-emerald-600 hover:bg-emerald-600/90 gap-2" tabIndex={-1}>
-                  <MessageCircle className="w-4 h-4" /> Contactar por WhatsApp
-                </Button>
-              </div>
-              <p className="text-center text-xs text-muted-foreground mt-3">Así se ve un perfil en BuscoUnDoctor</p>
-            </div>
-          </div>
+          {/* Hero reducido a título + subtítulo: sin badge, checklist, botón ni
+              mockup. La conversión real pasa en el formulario del Paso 1, justo
+              abajo -- aquí solo se busca que entienda la propuesta en 2 líneas. */}
+          <div className="relative max-w-2xl mx-auto px-4 sm:px-6 pt-14 sm:pt-20 pb-10 text-center">
+            <h1 id="hero-heading" className="font-heading font-extrabold text-4xl sm:text-5xl leading-[1.1] text-foreground tracking-tight">
+              Que los pacientes que buscan tu especialidad, te encuentren primero a ti
+            </h1>
+            <p className="text-lg text-muted-foreground mt-5 leading-relaxed">
+              Crea tu perfil en el directorio médico de México y aparece en Google cuando alguien busque un especialista como tú. Empieza gratis, en menos de 5 minutos.
+            </p>
           </div>
         </section>
 
