@@ -214,7 +214,7 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden pb-16 sm:pb-28">
+      <section className="relative bg-brand-navy overflow-hidden pb-10 sm:pb-28">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -231,11 +231,13 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             {/* Left: título + iconos de confianza */}
             <div className="text-left">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-3 sm:mb-5">
+              {/* Badge de ubicación: oculto en móvil para dejar el hero reducido a
+                  título + subtítulo + buscador, como la referencia de Doctoralia. */}
+              <div className="hidden sm:inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-3 sm:mb-5">
                 <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
                 <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
               </div>
-              <h1 className="font-heading font-extrabold text-2xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-4 sm:mb-8">
+              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-2.5 sm:mb-8">
                 <span className="text-white block">
                   Encuentra a tu especialista
                 </span>
@@ -244,8 +246,17 @@ export default function Home() {
                 </span>
               </h1>
 
-              {/* Iconos de confianza, estilo referencia */}
-              <div className="grid grid-cols-3 gap-x-3 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-6">
+              {/* Subtítulo: solo en móvil, reemplaza la fila de iconos de confianza
+                  para que el hero móvil quede en título + subtítulo + buscador. */}
+              <p className="sm:hidden text-white/80 text-sm leading-relaxed mb-5">
+                {totalSpecialists > 0
+                  ? `${totalSpecialists} especialistas verificados están aquí para ayudarte.`
+                  : "Especialistas verificados están aquí para ayudarte."}
+              </p>
+
+              {/* Iconos de confianza, estilo referencia: solo desktop, en móvil se
+                  reemplazan por el subtítulo de arriba para simplificar el hero. */}
+              <div className="hidden sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-6">
                 {TRUST_STRIP.map((item) => (
                   <div key={item.key} className="flex flex-col items-start gap-1.5 sm:gap-2 max-w-none sm:max-w-[160px]">
                     {item.key === "resenas" ? (
