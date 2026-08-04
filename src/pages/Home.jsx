@@ -526,8 +526,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonios sobre la plataforma (ejemplos ilustrativos hasta tener citas reales) */}
-      <section className="relative bg-white">
+      {/* Testimonios sobre la plataforma (ejemplos ilustrativos hasta tener citas reales).
+          Oculta por completo en móvil para no alargar la página; queda solo en desktop. */}
+      <section className="hidden sm:block relative bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="text-center mb-6">
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Qué dicen de BuscoUnDoctor?</h2>
@@ -667,27 +668,47 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Filas de comparación, una junto a la otra */}
+            {/* Filas de comparación, una junto a la otra. En móvil solo las 5 más
+                importantes (row.mobile), con una nota de que hay más; en
+                desktop se muestran las 10. */}
             <div className="rounded-b-3xl overflow-hidden">
-              {COMPARISON_ROWS.map((row, i) => (
-                <div key={i} className={`grid grid-cols-2 ${i % 2 === 1 ? "bg-brand-blueLight/40" : "bg-white"}`}>
-                  <div className="flex items-start gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-3 sm:py-3.5 border-r border-border/40">
-                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-[11px] sm:text-sm text-foreground leading-snug">{row.us}</span>
+              {COMPARISON_ROWS.filter((row) => row.mobile).map((row, i) => (
+                <div key={i} className={`sm:hidden grid grid-cols-2 ${i % 2 === 1 ? "bg-brand-blueLight/40" : "bg-white"}`}>
+                  <div className="flex items-start gap-1.5 px-3 py-3 border-r border-border/40">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] text-foreground leading-snug">{row.us}</span>
                   </div>
-                  <div className="flex items-start gap-1.5 sm:gap-2.5 px-3 sm:px-8 py-3 sm:py-3.5">
-                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground/60 flex-shrink-0 mt-0.5" />
-                    <span className="text-[11px] sm:text-sm text-muted-foreground leading-snug">{row.them}</span>
+                  <div className="flex items-start gap-1.5 px-3 py-3">
+                    <X className="w-3.5 h-3.5 text-muted-foreground/60 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] text-muted-foreground leading-snug">{row.them}</span>
+                  </div>
+                </div>
+              ))}
+              {COMPARISON_ROWS.map((row, i) => (
+                <div key={i} className={`hidden sm:grid grid-cols-2 ${i % 2 === 1 ? "bg-brand-blueLight/40" : "bg-white"}`}>
+                  <div className="flex items-start gap-2.5 px-8 py-3.5 border-r border-border/40">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground leading-snug">{row.us}</span>
+                  </div>
+                  <div className="flex items-start gap-2.5 px-8 py-3.5">
+                    <X className="w-4 h-4 text-muted-foreground/60 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground leading-snug">{row.them}</span>
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Nota en móvil: deja claro que hay más diferencias además de las 5 mostradas */}
+            <p className="sm:hidden text-center text-xs text-muted-foreground px-4 py-3 border-t border-border/40">
+              Y muchas diferencias más a favor de BuscoUnDoctor.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Preguntas frecuentes */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+      {/* Preguntas frecuentes: oculta por completo en móvil para no alargar la
+          página; sigue disponible en /preguntas-frecuentes y en desktop. */}
+      <section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
         <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-14">
           <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
           <div className="relative grid md:grid-cols-2 gap-10 lg:gap-16">
