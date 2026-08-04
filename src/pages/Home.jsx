@@ -410,25 +410,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por qué BuscoUnDoctor: mensaje único y directo sobre precio, justo
-          arriba de aseguradoras.
-          Móvil: banner compacto y llamativo (tarjeta de color, una línea).
-          Desktop: bloque centrado original, sin cambios. */}
+      {/* Por qué BuscoUnDoctor: mensaje único y directo sobre precio.
+          Solo desktop aquí — en móvil esta sección va más abajo (después de
+          Especialistas destacados) y de forma más discreta, ver más abajo. */}
       <section className="sm:bg-brand-blueLight/60">
-        {/* Móvil */}
-        <div className="sm:hidden px-4 py-6">
-          <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl px-4 py-3.5 shadow-lg shadow-emerald-500/25">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-              <CheckCircle className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-heading font-extrabold text-sm text-white leading-tight">Sin sobreprecio por agendar aquí</p>
-              <p className="text-xs text-white/90 leading-snug mt-0.5">Pagas igual que yendo directo con el médico.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop */}
         <div className="hidden sm:block max-w-2xl mx-auto px-6 py-12 text-center">
           <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
             <CheckCircle className="w-4 h-4 text-emerald-600" />
@@ -558,6 +543,15 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* "Sin sobreprecio": versión móvil, movida aquí (debajo de Especialistas
+          destacados) y más discreta — línea de texto muted en vez de tarjeta
+          de color, para que no llame tanto la atención. Oculta en desktop,
+          que ya tiene su propio bloque más arriba. */}
+      <div className="sm:hidden flex items-center justify-center gap-1.5 px-4 py-3 text-center">
+        <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+        <p className="text-xs text-muted-foreground">Sin sobreprecio por agendar aquí — pagas igual que directo con el médico.</p>
+      </div>
 
       {/* Testimonios sobre la plataforma (ejemplos ilustrativos hasta tener citas reales).
           Oculta por completo en móvil para no alargar la página; queda solo en desktop. */}
