@@ -656,13 +656,12 @@ export default function Home() {
           <div className="relative bg-white rounded-3xl border border-border/60 shadow-xl">
             {/* Encabezados */}
             <div className="grid grid-cols-2 rounded-t-3xl overflow-hidden">
-              <div className="bg-brand-navy px-3 sm:px-8 py-5 sm:py-6 flex items-center gap-2 sm:gap-2.5">
-                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+              <div className="bg-brand-navy px-3 sm:px-8 py-5 sm:py-6 flex items-center justify-center sm:justify-start">
+                {/* Logo real en vez del ícono + texto "BuscoUnDoctor.com"; se envuelve
+                    en una placa blanca para que se lea bien sobre el fondo navy. */}
+                <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center">
+                  <Logo to="/" className="h-4 sm:h-5" />
                 </div>
-                <h3 className="font-heading font-bold text-xs sm:text-base text-white leading-tight">
-                  BuscoUnDoctor<span className="text-brand-bluePale">.com</span>
-                </h3>
               </div>
               <div className="bg-muted px-3 sm:px-8 py-5 sm:py-6 flex items-center gap-2 sm:gap-2.5">
                 <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-muted-foreground/20 flex items-center justify-center flex-shrink-0">
