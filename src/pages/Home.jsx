@@ -252,9 +252,7 @@ export default function Home() {
               {/* Subtítulo: solo en móvil, reemplaza la fila de iconos de confianza
                   para que el hero móvil quede en título + subtítulo + buscador. */}
               <p className="sm:hidden text-white/80 text-sm leading-relaxed mb-5">
-                {totalSpecialists > 0
-                  ? `${totalSpecialists} especialistas verificados están aquí para ayudarte.`
-                  : "Especialistas verificados están aquí para ayudarte."}
+                Cada médico, verificado a mano.
               </p>
 
               {/* Iconos de confianza, estilo referencia: solo desktop, en móvil se
@@ -611,8 +609,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Cómo verificamos a nuestros médicos: rápido de leer, directo a la confianza */}
-      <section>
+      {/* Cómo verificamos a nuestros médicos: rápido de leer, directo a la confianza.
+          Se oculta en móvil porque el mensaje ya se comunica en el subtítulo del hero. */}
+      <section className="hidden sm:block">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-10">
           <div className="bg-brand-navy rounded-3xl overflow-hidden relative p-7 sm:p-10">
             <div className="absolute -top-12 -right-12 w-56 h-56 bg-brand-blue/20 rounded-full pointer-events-none" />
