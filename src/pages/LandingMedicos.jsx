@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Check, ShieldCheck, MessageCircle,
   Star, Award, Sparkles, Plus,
-  ArrowRight, MapPin, BadgeCheck,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,9 +42,6 @@ function addJsonLd(id, data) {
 }
 
 const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
-// Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar
-// cómo se ve un perfil; el perfil completo es ficticio.
-const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
 
 const TESTIMONIALS = [
   { name: "Dra. Ejemplo Ramírez", specialty: "Dermatóloga", city: "Monterrey", quote: "Recibo mensajes de pacientes que ya saben qué necesitan y llegan listos para agendar." },
