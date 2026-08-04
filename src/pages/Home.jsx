@@ -250,8 +250,11 @@ export default function Home() {
               </h1>
 
               {/* Subtítulo: solo en móvil, reemplaza la fila de iconos de confianza
-                  para que el hero móvil quede en título + subtítulo + buscador. */}
-              <p className="sm:hidden text-white/80 text-sm leading-relaxed mb-5">
+                  para que el hero móvil quede en título + subtítulo + buscador.
+                  Lleva el mismo escúdo verde de la sección "Cada médico, verificado
+                  a mano" de escritorio, para reforzar la confianza desde el hero. */}
+              <p className="sm:hidden flex items-center gap-2 text-white/80 text-sm leading-relaxed mb-5">
+                <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                 Cada médico, verificado a mano.
               </p>
 
