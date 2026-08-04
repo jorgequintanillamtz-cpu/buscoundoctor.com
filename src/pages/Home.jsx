@@ -658,11 +658,9 @@ export default function Home() {
             {/* Encabezados */}
             <div className="grid grid-cols-2 rounded-t-3xl overflow-hidden">
               <div className="bg-brand-navy px-3 sm:px-8 py-5 sm:py-6 flex items-center justify-center sm:justify-start">
-                {/* Logo real en vez del ícono + texto "BuscoUnDoctor.com"; se envuelve
-                    en una placa blanca para que se lea bien sobre el fondo navy. */}
-                <div className="bg-white rounded-lg px-2.5 py-1.5 flex items-center">
-                  <Logo to="/" className="h-4 sm:h-5" />
-                </div>
+                {/* Logo real en vez del ícono + texto "BuscoUnDoctor.com", a tamaño grande
+                    para llenar bien el recuadro (fondo transparente, sin placa). */}
+                <Logo to="/" className="h-9 sm:h-12" />
               </div>
               <div className="bg-muted px-3 sm:px-8 py-5 sm:py-6 flex items-center gap-2 sm:gap-2.5">
                 <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-muted-foreground/20 flex items-center justify-center flex-shrink-0">
