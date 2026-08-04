@@ -498,7 +498,32 @@ export default function Home() {
           <p className="text-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 max-w-md mx-auto mb-8">
             Ejemplos ilustrativos — se reemplazarán por testimonios reales.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          {/* Móvil: slider horizontal para no ocupar tanto espacio vertical con las 3 tarjetas apiladas */}
+          <div
+            className="sm:hidden flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scroll-smooth"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {PLATFORM_TESTIMONIALS.map((t) =>
+            <div key={t.name + t.role} className="relative flex flex-col flex-shrink-0 w-[80vw] bg-white border border-border/60 rounded-2xl p-6 shadow-sm snap-start">
+              <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                Ejemplo
+              </span>
+              <div className="flex gap-0.5 mb-3">
+                {[1, 2, 3, 4, 5].map((s) =>
+                <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                )}
+              </div>
+              <p className="text-sm text-foreground leading-relaxed flex-1">"{t.quote}"</p>
+              <div className="mt-4 pt-4 border-t border-border/50">
+                <p className="font-heading font-semibold text-sm text-brand-navy">{t.name}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.role}</p>
+              </div>
+            </div>
+            )}
+          </div>
+
+          {/* Tablet/desktop: grid como antes */}
+          <div className="hidden sm:grid sm:grid-cols-3 gap-4 sm:gap-6">
             {PLATFORM_TESTIMONIALS.map((t) =>
             <div key={t.name + t.role} className="relative flex flex-col bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
               <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
