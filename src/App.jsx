@@ -19,7 +19,7 @@ import BlogList from './pages/BlogList';
 import BlogPostPage from './pages/BlogPostPage';
 import Dashboard from './pages/admin/Dashboard';
 import AdminDoctorStats from './pages/admin/AdminDoctorStats';
-import AdminSpecialists from './pages/admin/AdminSpecialists';
+import AdminVerificaciones from './pages/admin/AdminVerificaciones';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
 import AdminZones from './pages/admin/AdminZones';
 import AdminSiteImages from './pages/admin/AdminSiteImages';
@@ -102,7 +102,7 @@ const AuthenticatedApp = () => {
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<Dashboard />} />
           <Route path="/admin/estadisticas" element={<AdminDoctorStats />} />
-          <Route path="/admin/especialistas" element={<AdminSpecialists />} />
+          <Route path="/admin/verificaciones" element={<AdminVerificaciones />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />
           <Route path="/admin/zonas" element={<AdminZones />} />
           <Route path="/admin/imagenes" element={<AdminSiteImages />} />
