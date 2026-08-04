@@ -125,9 +125,10 @@ export default function RegistroMedico() {
     });
   }, []);
 
-  // Si viene de la landing "/para-medicos" con el paso 1 ya lleno (nombre,
-  // WhatsApp, especialidad, cédula, etc.), lo precarga y salta directo al
-  // paso 2 (dirección) para que no tenga que volver a escribirlo.
+  // Si viene de la landing "/para-medicos" con lo básico ya lleno (título,
+  // nombre, WhatsApp y especialidad), lo precarga aquí. Se queda en el paso 1
+  // (datos) porque aún faltan campos de ese mismo paso (cédula, precio, etc.)
+  // que la landing no pide, para no hacerlo escribir su nombre dos veces.
   useEffect(() => {
     const raw = localStorage.getItem(LANDING_PREFILL_KEY);
     if (!raw) return;
@@ -135,7 +136,6 @@ export default function RegistroMedico() {
     try {
       const prefill = JSON.parse(raw);
       setData((prev) => ({ ...prev, ...prefill }));
-      setStepIndex(1);
     } catch {}
   }, []);
 
