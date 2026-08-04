@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
+import Logo from "@/components/Logo";
 
 const CTA_URL = "/registro-medico";
 // Misma clave que lee RegistroMedico.jsx al montar: si existe, precarga el
@@ -209,11 +210,7 @@ export default function LandingMedicos() {
       {/* Header mínimo: solo logo + un único CTA. */}
       <header className="sticky top-0 z-40 bg-card/90 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center flex-shrink-0" aria-label="BuscoUnDoctor, ir al inicio">
-            <span className="font-heading font-extrabold text-[20px] sm:text-[23px] whitespace-nowrap">
-              <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-            </span>
-          </Link>
+          <Logo to="/" className="h-9" />
           <CtaButton size="sm">Registrar mi perfil</CtaButton>
         </div>
       </header>
@@ -375,94 +372,6 @@ export default function LandingMedicos() {
           </div>
         </section>
 
-        {/* ============ BARRA DE CONFIANZA (muy notoria) ============ */}
-        <section aria-label="Elementos de confianza" className="bg-brand-bluePale py-8 sm:py-10">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {[
-                { icon: ShieldCheck, label: "Cédula profesional verificada" },
-                { icon: Users, label: "Hecho para médicos especialistas" },
-                { icon: Clock, label: "Tu perfil, listo en minutos" },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-3 bg-white rounded-2xl shadow-sm px-4 py-4 sm:px-5">
-                  <span className="w-11 h-11 rounded-xl bg-brand-blue flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-white" />
-                  </span>
-                  <span className="text-sm sm:text-base font-bold text-foreground leading-tight">{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============ BENEFICIOS ============ */}
-        <section aria-labelledby="beneficios-heading" className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
-          <h2 id="beneficios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground text-center mb-10">
-            Esto es lo que ganas
-          </h2>
-
-          <div className="divide-y divide-border/60 border-t border-b border-border/60">
-            {BENEFITS.map((b, i) => (
-              <div key={b.title} className="flex items-start sm:items-center gap-5 py-6">
-                <span className="text-xs font-bold text-muted-foreground/60 w-6 flex-shrink-0 hidden sm:block">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${COLOR_MAP[b.color]}`}>
-                  <b.icon className="w-5 h-5" />
-                </span>
-                <div>
-                  <h3 className="font-heading font-bold text-foreground">{b.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{b.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <CtaButton>Quiero mi perfil médico</CtaButton>
-          </div>
-        </section>
-
-        {/* ============ CTA INTERMEDIO (banner llamativo) ============ */}
-        <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-blue to-cyan-500 px-6 py-10 sm:px-12 sm:py-12 text-center">
-            <div className="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full pointer-events-none" />
-            <h2 className="relative font-heading font-extrabold text-2xl sm:text-3xl text-white">
-              ¿Listo para que te encuentren?
-            </h2>
-            <p className="relative text-white/90 mt-2 max-w-md mx-auto">
-              Tu perfil puede estar activo hoy mismo.
-            </p>
-            <div className="relative mt-6">
-              <CtaButton className="bg-white text-brand-blue hover:bg-white/90 h-14 px-8">Registrar mi perfil gratis</CtaButton>
-            </div>
-          </div>
-        </section>
-
-        {/* ============ POR QUÉ NO BASTA CON REDES SOCIALES (comparativa corta) ============ */}
-        <section aria-labelledby="comparativa-heading" className="max-w-3xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18 text-center">
-          <h2 id="comparativa-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-            Facebook e Instagram no fueron hechos para que te encuentre un paciente
-          </h2>
-          <div className="mt-8 space-y-3 text-left max-w-md mx-auto">
-            {[
-              { ok: false, text: "Google Maps no verifica tu cédula profesional" },
-              { ok: false, text: "Redes sociales no filtran pacientes por especialidad" },
-              { ok: false, text: "Un sitio web propio cuesta mantenerlo y no te posiciona solo" },
-              { ok: true, text: "BuscoUnDoctor hace las tres cosas" },
-            ].map((row) => (
-              <div key={row.text} className="flex items-center gap-3 bg-card border border-border/50 rounded-xl px-4 py-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.ok ? "bg-emerald-100" : "bg-muted"}`}>
-                  {row.ok ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <X className="w-3.5 h-3.5 text-muted-foreground" />}
-                </span>
-                <span className={`text-sm ${row.ok ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{row.text}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-9">
-            <CtaButton>Empezar ahora</CtaButton>
-          </div>
-        </section>
-
         {/* ============ TESTIMONIOS (placeholder) ============ */}
         <section aria-labelledby="testimonios-heading" className="bg-muted/40 py-14 sm:py-18">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -560,11 +469,7 @@ export default function LandingMedicos() {
       {/* Footer mínimo */}
       <footer className="border-t border-border/50 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <Link to="/" className="flex items-center flex-shrink-0">
-            <span className="font-heading font-extrabold text-[18px] whitespace-nowrap">
-              <span className="text-brand-navy">Busco</span><span className="text-brand-blue">UnDoctor</span>
-            </span>
-          </Link>
+          <Logo to="/" className="h-8" />
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} BuscoUnDoctor · Directorio médico en Monterrey y San Pedro Garza García
           </p>
