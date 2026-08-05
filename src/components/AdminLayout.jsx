@@ -1,21 +1,49 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, BarChart3, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus } from "lucide-react";
 
-const adminNavItems = [
-  { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { path: "/admin/estadisticas", label: "Estadísticas", icon: BarChart3 },
-  { path: "/admin/verificaciones", label: "Verificaciones", icon: ShieldCheck },
-  { path: "/admin/solicitudes", label: "Solicitudes de cita", icon: Calendar },
-  { path: "/admin/catalogos", label: "Catálogos", icon: ShieldPlus },
-  { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
-  { path: "/admin/zonas", label: "Zonas", icon: MapPin },
-  { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
-  { path: "/admin/blog", label: "Blog", icon: FileText },
-  { path: "/admin/doctores", label: "Doctores", icon: Users },
-  { path: "/admin/resenas", label: "Reseñas", icon: Star },
-  { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
-  { path: "/admin/planes", label: "Planes y precios", icon: Tag },
+// Agrupado por secciones (en vez de una lista plana de 13 links) para que
+// el menú se pueda escanear de un vistazo: Resumen primero, luego lo
+// operativo del día a día, después contenido del sitio, y configuración
+// al final (lo que casi nunca cambia).
+const adminNavSections = [
+  {
+    label: "Resumen",
+    items: [
+      { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { path: "/admin/estadisticas", label: "Estadísticas", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Operación",
+    items: [
+      { path: "/admin/doctores", label: "Doctores", icon: Users },
+      { path: "/admin/verificaciones", label: "Verificaciones", icon: ShieldCheck },
+      { path: "/admin/solicitudes", label: "Solicitudes de cita", icon: Calendar },
+      { path: "/admin/resenas", label: "Reseñas", icon: Star },
+    ],
+  },
+  {
+    label: "Contenido",
+    items: [
+      { path: "/admin/blog", label: "Blog", icon: FileText },
+      { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
+      { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
+    ],
+  },
+  {
+    label: "Configuración",
+    items: [
+      { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
+      { path: "/admin/zonas", label: "Zonas", icon: MapPin },
+      { path: "/admin/catalogos", label: "Catálogos", icon: ShieldPlus },
+      { path: "/admin/planes", label: "Planes y precios", icon: Tag },
+    ],
+  },
 ];
+
+// Versión plana de todos los items, usada por el nav horizontal de móvil
+// (ahí no caben encabezados de sección, es un solo scroll).
+const adminNavItems = adminNavSections.flatMap((section) => section.items);
 
 // Layout exclusivo del panel de administración (dueños de la plataforma).
 // El panel de médicos vive por completo aparte, en /panel-medico.
@@ -38,23 +66,30 @@ export default function AdminLayout() {
             </Link>
             <h2 className="font-heading font-bold text-lg text-foreground">Panel de Administración</h2>
           </div>
-          <nav className="flex-1 p-3">
-            <div className="flex flex-col gap-1">
-              {adminNavItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(item)
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+          <nav className="flex-1 p-3 space-y-5">
+            {adminNavSections.map((section) => (
+              <div key={section.label}>
+                <p className="px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground/70">
+                  {section.label}
+                </p>
+                <div className="flex flex-col gap-1">
+                  {section.items.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        isActive(item)
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
           </nav>
         </aside>
 
