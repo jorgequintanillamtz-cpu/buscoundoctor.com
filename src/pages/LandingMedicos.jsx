@@ -364,6 +364,7 @@ export default function LandingMedicos() {
               <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
               <div className="absolute -bottom-14 -left-14 w-48 h-48 bg-brand-bluePale/60 rounded-full pointer-events-none" />
               <div className="relative">
+                <Logo className="h-8 sm:h-9 mx-auto mb-4" />
                 <span className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue text-xs font-bold tracking-wide uppercase px-3 py-1.5 rounded-full mb-4">
                   <Sparkles className="w-3 h-3" />
                   Lanzamos el {launchDateLabel}
