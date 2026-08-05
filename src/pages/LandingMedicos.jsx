@@ -449,24 +449,43 @@ export default function LandingMedicos() {
           </div>
         </section>
 
-        {/* ============ MIEMBRO FUNDADOR: PERFIL GRATIS POR 1 AÑO ============ */}
-        <section aria-labelledby="fundador-heading" className="max-w-3xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
-          <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-10 shadow-sm text-center">
+        {/* ============ MIEMBRO FUNDADOR: 1 AÑO DE PREMIUM GRATIS ============ */}
+        <section aria-labelledby="fundador-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
+          <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-10 shadow-sm">
             <div className="absolute -top-14 -left-14 w-56 h-56 bg-brand-bluePale/50 rounded-full pointer-events-none" />
             <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-blue/10 rounded-full pointer-events-none" />
-            <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-brand-blue flex items-center justify-center mx-auto mb-5">
-                <Crown className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" />
+            <div className="relative grid md:grid-cols-[auto,1fr] gap-6 md:gap-8 items-center">
+              <div className="flex justify-center md:justify-start">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-brand-blue flex items-center justify-center flex-shrink-0">
+                  <Crown className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" />
+                </div>
               </div>
-              <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
-                Oferta de lanzamiento
-              </span>
-              <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
-                Sé Miembro Fundador
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Regístrate antes del lanzamiento y obtén tu <span className="font-semibold text-brand-navy">perfil gratis por 1 año</span>.
-              </p>
+              <div className="text-center md:text-left">
+                <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
+                  Oferta de lanzamiento
+                </span>
+                <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
+                  Sé Miembro Fundador
+                </h2>
+                <p className="text-muted-foreground mb-5">
+                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $10,989 MXN) — sin tarjeta, sin compromiso.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-2.5 max-w-xl mx-auto md:mx-0">
+                  {[
+                    "Perfil destacado en búsquedas",
+                    "Galería de fotos y video",
+                    "Reseñas verificadas",
+                    "Estadísticas de visitas y contactos",
+                    "Múltiples consultorios",
+                    "Soporte prioritario",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2 justify-center md:justify-start">
+                      <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0" />
+                      <span className="text-sm text-foreground">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
