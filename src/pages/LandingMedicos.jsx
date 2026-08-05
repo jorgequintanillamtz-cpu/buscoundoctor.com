@@ -80,12 +80,6 @@ const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba446723
 // cómo se ve un perfil; el perfil completo es ficticio.
 const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
 
-const TESTIMONIALS = [
-  { name: "Dra. Ejemplo Ramírez", specialty: "Dermatóloga", city: "Monterrey", quote: "Recibo mensajes de pacientes que ya saben qué necesitan y llegan listos para agendar." },
-  { name: "Dr. Ejemplo Torres", specialty: "Cardiólogo", city: "San Pedro", quote: "Completé mi perfil en diez minutos. No he vuelto a pagar por publicidad." },
-  { name: "Dra. Ejemplo Salas", specialty: "Pediatra", city: "Monterrey", quote: "Los pacientes llegan ya conociendo mi experiencia y las opiniones de otros papás." },
-];
-
 // Refleja los planes reales configurados en /planes (entidad Plan): Gratis
 // ($0, incluye hasta 3 cotizaciones y lo básico del directorio) y Premium
 // ($999 MXN/mes o $10,989 MXN/año, con perfil destacado, galería, reseñas
@@ -452,33 +446,6 @@ export default function LandingMedicos() {
               Siguiente <ArrowRight className="w-4 h-4" />
             </Button>
             <p className="text-xs text-muted-foreground text-center mt-3">Sigues llenando el resto (cédula, precio, dirección...) en la siguiente pantalla.</p>
-          </div>
-        </section>
-
-        {/* ============ TESTIMONIOS (placeholder) ============ */}
-        <section aria-labelledby="testimonios-heading" className="bg-muted/40 py-14 sm:py-18">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <h2 id="testimonios-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground text-center mb-2">
-              Lo que dicen los médicos registrados
-            </h2>
-            <p className="text-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 max-w-md mx-auto mb-8">
-              Ejemplos ilustrativos — reemplázalos por testimonios reales.
-            </p>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="relative bg-card border border-border/50 rounded-2xl p-5">
-                  <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                    Ejemplo
-                  </span>
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400" fill="currentColor" />)}
-                  </div>
-                  <p className="text-sm text-foreground leading-relaxed">"{t.quote}"</p>
-                  <p className="text-sm font-semibold text-foreground mt-3">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.specialty} · {t.city}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
