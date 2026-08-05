@@ -489,8 +489,8 @@ export default function LandingMedicos() {
         </section>
 
         {/* ============ RESUMEN + CTA FINAL ============ */}
-        <section aria-labelledby="cta-final-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
-          <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-8 sm:p-12 text-center">
+        <section aria-labelledby="cta-final-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20 lg:max-w-none lg:px-0">
+          <div className="relative bg-brand-navy lg:rounded-none rounded-3xl overflow-hidden p-8 sm:p-12 lg:py-16 text-center">
             <div className="absolute -top-16 -right-16 w-64 h-64 bg-brand-blue/20 rounded-full pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
             <div className="relative">
