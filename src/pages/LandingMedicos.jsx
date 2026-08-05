@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Star, Award, Sparkles, Plus, CreditCard, ShieldCheck,
+  Star, Award, Sparkles, CreditCard, ShieldCheck,
   ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -80,16 +80,6 @@ const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba446723
 // cómo se ve un perfil; el perfil completo es ficticio.
 const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
 
-// Refleja los planes reales configurados en /planes (entidad Plan): Gratis
-// ($0, incluye hasta 3 cotizaciones y lo básico del directorio) y Premium
-// ($999 MXN/mes o $10,989 MXN/año, con perfil destacado, galería, reseñas
-// verificadas y estadísticas). Actualizar este texto si cambian los planes.
-const FAQS = [
-  { q: "¿Cuánto cuesta y qué planes tienen?", a: "Tenemos dos planes. El Gratis no tiene costo: quedas en el directorio con tu especialidad, zona, contacto por WhatsApp y hasta 3 cotizaciones. El Premium cuesta $999 MXN al mes (o $10,989 MXN al año) e incluye perfil destacado en búsquedas, galería de fotos y video, reseñas verificadas, estadísticas de visitas y contactos, múltiples consultorios y soporte prioritario. Puedes ver el detalle completo en la página de planes y precios." },
-  { q: "¿Cuánto tarda el registro?", a: "Entre 3 y 5 minutos. Tu perfil queda visible de inmediato; puedes seguir completando fotos y horarios después." },
-  { q: "¿Cómo verifican mi cédula profesional?", a: "Revisamos manualmente tu número de cédula contra los registros oficiales antes de marcar tu perfil como verificado." },
-];
-
 function CtaButton({ children = "Registrar mi perfil gratis", size = "lg", className = "" }) {
   return (
     <Button
@@ -108,7 +98,6 @@ function CtaButton({ children = "Registrar mi perfil gratis", size = "lg", class
 export default function LandingMedicos() {
   const navigate = useNavigate();
   const [showStickyCta, setShowStickyCta] = useState(false);
-  const [openFaq, setOpenFaq] = useState(null);
   const heroRef = useRef(null);
   const countdown = useCountdown(LAUNCH_DATE);
   const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
@@ -193,15 +182,6 @@ export default function LandingMedicos() {
         { "@type": "ListItem", "position": 1, "name": "Inicio", "item": ORIGIN },
         { "@type": "ListItem", "position": 2, "name": "Para médicos", "item": PAGE_URL },
       ],
-    }));
-    scripts.push(addJsonLd("ld-faq", {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": FAQS.map((f) => ({
-        "@type": "Question",
-        "name": f.q,
-        "acceptedAnswer": { "@type": "Answer", "text": f.a },
-      })),
     }));
     return () => scripts.forEach((s) => s.remove());
   }, []);
@@ -485,55 +465,6 @@ export default function LandingMedicos() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ============ FAQ (mismo diseño que el home) ============ */}
-        <section aria-labelledby="faq-heading" className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
-          <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-14">
-            <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
-            <div className="relative grid md:grid-cols-2 gap-10 lg:gap-16">
-              <div>
-                <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-5">
-                  <Sparkles className="w-3 h-3 text-brand-bluePale" />
-                  Tus preguntas, respondidas
-                </span>
-                <h2 id="faq-heading" className="font-heading font-extrabold text-3xl sm:text-4xl leading-tight">
-                  <span className="text-white block">Preguntas</span>
-                  <span className="text-brand-bluePale block">Frecuentes</span>
-                </h2>
-                <p className="text-white/70 mt-4 leading-relaxed">
-                  Esto es lo que más preguntan los médicos antes de crear su perfil.
-                </p>
-
-                <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
-                  <h3 className="font-heading font-bold text-lg text-white">¿List@ para empezar?</h3>
-                  <p className="text-sm text-white/70 mt-2 leading-relaxed">
-                    Crea tu perfil ahora y aparece en el directorio en minutos.
-                  </p>
-                  <CtaButton className="mt-4">Registrar mi perfil</CtaButton>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {FAQS.map((f, i) => (
-                  <details
-                    key={i}
-                    open={openFaq === i}
-                    onToggle={(e) => setOpenFaq(e.target.open ? i : null)}
-                    className="group bg-white/5 border border-white/10 rounded-2xl px-5 py-4 open:bg-white/10 transition-colors"
-                  >
-                    <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-heading font-semibold text-sm sm:text-base text-white">
-                      {f.q}
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-bluePale group-open:rotate-45 transition-transform">
-                        <Plus className="w-3.5 h-3.5" />
-                      </span>
-                    </summary>
-                    <p className="text-sm text-white/70 leading-relaxed mt-3">{f.a}</p>
-                  </details>
-                ))}
               </div>
             </div>
           </div>
