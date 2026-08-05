@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Star, Award, Sparkles, CreditCard, ShieldCheck,
-  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2,
+  Star, Award, Sparkles, ShieldCheck,
+  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
