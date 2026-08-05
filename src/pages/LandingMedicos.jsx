@@ -467,7 +467,7 @@ export default function LandingMedicos() {
                   Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $999 MXN/mes) — sin tarjeta, sin compromiso.
                 </p>
                 <p className="text-sm font-semibold text-brand-blue mb-5">
-                  Cupo limitado: solo los primeros 5 médicos por especialidad y zona pueden ser Miembros Fundadores.
+                  Cupo limitado: solo los primeros 5 médicos por especialidad pueden ser Miembros Fundadores.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2.5 max-w-xl mx-auto md:mx-0">
                   {[
