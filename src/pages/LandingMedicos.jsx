@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Star, Award, Sparkles, Plus, CreditCard, ShieldCheck,
-  ArrowRight, BadgeCheck, MessageCircle,
+  ArrowRight, BadgeCheck, MessageCircle, ChevronDown, Search, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +74,95 @@ function CtaButton({ children = "Registrar mi perfil gratis", size = "lg", class
         <ArrowRight className="w-4 h-4" />
       </Link>
     </Button>
+  );
+}
+
+// Selector de especialidad en burbujas: reemplaza el <select> nativo por un
+// panel con las especialidades como chips redondeados (más fácil de escanear
+// que una lista larga), con buscador arriba porque hay ~90 especialidades.
+function SpecialtyBubblePicker({ specialties, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  const isOther = value === " " || (!specialties.some((s) => s.name === value) && !!value);
+  const label = isOther ? (value.trim() || "Otra (no está en la lista)") : (value || "Selecciona tu especialidad");
+  const filtered = query.trim()
+    ? specialties.filter((s) => s.name.toLowerCase().includes(query.trim().toLowerCase()))
+    : specialties;
+
+  const select = (name) => {
+    onChange(name);
+    setOpen(false);
+    setQuery("");
+  };
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full h-11 px-4 text-sm bg-background border border-input rounded-xl flex items-center justify-between gap-2 text-left"
+      >
+        <span className={value ? "text-foreground truncate" : "text-muted-foreground truncate"}>{label}</span>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-20 mt-2 w-full bg-card border border-border/50 rounded-2xl shadow-xl p-4">
+          <div className="relative mb-3">
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Busca tu especialidad..."
+              className="w-full h-10 pl-9 pr-3 text-sm bg-background border border-input rounded-xl"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto pr-1">
+            {filtered.map((s) => {
+              const active = value === s.name;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => select(s.name)}
+                  className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    active
+                      ? "bg-brand-blue text-white border-brand-blue"
+                      : "border-border text-foreground hover:border-brand-blue/50 hover:bg-brand-bluePale/40"
+                  }`}
+                >
+                  {active && <Check className="w-3.5 h-3.5" />}
+                  {s.name}
+                </button>
+              );
+            })}
+            {filtered.length === 0 && (
+              <p className="text-sm text-muted-foreground py-2">No encontramos esa especialidad.</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => select(" ")}
+            className={`w-full mt-3 pt-3 border-t border-border/50 text-sm font-medium text-center rounded-xl py-2 transition-colors ${
+              isOther ? "text-brand-blue" : "text-muted-foreground hover:text-brand-blue"
+            }`}
+          >
+            Otra (no está en la lista)
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -349,16 +438,13 @@ export default function LandingMedicos() {
 
               <div className="sm:col-span-2">
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
-                <select
-                  value={specialties.some((s) => s.name === step1.specialty) ? step1.specialty : (step1.specialty ? "__otra__" : "")}
-                  onChange={(e) => updateStep1("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
-                  className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl mb-2">
-                  <option value="">Selecciona tu especialidad</option>
-                  {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
-                  <option value="__otra__">Otra (no está en la lista)</option>
-                </select>
+                <SpecialtyBubblePicker
+                  specialties={specialties}
+                  value={step1.specialty}
+                  onChange={(v) => updateStep1("specialty", v)}
+                />
                 {(step1.specialty === " " || (!specialties.some((s) => s.name === step1.specialty) && step1.specialty)) && (
-                  <Input value={step1.specialty.trim()} onChange={(e) => updateStep1("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl" />
+                  <Input value={step1.specialty.trim()} onChange={(e) => updateStep1("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl mt-2" />
                 )}
               </div>
             </div>
