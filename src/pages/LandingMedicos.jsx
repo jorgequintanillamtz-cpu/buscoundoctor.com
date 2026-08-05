@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Star, Award, Sparkles, Plus, CreditCard, ShieldCheck,
-  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2,
+  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -388,6 +388,47 @@ export default function LandingMedicos() {
             </div>
           </section>
         )}
+
+        {/* ============ MIEMBRO FUNDADOR: 1 AÑO DE PREMIUM GRATIS ============ */}
+        <section aria-labelledby="fundador-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-10 sm:pb-14">
+          <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-10 shadow-sm">
+            <div className="absolute -top-14 -left-14 w-56 h-56 bg-brand-bluePale/50 rounded-full pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-blue/10 rounded-full pointer-events-none" />
+            <div className="relative grid md:grid-cols-[auto,1fr] gap-6 md:gap-8 items-center">
+              <div className="flex justify-center md:justify-start">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-brand-blue flex items-center justify-center flex-shrink-0">
+                  <Crown className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" />
+                </div>
+              </div>
+              <div className="text-center md:text-left">
+                <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
+                  Oferta de lanzamiento
+                </span>
+                <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
+                  Sé Miembro Fundador
+                </h2>
+                <p className="text-muted-foreground mb-5">
+                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $10,989 MXN) — sin tarjeta, sin compromiso.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-2.5 max-w-xl mx-auto md:mx-0">
+                  {[
+                    "Perfil destacado en búsquedas",
+                    "Galería de fotos y video",
+                    "Reseñas verificadas",
+                    "Estadísticas de visitas y contactos",
+                    "Múltiples consultorios",
+                    "Soporte prioritario",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2 justify-center md:justify-start">
+                      <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0" />
+                      <span className="text-sm text-foreground">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ============ PASO 1 DEL REGISTRO, EMBEBIDO JUSTO DEBAJO DEL HERO ============ */}
         <section aria-labelledby="paso1-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
