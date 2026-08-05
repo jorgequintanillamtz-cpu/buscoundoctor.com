@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Star, Sparkles, ShieldCheck,
-  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown,
+  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown, Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -504,6 +504,7 @@ export default function LandingMedicos() {
                 {[
                   { icon: ShieldCheck, text: "Perfil verificado en el directorio, gratis" },
                   { icon: Crown, text: "1 año gratis de Premium por ser Miembro Fundador" },
+                  { icon: Tag, text: "Ahorras $11,988 MXN al año" },
                   { icon: BadgeCheck, text: "Prioridad en las listas de búsqueda" },
                   { icon: MessageCircle, text: "Contacto directo por WhatsApp, sin intermediarios" },
                 ].map(({ icon: Icon, text }) => (
