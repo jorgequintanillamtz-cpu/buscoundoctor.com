@@ -240,6 +240,9 @@ export default function LandingMedicos() {
               <h1 id="hero-heading" className="font-heading font-extrabold text-4xl sm:text-5xl leading-[1.1] text-foreground tracking-tight">
                 Regístrate <span className="text-brand-blue">gratis ahorita</span> y sé de los primeros en el directorio
               </h1>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Antes del lanzamiento, crear tu perfil no cuesta nada.
+              </p>
               {/* Subtítulo como bullets: lo importante que un médico necesita
                   saber antes de registrarse. Cada uno con un ícono que hace
                   referencia a su contenido, en verde. */}
