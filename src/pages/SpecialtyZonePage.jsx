@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { rankSpecialists } from "@/lib/specialistRanking";
 import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import {
@@ -57,8 +58,8 @@ export default function SpecialtyZonePage() {
 
   const filtered = useMemo(() => {
     if (!specialty || !zone) return [];
-    return specialists.filter(
-      (s) => s.specialty === specialty.name && (s.zone === zone.name || s.location === zone.name)
+    return rankSpecialists(
+      specialists.filter((s) => s.specialty === specialty.name && (s.zone === zone.name || s.location === zone.name))
     );
   }, [specialty, zone, specialists]);
 
