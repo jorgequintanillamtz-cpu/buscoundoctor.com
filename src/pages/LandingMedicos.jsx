@@ -493,7 +493,7 @@ export default function LandingMedicos() {
           <div className="relative bg-brand-navy lg:rounded-none rounded-3xl overflow-hidden p-8 sm:p-12 lg:py-16 text-center">
             <div className="absolute -top-16 -right-16 w-64 h-64 bg-brand-blue/20 rounded-full pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
-            <div className="relative">
+            <div className="relative max-w-3xl mx-auto">
               <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-bold tracking-wide uppercase px-3 py-1.5 rounded-full mb-5">
                 <Sparkles className="w-3 h-3 text-brand-bluePale" />
                 Resumen de tu oferta
