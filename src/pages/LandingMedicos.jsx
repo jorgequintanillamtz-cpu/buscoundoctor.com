@@ -461,10 +461,10 @@ export default function LandingMedicos() {
                   Oferta de lanzamiento
                 </span>
                 <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
-                  Sé Miembro Fundador
+                  Sé Miembro Fundador y ahorra <span className="text-brand-blue">$11,988 MXN</span>
                 </h2>
                 <p className="text-muted-foreground mb-5">
-                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $999 MXN/mes — $11,988 MXN al año) — sin tarjeta, sin compromiso.
+                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $999 MXN/mes) — sin tarjeta, sin compromiso.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2.5 max-w-xl mx-auto md:mx-0">
                   {[
