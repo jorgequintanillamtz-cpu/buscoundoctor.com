@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Star, Sparkles, ShieldCheck,
-  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown, Tag,
+  ArrowRight, BadgeCheck, MessageCircle, Clock, Crown, Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
