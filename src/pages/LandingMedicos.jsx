@@ -42,11 +42,11 @@ function useCountdown(target) {
 
 function CountdownBox({ value, label }) {
   return (
-    <div className="bg-white/10 border border-white/15 rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3.5 text-center min-w-[64px] sm:min-w-[84px]">
-      <p className="font-heading font-bold text-2xl sm:text-4xl text-white tabular-nums leading-none">
+    <div className="bg-brand-bluePale/50 border border-brand-blue/15 rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3.5 text-center min-w-[64px] sm:min-w-[84px]">
+      <p className="font-heading font-bold text-2xl sm:text-4xl text-brand-navy tabular-nums leading-none">
         {String(value).padStart(2, "0")}
       </p>
-      <p className="text-[10px] sm:text-xs text-white/70 mt-1 uppercase tracking-wide">{label}</p>
+      <p className="text-[10px] sm:text-xs text-brand-blue/80 mt-1 uppercase tracking-wide">{label}</p>
     </div>
   );
 }
@@ -351,14 +351,15 @@ export default function LandingMedicos() {
         {/* ============ COUNTDOWN DE LANZAMIENTO ============ */}
         {!countdown.done && (
           <section aria-labelledby="countdown-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-10 sm:pb-14">
-            <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-8 text-center">
+            <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-8 text-center shadow-sm">
               <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
+              <div className="absolute -bottom-14 -left-14 w-48 h-48 bg-brand-bluePale/60 rounded-full pointer-events-none" />
               <div className="relative">
-                <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
-                  <Sparkles className="w-3 h-3 text-brand-bluePale" />
+                <span className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue text-xs font-bold tracking-wide uppercase px-3 py-1.5 rounded-full mb-4">
+                  <Sparkles className="w-3 h-3" />
                   Lanzamos el {launchDateLabel}
                 </span>
-                <h2 id="countdown-heading" className="font-heading font-bold text-xl sm:text-2xl text-white mb-5">
+                <h2 id="countdown-heading" className="font-heading font-bold text-xl sm:text-2xl text-brand-navy mb-5">
                   Regístrate ahora y sé de los primeros médicos visibles en el directorio
                 </h2>
 
@@ -370,13 +371,13 @@ export default function LandingMedicos() {
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
-                  <div className="flex items-start gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                    <Clock className="w-4 h-4 text-brand-bluePale flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-white/90">Entre más pronto te registres, antes apareces</p>
+                  <div className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
+                    <Clock className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-brand-navy">Entre más pronto te registres, antes apareces</p>
                   </div>
-                  <div className="flex items-start gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand-bluePale flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-white/90">Entre más completo esté tu perfil, más arriba sales</p>
+                  <div className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
+                    <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-brand-navy">Entre más completo esté tu perfil, más arriba sales</p>
                   </div>
                 </div>
               </div>
