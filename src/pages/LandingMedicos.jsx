@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Star, Award, Sparkles, ShieldCheck,
+  Star, Sparkles, ShieldCheck,
   ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2, Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
