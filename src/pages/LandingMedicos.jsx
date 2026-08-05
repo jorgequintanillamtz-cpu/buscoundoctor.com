@@ -10,6 +10,12 @@ import { base44 } from "@/api/base44Client";
 import Logo from "@/components/Logo";
 
 const CTA_URL = "/registro-medico";
+// Número real de WhatsApp del negocio (mismo que /contacto), para el botón
+// de "¿sigues teniendo dudas?" al final de la página.
+const WHATSAPP_NUMBER = "528117902740";
+const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Hola, tengo una pregunta sobre el registro de médicos en BuscoUnDoctor"
+)}`;
 // Fecha de lanzamiento público de la plataforma (hora de Monterrey, UTC-6).
 const LAUNCH_DATE = new Date("2026-10-15T00:00:00-06:00");
 // Misma clave que lee RegistroMedico.jsx al montar: si existe, precarga el
@@ -38,6 +44,16 @@ function useCountdown(target) {
     seconds: totalSeconds % 60,
     done: timeLeft <= 0,
   };
+}
+
+// Ícono de WhatsApp (glifo real, no la burbuja genérica de lucide) — mismo
+// SVG que se usa en /contacto para que se vea igual en todo el sitio.
+function WhatsAppIcon({ className = "w-4 h-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.48 1.32 5L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.24-8.23zm-4.75 4.7c-.16 0-.42.06-.64.31-.22.25-.85.83-.85 2.02s.87 2.35.99 2.51c.12.16 1.71 2.71 4.24 3.7 2.11.83 2.54.66 3 .62.46-.04 1.48-.6 1.69-1.19.21-.58.21-1.08.15-1.19-.06-.11-.22-.17-.46-.29-.24-.12-1.48-.73-1.71-.81-.23-.08-.4-.12-.57.12-.17.24-.65.81-.8.98-.15.17-.29.19-.53.06-.24-.12-1.03-.38-1.96-1.21-.72-.64-1.21-1.44-1.35-1.68-.14-.24-.02-.37.11-.49.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.57-1.4-.78-1.91-.2-.49-.41-.42-.57-.43z" />
+    </svg>
+  );
 }
 
 function CountdownBox({ value, label }) {
