@@ -389,28 +389,6 @@ export default function LandingMedicos() {
           </section>
         )}
 
-        {/* ============ MIEMBRO FUNDADOR: PERFIL GRATIS POR 1 AÑO ============ */}
-        <section aria-labelledby="fundador-heading" className="max-w-3xl mx-auto px-4 sm:px-6 pb-10 sm:pb-14">
-          <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-10 shadow-sm text-center">
-            <div className="absolute -top-14 -left-14 w-56 h-56 bg-brand-bluePale/50 rounded-full pointer-events-none" />
-            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-blue/10 rounded-full pointer-events-none" />
-            <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-brand-blue flex items-center justify-center mx-auto mb-5">
-                <Crown className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" />
-              </div>
-              <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
-                Oferta de lanzamiento
-              </span>
-              <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
-                Sé Miembro Fundador
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Regístrate antes del lanzamiento y obtén tu <span className="font-semibold text-brand-navy">perfil gratis por 1 año</span>.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* ============ PASO 1 DEL REGISTRO, EMBEBIDO JUSTO DEBAJO DEL HERO ============ */}
         <section aria-labelledby="paso1-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
           <div className="text-center mb-6">
@@ -468,6 +446,28 @@ export default function LandingMedicos() {
               Siguiente <ArrowRight className="w-4 h-4" />
             </Button>
             <p className="text-xs text-muted-foreground text-center mt-3">Sigues llenando el resto (cédula, precio, dirección...) en la siguiente pantalla.</p>
+          </div>
+        </section>
+
+        {/* ============ MIEMBRO FUNDADOR: PERFIL GRATIS POR 1 AÑO ============ */}
+        <section aria-labelledby="fundador-heading" className="max-w-3xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
+          <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-10 shadow-sm text-center">
+            <div className="absolute -top-14 -left-14 w-56 h-56 bg-brand-bluePale/50 rounded-full pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-blue/10 rounded-full pointer-events-none" />
+            <div className="relative">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-brand-blue flex items-center justify-center mx-auto mb-5">
+                <Crown className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="currentColor" />
+              </div>
+              <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
+                Oferta de lanzamiento
+              </span>
+              <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
+                Sé Miembro Fundador
+              </h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Regístrate antes del lanzamiento y obtén tu <span className="font-semibold text-brand-navy">perfil gratis por 1 año</span>.
+              </p>
+            </div>
           </div>
         </section>
 
