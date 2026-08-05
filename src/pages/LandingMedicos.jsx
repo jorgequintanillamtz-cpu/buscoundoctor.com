@@ -488,31 +488,49 @@ export default function LandingMedicos() {
           </div>
         </section>
 
-        {/* ============ CTA FINAL: ÚLTIMA OPORTUNIDAD ============ */}
-        <section aria-labelledby="cta-final-heading" className="max-w-5xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
-          <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-8 sm:p-14 text-center">
-            <div className="absolute -top-16 -right-16 w-64 h-64 bg-brand-blue/20 rounded-full pointer-events-none" />
-            <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
+        {/* ============ RESUMEN + CTA FINAL ============ */}
+        <section aria-labelledby="cta-final-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
+          <div className="relative bg-card border border-border/50 rounded-3xl overflow-hidden p-6 sm:p-10 text-center shadow-sm">
+            <div className="absolute -top-14 -right-14 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-brand-bluePale/50 rounded-full pointer-events-none" />
             <div className="relative">
-              {!countdown.done && (
-                <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-bold tracking-wide uppercase px-3 py-1.5 rounded-full mb-5">
-                  <Clock className="w-3 h-3 text-brand-bluePale" />
-                  Quedan {countdown.days}d {countdown.hours}h para el lanzamiento
-                </span>
-              )}
-              <Award className="w-9 h-9 text-brand-bluePale mx-auto mb-4" />
-              <h2 id="cta-final-heading" className="font-heading font-extrabold text-3xl sm:text-4xl text-white tracking-tight">
-                No dejes que tu próximo paciente te encuentre en otro lado
+              <h2 id="cta-final-heading" className="font-heading font-extrabold text-2xl sm:text-3xl text-foreground tracking-tight">
+                Todo lo que obtienes al registrarte hoy
               </h2>
-              <p className="text-white/70 mt-4 text-lg max-w-xl mx-auto">
-                Regístrate hoy, gratis, y asegura tu 1 año de Premium como Miembro Fundador antes de que termine la oferta de lanzamiento.
-              </p>
-              <div className="mt-8">
-                <CtaButton className="h-14 px-10 text-base shadow-xl shadow-black/20">Registrar mi perfil gratis</CtaButton>
+
+              <div className="grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left mt-6">
+                {[
+                  "Perfil verificado en el directorio, gratis",
+                  "1 año gratis de Premium por ser Miembro Fundador",
+                  "Cédula profesional verificada",
+                  "Contacto directo por WhatsApp, sin intermediarios",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
+                    <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-brand-navy">{item}</p>
+                  </div>
+                ))}
               </div>
-              <p className="text-xs text-white/50 mt-4">
-                Toma 5 minutos · Sin tarjeta de crédito · Cédula verificada
+
+              <div className="mt-8">
+                <CtaButton className="h-14 px-10 text-base">Registrar mi perfil gratis</CtaButton>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Toma 5 minutos · Sin tarjeta de crédito
               </p>
+
+              <div className="mt-8 pt-6 border-t border-border/50">
+                <p className="text-sm text-muted-foreground mb-3">¿Sigues teniendo dudas?</p>
+                <a
+                  href={WHATSAPP_HREF}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1fb855] transition-colors text-white text-sm font-semibold px-5 py-3 rounded-xl"
+                >
+                  <WhatsAppIcon className="w-4 h-4" />
+                  Escríbenos por WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </section>
