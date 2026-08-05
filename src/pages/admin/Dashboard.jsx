@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   Users, Heart, MapPin, FileText, Calendar, Stethoscope,
-  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2,
+  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown,
 } from "lucide-react";
 
 function AlertCard({ to, icon: Icon, label, count }) {
@@ -70,6 +70,7 @@ export default function Dashboard() {
       const activeDoctors = specialists.filter((s) => s.active).length;
       const publishedDoctors = specialists.filter((s) => s.publication_status === "published").length;
       const draftDoctors = specialists.filter((s) => s.publication_status === "draft").length;
+      const premiumDoctors = specialists.filter((s) => s.plan_slug === "premium").length;
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -87,6 +88,7 @@ export default function Dashboard() {
           draftDoctors,
           newLast30,
           totalRequests: requests.length,
+          premiumDoctors,
         },
       });
       setLoading(false);
@@ -131,6 +133,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} color="text-emerald-600" />
           <StatCard icon={FileText} label="Publicados / borrador" value={`${business.publishedDoctors} / ${business.draftDoctors}`} color="text-blue-500" />
+          <StatCard icon={Crown} label="Doctores en Premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} color="text-purple-500" />
           <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} color="text-purple-500" />
           <StatCard icon={Calendar} label="Solicitudes de cita (total)" value={business.totalRequests} color="text-orange-500" />
         </div>
