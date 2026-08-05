@@ -18,7 +18,6 @@ import ConditionDetailPage from './pages/ConditionDetailPage';
 import BlogList from './pages/BlogList';
 import BlogPostPage from './pages/BlogPostPage';
 import Dashboard from './pages/admin/Dashboard';
-import AdminDoctorStats from './pages/admin/AdminDoctorStats';
 import AdminVerificaciones from './pages/admin/AdminVerificaciones';
 import AdminSolicitudes from './pages/admin/AdminSolicitudes';
 import AdminCatalogos from './pages/admin/AdminCatalogos';
@@ -103,7 +102,8 @@ const AuthenticatedApp = () => {
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>
           <Route path="/admin" element={<Dashboard />} />
-          <Route path="/admin/estadisticas" element={<AdminDoctorStats />} />
+          {/* Redirección: las estadísticas se fusionaron dentro del Dashboard central */}
+          <Route path="/admin/estadisticas" element={<Navigate to="/admin" replace />} />
           <Route path="/admin/verificaciones" element={<AdminVerificaciones />} />
           <Route path="/admin/solicitudes" element={<AdminSolicitudes />} />
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
