@@ -489,7 +489,7 @@ export default function LandingMedicos() {
                 No dejes que tu próximo paciente te encuentre en otro lado
               </h2>
               <p className="text-white/70 mt-4 text-lg max-w-xl mx-auto">
-                Regístrate hoy, gratis, y asegúra tu 1 año de Premium como Miembro Fundador antes de que termine la oferta de lanzamiento.
+                Regístrate hoy, gratis, y asegura tu 1 año de Premium como Miembro Fundador antes de que termine la oferta de lanzamiento.
               </p>
               <div className="mt-8">
                 <CtaButton className="h-14 px-10 text-base shadow-xl shadow-black/20">Registrar mi perfil gratis</CtaButton>
