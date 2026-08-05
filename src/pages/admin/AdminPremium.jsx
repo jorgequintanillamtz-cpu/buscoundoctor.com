@@ -132,7 +132,7 @@ export default function AdminPremium() {
     const nextActivatedAt = next === "premium" ? new Date().toISOString() : prevActivatedAt;
     setSpecialists((prev) => prev.map((d) => (d.id === id ? { ...d, plan_slug: next, premium_activated_at: nextActivatedAt } : d)));
     try {
-      await base44.entities.Specialist.update(id, { plan_slug: next, ...(next === "premium" ? { premium_activated_at: nextActivatedAt } : {}) });
+      await base44.entities.Specialist.update(id, { plan_slug: next, premium_activated_at: nextActivatedAt || null });
       toast.success(next === "premium" ? `${nombre} ahora es Premium` : `${nombre} ahora es Gratis`);
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === id ? { ...d, plan_slug: currentPlan, premium_activated_at: prevActivatedAt } : d)));
