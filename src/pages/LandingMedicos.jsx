@@ -506,7 +506,7 @@ export default function LandingMedicos() {
                 {[
                   { icon: ShieldCheck, text: "Perfil verificado en el directorio, gratis" },
                   { icon: Crown, text: "1 año gratis de Premium por ser Miembro Fundador" },
-                  { icon: BadgeCheck, text: "Cédula profesional verificada" },
+                  { icon: BadgeCheck, text: "Prioridad en las listas de búsqueda" },
                   { icon: MessageCircle, text: "Contacto directo por WhatsApp, sin intermediarios" },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-center gap-3 bg-white/10 border border-white/15 rounded-2xl px-4 py-3.5">
