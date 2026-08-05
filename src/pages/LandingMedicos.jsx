@@ -280,8 +280,6 @@ export default function LandingMedicos() {
               <ul className="mt-6 space-y-2.5 inline-block text-left">
                 {[
                   { icon: Crown, text: "1 año gratis de Premium (ahorras $11,988 MXN) siendo Miembro Fundador" },
-                  { icon: ShieldCheck, text: "Cédula profesional verificada, le da confianza a tus pacientes" },
-                  { icon: MessageCircle, text: "Contacto directo por WhatsApp, sin intermediarios" },
                 ].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-base text-foreground font-medium">
                     <span className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -372,16 +370,6 @@ export default function LandingMedicos() {
                   <CountdownBox value={countdown.seconds} label="Seg" />
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
-                  <div className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
-                    <Clock className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-brand-navy">Entre más pronto te registres, más prioridad tienes para salir más arriba</p>
-                  </div>
-                  <div className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
-                    <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-brand-navy">Entre más completo esté tu perfil, más arriba sales</p>
-                  </div>
-                </div>
               </div>
             </div>
           </section>
@@ -469,21 +457,9 @@ export default function LandingMedicos() {
                 <p className="text-sm font-semibold text-brand-blue mb-5">
                   Cupo limitado: solo los primeros 5 médicos por especialidad pueden ser Miembros Fundadores.
                 </p>
-                <div className="grid sm:grid-cols-2 gap-2.5 max-w-xl mx-auto md:mx-0">
-                  {[
-                    "Perfil destacado en búsquedas",
-                    "Galería de fotos y video",
-                    "Reseñas verificadas",
-                    "Estadísticas de visitas y contactos",
-                    "Múltiples consultorios",
-                    "Soporte prioritario",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-xl px-3.5 py-2.5 text-left">
-                      <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0" />
-                      <span className="text-sm text-foreground">{item}</span>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-foreground font-medium">
+                  Podrás disfrutar de todas las funciones del plan Premium sin costo durante 1 año.
+                </p>
               </div>
             </div>
           </div>
