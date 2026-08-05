@@ -42,11 +42,11 @@ function useCountdown(target) {
 
 function CountdownBox({ value, label }) {
   return (
-    <div className="bg-brand-bluePale/50 border border-brand-blue/15 rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3.5 text-center min-w-[64px] sm:min-w-[84px]">
-      <p className="font-heading font-bold text-2xl sm:text-4xl text-brand-navy tabular-nums leading-none">
+    <div className="bg-brand-blue rounded-2xl px-3 py-2.5 sm:px-5 sm:py-4 text-center min-w-[68px] sm:min-w-[92px] shadow-md shadow-brand-blue/20">
+      <p className="font-heading font-extrabold text-3xl sm:text-5xl text-white tabular-nums leading-none">
         {String(value).padStart(2, "0")}
       </p>
-      <p className="text-[10px] sm:text-xs text-brand-blue/80 mt-1 uppercase tracking-wide">{label}</p>
+      <p className="text-[10px] sm:text-xs text-white/85 mt-1.5 uppercase tracking-wide font-bold">{label}</p>
     </div>
   );
 }
