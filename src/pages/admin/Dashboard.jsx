@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
   Users, Heart, MapPin, FileText, Calendar, Stethoscope,
-  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown,
+  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown, BarChart3,
 } from "lucide-react";
 
 function AlertCard({ to, icon: Icon, label, count }) {
@@ -137,6 +138,16 @@ export default function Dashboard() {
           <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} color="text-purple-500" />
           <StatCard icon={Calendar} label="Solicitudes de cita (total)" value={business.totalRequests} color="text-orange-500" />
         </div>
+      </section>
+
+      {/* Estadísticas: impresiones, clicks y citas agendadas de todos los
+          doctores. Antes vivía en /admin/estadisticas como página aparte;
+          se fusionó aquí para no tener que saltar entre pantallas. */}
+      <section className="mb-8">
+        <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-1.5">
+          <BarChart3 className="w-3.5 h-3.5" /> Estadísticas
+        </h2>
+        <DoctorStatsPanel />
       </section>
 
       {/* Catálogo: contenido de soporte del sitio */}
