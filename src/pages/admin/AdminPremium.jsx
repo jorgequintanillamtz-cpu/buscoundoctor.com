@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Crown, DollarSign, TrendingUp, Plus, Loader2, Trash2,
-  ChevronDown, ChevronUp, Stethoscope, Receipt,
+  ChevronDown, ChevronUp, Stethoscope, Receipt, AlertCircle, CheckCircle2,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -24,7 +24,9 @@ const METHOD_LABELS = {
   otro: "Otro",
 };
 
-const EMPTY_PAYMENT = { specialist_id: "", amount: "999", payment_date: new Date().toISOString().slice(0, 10), period_label: "", method: "transferencia", notes: "" };
+const DEFAULT_RATE = 999;
+
+const EMPTY_PAYMENT = { specialist_id: "", amount: String(DEFAULT_RATE), payment_date: new Date().toISOString().slice(0, 10), period_label: "", method: "transferencia", notes: "" };
 
 function KpiCard({ icon: Icon, label, value, color }) {
   return (
@@ -38,16 +40,19 @@ function KpiCard({ icon: Icon, label, value, color }) {
 
 const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—");
+const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // Panel de negocio del plan Premium: como el cobro es manual (transferencia,
-// efectivo, etc.), aquí el dueño marca quién está Premium y registra cada
-// pago que recibe, para tener control real de cuánto dinero está generando
-// el plan sin depender de un procesador de pagos.
+// efectivo, etc., no hay pasarela de pagos conectada), aquí el dueño marca
+// quién está Premium, cuánto le toca pagar cada mes, y registra cada pago
+// que recibe. La app calcula solita el ciclo mensual: quién ya pagó este
+// mes, quién falta, y las sumas de ingresos esperados/cobrados/pendientes.
 export default function AdminPremium() {
   const [specialists, setSpecialists] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [amountDrafts, setAmountDrafts] = useState({});
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_PAYMENT);
@@ -85,22 +90,43 @@ export default function AdminPremium() {
     return map;
   }, [payments]);
 
-  const premiumRows = useMemo(
-    () =>
-      premiumDoctors
-        .map((doc) => ({
-          ...doc,
-          totalRevenue: revenueByDoctor[doc.id]?.total || 0,
-          lastPayment: revenueByDoctor[doc.id]?.last || null,
-          payments: revenueByDoctor[doc.id]?.list || [],
-        }))
-        .sort((a, b) => b.totalRevenue - a.totalRevenue),
-    [premiumDoctors, revenueByDoctor]
-  );
-
   const now = useMemo(() => new Date(), []);
   const monthStart = useMemo(() => startOfMonth(now), [now]);
   const monthEnd = useMemo(() => endOfMonth(now), [now]);
+  const currentMonthLabel = useMemo(() => capitalize(format(now, "MMMM yyyy", { locale: es })), [now]);
+
+  // Lo que cada doctor Premium ya pagó DENTRO del mes en curso (para el
+  // ciclo de cobro mensual, aparte del acumulado histórico de arriba).
+  const paidThisMonthByDoctor = useMemo(() => {
+    const map = {};
+    payments
+      .filter((p) => p.payment_date && isWithinInterval(parseISO(p.payment_date), { start: monthStart, end: monthEnd }))
+      .forEach((p) => {
+        if (!p.specialist_id) return;
+        map[p.specialist_id] = (map[p.specialist_id] || 0) + (p.amount || 0);
+      });
+    return map;
+  }, [payments, monthStart, monthEnd]);
+
+  const premiumRows = useMemo(
+    () =>
+      premiumDoctors
+        .map((doc) => {
+          const rate = doc.monthly_amount || DEFAULT_RATE;
+          const paidThisMonth = paidThisMonthByDoctor[doc.id] || 0;
+          return {
+            ...doc,
+            rate,
+            totalRevenue: revenueByDoctor[doc.id]?.total || 0,
+            lastPayment: revenueByDoctor[doc.id]?.last || null,
+            payments: revenueByDoctor[doc.id]?.list || [],
+            paidThisMonth,
+            isPaidThisMonth: paidThisMonth >= rate,
+          };
+        })
+        .sort((a, b) => b.totalRevenue - a.totalRevenue),
+    [premiumDoctors, revenueByDoctor, paidThisMonthByDoctor]
+  );
 
   const totalRevenue = useMemo(() => payments.reduce((sum, p) => sum + (p.amount || 0), 0), [payments]);
   const revenueThisMonth = useMemo(
@@ -110,9 +136,15 @@ export default function AdminPremium() {
         .reduce((sum, p) => sum + (p.amount || 0), 0),
     [payments, monthStart, monthEnd]
   );
-  const avgPerDoctor = premiumDoctors.length ? totalRevenue / premiumDoctors.length : 0;
+  // Suma automática mensual: cuánto debería entrar este mes (según el monto
+  // de cada doctor Premium) vs. cuánto ya entró vs. cuánto falta.
+  const expectedThisMonth = useMemo(() => premiumRows.reduce((sum, d) => sum + d.rate, 0), [premiumRows]);
+  const pendingThisMonth = useMemo(
+    () => premiumRows.reduce((sum, d) => sum + Math.max(d.rate - d.paidThisMonth, 0), 0),
+    [premiumRows]
+  );
 
-  // Ingresos por mes, últimos 6 meses.
+  // Ingresos por mes, últimos 6 meses (histórico, se recalcula solo).
   const chartData = useMemo(() => {
     const months = eachMonthOfInterval({ start: subMonths(now, 5), end: now });
     return months.map((month) => {
@@ -140,8 +172,34 @@ export default function AdminPremium() {
     }
   };
 
-  const openPaymentDialog = (specialistId) => {
-    setForm({ ...EMPTY_PAYMENT, specialist_id: specialistId || premiumRows[0]?.id || "" });
+  const handleAmountBlur = async (doc) => {
+    const raw = amountDrafts[doc.id];
+    if (raw === undefined) return;
+    const value = Number(raw);
+    setAmountDrafts((prev) => { const next = { ...prev }; delete next[doc.id]; return next; });
+    if (!value || value <= 0 || value === doc.rate) return;
+    const prevAmount = doc.monthly_amount;
+    setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, monthly_amount: value } : d)));
+    try {
+      await base44.entities.Specialist.update(doc.id, { monthly_amount: value });
+      toast.success(`Monto mensual de ${doc.full_name} actualizado a ${fmtMoney(value)}`);
+    } catch (e) {
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, monthly_amount: prevAmount } : d)));
+      toast.error("No se pudo actualizar el monto: " + e.message);
+    }
+  };
+
+  const openPaymentDialog = (doc) => {
+    if (doc) {
+      setForm({
+        ...EMPTY_PAYMENT,
+        specialist_id: doc.id,
+        amount: String(doc.rate),
+        period_label: currentMonthLabel,
+      });
+    } else {
+      setForm({ ...EMPTY_PAYMENT, specialist_id: premiumRows[0]?.id || "" });
+    }
     setDialogOpen(true);
   };
 
@@ -200,20 +258,21 @@ export default function AdminPremium() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground mb-6">
-        Cobro manual: marca el plan de cada doctor en Doctores, y registra aquí cada pago que recibas para llevar el control de ingresos.
+        Cobro manual: tú recibes el pago (transferencia, efectivo, etc.) y lo registras aquí. La app calcula sola quién ya pagó {currentMonthLabel.toLowerCase()} y las sumas del mes.
       </p>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* KPIs del ciclo mensual */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <KpiCard icon={Crown} label="Doctores Premium" value={premiumDoctors.length} color="text-purple-500" />
-        <KpiCard icon={DollarSign} label="Ingresos este mes" value={fmtMoney(revenueThisMonth)} color="text-emerald-600" />
-        <KpiCard icon={TrendingUp} label="Ingresos totales" value={fmtMoney(totalRevenue)} color="text-blue-500" />
-        <KpiCard icon={Receipt} label="Promedio por doctor" value={fmtMoney(avgPerDoctor)} color="text-orange-500" />
+        <KpiCard icon={TrendingUp} label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} color="text-blue-500" />
+        <KpiCard icon={DollarSign} label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} color="text-emerald-600" />
+        <KpiCard icon={AlertCircle} label={`Pendiente ${currentMonthLabel}`} value={fmtMoney(pendingThisMonth)} color="text-amber-500" />
+        <KpiCard icon={Receipt} label="Ingresos totales" value={fmtMoney(totalRevenue)} color="text-slate-500" />
       </div>
 
       {/* Gráfica de ingresos por mes */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 mb-6">
-        <h2 className="font-heading font-semibold text-sm text-foreground mb-4">Ingresos por mes (últimos 6 meses)</h2>
+        <h2 className="font-heading font-semibold text-sm text-foreground mb-4">Ingresos cobrados por mes (últimos 6 meses)</h2>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -228,7 +287,7 @@ export default function AdminPremium() {
         </ResponsiveContainer>
       </div>
 
-      {/* Tabla de doctores Premium */}
+      {/* Tabla de doctores Premium con estado de cobro del mes */}
       <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
         <div className="px-5 py-3 border-b border-border/50">
           <h2 className="font-heading font-semibold text-sm text-foreground">Doctores en plan Premium ({premiumRows.length})</h2>
@@ -262,7 +321,7 @@ export default function AdminPremium() {
                     <p className="text-xs text-muted-foreground">Último pago: {fmtDate(doc.lastPayment)}</p>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1.5" onClick={() => openPaymentDialog(doc.id)}>
+                    <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1.5" onClick={() => openPaymentDialog(doc)}>
                       <Plus className="w-3.5 h-3.5" /> Pago
                     </Button>
                     <Button
@@ -283,6 +342,33 @@ export default function AdminPremium() {
                     </button>
                   </div>
                 </div>
+
+                {/* Ciclo de cobro del mes en curso */}
+                <div className="flex items-center gap-4 px-5 pb-4 flex-wrap text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">Monto mensual:</span>
+                    <span className="text-muted-foreground">$</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={amountDrafts[doc.id] ?? doc.rate}
+                      onChange={(e) => setAmountDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                      onBlur={() => handleAmountBlur(doc)}
+                      className="rounded-lg h-7 w-20 px-2 text-xs"
+                    />
+                  </div>
+                  {doc.isPaidThisMonth ? (
+                    <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-green-100 text-green-700 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Pagado {currentMonthLabel}
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-700 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Pendiente {currentMonthLabel} ({fmtMoney(doc.rate - doc.paidThisMonth)})
+                    </span>
+                  )}
+                </div>
+
                 {expandedId === doc.id && (
                   <div className="px-5 pb-4 bg-muted/30">
                     {doc.payments.length === 0 ? (
@@ -327,7 +413,10 @@ export default function AdminPremium() {
               <label className="text-sm font-medium mb-1 block">Doctor *</label>
               <select
                 value={form.specialist_id}
-                onChange={(e) => setForm((prev) => ({ ...prev, specialist_id: e.target.value }))}
+                onChange={(e) => {
+                  const doc = premiumRows.find((d) => d.id === e.target.value);
+                  setForm((prev) => ({ ...prev, specialist_id: e.target.value, amount: doc ? String(doc.rate) : prev.amount }));
+                }}
                 className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm"
               >
                 <option value="">Selecciona un doctor</option>
