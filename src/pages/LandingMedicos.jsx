@@ -116,6 +116,8 @@ export default function LandingMedicos() {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const heroRef = useRef(null);
+  const countdown = useCountdown(LAUNCH_DATE);
+  const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
   // --- Paso 1 del registro, embebido justo debajo del hero ---
   const [specialties, setSpecialties] = useState([]);
@@ -345,6 +347,42 @@ export default function LandingMedicos() {
           </div>
           </div>
         </section>
+
+        {/* ============ COUNTDOWN DE LANZAMIENTO ============ */}
+        {!countdown.done && (
+          <section aria-labelledby="countdown-heading" className="max-w-4xl mx-auto px-4 sm:px-6 pb-10 sm:pb-14">
+            <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-8 text-center">
+              <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
+              <div className="relative">
+                <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-4">
+                  <Sparkles className="w-3 h-3 text-brand-bluePale" />
+                  Lanzamos el {launchDateLabel}
+                </span>
+                <h2 id="countdown-heading" className="font-heading font-bold text-xl sm:text-2xl text-white mb-5">
+                  Regístrate ahora y sé de los primeros médicos visibles en el directorio
+                </h2>
+
+                <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6">
+                  <CountdownBox value={countdown.days} label="Días" />
+                  <CountdownBox value={countdown.hours} label="Horas" />
+                  <CountdownBox value={countdown.minutes} label="Min" />
+                  <CountdownBox value={countdown.seconds} label="Seg" />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
+                  <div className="flex items-start gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                    <Clock className="w-4 h-4 text-brand-bluePale flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-white/90">Entre más pronto te registres, antes apareces</p>
+                  </div>
+                  <div className="flex items-start gap-2.5 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                    <CheckCircle2 className="w-4 h-4 text-brand-bluePale flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-white/90">Entre más completo esté tu perfil, más arriba sales</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ============ PASO 1 DEL REGISTRO, EMBEBIDO JUSTO DEBAJO DEL HERO ============ */}
         <section aria-labelledby="paso1-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
