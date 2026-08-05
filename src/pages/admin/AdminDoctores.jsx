@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock, Stethoscope } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock, Stethoscope, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -33,6 +33,23 @@ export default function AdminDoctores() {
       toast.success(next ? `${nombre} ahora aparece en la página principal` : `${nombre} ya no aparece en la página principal`);
     } catch (e) {
       setDoctors(prev => prev.map(d => d.id === id ? { ...d, featured: current } : d));
+      toast.error("No se pudo actualizar: " + e.message);
+    }
+  };
+
+  // Plan Premium/Gratis: el cobro se maneja manualmente fuera del sistema
+  // (transferencia, efectivo, etc.), aquí solo se refleja el resultado para
+  // que el sitio sepa a quién destacar y para llevar control interno.
+  const togglePremium = async (id, nombre, currentPlan) => {
+    const next = currentPlan === "premium" ? "gratis" : "premium";
+    const prevActivatedAt = doctors.find(d => d.id === id)?.premium_activated_at;
+    const nextActivatedAt = next === "premium" ? new Date().toISOString() : prevActivatedAt;
+    setDoctors(prev => prev.map(d => d.id === id ? { ...d, plan_slug: next, premium_activated_at: nextActivatedAt } : d));
+    try {
+      await base44.entities.Specialist.update(id, { plan_slug: next, ...(next === "premium" ? { premium_activated_at: nextActivatedAt } : {}) });
+      toast.success(next === "premium" ? `${nombre} ahora es Premium` : `${nombre} ahora es Gratis`);
+    } catch (e) {
+      setDoctors(prev => prev.map(d => d.id === id ? { ...d, plan_slug: currentPlan, premium_activated_at: prevActivatedAt } : d));
       toast.error("No se pudo actualizar: " + e.message);
     }
   };
@@ -82,6 +99,7 @@ export default function AdminDoctores() {
   };
 
   const featuredCount = useMemo(() => doctors.filter(d => d.featured).length, [doctors]);
+  const premiumCount = useMemo(() => doctors.filter(d => d.plan_slug === "premium").length, [doctors]);
 
   const handleApprove = async (id, nombre) => {
     await base44.entities.Specialist.update(id, { publication_status: "published" });
@@ -118,12 +136,20 @@ export default function AdminDoctores() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 w-fit">
-        <Star className="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" />
-        <p className="text-sm text-amber-800">
-          <span className="font-semibold">{featuredCount}</span> destacado{featuredCount !== 1 ? "s" : ""} para la página principal
-          {featuredCount > 6 && <span className="text-amber-600"> — solo se muestran los primeros 6</span>}
-        </p>
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 w-fit">
+          <Star className="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" />
+          <p className="text-sm text-amber-800">
+            <span className="font-semibold">{featuredCount}</span> destacado{featuredCount !== 1 ? "s" : ""} para la página principal
+            {featuredCount > 6 && <span className="text-amber-600"> — solo se muestran los primeros 6</span>}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-xl px-4 py-2.5 w-fit">
+          <Crown className="w-4 h-4 text-purple-500 flex-shrink-0" fill="currentColor" />
+          <p className="text-sm text-purple-800">
+            <span className="font-semibold">{premiumCount}</span> doctor{premiumCount !== 1 ? "es" : ""} en plan Premium
+          </p>
+        </div>
       </div>
 
       {/* Pestañas */}
@@ -193,6 +219,19 @@ export default function AdminDoctores() {
                     }`}
                   >
                     <Star className="w-4 h-4" fill={doc.featured ? "currentColor" : "none"} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => togglePremium(doc.id, doc.full_name, doc.plan_slug || "gratis")}
+                    title={doc.plan_slug === "premium" ? "Cambiar a plan Gratis" : "Marcar como Premium (cobro manual)"}
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 transition-colors flex-shrink-0 ${
+                      doc.plan_slug === "premium"
+                        ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                        : "bg-muted text-muted-foreground hover:bg-purple-50 hover:text-purple-600"
+                    }`}
+                  >
+                    <Crown className="w-3 h-3" fill={doc.plan_slug === "premium" ? "currentColor" : "none"} />
+                    {doc.plan_slug === "premium" ? "Premium" : "Gratis"}
                   </button>
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${doc.active !== false ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
                     {doc.active !== false ? "Activo" : "Inactivo"}
