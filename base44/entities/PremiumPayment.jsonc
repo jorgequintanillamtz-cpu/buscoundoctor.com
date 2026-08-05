@@ -1,0 +1,46 @@
+{
+  "name": "PremiumPayment",
+  "type": "object",
+  "description": "Registro manual de un pago de plan Premium hecho por un doctor. No hay cobro autom\u00e1tico: el due\u00f1o registra aqu\u00ed cada pago cuando lo recibe (transferencia, efectivo, etc.) para llevar control de ingresos.",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Doctor (relaci\u00f3n)",
+      "description": "ID del registro de la entidad Specialist"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Monto (MXN)"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Fecha de pago"
+    },
+    "period_label": {
+      "type": "string",
+      "title": "Periodo cubierto",
+      "description": "Ej. \"Agosto 2026\" o \"Ago 2026 - Ago 2027\" (anual). Texto libre."
+    },
+    "method": {
+      "type": "string",
+      "title": "M\u00e9todo de pago",
+      "enum": [
+        "transferencia",
+        "efectivo",
+        "tarjeta",
+        "otro"
+      ],
+      "default": "transferencia"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notas"
+    }
+  },
+  "required": [
+    "specialist_id",
+    "amount",
+    "payment_date"
+  ]
+}
