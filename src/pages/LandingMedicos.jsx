@@ -477,7 +477,7 @@ export default function LandingMedicos() {
                     "Múltiples consultorios",
                     "Soporte prioritario",
                   ].map((item) => (
-                    <div key={item} className="flex items-center gap-2 justify-center md:justify-start">
+                    <div key={item} className="flex items-center gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-xl px-3.5 py-2.5 text-left">
                       <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0" />
                       <span className="text-sm text-foreground">{item}</span>
                     </div>
