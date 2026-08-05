@@ -530,10 +530,10 @@ export default function LandingMedicos() {
       </main>
 
       {/* Footer mínimo */}
-      <footer className="border-t border-border/50 py-8">
+      <footer className="bg-brand-navy py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <Logo to="/" className="h-8" />
-          <p className="text-xs text-muted-foreground">
+          <Logo to="/" className="h-8 brightness-0 invert" />
+          <p className="text-xs text-white/60">
             © {new Date().getFullYear()} BuscoUnDoctor · Directorio médico en Monterrey y San Pedro Garza García
           </p>
         </div>
