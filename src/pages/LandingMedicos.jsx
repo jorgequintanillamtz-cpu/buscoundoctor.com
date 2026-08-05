@@ -238,7 +238,7 @@ export default function LandingMedicos() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-center lg:text-left">
               <h1 id="hero-heading" className="font-heading font-extrabold text-4xl sm:text-5xl leading-[1.1] text-foreground tracking-tight">
-                Regístrate <span className="text-brand-blue">gratis ahorita</span> y sé de los primeros médicos visibles en el directorio de Monterrey y San Pedro
+                Regístrate <span className="text-brand-blue">gratis ahorita</span> y sé de los primeros en el directorio
               </h1>
               {/* Subtítulo como bullets: lo importante que un médico necesita
                   saber antes de registrarse. Cada uno con un ícono que hace
