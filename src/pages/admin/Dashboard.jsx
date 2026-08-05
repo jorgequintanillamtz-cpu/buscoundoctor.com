@@ -130,7 +130,7 @@ export default function Dashboard() {
       {/* Negocio: qué tan sano está el directorio */}
       <section className="mb-8">
         <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Negocio</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} color="text-emerald-600" />
           <StatCard icon={FileText} label="Publicados / borrador" value={`${business.publishedDoctors} / ${business.draftDoctors}`} color="text-blue-500" />
           <StatCard icon={Crown} label="Doctores en Premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} color="text-purple-500" />
