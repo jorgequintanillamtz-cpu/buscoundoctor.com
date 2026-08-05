@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Star, Award, Sparkles, Plus, CreditCard, ShieldCheck,
-  ArrowRight, BadgeCheck, MessageCircle,
+  ArrowRight, BadgeCheck, MessageCircle, Clock, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,46 @@ import { base44 } from "@/api/base44Client";
 import Logo from "@/components/Logo";
 
 const CTA_URL = "/registro-medico";
+// Fecha de lanzamiento público de la plataforma (hora de Monterrey, UTC-6).
+const LAUNCH_DATE = new Date("2026-10-15T00:00:00-06:00");
 // Misma clave que lee RegistroMedico.jsx al montar: si existe, precarga el
 // paso 1 (datos) y salta directo al paso 2, para que el médico no tenga que
 // volver a escribir lo que ya lleno aquí en la landing.
 const LANDING_PREFILL_KEY = "buscoundoctor_landing_prefill";
 const ORIGIN = "https://buscoundoctor.com";
 const PAGE_URL = `${ORIGIN}/para-medicos`;
+
+// Cuenta regresiva en vivo hasta LAUNCH_DATE, actualizada cada segundo.
+function useCountdown(target) {
+  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, target.getTime() - Date.now()));
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTimeLeft(Math.max(0, target.getTime() - Date.now()));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [target]);
+
+  const totalSeconds = Math.floor(timeLeft / 1000);
+  return {
+    days: Math.floor(totalSeconds / 86400),
+    hours: Math.floor((totalSeconds % 86400) / 3600),
+    minutes: Math.floor((totalSeconds % 3600) / 60),
+    seconds: totalSeconds % 60,
+    done: timeLeft <= 0,
+  };
+}
+
+function CountdownBox({ value, label }) {
+  return (
+    <div className="bg-white/10 border border-white/15 rounded-2xl px-3 py-2.5 sm:px-5 sm:py-3.5 text-center min-w-[64px] sm:min-w-[84px]">
+      <p className="font-heading font-bold text-2xl sm:text-4xl text-white tabular-nums leading-none">
+        {String(value).padStart(2, "0")}
+      </p>
+      <p className="text-[10px] sm:text-xs text-white/70 mt-1 uppercase tracking-wide">{label}</p>
+    </div>
+  );
+}
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
