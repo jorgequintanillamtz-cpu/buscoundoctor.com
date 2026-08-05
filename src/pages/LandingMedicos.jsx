@@ -289,6 +289,17 @@ export default function LandingMedicos() {
                   </li>
                 ))}
               </ul>
+
+              <div className="mt-8">
+                <Button
+                  onClick={() => document.getElementById("paso1")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  size="lg"
+                  className="rounded-xl font-semibold gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white shadow-md hover:shadow-lg hover:scale-[1.02] transition-all h-14 px-10 text-base"
+                >
+                  Registrar mi perfil gratis
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Mockup de producto: perfil de ejemplo completo, mismo estilo
@@ -376,7 +387,7 @@ export default function LandingMedicos() {
         )}
 
         {/* ============ PASO 1 DEL REGISTRO, EMBEBIDO JUSTO DEBAJO DEL HERO ============ */}
-        <section aria-labelledby="paso1-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18">
+        <section id="paso1" aria-labelledby="paso1-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18 scroll-mt-28 sm:scroll-mt-32">
           <div className="text-center mb-6">
             <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
               Paso 1 de 4
