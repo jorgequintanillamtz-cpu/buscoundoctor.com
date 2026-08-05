@@ -230,6 +230,15 @@ export default function LandingMedicos() {
           <Logo to="/" className="h-[47px] sm:h-[52px]" />
           <CtaButton size="sm">Registrar mi perfil</CtaButton>
         </div>
+        {!countdown.done && (
+          <div className="bg-brand-bluePale/60 border-t border-brand-blue/10 py-1.5 px-2">
+            <p className="text-center text-xs sm:text-sm font-semibold text-brand-blue flex items-center justify-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Lanzamos en {countdown.days}d {countdown.hours}h {countdown.minutes}m {countdown.seconds}s</span>
+              <span className="hidden sm:inline text-brand-navy/70 font-normal">· Regístrate antes para salir más arriba</span>
+            </p>
+          </div>
+        )}
       </header>
 
       <main>
