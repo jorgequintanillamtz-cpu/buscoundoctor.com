@@ -65,7 +65,7 @@ export default function AdminDoctores() {
   // abandona el registro, el perfil queda aquí (sin dueño todavía) para que
   // se pueda dar seguimiento manualmente.
   const enProgreso = useMemo(
-    () => doctors.filter(s => s.publication_status === "draft" && !s.owner_user_id && s.registration_step),
+    () => doctors.filter(s => s.publication_status === "draft" && !s.owner_user_id),
     [doctors]
   );
 
@@ -281,7 +281,7 @@ export default function AdminDoctores() {
                       <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{doc.whatsapp || "—"}</td>
                       <td className="px-4 py-3">
                         <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
-                          {STEP_LABELS[doc.registration_step] || doc.registration_step}
+                          {STEP_LABELS[doc.registration_step] || doc.registration_step || "Sin datos de registro"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
