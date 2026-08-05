@@ -382,7 +382,7 @@ export default function LandingMedicos() {
                 <div className="grid sm:grid-cols-2 gap-3 max-w-xl mx-auto text-left">
                   <div className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
                     <Clock className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-brand-navy">Entre más pronto te registres, antes apareces</p>
+                    <p className="text-sm text-brand-navy">Entre más pronto te registres, más prioridad tienes para salir más arriba</p>
                   </div>
                   <div className="flex items-start gap-2.5 bg-brand-bluePale/40 border border-brand-blue/10 rounded-2xl px-4 py-3">
                     <CheckCircle2 className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5" />
