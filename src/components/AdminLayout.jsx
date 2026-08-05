@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, BarChart3, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus } from "lucide-react";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
 // el menú se pueda escanear de un vistazo: Resumen primero, luego lo
@@ -10,7 +10,6 @@ const adminNavSections = [
     label: "Resumen",
     items: [
       { path: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { path: "/admin/estadisticas", label: "Estadísticas", icon: BarChart3 },
     ],
   },
   {
