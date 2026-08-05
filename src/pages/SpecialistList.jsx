@@ -4,6 +4,7 @@ import { SlidersHorizontal, X, Search, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { rankSpecialists } from "@/lib/specialistRanking";
 import SearchBar from "../components/SearchBar";
 import SpecialistCard from "../components/SpecialistCard";
 import SpecialistsMapPanel from "../components/SpecialistsMapPanel";
@@ -88,7 +89,7 @@ export default function SpecialistList() {
       );
     }
 
-    return result;
+    return rankSpecialists(result);
   }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, searchQuery]);
 
   const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer].filter(Boolean).length;
