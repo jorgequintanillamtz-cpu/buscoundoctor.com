@@ -279,7 +279,7 @@ export default function LandingMedicos() {
                   referencia a su contenido, en verde. */}
               <ul className="mt-6 space-y-2.5 inline-block text-left">
                 {[
-                  { icon: Crown, text: "1 año gratis de Premium siendo Miembro Fundador" },
+                  { icon: Crown, text: "1 año gratis de Premium (ahorras $11,988 MXN) siendo Miembro Fundador" },
                   { icon: ShieldCheck, text: "Cédula profesional verificada, le da confianza a tus pacientes" },
                   { icon: MessageCircle, text: "Contacto directo por WhatsApp, sin intermediarios" },
                 ].map(({ icon: Icon, text }) => (
