@@ -5,6 +5,7 @@ import { SlidersHorizontal, X, Search, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { rankSpecialists } from "@/lib/specialistRanking";
 import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import {
@@ -123,7 +124,7 @@ export default function SpecialtyPage() {
           s.description?.toLowerCase().includes(q)
       );
     }
-    return result;
+    return rankSpecialists(result);
   }, [specialty, specialists, filterZone, filterModality, filterPrice, searchQuery]);
 
   const activeFilters = [filterZone, filterModality, filterPrice].filter(Boolean).length;
