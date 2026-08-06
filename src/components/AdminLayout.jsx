@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History } from "lucide-react";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
 // el menú se pueda escanear de un vistazo: Resumen primero, luego lo
@@ -20,6 +20,7 @@ const adminNavSections = [
       { path: "/admin/solicitudes", label: "Solicitudes de cita", icon: Calendar },
       { path: "/admin/premium", label: "Premium", icon: Crown },
       { path: "/admin/resenas", label: "Reseñas", icon: Star },
+      { path: "/admin/historial", label: "Historial", icon: History },
     ],
   },
   {
