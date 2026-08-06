@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Calendar, Phone, MessageCircle, User, Stethoscope, CheckCircle2,
-  Clock, TrendingUp, Trophy, XCircle, PhoneMissed,
+  TrendingUp, Users, Search,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -12,23 +13,9 @@ import {
   startOfWeek, eachWeekOfInterval, subWeeks, format, isWithinInterval, endOfWeek, parseISO,
 } from "date-fns";
 import { es } from "date-fns/locale";
-import { toast } from "sonner";
-
-// Estados del embudo de seguimiento: de "pendiente" (recién llegó) a un
-// desenlace real (agendada / no contestó / cancelada). Esto es lo que le
-// permite al dueño saber si sus doctores realmente están cerrando citas,
-// no solo cuántos mensajes les llegaron.
-const STATUS_META = {
-  pendiente: { label: "Pendiente", badge: "bg-amber-100 text-amber-700" },
-  contactado: { label: "Contactado", badge: "bg-blue-100 text-blue-700" },
-  agendada: { label: "Agendada", badge: "bg-emerald-100 text-emerald-700" },
-  no_contesto: { label: "No contestó", badge: "bg-slate-200 text-slate-700" },
-  cancelada: { label: "Cancelada", badge: "bg-red-100 text-red-700" },
-};
-const STATUS_ORDER = ["pendiente", "contactado", "agendada", "no_contesto", "cancelada"];
 
 function fmtDate(d) {
-  if (!d) return "";
+  if (!d) return "—";
   return new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
 }
 
@@ -38,8 +25,7 @@ const waLink = (phone) => {
 };
 
 // Tarjeta de KPI: mismo lenguaje visual que el Dashboard principal (azul y
-// navy sólidos de marca, número grande en blanco), para que se sienta como
-// parte del mismo panel de control.
+// navy sólidos de marca, número grande en blanco).
 const STAT_TONES = {
   blue: { bg: "bg-brand-blue", iconBg: "bg-white/20" },
   navy: { bg: "bg-brand-navy", iconBg: "bg-white/15" },
@@ -59,26 +45,43 @@ function KpiCard({ icon: Icon, label, value, tone = "blue" }) {
   );
 }
 
-function RequestCard({ req, onStatusChange }) {
-  const [saving, setSaving] = useState(false);
+// Un recuadro por doctor: cuántas citas ha generado el directorio para él,
+// este mes y en total. No sabemos si el doctor le dio seguimiento al
+// paciente (el contacto pasa directo a su WhatsApp), así que esto mide lo
+// único que sí podemos medir: cuántos leads le está dando la plataforma.
+function DoctorCard({ doc }) {
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl p-4">
+      <div className="flex items-center gap-3 mb-3">
+        {doc.profile_photo ? (
+          <img src={doc.profile_photo} alt={doc.full_name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-bold flex-shrink-0">
+            {(doc.full_name || "D")[0]}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate">{doc.full_name}</p>
+          <p className="text-xs text-muted-foreground truncate">{doc.specialty || "Sin especialidad"}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Desde {fmtDate(doc.created_date)}</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-brand-bluePale/50 rounded-xl px-3 py-2 text-center">
+          <p className="font-heading font-bold text-xl text-brand-navy leading-none">{doc.thisMonth}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">citas este mes</p>
+        </div>
+        <div className="bg-muted/50 rounded-xl px-3 py-2 text-center">
+          <p className="font-heading font-bold text-xl text-foreground leading-none">{doc.total}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">citas totales</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RequestCard({ req }) {
   const wa = waLink(req.phone);
-  const status = req.status || "pendiente";
-  const meta = STATUS_META[status] || STATUS_META.pendiente;
-
-  const updateStatus = async (next) => {
-    if (next === status) return;
-    setSaving(true);
-    const prev = status;
-    onStatusChange(req.id, next);
-    try {
-      await base44.entities.AppointmentRequest.update(req.id, { status: next });
-    } catch (e) {
-      onStatusChange(req.id, prev);
-      toast.error("Error: " + e.message);
-    }
-    setSaving(false);
-  };
-
   return (
     <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 space-y-3">
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -91,9 +94,6 @@ function RequestCard({ req, onStatusChange }) {
             Para {req.specialist_name || "un doctor"} · Solicitado el {fmtDate(req.created_date)}
           </p>
         </div>
-        <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${meta.badge}`}>
-          {meta.label}
-        </span>
       </div>
 
       <p className="text-sm text-foreground">{req.reason}</p>
@@ -120,20 +120,6 @@ function RequestCard({ req, onStatusChange }) {
             </Button>
           </a>
         )}
-
-        <div className="ml-auto flex items-center gap-1.5">
-          <span className="text-xs text-muted-foreground hidden sm:inline">Estado:</span>
-          <select
-            value={status}
-            disabled={saving}
-            onChange={(e) => updateStatus(e.target.value)}
-            className="h-8 text-xs rounded-lg border border-input bg-background px-2"
-          >
-            {STATUS_ORDER.map((s) => (
-              <option key={s} value={s}>{STATUS_META[s].label}</option>
-            ))}
-          </select>
-        </div>
       </div>
     </div>
   );
@@ -141,45 +127,42 @@ function RequestCard({ req, onStatusChange }) {
 
 export default function AdminSolicitudes() {
   const [requests, setRequests] = useState([]);
+  const [specialists, setSpecialists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("pendiente");
+  const [doctorSearch, setDoctorSearch] = useState("");
 
   useEffect(() => {
-    base44.entities.AppointmentRequest.list("-created_date", 1000).then((r) => {
+    Promise.all([
+      base44.entities.AppointmentRequest.list("-created_date", 2000),
+      base44.entities.Specialist.list(),
+    ]).then(([r, s]) => {
       setRequests(r);
+      setSpecialists(s);
       setLoading(false);
     });
   }, []);
 
-  const handleStatusChange = (id, status) => {
-    setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-  };
-
-  // ---- KPIs del embudo ----
+  // ---- KPIs: solo lo que sí podemos medir (leads generados), nada de
+  // "seguimiento" porque el contacto real ocurre en el WhatsApp del doctor. ----
   const kpis = useMemo(() => {
     const total = requests.length;
-    const byStatus = { pendiente: 0, contactado: 0, agendada: 0, no_contesto: 0, cancelada: 0 };
-    requests.forEach((r) => {
-      const s = r.status || "pendiente";
-      if (byStatus[s] === undefined) byStatus[s] = 0;
-      byStatus[s] += 1;
-    });
-    const contacted = total - byStatus.pendiente;
-    const contactRate = total > 0 ? Math.round((contacted / total) * 100) : 0;
-    const conversionRate = total > 0 ? Math.round((byStatus.agendada / total) * 100) : 0;
+    const now = new Date();
+    const thisMonth = requests.filter((r) => {
+      if (!r.created_date) return false;
+      const d = new Date(r.created_date);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }).length;
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const thisWeek = requests.filter((r) => r.created_date && new Date(r.created_date) >= sevenDaysAgo).length;
-    return { total, byStatus, contactRate, conversionRate, thisWeek };
+    const doctorsWithRequests = new Set(requests.map((r) => r.specialist_id).filter(Boolean)).size;
+    return { total, thisMonth, thisWeek, doctorsWithRequests };
   }, [requests]);
 
   // ---- Solicitudes por semana, últimas 8 semanas ----
   const weeklyData = useMemo(() => {
     const now = new Date();
-    const weeks = eachWeekOfInterval(
-      { start: subWeeks(now, 7), end: now },
-      { weekStartsOn: 1 }
-    );
+    const weeks = eachWeekOfInterval({ start: subWeeks(now, 7), end: now }, { weekStartsOn: 1 });
     return weeks.map((weekStart) => {
       const start = startOfWeek(weekStart, { weekStartsOn: 1 });
       const end = endOfWeek(weekStart, { weekStartsOn: 1 });
@@ -190,25 +173,28 @@ export default function AdminSolicitudes() {
     });
   }, [requests]);
 
-  // ---- Top doctores por solicitudes recibidas ----
-  const topDoctors = useMemo(() => {
-    const totals = {};
-    requests.forEach((r) => {
-      const key = r.specialist_id || r.specialist_name || "otro";
-      if (!totals[key]) totals[key] = { name: r.specialist_name || "Sin nombre", total: 0, agendadas: 0 };
-      totals[key].total += 1;
-      if ((r.status || "pendiente") === "agendada") totals[key].agendadas += 1;
-    });
-    return Object.values(totals).sort((a, b) => b.total - a.total).slice(0, 5);
-  }, [requests]);
+  // ---- Un recuadro por doctor con sus citas de este mes y su histórico ----
+  const doctorRows = useMemo(() => {
+    const now = new Date();
+    return specialists
+      .map((doc) => {
+        const docRequests = requests.filter((r) => r.specialist_id === doc.id);
+        const thisMonth = docRequests.filter((r) => {
+          if (!r.created_date) return false;
+          const d = new Date(r.created_date);
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).length;
+        return { ...doc, thisMonth, total: docRequests.length };
+      })
+      .filter((doc) => {
+        if (!doctorSearch.trim()) return true;
+        const q = doctorSearch.trim().toLowerCase();
+        return (doc.full_name || "").toLowerCase().includes(q) || (doc.specialty || "").toLowerCase().includes(q);
+      })
+      .sort((a, b) => b.total - a.total || b.thisMonth - a.thisMonth);
+  }, [specialists, requests, doctorSearch]);
 
-  const visible = useMemo(
-    () =>
-      statusFilter === "todas"
-        ? requests
-        : requests.filter((r) => (r.status || "pendiente") === statusFilter),
-    [requests, statusFilter]
-  );
+  const recentRequests = useMemo(() => requests.slice(0, 30), [requests]);
 
   if (loading) {
     return (
@@ -225,23 +211,22 @@ export default function AdminSolicitudes() {
         <h1 className="font-heading font-bold text-2xl text-foreground">Solicitudes de cita</h1>
       </div>
       <p className="text-sm text-muted-foreground mb-6">
-        No las gestionas tú directamente, pero es lo más importante del negocio: que los doctores realmente consigan
-        pacientes. Aquí le das seguimiento a todo el embudo.
+        El contacto pasa directo al WhatsApp del doctor, así que no sabemos si le dio seguimiento. Lo que sí puedes
+        ver aquí es cuántos leads le está generando la plataforma a cada uno.
       </p>
 
       {/* KPIs */}
       <section className="mb-6">
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
           <KpiCard icon={Calendar} label="Solicitudes totales" value={kpis.total} tone="blue" />
-          <KpiCard icon={Clock} label="Pendientes por contactar" value={kpis.byStatus.pendiente} tone="navy" />
-          <KpiCard icon={MessageCircle} label="Tasa de contacto" value={`${kpis.contactRate}%`} tone="blue" />
-          <KpiCard icon={CheckCircle2} label="Citas agendadas" value={kpis.byStatus.agendada} tone="navy" />
+          <KpiCard icon={TrendingUp} label="Este mes" value={kpis.thisMonth} tone="navy" />
           <KpiCard icon={TrendingUp} label="Esta semana" value={kpis.thisWeek} tone="blue" />
+          <KpiCard icon={Users} label="Doctores con citas" value={kpis.doctorsWithRequests} tone="navy" />
         </div>
       </section>
 
-      {/* Gráfica + leaderboard */}
-      <section className="mb-6 grid lg:grid-cols-[1.4fr,1fr] gap-4">
+      {/* Gráfica */}
+      <section className="mb-6">
         <div className="bg-card rounded-2xl border border-border/50 p-4 sm:p-5">
           <h2 className="font-heading font-semibold text-sm text-foreground mb-4 flex items-center gap-1.5">
             <TrendingUp className="w-4 h-4 text-muted-foreground" /> Solicitudes por semana (últimas 8 semanas)
@@ -256,75 +241,49 @@ export default function AdminSolicitudes() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        <div className="bg-card rounded-2xl border border-border/50 p-4 sm:p-5">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-4 flex items-center gap-1.5">
-            <Trophy className="w-4 h-4 text-muted-foreground" /> Doctores con más solicitudes
-          </h2>
-          {topDoctors.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">Aún no hay solicitudes.</p>
-          ) : (
-            <div className="space-y-1">
-              {topDoctors.map((d, i) => (
-                <div key={d.name + i} className="flex items-center justify-between py-2.5 border-b border-border/40 last:border-0">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs font-heading font-bold text-muted-foreground w-5 flex-shrink-0">{i + 1}</span>
-                    <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {d.agendadas > 0 && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
-                        {d.agendadas} agendada{d.agendadas !== 1 ? "s" : ""}
-                      </span>
-                    )}
-                    <span className="text-sm font-heading font-bold text-foreground">{d.total}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </section>
 
-      {/* Lista de solicitudes, filtrable por estado */}
-      <section>
+      {/* Citas por doctor */}
+      <section className="mb-6">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <h2 className="font-heading font-semibold text-base text-foreground">Solicitudes</h2>
-          <div className="flex items-center gap-1 flex-wrap bg-muted rounded-full p-1">
-            {["todas", ...STATUS_ORDER].map((s) => {
-              const count = s === "todas" ? kpis.total : kpis.byStatus[s] || 0;
-              const label = s === "todas" ? "Todas" : STATUS_META[s].label;
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setStatusFilter(s)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                    statusFilter === s ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
-                  }`}
-                >
-                  {label} ({count})
-                </button>
-              );
-            })}
+          <h2 className="font-heading font-semibold text-base text-foreground">Citas por doctor</h2>
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            <Input
+              value={doctorSearch}
+              onChange={(e) => setDoctorSearch(e.target.value)}
+              placeholder="Buscar doctor o especialidad..."
+              className="rounded-xl pl-9 h-9 text-sm w-64 max-w-full"
+            />
           </div>
         </div>
 
-        {visible.length === 0 ? (
+        {doctorRows.length === 0 ? (
           <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
-            {statusFilter === "cancelada" ? (
-              <XCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-            ) : statusFilter === "no_contesto" ? (
-              <PhoneMissed className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            ) : (
-              <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-            )}
-            <p className="text-sm font-medium text-foreground">No hay solicitudes en este estado.</p>
+            <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
+            <p className="text-sm font-medium text-foreground">No hay doctores que coincidan con la búsqueda.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {doctorRows.map((doc) => (
+              <DoctorCard key={doc.id} doc={doc} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Solicitudes recientes */}
+      <section>
+        <h2 className="font-heading font-semibold text-base text-foreground mb-4">Solicitudes recientes</h2>
+        {recentRequests.length === 0 ? (
+          <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-foreground">Todavía no hay solicitudes de cita.</p>
           </div>
         ) : (
           <div className="space-y-3 max-w-2xl">
-            {visible.map((req) => (
-              <RequestCard key={req.id} req={req} onStatusChange={handleStatusChange} />
+            {recentRequests.map((req) => (
+              <RequestCard key={req.id} req={req} />
             ))}
           </div>
         )}
