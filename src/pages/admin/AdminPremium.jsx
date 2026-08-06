@@ -426,11 +426,11 @@ export default function AdminPremium() {
 
       {/* KPIs del ciclo mensual */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <KpiCard icon={Crown} label="Doctores Premium" value={premiumDoctors.length} tone="navy" />
-        <KpiCard icon={TrendingUp} label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} tone="blue" />
-        <KpiCard icon={DollarSign} label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} tone="navy" />
-        <AlertKpiCard icon={AlertTriangle} label="Retrasados" value={lateDoctors.length} active={lateDoctors.length > 0} />
-        <KpiCard icon={Receipt} label="Ingresos totales" value={fmtMoney(totalRevenue)} tone="blue" />
+        <KpiCard label="Doctores Premium" value={premiumDoctors.length} tone="navy" />
+        <KpiCard label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} tone="blue" />
+        <KpiCard label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} tone="navy" />
+        <AlertKpiCard label="Retrasados" value={lateDoctors.length} active={lateDoctors.length > 0} />
+        <KpiCard label="Ingresos totales" value={fmtMoney(totalRevenue)} tone="blue" />
       </div>
 
       {/* Gráfica de ingresos por mes */}
