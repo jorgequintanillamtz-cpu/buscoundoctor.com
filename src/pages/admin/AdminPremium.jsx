@@ -34,29 +34,24 @@ const STAT_TONES = {
   navy: { bg: "bg-brand-navy", iconBg: "bg-white/15" },
 };
 
-function KpiCard({ icon: Icon, label, value, tone = "blue" }) {
+function KpiCard({ label, value, tone = "blue" }) {
   const t = STAT_TONES[tone] || STAT_TONES.blue;
   return (
     <div className={`${t.bg} rounded-2xl p-5`}>
-      <div className={`w-10 h-10 rounded-xl ${t.iconBg} flex items-center justify-center mb-3`}>
-        <Icon className="w-5 h-5 text-white" />
-      </div>
+      <p className="text-sm font-semibold text-white/90 mb-1.5">{label}</p>
       <p className="font-heading font-extrabold text-3xl lg:text-4xl text-white">{value}</p>
-      <p className="text-sm text-white/80 mt-1">{label}</p>
     </div>
   );
 }
 
 // Como Retrasados: naranja/rojo cuando hay algo pendiente, tono neutro claro
-// cuando todo está al día (mismo patrón que las alertas del Dashboard).
-function AlertKpiCard({ icon: Icon, label, value, active }) {
+// cuando todo está al día (mismo patrón que las alertas del Dashboard). Sin
+// ícono ni burbuja: la etiqueta va arriba del número, en texto plano.
+function AlertKpiCard({ label, value, active }) {
   return (
     <div className={`rounded-2xl p-5 ${active ? "bg-red-500" : "bg-brand-bluePale"}`}>
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${active ? "bg-white/20" : "bg-white"}`}>
-        <Icon className={`w-5 h-5 ${active ? "text-white" : "text-brand-navy"}`} />
-      </div>
+      <p className={`text-sm font-semibold mb-1.5 ${active ? "text-white/90" : "text-brand-navy/80"}`}>{label}</p>
       <p className={`font-heading font-extrabold text-3xl lg:text-4xl ${active ? "text-white" : "text-brand-navy"}`}>{value}</p>
-      <p className={`text-sm mt-1 ${active ? "text-white/80" : "text-brand-navy/70"}`}>{label}</p>
     </div>
   );
 }
