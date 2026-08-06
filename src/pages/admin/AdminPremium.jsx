@@ -17,6 +17,7 @@ import {
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 
 const METHOD_LABELS = {
   transferencia: "Transferencia",
@@ -255,11 +256,12 @@ export default function AdminPremium() {
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const [specs, pays] = await Promise.all([
+    const [specs, pays, premiumStatuses] = await Promise.all([
       base44.entities.Specialist.list(),
       base44.entities.PremiumPayment.list("-payment_date", 1000),
+      loadPremiumStatuses(),
     ]);
-    setSpecialists(specs);
+    setSpecialists(mergePremiumStatus(specs, premiumStatuses));
     setPayments(pays);
     setLoading(false);
   };
@@ -378,7 +380,8 @@ export default function AdminPremium() {
     const prevAmount = doc.monthly_amount;
     setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, monthly_amount: value } : d)));
     try {
-      await base44.entities.Specialist.update(doc.id, { monthly_amount: value });
+      const statusId = await savePremiumStatus(doc, { monthly_amount: value });
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, _premiumStatusId: statusId } : d)));
       toast.success(`Monto mensual de ${doc.full_name} actualizado a ${fmtMoney(value)}`);
       logActivity({
         type: "monto_actualizado",
@@ -401,7 +404,8 @@ export default function AdminPremium() {
     const prevValue = doc.billing_day;
     setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, billing_day: value } : d)));
     try {
-      await base44.entities.Specialist.update(doc.id, { billing_day: value });
+      const statusId = await savePremiumStatus(doc, { billing_day: value });
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, _premiumStatusId: statusId } : d)));
       toast.success(`Día de cobro de ${doc.full_name} actualizado al día ${value}`);
       logActivity({
         type: "dia_cobro_actualizado",
@@ -424,7 +428,8 @@ export default function AdminPremium() {
     const prevValue = doc.trial_ends_at || null;
     setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: iso } : d)));
     try {
-      await base44.entities.Specialist.update(doc.id, { trial_ends_at: iso });
+      const statusId = await savePremiumStatus(doc, { trial_ends_at: iso });
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, _premiumStatusId: statusId } : d)));
       toast.success(`${doc.full_name} en prueba hasta el ${fmtDate(iso)}`);
       logActivity({
         type: "prueba_iniciada",
@@ -442,7 +447,8 @@ export default function AdminPremium() {
     const prevValue = doc.trial_ends_at || null;
     setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: null } : d)));
     try {
-      await base44.entities.Specialist.update(doc.id, { trial_ends_at: null });
+      const statusId = await savePremiumStatus(doc, { trial_ends_at: null });
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, _premiumStatusId: statusId } : d)));
       toast.success(`Prueba de ${doc.full_name} terminada`);
       logActivity({
         type: "prueba_terminada",
