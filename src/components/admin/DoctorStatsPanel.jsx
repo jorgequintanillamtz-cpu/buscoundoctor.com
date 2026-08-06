@@ -20,12 +20,14 @@ const SOURCE_PAGE_LABELS = {
   otro: "Otro",
 };
 
-function KpiCard({ icon: Icon, label, value, color }) {
+function KpiCard({ icon: Icon, label, value, iconBg, iconColor }) {
   return (
-    <div className="bg-card rounded-2xl border border-border/50 p-5">
-      <Icon className={`w-6 h-6 ${color} mb-3`} />
-      <p className="font-heading font-bold text-2xl text-foreground">{value.toLocaleString("es-MX")}</p>
-      <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
+    <div className="bg-card rounded-xl border border-border/50 p-3.5">
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 ${iconBg} ${iconColor}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <p className="font-heading font-bold text-lg text-foreground leading-tight">{value.toLocaleString("es-MX")}</p>
+      <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{label}</p>
     </div>
   );
 }
@@ -150,10 +152,10 @@ export default function DoctorStatsPanel() {
   return (
     <div>
       {/* KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <KpiCard icon={Eye} label="Impresiones este mes" value={kpis.impressionsThisMonth} color="text-brand-blue" />
-        <KpiCard icon={MousePointerClick} label="Clicks al perfil este mes" value={kpis.clicksThisMonth} color="text-brand-navy" />
-        <KpiCard icon={CalendarCheck} label="Citas agendadas este mes" value={kpis.contactsThisMonth} color="text-emerald-600" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-5">
+        <KpiCard icon={Eye} label="Impresiones este mes" value={kpis.impressionsThisMonth} iconBg="bg-brand-bluePale" iconColor="text-brand-blue" />
+        <KpiCard icon={MousePointerClick} label="Clicks al perfil este mes" value={kpis.clicksThisMonth} iconBg="bg-slate-100" iconColor="text-brand-navy" />
+        <KpiCard icon={CalendarCheck} label="Citas agendadas este mes" value={kpis.contactsThisMonth} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
       </div>
 
       {/* Gráfica */}
