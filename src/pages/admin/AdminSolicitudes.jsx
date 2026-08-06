@@ -136,6 +136,9 @@ export default function AdminSolicitudes() {
   const [specialists, setSpecialists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [doctorSearch, setDoctorSearch] = useState("");
+  const [specialtyFilter, setSpecialtyFilter] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc"); // "desc" = más citas primero, "asc" = menos citas primero
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -180,25 +183,39 @@ export default function AdminSolicitudes() {
   }, [requests]);
 
   // ---- Un recuadro por doctor con sus citas de este mes y su histórico ----
-  const doctorRows = useMemo(() => {
+  const allDoctorRows = useMemo(() => {
     const now = new Date();
-    return specialists
-      .map((doc) => {
-        const docRequests = requests.filter((r) => r.specialist_id === doc.id);
-        const thisMonth = docRequests.filter((r) => {
-          if (!r.created_date) return false;
-          const d = new Date(r.created_date);
-          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-        }).length;
-        return { ...doc, thisMonth, total: docRequests.length };
-      })
+    return specialists.map((doc) => {
+      const docRequests = requests.filter((r) => r.specialist_id === doc.id);
+      const thisMonth = docRequests.filter((r) => {
+        if (!r.created_date) return false;
+        const d = new Date(r.created_date);
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      }).length;
+      return { ...doc, thisMonth, total: docRequests.length };
+    });
+  }, [specialists, requests]);
+
+  const specialtyOptions = useMemo(
+    () => [...new Set(allDoctorRows.map((d) => d.specialty).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es")),
+    [allDoctorRows]
+  );
+
+  const doctorRows = useMemo(() => {
+    return allDoctorRows
       .filter((doc) => {
+        if (specialtyFilter && doc.specialty !== specialtyFilter) return false;
         if (!doctorSearch.trim()) return true;
         const q = doctorSearch.trim().toLowerCase();
         return (doc.full_name || "").toLowerCase().includes(q) || (doc.specialty || "").toLowerCase().includes(q);
       })
-      .sort((a, b) => b.total - a.total || b.thisMonth - a.thisMonth);
-  }, [specialists, requests, doctorSearch]);
+      .sort((a, b) => (sortOrder === "desc" ? b.total - a.total : a.total - b.total));
+  }, [allDoctorRows, doctorSearch, specialtyFilter, sortOrder]);
+
+  const selectedDoctorRequests = useMemo(
+    () => (selectedDoctor ? requests.filter((r) => r.specialist_id === selectedDoctor.id) : []),
+    [requests, selectedDoctor]
+  );
 
   const recentRequests = useMemo(() => requests.slice(0, 30), [requests]);
 
