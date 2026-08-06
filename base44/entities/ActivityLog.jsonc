@@ -1,0 +1,48 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "title": "Tipo de movimiento",
+      "enum": [
+        "premium_activado",
+        "premium_desactivado",
+        "prueba_iniciada",
+        "prueba_terminada",
+        "perfil_activado",
+        "perfil_desactivado",
+        "destacado_activado",
+        "destacado_desactivado",
+        "pago_registrado",
+        "pago_eliminado",
+        "monto_actualizado",
+        "dia_cobro_actualizado",
+        "doctor_aprobado",
+        "doctor_rechazado",
+        "doctor_eliminado",
+        "registro_eliminado",
+        "documento_aprobado",
+        "documento_rechazado",
+        "resena_aprobada",
+        "resena_eliminada"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "title": "Descripci\u00f3n"
+    },
+    "specialist_id": {
+      "type": "string",
+      "title": "Doctor relacionado (ID)"
+    },
+    "specialist_name": {
+      "type": "string",
+      "title": "Nombre del doctor"
+    }
+  },
+  "required": [
+    "type",
+    "description"
+  ]
+}
