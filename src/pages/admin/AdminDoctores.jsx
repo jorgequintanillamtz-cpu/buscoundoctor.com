@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
@@ -37,8 +38,9 @@ export default function AdminDoctores() {
     Promise.all([
       base44.entities.Specialist.list("-created_date"),
       base44.entities.AppointmentRequest.list("-created_date", 2000),
-    ]).then(([d, r]) => {
-      setDoctors(d);
+      loadPremiumStatuses(),
+    ]).then(([d, r, premiumStatuses]) => {
+      setDoctors(mergePremiumStatus(d, premiumStatuses));
       setRequests(r);
       setLoading(false);
     });
@@ -76,14 +78,18 @@ export default function AdminDoctores() {
 
   // Plan Premium/Gratis: el cobro se maneja manualmente fuera del sistema
   // (transferencia, efectivo, etc.), aquí solo se refleja el resultado para
-  // que el sitio sepa a quién destacar y para llevar control interno.
-  const togglePremium = async (id, nombre, currentPlan) => {
+  // que el sitio sepa a quién destacar y para llevar control interno. El
+  // estado vive en la entidad PremiumStatus, no en Specialist.
+  const togglePremium = async (doc) => {
+    const { id, full_name: nombre } = doc;
+    const currentPlan = doc.plan_slug || "gratis";
     const next = currentPlan === "premium" ? "gratis" : "premium";
-    const prevActivatedAt = doctors.find(d => d.id === id)?.premium_activated_at;
+    const prevActivatedAt = doc.premium_activated_at;
     const nextActivatedAt = next === "premium" ? new Date().toISOString() : prevActivatedAt;
     setDoctors(prev => prev.map(d => d.id === id ? { ...d, plan_slug: next, premium_activated_at: nextActivatedAt } : d));
     try {
-      await base44.entities.Specialist.update(id, { plan_slug: next, premium_activated_at: nextActivatedAt || null });
+      const statusId = await savePremiumStatus(doc, { plan_slug: next, premium_activated_at: nextActivatedAt || null });
+      setDoctors(prev => prev.map(d => d.id === id ? { ...d, _premiumStatusId: statusId } : d));
       toast.success(next === "premium" ? `${nombre} ahora es Premium` : `${nombre} ahora es Gratis`);
       logActivity({
         type: next === "premium" ? "premium_activado" : "premium_desactivado",
@@ -436,7 +442,7 @@ export default function AdminDoctores() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => togglePremium(doc.id, doc.full_name, doc.plan_slug || "gratis")}
+                        onClick={() => togglePremium(doc)}
                         title={doc.plan_slug === "premium" ? "Cambiar a plan Gratis" : "Marcar como Premium (cobro manual)"}
                         className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 transition-colors flex-shrink-0 ${
                           doc.plan_slug === "premium"
