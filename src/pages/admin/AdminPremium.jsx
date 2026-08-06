@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Crown, Plus, Loader2, Trash2,
-  ChevronDown, ChevronUp, Stethoscope, AlertTriangle, CheckCircle2, Ban, Power,
+  ChevronDown, ChevronUp, Stethoscope, AlertTriangle, CheckCircle2, Ban, Power, Hourglass,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -69,6 +69,7 @@ function PremiumDoctorCard({
   expanded, onToggleExpand, onDeletePayment,
   amountDraft, onAmountChange, onAmountBlur,
   billingDayDraft, onBillingDayChange, onBillingDayBlur,
+  onStartTrial, onEndTrial,
 }) {
   return (
     <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
@@ -84,7 +85,11 @@ function PremiumDoctorCard({
           <p className="font-medium text-foreground truncate text-sm">{doc.full_name}</p>
           <p className="text-xs text-muted-foreground truncate">{doc.specialty}</p>
         </div>
-        {doc.isUpToDate ? (
+        {doc.isTrial ? (
+          <span className="text-[11px] px-2 py-1 rounded-full font-semibold bg-brand-bluePale text-brand-navy flex items-center gap-1 flex-shrink-0">
+            <Hourglass className="w-3 h-3" /> Prueba · {doc.trialDaysLeft} día{doc.trialDaysLeft !== 1 ? "s" : ""} más
+          </span>
+        ) : doc.isUpToDate ? (
           <span className="text-[11px] px-2 py-1 rounded-full font-semibold bg-green-100 text-green-700 flex items-center gap-1 flex-shrink-0">
             <CheckCircle2 className="w-3 h-3" /> Al día
           </span>
@@ -120,30 +125,61 @@ function PremiumDoctorCard({
             className="rounded-lg h-7 w-20 px-1.5 text-xs"
           />
         </div>
-        <span className="text-muted-foreground">Último pago: {fmtDate(doc.lastPayment)}</span>
+        <span className="text-muted-foreground">
+          {doc.isTrial ? `Prueba termina: ${fmtDate(doc.trialEndsAt)}` : `Último pago: ${fmtDate(doc.lastPayment)}`}
+        </span>
       </div>
 
       <div className="px-4 pb-4 flex items-center gap-1.5 flex-wrap">
         <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1.5" onClick={onOpenPayment}>
           <Plus className="w-3.5 h-3.5" /> Pago
         </Button>
-        {!doc.isUpToDate && (
+        {doc.isTrial ? (
           <Button
             size="sm"
             variant="outline"
-            className={`rounded-lg h-8 gap-1.5 ${
-              doc.active
-                ? "text-destructive border-destructive/30 hover:bg-destructive/5"
-                : "text-emerald-600 border-emerald-300 hover:bg-emerald-50"
-            }`}
-            onClick={onToggleActive}
+            className="rounded-lg h-8 gap-1.5 text-brand-navy border-brand-blue/30 hover:bg-brand-bluePale"
+            onClick={onEndTrial}
           >
-            {doc.active ? (
-              <><Ban className="w-3.5 h-3.5" /> Desactivar perfil</>
-            ) : (
-              <><Power className="w-3.5 h-3.5" /> Reactivar perfil</>
-            )}
+            <Hourglass className="w-3.5 h-3.5" /> Terminar prueba
           </Button>
+        ) : (
+          <>
+            {!doc.isUpToDate && (
+              <Button
+                size="sm"
+                variant="outline"
+                className={`rounded-lg h-8 gap-1.5 ${
+                  doc.active
+                    ? "text-destructive border-destructive/30 hover:bg-destructive/5"
+                    : "text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                }`}
+                onClick={onToggleActive}
+              >
+                {doc.active ? (
+                  <><Ban className="w-3.5 h-3.5" /> Desactivar perfil</>
+                ) : (
+                  <><Power className="w-3.5 h-3.5" /> Reactivar perfil</>
+                )}
+              </Button>
+            )}
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                if (e.target.value) {
+                  onStartTrial(Number(e.target.value));
+                  e.target.value = "";
+                }
+              }}
+              className="h-8 text-xs rounded-lg border border-input bg-background px-2 text-muted-foreground"
+            >
+              <option value="">Poner en prueba…</option>
+              <option value="7">7 días</option>
+              <option value="14">14 días</option>
+              <option value="30">30 días</option>
+              <option value="60">60 días</option>
+            </select>
+          </>
         )}
         <button
           type="button"
