@@ -60,6 +60,20 @@ const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDi
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—");
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+// Con pruebas de 1/3/12 meses, mostrar el conteo en días se ve raro para
+// las largas ("364 días más"); se redondea a la unidad más legible.
+const fmtTrialRemaining = (days) => {
+  if (days >= 60) {
+    const months = Math.round(days / 30);
+    return `${months} mes${months !== 1 ? "es" : ""} más`;
+  }
+  if (days >= 14) {
+    const weeks = Math.round(days / 7);
+    return `${weeks} semana${weeks !== 1 ? "s" : ""} más`;
+  }
+  return `${days} día${days !== 1 ? "s" : ""} más`;
+};
+
 // Tarjeta de un doctor Premium: su ciclo de cobro (día del mes que le toca
 // pagar, monto), si está al día o cuántos días lleva de retraso, y las
 // acciones disponibles (registrar pago, desactivar perfil si no ha pagado,
@@ -87,7 +101,7 @@ function PremiumDoctorCard({
         </div>
         {doc.isTrial ? (
           <span className="text-[11px] px-2 py-1 rounded-full font-semibold bg-brand-bluePale text-brand-navy flex items-center gap-1 flex-shrink-0">
-            <Hourglass className="w-3 h-3" /> Prueba · {doc.trialDaysLeft} día{doc.trialDaysLeft !== 1 ? "s" : ""} más
+            <Hourglass className="w-3 h-3" /> Prueba · {fmtTrialRemaining(doc.trialDaysLeft)}
           </span>
         ) : doc.isUpToDate ? (
           <span className="text-[11px] px-2 py-1 rounded-full font-semibold bg-green-100 text-green-700 flex items-center gap-1 flex-shrink-0">
