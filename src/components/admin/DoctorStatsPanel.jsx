@@ -26,7 +26,7 @@ function KpiCard({ icon: Icon, label, value, cardBg, cardBorder, iconColor, labe
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 bg-white/70 ${iconColor}`}>
         <Icon className="w-4 h-4" />
       </div>
-      <p className="font-heading font-bold text-lg text-foreground leading-tight">{value.toLocaleString("es-MX")}</p>
+      <p className="font-heading font-extrabold text-2xl text-foreground leading-tight">{value.toLocaleString("es-MX")}</p>
       <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${labelBg} ${labelText}`}>
         {label}
       </span>
