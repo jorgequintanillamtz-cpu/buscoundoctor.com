@@ -270,30 +270,77 @@ export default function AdminSolicitudes() {
       <section className="mb-6">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <h2 className="font-heading font-semibold text-base text-foreground">Citas por doctor</h2>
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-            <Input
-              value={doctorSearch}
-              onChange={(e) => setDoctorSearch(e.target.value)}
-              placeholder="Buscar doctor o especialidad..."
-              className="rounded-xl pl-9 h-9 text-sm w-64 max-w-full"
-            />
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                value={doctorSearch}
+                onChange={(e) => setDoctorSearch(e.target.value)}
+                placeholder="Buscar doctor..."
+                className="rounded-xl pl-9 h-9 text-sm w-48 max-w-full"
+              />
+            </div>
+            <select
+              value={specialtyFilter}
+              onChange={(e) => setSpecialtyFilter(e.target.value)}
+              className="h-9 text-sm rounded-xl border border-input bg-background px-3"
+            >
+              <option value="">Todas las especialidades</option>
+              {specialtyOptions.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setSortOrder((o) => (o === "desc" ? "asc" : "desc"))}
+              className="h-9 text-sm rounded-xl border border-input bg-background px-3 flex items-center gap-1.5 text-foreground hover:bg-muted"
+            >
+              <ArrowUpDown className="w-3.5 h-3.5" />
+              {sortOrder === "desc" ? "Más citas primero" : "Menos citas primero"}
+            </button>
           </div>
         </div>
 
         {doctorRows.length === 0 ? (
           <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
             <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
-            <p className="text-sm font-medium text-foreground">No hay doctores que coincidan con la búsqueda.</p>
+            <p className="text-sm font-medium text-foreground">No hay doctores que coincidan con los filtros.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {doctorRows.map((doc) => (
-              <DoctorCard key={doc.id} doc={doc} />
+              <DoctorCard key={doc.id} doc={doc} onClick={() => setSelectedDoctor(doc)} />
             ))}
           </div>
         )}
       </section>
+
+      {/* Detalle: todas las citas generadas para el doctor seleccionado */}
+      <Dialog open={!!selectedDoctor} onOpenChange={(open) => !open && setSelectedDoctor(null)}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2">
+              {selectedDoctor?.profile_photo ? (
+                <img src={selectedDoctor.profile_photo} alt={selectedDoctor.full_name} className="w-8 h-8 rounded-full object-cover" />
+              ) : (
+                <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                  {(selectedDoctor?.full_name || "D")[0]}
+                </span>
+              )}
+              {selectedDoctor?.full_name} · {selectedDoctorRequests.length} cita{selectedDoctorRequests.length !== 1 ? "s" : ""} en total
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {selectedDoctorRequests.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Este doctor todavía no ha recibido citas.</p>
+            ) : (
+              selectedDoctorRequests.map((req) => (
+                <RequestCard key={req.id} req={req} hideDoctor />
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Solicitudes recientes */}
       <section>
