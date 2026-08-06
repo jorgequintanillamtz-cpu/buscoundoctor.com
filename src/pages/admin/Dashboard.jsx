@@ -36,7 +36,7 @@ function AlertCard({ to, icon: Icon, label, count }) {
         <Icon className="w-4 h-4" />
       </span>
       <div className="min-w-0">
-        <p className={`font-heading font-extrabold text-2xl leading-none ${urgent ? "text-white" : "text-foreground"}`}>
+        <p className={`font-heading font-extrabold text-4xl leading-none ${urgent ? "text-white" : "text-foreground"}`}>
           {count}
         </p>
         <span
@@ -58,7 +58,7 @@ function StatCard({ icon: Icon, label, value, tone = "blue" }) {
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 ${c.iconBg} ${c.iconText}`}>
         <Icon className="w-4 h-4" />
       </div>
-      <p className="font-heading font-extrabold text-2xl text-white leading-tight">{value}</p>
+      <p className="font-heading font-extrabold text-4xl text-white leading-tight">{value}</p>
       <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${c.labelBg} ${c.labelText}`}>
         {label}
       </span>
