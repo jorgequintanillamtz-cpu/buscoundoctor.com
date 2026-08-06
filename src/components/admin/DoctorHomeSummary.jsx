@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Eye, MousePointerClick, Stethoscope } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, Tooltip } from "recharts";
 import { eachDayOfInterval, subDays, format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -54,18 +54,12 @@ export default function DoctorHomeSummary({ specialistId }) {
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="flex gap-6 flex-shrink-0">
           <div>
-            <div className="flex items-center gap-1.5 text-brand-blue">
-              <Eye className="w-4 h-4" />
-              <span className="font-heading font-bold text-xl text-foreground">{totalImpressions}</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Impresiones</p>
+            <p className="text-sm font-semibold text-foreground mb-0.5">Impresiones</p>
+            <span className="font-heading font-extrabold text-xl text-foreground">{totalImpressions}</span>
           </div>
           <div>
-            <div className="flex items-center gap-1.5 text-brand-navy">
-              <MousePointerClick className="w-4 h-4" />
-              <span className="font-heading font-bold text-xl text-foreground">{totalClicks}</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Clicks al perfil</p>
+            <p className="text-sm font-semibold text-foreground mb-0.5">Clicks al perfil</p>
+            <span className="font-heading font-extrabold text-xl text-foreground">{totalClicks}</span>
           </div>
         </div>
         <div className="w-full flex-1" style={{ height: 90 }}>
