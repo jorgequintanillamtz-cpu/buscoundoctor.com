@@ -42,23 +42,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const [specialists, specialties, zones, posts, requests, documents, reviews, payments] = await Promise.all([
+      const [specialists, payments] = await Promise.all([
         base44.entities.Specialist.list(),
-        base44.entities.Specialty.list(),
-        base44.entities.Zone.list(),
-        base44.entities.BlogPost.list(),
-        base44.entities.AppointmentRequest.list(),
-        base44.entities.SpecialistDocument.list(),
-        base44.entities.Review.list(),
         base44.entities.PremiumPayment.list(),
       ]);
-
-      const pendingDocs = documents.filter(
-        (d) => d.upload_status === "uploaded" || d.upload_status === "under_review"
-      ).length;
-      const pendingDoctors = specialists.filter((s) => s.publication_status === "pending_review").length;
-      const pendingReviews = reviews.filter((r) => !r.approved).length;
-      const pendingRequests = requests.filter((r) => (r.status || "pendiente") === "pendiente").length;
 
       const activeDoctors = specialists.filter((s) => s.active).length;
       const premiumDoctors = specialists.filter((s) => s.plan_slug === "premium").length;
@@ -81,8 +68,6 @@ export default function Dashboard() {
       ).length;
 
       setData({
-        catalog: { specialties: specialties.length, zones: zones.length, posts: posts.length },
-        alerts: { pendingDocs, pendingDoctors, pendingReviews, pendingRequests },
         business: {
           activeDoctors,
           newLast30,
@@ -103,16 +88,13 @@ export default function Dashboard() {
     );
   }
 
-  const { catalog, alerts, business } = data;
-  const totalPending = alerts.pendingDocs + alerts.pendingDoctors + alerts.pendingReviews + alerts.pendingRequests;
+  const { business } = data;
 
   return (
     <div>
       <h1 className="font-heading font-bold text-2xl text-foreground mb-1">Dashboard</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        {totalPending > 0
-          ? `Tienes ${totalPending} cosa${totalPending !== 1 ? "s" : ""} pendiente${totalPending !== 1 ? "s" : ""} de revisar.`
-          : "No hay nada pendiente por ahora."}
+        Resumen general del negocio y actividad de la plataforma.
       </p>
 
       {/* Resumen: los 4 números que más le importan al dueño, hasta arriba */}
@@ -136,26 +118,6 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Catálogo: contenido de soporte del sitio */}
-      <section className="mb-6">
-        <SectionLabel icon={Heart}>Catálogo</SectionLabel>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
-          <StatCard label="Especialidades" value={catalog.specialties} tone="blue" />
-          <StatCard label="Zonas" value={catalog.zones} tone="navy" />
-          <StatCard label="Artículos" value={catalog.posts} tone="blue" />
-        </div>
-      </section>
-
-      {/* Pendientes: hasta abajo, con link directo a cada bandeja */}
-      <section>
-        <SectionLabel icon={ShieldCheck}>Pendientes</SectionLabel>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <AlertCard to="/admin/verificaciones" label="Cédulas por revisar" count={alerts.pendingDocs} />
-          <AlertCard to="/admin/doctores" label="Doctores en revisión" count={alerts.pendingDoctors} />
-          <AlertCard to="/admin/resenas" label="Reseñas sin aprobar" count={alerts.pendingReviews} />
-          <AlertCard to="/admin/solicitudes" label="Solicitudes sin contactar" count={alerts.pendingRequests} />
-        </div>
-      </section>
     </div>
   );
 }
