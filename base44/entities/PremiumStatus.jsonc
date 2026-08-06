@@ -1,0 +1,51 @@
+{
+  "name": "PremiumStatus",
+  "type": "object",
+  "description": "Estado actual del plan Premium de cada doctor (plan, fecha de activaci\u00f3n, monto, d\u00eda de cobro, prueba). Vive separado de Specialist a prop\u00f3sito: los campos que se le agregan despu\u00e9s a una entidad ya existente son los que la plataforma ha borrado solos m\u00e1s de una vez.",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Doctor (relaci\u00f3n)",
+      "description": "ID del registro de la entidad Specialist. Un registro de estado por doctor."
+    },
+    "plan_slug": {
+      "type": "string",
+      "title": "Plan actual",
+      "enum": [
+        "gratis",
+        "premium"
+      ],
+      "default": "gratis"
+    },
+    "premium_activated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Fecha de activaci\u00f3n de Premium"
+    },
+    "monthly_amount": {
+      "type": "number",
+      "title": "Monto mensual Premium (MXN)",
+      "description": "Monto que este doctor paga al mes por el plan Premium. Si est\u00e1 vac\u00edo, se usa la tarifa por defecto ($999 MXN)."
+    },
+    "billing_day": {
+      "type": "number",
+      "title": "D\u00eda de cobro (d\u00eda del mes)",
+      "description": "D\u00eda del mes (1-28) en que le toca pagar su mensualidad Premium a este doctor.",
+      "minimum": 1,
+      "maximum": 28,
+      "multipleOf": 1
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Fin del per\u00edodo de prueba Premium",
+      "description": "Mientras esta fecha sea futura, el doctor est\u00e1 en modo prueba: no cuenta en las m\u00e9tricas de ventas ni puede aparecer como retrasado en su pago."
+    }
+  },
+  "required": [
+    "specialist_id"
+  ],
+  "uniqueFields": [
+    "specialist_id"
+  ]
+}
