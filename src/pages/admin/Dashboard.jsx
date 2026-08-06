@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
-  Heart, Stethoscope, ShieldCheck, TrendingUp, BarChart3,
+  Stethoscope, TrendingUp, BarChart3,
 } from "lucide-react";
 
 const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
@@ -15,29 +15,6 @@ const STAT_TONES = {
   blue: { bg: "bg-brand-blue" },
   navy: { bg: "bg-brand-navy" },
 };
-
-// Pendientes usa ámbar sólido (no pastel) cuando hay algo por revisar, para
-// que la urgencia se note; en 0 se queda neutra. Sin ícono ni burbuja: solo
-// texto, con la etiqueta arriba del número y en tamaño grande para que se
-// lea bien.
-function AlertCard({ to, label, count }) {
-  const urgent = count > 0;
-  return (
-    <Link
-      to={to}
-      className={`block rounded-xl border p-3.5 transition-colors ${
-        urgent ? "bg-amber-500 border-amber-500 hover:bg-amber-600" : "bg-card border-border/50 hover:border-border"
-      }`}
-    >
-      <p className={`text-sm font-semibold mb-1 ${urgent ? "text-white/90" : "text-muted-foreground"}`}>
-        {label}
-      </p>
-      <p className={`font-heading font-extrabold text-4xl leading-tight ${urgent ? "text-white" : "text-foreground"}`}>
-        {count}
-      </p>
-    </Link>
-  );
-}
 
 function StatCard({ label, value, tone = "blue" }) {
   const c = STAT_TONES[tone];
