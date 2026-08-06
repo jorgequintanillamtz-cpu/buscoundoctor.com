@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Check, Trash2, Star, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { logActivity } from "@/api/activityLog";
 
 function StarDisplay({ rating }) {
   return (
@@ -28,15 +29,27 @@ export default function AdminReviews() {
   useEffect(() => { load(); }, []);
 
   const approve = async (id) => {
+    const review = reviews.find((r) => r.id === id);
     await base44.entities.Review.update(id, { approved: true });
     toast.success("Reseña aprobada");
+    logActivity({
+      type: "resena_aprobada",
+      description: `Se aprobó la reseña de ${review?.patient_name || "un paciente"} para ${review?.specialist_name || "un doctor"}`,
+      specialistName: review?.specialist_name || "",
+    });
     load();
   };
 
   const remove = async (id) => {
     if (!confirm("¿Eliminar esta reseña?")) return;
+    const review = reviews.find((r) => r.id === id);
     await base44.entities.Review.delete(id);
     toast.success("Reseña eliminada");
+    logActivity({
+      type: "resena_eliminada",
+      description: `Se eliminó la reseña de ${review?.patient_name || "un paciente"} para ${review?.specialist_name || "un doctor"}`,
+      specialistName: review?.specialist_name || "",
+    });
     load();
   };
 
