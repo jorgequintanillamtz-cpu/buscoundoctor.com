@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
-  Users, Heart, MapPin, FileText, Stethoscope,
-  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown, BarChart3, DollarSign,
+  Heart, Stethoscope, ShieldCheck, TrendingUp, BarChart3,
 } from "lucide-react";
 
 const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
@@ -13,55 +12,39 @@ const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDi
 // footer, botones): azul y navy sólidos con texto blanco, en vez de los
 // tonos pastel apagados. Dos variantes para dar un poco de ritmo visual.
 const STAT_TONES = {
-  blue: { bg: "bg-brand-blue", iconBg: "bg-white/20", iconText: "text-white", labelBg: "bg-white/20", labelText: "text-white" },
-  navy: { bg: "bg-brand-navy", iconBg: "bg-white/15", iconText: "text-white", labelBg: "bg-white/15", labelText: "text-white" },
+  blue: { bg: "bg-brand-blue" },
+  navy: { bg: "bg-brand-navy" },
 };
 
 // Pendientes usa ámbar sólido (no pastel) cuando hay algo por revisar, para
-// que la urgencia se note; en 0 se queda neutra.
-function AlertCard({ to, icon: Icon, label, count }) {
+// que la urgencia se note; en 0 se queda neutra. Sin ícono ni burbuja: solo
+// texto, con la etiqueta arriba del número y en tamaño grande para que se
+// lea bien.
+function AlertCard({ to, label, count }) {
   const urgent = count > 0;
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2.5 rounded-xl border p-3 transition-colors ${
+      className={`block rounded-xl border p-3.5 transition-colors ${
         urgent ? "bg-amber-500 border-amber-500 hover:bg-amber-600" : "bg-card border-border/50 hover:border-border"
       }`}
     >
-      <span
-        className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          urgent ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
-        }`}
-      >
-        <Icon className="w-4 h-4" />
-      </span>
-      <div className="min-w-0">
-        <p className={`font-heading font-extrabold text-4xl leading-none ${urgent ? "text-white" : "text-foreground"}`}>
-          {count}
-        </p>
-        <span
-          className={`inline-block text-[10px] font-semibold leading-tight mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${
-            urgent ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {label}
-        </span>
-      </div>
+      <p className={`text-sm font-semibold mb-1 ${urgent ? "text-white/90" : "text-muted-foreground"}`}>
+        {label}
+      </p>
+      <p className={`font-heading font-extrabold text-4xl leading-tight ${urgent ? "text-white" : "text-foreground"}`}>
+        {count}
+      </p>
     </Link>
   );
 }
 
-function StatCard({ icon: Icon, label, value, tone = "blue" }) {
+function StatCard({ label, value, tone = "blue" }) {
   const c = STAT_TONES[tone];
   return (
     <div className={`rounded-xl p-3.5 ${c.bg}`}>
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 ${c.iconBg} ${c.iconText}`}>
-        <Icon className="w-4 h-4" />
-      </div>
+      <p className="text-sm font-semibold text-white/90 mb-1">{label}</p>
       <p className="font-heading font-extrabold text-4xl text-white leading-tight">{value}</p>
-      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${c.labelBg} ${c.labelText}`}>
-        {label}
-      </span>
     </div>
   );
 }
@@ -159,10 +142,10 @@ export default function Dashboard() {
       <section className="mb-6">
         <SectionLabel icon={TrendingUp}>Resumen</SectionLabel>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} tone="blue" />
-          <StatCard icon={CheckCircle2} label="Doctores activos" value={business.activeDoctors} tone="navy" />
-          <StatCard icon={Crown} label="Doctores premium" value={business.premiumDoctors} tone="blue" />
-          <StatCard icon={DollarSign} label="Valor ventas al mes (cobrado)" value={fmtMoney(business.monthlyValue)} tone="navy" />
+          <StatCard label="Registros nuevos (30 días)" value={business.newLast30} tone="blue" />
+          <StatCard label="Doctores activos" value={business.activeDoctors} tone="navy" />
+          <StatCard label="Doctores premium" value={business.premiumDoctors} tone="blue" />
+          <StatCard label="Valor ventas al mes (cobrado)" value={fmtMoney(business.monthlyValue)} tone="navy" />
         </div>
       </section>
 
@@ -180,9 +163,9 @@ export default function Dashboard() {
       <section className="mb-6">
         <SectionLabel icon={Heart}>Catálogo</SectionLabel>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
-          <StatCard icon={Heart} label="Especialidades" value={catalog.specialties} tone="blue" />
-          <StatCard icon={MapPin} label="Zonas" value={catalog.zones} tone="navy" />
-          <StatCard icon={FileText} label="Artículos" value={catalog.posts} tone="blue" />
+          <StatCard label="Especialidades" value={catalog.specialties} tone="blue" />
+          <StatCard label="Zonas" value={catalog.zones} tone="navy" />
+          <StatCard label="Artículos" value={catalog.posts} tone="blue" />
         </div>
       </section>
 
@@ -190,10 +173,10 @@ export default function Dashboard() {
       <section>
         <SectionLabel icon={ShieldCheck}>Pendientes</SectionLabel>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <AlertCard to="/admin/verificaciones" icon={ShieldCheck} label="Cédulas por revisar" count={alerts.pendingDocs} />
-          <AlertCard to="/admin/doctores" icon={Users} label="Doctores en revisión" count={alerts.pendingDoctors} />
-          <AlertCard to="/admin/resenas" icon={Star} label="Reseñas sin aprobar" count={alerts.pendingReviews} />
-          <AlertCard to="/admin/solicitudes" icon={ClipboardList} label="Solicitudes sin contactar" count={alerts.pendingRequests} />
+          <AlertCard to="/admin/verificaciones" label="Cédulas por revisar" count={alerts.pendingDocs} />
+          <AlertCard to="/admin/doctores" label="Doctores en revisión" count={alerts.pendingDoctors} />
+          <AlertCard to="/admin/resenas" label="Reseñas sin aprobar" count={alerts.pendingReviews} />
+          <AlertCard to="/admin/solicitudes" label="Solicitudes sin contactar" count={alerts.pendingRequests} />
         </div>
       </section>
     </div>
