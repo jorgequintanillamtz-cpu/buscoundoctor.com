@@ -29,6 +29,7 @@ import AdminBlog from './pages/admin/AdminBlog';
 import BlogEditor from './pages/admin/BlogEditor.jsx';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminDoctores from './pages/admin/AdminDoctores';
+import AdminHistorial from './pages/admin/AdminHistorial';
 import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
 import RequireAdmin from './components/RequireAdmin';
 import DoctorPanel from './pages/DoctorPanel';
@@ -122,6 +123,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/faqs" element={<AdminFaqs />} />
           <Route path="/admin/faqs/editar/:id" element={<AdminFaqEditor />} />
           <Route path="/admin/planes" element={<AdminPlanes />} />
+          <Route path="/admin/historial" element={<AdminHistorial />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
