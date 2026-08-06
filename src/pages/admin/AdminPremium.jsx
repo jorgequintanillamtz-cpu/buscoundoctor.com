@@ -29,12 +29,34 @@ const DEFAULT_BILLING_DAY = 1;
 
 const EMPTY_PAYMENT = { specialist_id: "", amount: String(DEFAULT_RATE), payment_date: new Date().toISOString().slice(0, 10), period_label: "", method: "transferencia", notes: "" };
 
-function KpiCard({ icon: Icon, label, value, color }) {
+const STAT_TONES = {
+  blue: { bg: "bg-brand-blue", iconBg: "bg-white/20" },
+  navy: { bg: "bg-brand-navy", iconBg: "bg-white/15" },
+};
+
+function KpiCard({ icon: Icon, label, value, tone = "blue" }) {
+  const t = STAT_TONES[tone] || STAT_TONES.blue;
   return (
-    <div className="bg-card rounded-2xl border border-border/50 p-5">
-      <Icon className={`w-6 h-6 ${color} mb-3`} />
-      <p className="font-heading font-bold text-2xl text-foreground">{value}</p>
-      <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
+    <div className={`${t.bg} rounded-2xl p-5`}>
+      <div className={`w-10 h-10 rounded-xl ${t.iconBg} flex items-center justify-center mb-3`}>
+        <Icon className="w-5 h-5 text-white" />
+      </div>
+      <p className="font-heading font-extrabold text-3xl lg:text-4xl text-white">{value}</p>
+      <p className="text-sm text-white/80 mt-1">{label}</p>
+    </div>
+  );
+}
+
+// Como Retrasados: naranja/rojo cuando hay algo pendiente, tono neutro claro
+// cuando todo está al día (mismo patrón que las alertas del Dashboard).
+function AlertKpiCard({ icon: Icon, label, value, active }) {
+  return (
+    <div className={`rounded-2xl p-5 ${active ? "bg-red-500" : "bg-brand-bluePale"}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${active ? "bg-white/20" : "bg-white"}`}>
+        <Icon className={`w-5 h-5 ${active ? "text-white" : "text-brand-navy"}`} />
+      </div>
+      <p className={`font-heading font-extrabold text-3xl lg:text-4xl ${active ? "text-white" : "text-brand-navy"}`}>{value}</p>
+      <p className={`text-sm mt-1 ${active ? "text-white/80" : "text-brand-navy/70"}`}>{label}</p>
     </div>
   );
 }
@@ -409,11 +431,11 @@ export default function AdminPremium() {
 
       {/* KPIs del ciclo mensual */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <KpiCard icon={Crown} label="Doctores Premium" value={premiumDoctors.length} color="text-purple-500" />
-        <KpiCard icon={TrendingUp} label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} color="text-blue-500" />
-        <KpiCard icon={DollarSign} label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} color="text-emerald-600" />
-        <KpiCard icon={AlertTriangle} label="Retrasados" value={lateDoctors.length} color="text-red-500" />
-        <KpiCard icon={Receipt} label="Ingresos totales" value={fmtMoney(totalRevenue)} color="text-slate-500" />
+        <KpiCard icon={Crown} label="Doctores Premium" value={premiumDoctors.length} tone="navy" />
+        <KpiCard icon={TrendingUp} label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} tone="blue" />
+        <KpiCard icon={DollarSign} label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} tone="navy" />
+        <AlertKpiCard icon={AlertTriangle} label="Retrasados" value={lateDoctors.length} active={lateDoctors.length > 0} />
+        <KpiCard icon={Receipt} label="Ingresos totales" value={fmtMoney(totalRevenue)} tone="blue" />
       </div>
 
       {/* Gráfica de ingresos por mes */}
