@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
-  Users, Heart, MapPin, FileText, Calendar, Stethoscope,
+  Users, Heart, MapPin, FileText, Stethoscope,
   ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown, BarChart3, DollarSign,
 } from "lucide-react";
 
