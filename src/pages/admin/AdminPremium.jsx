@@ -297,6 +297,13 @@ export default function AdminPremium() {
           const lastPayment = revenueByDoctor[doc.id]?.last || null;
           const isUpToDate = !!(lastPayment && new Date(lastPayment) >= dueDate);
           const daysLate = isUpToDate ? 0 : Math.max(0, differenceInCalendarDays(now, dueDate));
+
+          // Modo prueba: mientras dure, el doctor no cuenta en las métricas de
+          // ventas ni aparece como retrasado, aunque no haya pagado todavía.
+          const trialEndsAt = doc.trial_ends_at || null;
+          const isTrial = !!(trialEndsAt && new Date(trialEndsAt) >= now);
+          const trialDaysLeft = isTrial ? Math.max(0, differenceInCalendarDays(new Date(trialEndsAt), now)) : 0;
+
           return {
             ...doc,
             rate,
@@ -307,14 +314,18 @@ export default function AdminPremium() {
             payments: revenueByDoctor[doc.id]?.list || [],
             isUpToDate,
             daysLate,
+            trialEndsAt,
+            isTrial,
+            trialDaysLeft,
           };
         })
         .sort((a, b) => b.daysLate - a.daysLate || b.totalRevenue - a.totalRevenue),
     [premiumDoctors, revenueByDoctor, now]
   );
 
-  const onTimeDoctors = useMemo(() => premiumRows.filter((d) => d.isUpToDate), [premiumRows]);
-  const lateDoctors = useMemo(() => premiumRows.filter((d) => !d.isUpToDate), [premiumRows]);
+  const trialDoctors = useMemo(() => premiumRows.filter((d) => d.isTrial), [premiumRows]);
+  const onTimeDoctors = useMemo(() => premiumRows.filter((d) => !d.isTrial && d.isUpToDate), [premiumRows]);
+  const lateDoctors = useMemo(() => premiumRows.filter((d) => !d.isTrial && !d.isUpToDate), [premiumRows]);
 
   const totalRevenue = useMemo(() => payments.reduce((sum, p) => sum + (p.amount || 0), 0), [payments]);
   const revenueThisMonth = useMemo(
@@ -325,7 +336,11 @@ export default function AdminPremium() {
     [payments, monthStart, monthEnd]
   );
   // Cuánto debería entrar este mes según el monto de cada doctor Premium.
-  const expectedThisMonth = useMemo(() => premiumRows.reduce((sum, d) => sum + d.rate, 0), [premiumRows]);
+  // Los que están en modo prueba no suman aquí: todavía no les toca pagar.
+  const expectedThisMonth = useMemo(
+    () => premiumRows.filter((d) => !d.isTrial).reduce((sum, d) => sum + d.rate, 0),
+    [premiumRows]
+  );
 
   // Ingresos por mes, últimos 6 meses (histórico, se recalcula solo).
   const chartData = useMemo(() => {
@@ -371,6 +386,35 @@ export default function AdminPremium() {
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, billing_day: prevValue } : d)));
       toast.error("No se pudo actualizar el día de cobro: " + e.message);
+    }
+  };
+
+  // Pone a un doctor Premium en modo prueba por N días: mientras dure, no
+  // cuenta en "Esperado" ni puede aparecer como retrasado.
+  const startTrial = async (doc, days) => {
+    const end = new Date();
+    end.setDate(end.getDate() + days);
+    const iso = end.toISOString();
+    const prevValue = doc.trial_ends_at || null;
+    setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: iso } : d)));
+    try {
+      await base44.entities.Specialist.update(doc.id, { trial_ends_at: iso });
+      toast.success(`${doc.full_name} en prueba hasta el ${fmtDate(iso)}`);
+    } catch (e) {
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: prevValue } : d)));
+      toast.error("No se pudo activar la prueba: " + e.message);
+    }
+  };
+
+  const endTrial = async (doc) => {
+    const prevValue = doc.trial_ends_at || null;
+    setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: null } : d)));
+    try {
+      await base44.entities.Specialist.update(doc.id, { trial_ends_at: null });
+      toast.success(`Prueba de ${doc.full_name} terminada`);
+    } catch (e) {
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: prevValue } : d)));
+      toast.error("No se pudo terminar la prueba: " + e.message);
     }
   };
 
