@@ -20,14 +20,14 @@ const SOURCE_PAGE_LABELS = {
   otro: "Otro",
 };
 
-function KpiCard({ icon: Icon, label, value, iconBg, iconColor }) {
+function KpiCard({ icon: Icon, label, value, cardBg, cardBorder, iconColor, labelBg, labelText }) {
   return (
-    <div className="bg-card rounded-xl border border-border/50 p-3.5">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 ${iconBg} ${iconColor}`}>
+    <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder}`}>
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 bg-white/70 ${iconColor}`}>
         <Icon className="w-4 h-4" />
       </div>
       <p className="font-heading font-bold text-lg text-foreground leading-tight">{value.toLocaleString("es-MX")}</p>
-      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${iconBg} ${iconColor}`}>
+      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${labelBg} ${labelText}`}>
         {label}
       </span>
     </div>
@@ -155,9 +155,9 @@ export default function DoctorStatsPanel() {
     <div>
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-5">
-        <KpiCard icon={Eye} label="Impresiones este mes" value={kpis.impressionsThisMonth} iconBg="bg-brand-bluePale" iconColor="text-brand-blue" />
-        <KpiCard icon={MousePointerClick} label="Clicks al perfil este mes" value={kpis.clicksThisMonth} iconBg="bg-slate-100" iconColor="text-brand-navy" />
-        <KpiCard icon={CalendarCheck} label="Citas agendadas este mes" value={kpis.contactsThisMonth} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
+        <KpiCard icon={Eye} label="Impresiones este mes" value={kpis.impressionsThisMonth} cardBg="bg-brand-bluePale" cardBorder="border-brand-blue/15" iconColor="text-brand-blue" labelBg="bg-white/60" labelText="text-brand-blue" />
+        <KpiCard icon={MousePointerClick} label="Clicks al perfil este mes" value={kpis.clicksThisMonth} cardBg="bg-slate-200" cardBorder="border-slate-300" iconColor="text-brand-navy" labelBg="bg-white/60" labelText="text-brand-navy" />
+        <KpiCard icon={CalendarCheck} label="Citas agendadas este mes" value={kpis.contactsThisMonth} cardBg="bg-emerald-100" cardBorder="border-emerald-200" iconColor="text-emerald-700" labelBg="bg-emerald-200/70" labelText="text-emerald-800" />
       </div>
 
       {/* Gráfica */}
