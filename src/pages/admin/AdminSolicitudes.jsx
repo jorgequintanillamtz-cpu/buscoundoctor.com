@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Calendar, Phone, MessageCircle, User, Stethoscope, CheckCircle2,
-  TrendingUp, Users, Search,
+  TrendingUp, Users, Search, ArrowUpDown,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -49,9 +50,14 @@ function KpiCard({ icon: Icon, label, value, tone = "blue" }) {
 // este mes y en total. No sabemos si el doctor le dio seguimiento al
 // paciente (el contacto pasa directo a su WhatsApp), así que esto mide lo
 // único que sí podemos medir: cuántos leads le está dando la plataforma.
-function DoctorCard({ doc }) {
+// Es clickeable: al seleccionarlo se abre el detalle con todas sus citas.
+function DoctorCard({ doc, onClick }) {
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-4">
+    <button
+      type="button"
+      onClick={onClick}
+      className="bg-card border border-border/50 rounded-2xl p-4 text-left hover:border-brand-blue/40 hover:shadow-sm transition-all"
+    >
       <div className="flex items-center gap-3 mb-3">
         {doc.profile_photo ? (
           <img src={doc.profile_photo} alt={doc.full_name} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
@@ -76,11 +82,11 @@ function DoctorCard({ doc }) {
           <p className="text-[10px] text-muted-foreground mt-1">citas totales</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
-function RequestCard({ req }) {
+function RequestCard({ req, hideDoctor = false }) {
   const wa = waLink(req.phone);
   return (
     <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 space-y-3">
@@ -91,7 +97,7 @@ function RequestCard({ req }) {
             {req.patient_name}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Para {req.specialist_name || "un doctor"} · Solicitado el {fmtDate(req.created_date)}
+            {hideDoctor ? "Solicitado el" : `Para ${req.specialist_name || "un doctor"} · Solicitado el`} {fmtDate(req.created_date)}
           </p>
         </div>
       </div>
