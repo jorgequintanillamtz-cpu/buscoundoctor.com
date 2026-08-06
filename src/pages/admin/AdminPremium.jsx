@@ -223,7 +223,7 @@ function PremiumDoctorCard({
                     type="button"
                     aria-label="Eliminar pago"
                     className="p-1.5 rounded-lg hover:bg-destructive/10 flex-shrink-0"
-                    onClick={() => onDeletePayment(p.id)}
+                    onClick={() => onDeletePayment(p.id, doc)}
                   >
                     <Trash2 className="w-3.5 h-3.5 text-destructive" />
                   </button>
