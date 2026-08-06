@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Eye, MousePointerClick, CalendarCheck, TrendingUp, Stethoscope } from "lucide-react";
+import { TrendingUp, Stethoscope } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
@@ -20,16 +20,13 @@ const SOURCE_PAGE_LABELS = {
   otro: "Otro",
 };
 
-function KpiCard({ icon: Icon, label, value, cardBg, cardBorder, iconColor, labelBg, labelText }) {
+// Sin ícono ni burbuja: la etiqueta va arriba del número, en texto plano y
+// más grande para que se lea bien.
+function KpiCard({ label, value, cardBg, cardBorder, textColor }) {
   return (
     <div className={`rounded-xl border p-3.5 ${cardBg} ${cardBorder}`}>
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 bg-white/70 ${iconColor}`}>
-        <Icon className="w-4 h-4" />
-      </div>
+      <p className={`text-sm font-semibold mb-1 ${textColor}`}>{label}</p>
       <p className="font-heading font-extrabold text-4xl text-foreground leading-tight">{value.toLocaleString("es-MX")}</p>
-      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${labelBg} ${labelText}`}>
-        {label}
-      </span>
     </div>
   );
 }
@@ -155,9 +152,9 @@ export default function DoctorStatsPanel() {
     <div>
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-5">
-        <KpiCard icon={Eye} label="Impresiones este mes" value={kpis.impressionsThisMonth} cardBg="bg-brand-bluePale" cardBorder="border-brand-blue/15" iconColor="text-brand-blue" labelBg="bg-white/60" labelText="text-brand-blue" />
-        <KpiCard icon={MousePointerClick} label="Clicks al perfil este mes" value={kpis.clicksThisMonth} cardBg="bg-slate-200" cardBorder="border-slate-300" iconColor="text-brand-navy" labelBg="bg-white/60" labelText="text-brand-navy" />
-        <KpiCard icon={CalendarCheck} label="Citas agendadas este mes" value={kpis.contactsThisMonth} cardBg="bg-emerald-100" cardBorder="border-emerald-200" iconColor="text-emerald-700" labelBg="bg-emerald-200/70" labelText="text-emerald-800" />
+        <KpiCard label="Impresiones este mes" value={kpis.impressionsThisMonth} cardBg="bg-brand-bluePale" cardBorder="border-brand-blue/15" textColor="text-brand-blue" />
+        <KpiCard label="Clicks al perfil este mes" value={kpis.clicksThisMonth} cardBg="bg-slate-200" cardBorder="border-slate-300" textColor="text-brand-navy" />
+        <KpiCard label="Citas agendadas este mes" value={kpis.contactsThisMonth} cardBg="bg-emerald-100" cardBorder="border-emerald-200" textColor="text-emerald-800" />
       </div>
 
       {/* Gráfica */}
