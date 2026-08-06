@@ -4,8 +4,10 @@ import { base44 } from "@/api/base44Client";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
   Users, Heart, MapPin, FileText, Calendar, Stethoscope,
-  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown, BarChart3,
+  ShieldCheck, Star, ClipboardList, TrendingUp, CheckCircle2, Crown, BarChart3, DollarSign,
 } from "lucide-react";
+
+const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
 
 // Paleta por tipo de alerta: cuando hay algo pendiente (urgent), la tarjeta
 // toma este color; en 0 se queda neutra (gris). Todas las clases están
@@ -115,7 +117,9 @@ export default function Dashboard() {
       const activeDoctors = specialists.filter((s) => s.active).length;
       const publishedDoctors = specialists.filter((s) => s.publication_status === "published").length;
       const draftDoctors = specialists.filter((s) => s.publication_status === "draft").length;
-      const premiumDoctors = specialists.filter((s) => s.plan_slug === "premium").length;
+      const premiumSpecialists = specialists.filter((s) => s.plan_slug === "premium");
+      const premiumDoctors = premiumSpecialists.length;
+      const monthlyValue = premiumSpecialists.reduce((sum, s) => sum + (s.monthly_amount || 999), 0);
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -134,6 +138,7 @@ export default function Dashboard() {
           newLast30,
           totalRequests: requests.length,
           premiumDoctors,
+          monthlyValue,
         },
       });
       setLoading(false);
@@ -161,28 +166,25 @@ export default function Dashboard() {
           : "No hay nada pendiente por ahora."}
       </p>
 
-      {/* Pendientes: lo primero que se ve, con link directo a cada bandeja */}
+      {/* Resumen: los 4 números que más le importan al dueño, hasta arriba */}
       <section className="mb-6">
-        <SectionLabel icon={ShieldCheck} bg="bg-amber-50" text="text-amber-700">Pendientes</SectionLabel>
-        <div className="bg-amber-50/30 border border-amber-100 rounded-2xl p-3">
+        <SectionLabel icon={TrendingUp} bg="bg-blue-50" text="text-blue-700">Resumen</SectionLabel>
+        <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-3">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-            <AlertCard to="/admin/verificaciones" icon={ShieldCheck} label="Cédulas por revisar" count={alerts.pendingDocs} hue="amber" />
-            <AlertCard to="/admin/doctores" icon={Users} label="Doctores en revisión" count={alerts.pendingDoctors} hue="blue" />
-            <AlertCard to="/admin/resenas" icon={Star} label="Reseñas sin aprobar" count={alerts.pendingReviews} hue="pink" />
-            <AlertCard to="/admin/solicitudes" icon={ClipboardList} label="Solicitudes sin contactar" count={alerts.pendingRequests} hue="orange" />
+            <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} hue="indigo" />
+            <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} hue="emerald" />
+            <StatCard icon={Crown} label="Doctores premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} hue="purple" />
+            <StatCard icon={DollarSign} label="Valor ventas al mes" value={fmtMoney(business.monthlyValue)} hue="blue" />
           </div>
         </div>
       </section>
 
       {/* Negocio: qué tan sano está el directorio */}
       <section className="mb-6">
-        <SectionLabel icon={TrendingUp} bg="bg-blue-50" text="text-blue-700">Negocio</SectionLabel>
-        <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-3">
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
-            <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} hue="emerald" />
+        <SectionLabel icon={FileText} bg="bg-sky-50" text="text-sky-700">Negocio</SectionLabel>
+        <div className="bg-sky-50/30 border border-sky-100 rounded-2xl p-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
             <StatCard icon={FileText} label="Publicados / borrador" value={`${business.publishedDoctors} / ${business.draftDoctors}`} hue="blue" />
-            <StatCard icon={Crown} label="Doctores en Premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} hue="purple" />
-            <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} hue="indigo" />
             <StatCard icon={Calendar} label="Solicitudes de cita (total)" value={business.totalRequests} hue="orange" />
           </div>
         </div>
@@ -199,13 +201,26 @@ export default function Dashboard() {
       </section>
 
       {/* Catálogo: contenido de soporte del sitio */}
-      <section>
+      <section className="mb-6">
         <SectionLabel icon={Heart} bg="bg-emerald-50" text="text-emerald-700">Catálogo</SectionLabel>
         <div className="bg-emerald-50/30 border border-emerald-100 rounded-2xl p-3">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
             <StatCard icon={Heart} label="Especialidades" value={catalog.specialties} hue="pink" />
             <StatCard icon={MapPin} label="Zonas" value={catalog.zones} hue="orange" />
             <StatCard icon={FileText} label="Artículos" value={catalog.posts} hue="sky" />
+          </div>
+        </div>
+      </section>
+
+      {/* Pendientes: movido hasta abajo, con link directo a cada bandeja */}
+      <section>
+        <SectionLabel icon={ShieldCheck} bg="bg-amber-50" text="text-amber-700">Pendientes</SectionLabel>
+        <div className="bg-amber-50/30 border border-amber-100 rounded-2xl p-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <AlertCard to="/admin/verificaciones" icon={ShieldCheck} label="Cédulas por revisar" count={alerts.pendingDocs} hue="amber" />
+            <AlertCard to="/admin/doctores" icon={Users} label="Doctores en revisión" count={alerts.pendingDoctors} hue="blue" />
+            <AlertCard to="/admin/resenas" icon={Star} label="Reseñas sin aprobar" count={alerts.pendingReviews} hue="pink" />
+            <AlertCard to="/admin/solicitudes" icon={ClipboardList} label="Solicitudes sin contactar" count={alerts.pendingRequests} hue="orange" />
           </div>
         </div>
       </section>
