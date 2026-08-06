@@ -31,17 +31,12 @@ const STAT_TONES = {
   blue: { bg: "bg-brand-blue", iconBg: "bg-white/20" },
   navy: { bg: "bg-brand-navy", iconBg: "bg-white/15" },
 };
-function KpiCard({ icon: Icon, label, value, tone = "blue" }) {
+function KpiCard({ label, value, tone = "blue" }) {
   const c = STAT_TONES[tone];
   return (
     <div className={`rounded-xl p-3.5 ${c.bg}`}>
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 text-white ${c.iconBg}`}>
-        <Icon className="w-4 h-4" />
-      </div>
+      <p className="text-sm font-semibold text-white/90 mb-1">{label}</p>
       <p className="font-heading font-extrabold text-4xl text-white leading-tight">{value}</p>
-      <span className="inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full bg-white/20 text-white">
-        {label}
-      </span>
     </div>
   );
 }
@@ -74,12 +69,12 @@ function DoctorCard({ doc, onClick }) {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-brand-bluePale/50 rounded-xl px-3 py-2 text-center">
+          <p className="text-xs font-semibold text-muted-foreground mb-1">citas este mes</p>
           <p className="font-heading font-bold text-xl text-brand-navy leading-none">{doc.thisMonth}</p>
-          <p className="text-[10px] text-muted-foreground mt-1">citas este mes</p>
         </div>
         <div className="bg-muted/50 rounded-xl px-3 py-2 text-center">
+          <p className="text-xs font-semibold text-muted-foreground mb-1">citas totales</p>
           <p className="font-heading font-bold text-xl text-foreground leading-none">{doc.total}</p>
-          <p className="text-[10px] text-muted-foreground mt-1">citas totales</p>
         </div>
       </div>
     </button>
@@ -241,10 +236,10 @@ export default function AdminSolicitudes() {
       {/* KPIs */}
       <section className="mb-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <KpiCard icon={Calendar} label="Solicitudes totales" value={kpis.total} tone="blue" />
-          <KpiCard icon={TrendingUp} label="Este mes" value={kpis.thisMonth} tone="navy" />
-          <KpiCard icon={TrendingUp} label="Esta semana" value={kpis.thisWeek} tone="blue" />
-          <KpiCard icon={Users} label="Doctores con citas" value={kpis.doctorsWithRequests} tone="navy" />
+          <KpiCard label="Solicitudes totales" value={kpis.total} tone="blue" />
+          <KpiCard label="Este mes" value={kpis.thisMonth} tone="navy" />
+          <KpiCard label="Esta semana" value={kpis.thisWeek} tone="blue" />
+          <KpiCard label="Doctores con citas" value={kpis.doctorsWithRequests} tone="navy" />
         </div>
       </section>
 
