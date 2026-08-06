@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Check, Trash2, Star, Stethoscope } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
 
