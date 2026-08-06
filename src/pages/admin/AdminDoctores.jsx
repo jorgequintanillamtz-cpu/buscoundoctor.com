@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
+import { logActivity } from "@/api/activityLog";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
@@ -49,6 +50,7 @@ export default function AdminDoctores() {
       await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
       setDoctors(prev => prev.filter(d => d.id !== id));
       toast.success("Doctor eliminado por completo");
+      logActivity({ type: "doctor_eliminado", description: `Se eliminó por completo el perfil de ${nombre}`, specialistName: nombre });
     } catch (e) {
       toast.error("No se pudo eliminar: " + e.message);
     }
@@ -60,6 +62,12 @@ export default function AdminDoctores() {
     try {
       await base44.entities.Specialist.update(id, { featured: next });
       toast.success(next ? `${nombre} ahora aparece en la página principal` : `${nombre} ya no aparece en la página principal`);
+      logActivity({
+        type: next ? "destacado_activado" : "destacado_desactivado",
+        description: next ? `${nombre} se marcó como destacado` : `${nombre} se quitó de destacados`,
+        specialistId: id,
+        specialistName: nombre,
+      });
     } catch (e) {
       setDoctors(prev => prev.map(d => d.id === id ? { ...d, featured: current } : d));
       toast.error("No se pudo actualizar: " + e.message);
@@ -77,6 +85,12 @@ export default function AdminDoctores() {
     try {
       await base44.entities.Specialist.update(id, { plan_slug: next, premium_activated_at: nextActivatedAt || null });
       toast.success(next === "premium" ? `${nombre} ahora es Premium` : `${nombre} ahora es Gratis`);
+      logActivity({
+        type: next === "premium" ? "premium_activado" : "premium_desactivado",
+        description: next === "premium" ? `${nombre} pasó a plan Premium` : `${nombre} pasó a plan Gratis`,
+        specialistId: id,
+        specialistName: nombre,
+      });
     } catch (e) {
       setDoctors(prev => prev.map(d => d.id === id ? { ...d, plan_slug: currentPlan, premium_activated_at: prevActivatedAt } : d));
       toast.error("No se pudo actualizar: " + e.message);
@@ -94,6 +108,12 @@ export default function AdminDoctores() {
     try {
       await base44.entities.Specialist.update(doc.id, { active: next });
       toast.success(next ? `${doc.full_name} reactivado` : `${doc.full_name} desactivado`);
+      logActivity({
+        type: next ? "perfil_activado" : "perfil_desactivado",
+        description: next ? `Se reactivó el perfil de ${doc.full_name}` : `Se desactivó el perfil de ${doc.full_name}`,
+        specialistId: doc.id,
+        specialistName: doc.full_name,
+      });
     } catch (e) {
       setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: isActive } : d));
       toast.error("No se pudo actualizar: " + e.message);
@@ -189,6 +209,7 @@ export default function AdminDoctores() {
       await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
       setDoctors(prev => prev.filter(d => d.id !== id));
       toast.success("Registro eliminado por completo");
+      logActivity({ type: "registro_eliminado", description: `Se eliminó el registro en progreso de ${nombre}`, specialistName: nombre });
     } catch (e) {
       toast.error("No se pudo eliminar: " + e.message);
     }
@@ -214,6 +235,10 @@ export default function AdminDoctores() {
     try {
       await Promise.all(ids.map(id => base44.entities.Specialist.update(id, { publication_status: "published" })));
       setDoctors(prev => prev.map(d => (ids.includes(d.id) ? { ...d, publication_status: "published" } : d)));
+      const approvedDocs = doctors.filter(d => ids.includes(d.id));
+      approvedDocs.forEach(d => {
+        logActivity({ type: "doctor_aprobado", description: `Se aprobó y publicó el perfil de ${d.full_name}`, specialistId: d.id, specialistName: d.full_name });
+      });
       setSelectedPending(new Set());
       toast.success(`${ids.length} perfil${ids.length !== 1 ? "es" : ""} aprobado${ids.length !== 1 ? "s" : ""} y publicado${ids.length !== 1 ? "s" : ""}`);
     } catch (e) {
@@ -229,6 +254,15 @@ export default function AdminDoctores() {
     try {
       await Promise.all(rejectDialog.ids.map(id => base44.entities.Specialist.update(id, { publication_status: "rejected" })));
       setDoctors(prev => prev.map(d => (rejectDialog.ids.includes(d.id) ? { ...d, publication_status: "rejected" } : d)));
+      const rejectedDocs = doctors.filter(d => rejectDialog.ids.includes(d.id));
+      rejectedDocs.forEach(d => {
+        logActivity({
+          type: "doctor_rechazado",
+          description: `Se rechazó el perfil de ${d.full_name}. Motivo: ${rejectDialog.motivo.trim()}`,
+          specialistId: d.id,
+          specialistName: d.full_name,
+        });
+      });
       setSelectedPending(new Set());
       toast.success(`${rejectDialog.ids.length} perfil${rejectDialog.ids.length !== 1 ? "es" : ""} rechazado${rejectDialog.ids.length !== 1 ? "s" : ""}`);
       setRejectDialog({ open: false, ids: [], motivo: "" });
