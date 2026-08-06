@@ -174,10 +174,9 @@ function PremiumDoctorCard({
               className="h-8 text-xs rounded-lg border border-input bg-background px-2 text-muted-foreground"
             >
               <option value="">Poner en prueba…</option>
-              <option value="7">7 días</option>
-              <option value="14">14 días</option>
-              <option value="30">30 días</option>
-              <option value="60">60 días</option>
+              <option value="1">1 mes</option>
+              <option value="3">3 meses</option>
+              <option value="12">12 meses</option>
             </select>
           </>
         )}
