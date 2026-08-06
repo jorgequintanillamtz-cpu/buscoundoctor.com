@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Eye, MousePointerClick, CalendarCheck, TrendingUp, BarChart3, ExternalLink, Pencil, Star, Stethoscope } from "lucide-react";
+import { TrendingUp, BarChart3, ExternalLink, Stethoscope } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,14 +22,11 @@ const SOURCE_PAGE_LABELS = {
   otro: "Otro",
 };
 
-function KpiCard({ icon: Icon, value, label, sub, color }) {
+function KpiCard({ value, label, sub }) {
   return (
     <div className="bg-card rounded-2xl border border-border/50 p-5">
-      <div className={`w-9 h-9 rounded-xl bg-accent flex items-center justify-center mb-3`}>
-        <Icon className={`w-4 h-4 ${color}`} />
-      </div>
-      <p className="font-heading font-bold text-2xl text-foreground">{value}</p>
-      <p className="text-sm font-medium text-foreground mt-0.5">{label}</p>
+      <p className="text-sm font-semibold text-foreground mb-1">{label}</p>
+      <p className="font-heading font-extrabold text-3xl text-foreground">{value}</p>
       <p className="text-xs text-muted-foreground mt-1">{sub}</p>
     </div>
   );
@@ -154,10 +151,10 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true })
 
       {/* 4 KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard icon={Eye} value={kpis.impressions30} label="Impresiones este mes" sub={isOwnProfile ? "Veces que tu perfil apareció" : "Veces que apareció en el directorio"} color="text-brand-blue" />
-        <KpiCard icon={MousePointerClick} value={kpis.clicks30} label="Clicks este mes" sub={isOwnProfile ? "Le dieron clic a tu perfil" : "Clicks al perfil"} color="text-brand-navy" />
-        <KpiCard icon={CalendarCheck} value={kpis.contacts30} label="Citas agendadas este mes" sub="Solicitudes de cita" color="text-emerald-600" />
-        <KpiCard icon={Star} value={`${kpis.contactRate}%`} label="Tasa de contacto" sub="Clicks que se volvieron cita" color="text-amber-500" />
+        <KpiCard value={kpis.impressions30} label="Impresiones este mes" sub={isOwnProfile ? "Veces que tu perfil apareció" : "Veces que apareció en el directorio"} />
+        <KpiCard value={kpis.clicks30} label="Clicks este mes" sub={isOwnProfile ? "Le dieron clic a tu perfil" : "Clicks al perfil"} />
+        <KpiCard value={kpis.contacts30} label="Citas agendadas este mes" sub="Solicitudes de cita" />
+        <KpiCard value={`${kpis.contactRate}%`} label="Tasa de contacto" sub="Clicks que se volvieron cita" />
       </div>
 
       {/* Gráfica o estado vacío */}
