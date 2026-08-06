@@ -388,11 +388,11 @@ export default function AdminPremium() {
     }
   };
 
-  // Pone a un doctor Premium en modo prueba por N días: mientras dure, no
+  // Pone a un doctor Premium en modo prueba por N meses: mientras dure, no
   // cuenta en "Esperado" ni puede aparecer como retrasado.
-  const startTrial = async (doc, days) => {
+  const startTrial = async (doc, months) => {
     const end = new Date();
-    end.setDate(end.getDate() + days);
+    end.setMonth(end.getMonth() + months);
     const iso = end.toISOString();
     const prevValue = doc.trial_ends_at || null;
     setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: iso } : d)));
