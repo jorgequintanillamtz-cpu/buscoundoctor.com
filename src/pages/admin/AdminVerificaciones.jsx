@@ -12,10 +12,7 @@ import { logActivity } from "@/api/activityLog";
 const DOC_TYPE_LABELS = {
   cedula_profesional: "Cédula profesional",
   cedula_especialidad: "Cédula de especialidad",
-  certificado_especialidad: "Certificado del consejo de especialidad",
-  titulo: "Título profesional",
   identificacion_oficial: "Identificación oficial (INE/pasaporte)",
-  foto_verificacion: "Foto reciente de verificación",
 };
 
 const STATUS_LABELS = {
