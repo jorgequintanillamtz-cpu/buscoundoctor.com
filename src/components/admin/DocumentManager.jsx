@@ -5,12 +5,9 @@ import { Upload, FileText, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const DOC_TYPES = [
-  { value: "cedula_profesional", label: "Cédula profesional", hint: "Tu cédula de médico general/cirujano" },
-  { value: "cedula_especialidad", label: "Cédula de especialidad", hint: "Distinta de la cédula profesional general" },
-  { value: "certificado_especialidad", label: "Certificado del consejo de especialidad", hint: "Vigencia/recertificación del consejo correspondiente" },
-  { value: "titulo", label: "Título profesional", hint: "Documento original emitido por tu universidad" },
-  { value: "identificacion_oficial", label: "Identificación oficial (INE/pasaporte)", hint: "Para confirmar tu identidad" },
-  { value: "foto_verificacion", label: "Foto reciente de verificación", hint: "Una selfie o foto reciente y clara de tu rostro" },
+  { value: "cedula_profesional", label: "Cédula profesional", hint: "Tu cédula de médico general/cirujano", required: true },
+  { value: "cedula_especialidad", label: "Cédula de especialidad", hint: "Solo si cuentas con una especialidad certificada", required: false },
+  { value: "identificacion_oficial", label: "Identificación oficial (INE/pasaporte)", hint: "Para confirmar tu identidad", required: true },
 ];
 
 const STATUS = {
