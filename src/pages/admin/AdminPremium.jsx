@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Crown, DollarSign, TrendingUp, Plus, Loader2, Trash2,
-  ChevronDown, ChevronUp, Stethoscope, Receipt, AlertCircle, CheckCircle2,
+  ChevronDown, ChevronUp, Stethoscope, Receipt, AlertCircle, AlertTriangle, CheckCircle2, Ban, Power,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 import {
   startOfMonth, endOfMonth, isWithinInterval, parseISO,
-  eachMonthOfInterval, subMonths, format,
+  eachMonthOfInterval, subMonths, format, differenceInCalendarDays,
 } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ const METHOD_LABELS = {
 };
 
 const DEFAULT_RATE = 999;
+const DEFAULT_BILLING_DAY = 1;
 
 const EMPTY_PAYMENT = { specialist_id: "", amount: String(DEFAULT_RATE), payment_date: new Date().toISOString().slice(0, 10), period_label: "", method: "transferencia", notes: "" };
 
@@ -42,17 +43,145 @@ const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDi
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—");
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+// Tarjeta de un doctor Premium: su ciclo de cobro (día del mes que le toca
+// pagar, monto), si está al día o cuántos días lleva de retraso, y las
+// acciones disponibles (registrar pago, desactivar perfil si no ha pagado,
+// ver historial).
+function PremiumDoctorCard({
+  doc, onOpenPayment, onToggleActive,
+  expanded, onToggleExpand, onDeletePayment,
+  amountDraft, onAmountChange, onAmountBlur,
+  billingDayDraft, onBillingDayChange, onBillingDayBlur,
+}) {
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3.5 flex-wrap">
+        {doc.profile_photo ? (
+          <img src={doc.profile_photo} alt={doc.full_name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0 flex items-center justify-center text-muted-foreground text-sm font-bold">
+            {(doc.full_name || "D")[0]}
+          </div>
+        )}
+        <div className="flex-1 min-w-[140px]">
+          <p className="font-medium text-foreground truncate text-sm">{doc.full_name}</p>
+          <p className="text-xs text-muted-foreground truncate">{doc.specialty}</p>
+        </div>
+        {doc.isUpToDate ? (
+          <span className="text-[11px] px-2 py-1 rounded-full font-semibold bg-green-100 text-green-700 flex items-center gap-1 flex-shrink-0">
+            <CheckCircle2 className="w-3 h-3" /> Al día
+          </span>
+        ) : (
+          <span className="text-[11px] px-2 py-1 rounded-full font-semibold bg-red-100 text-red-700 flex items-center gap-1 flex-shrink-0">
+            <AlertTriangle className="w-3 h-3" /> {doc.daysLate} día{doc.daysLate !== 1 ? "s" : ""} de retraso
+          </span>
+        )}
+      </div>
+
+      <div className="px-4 pb-3 flex items-center gap-3 flex-wrap text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Cobro día</span>
+          <Input
+            type="number"
+            min="1"
+            max="28"
+            value={billingDayDraft ?? doc.billingDay}
+            onChange={onBillingDayChange}
+            onBlur={onBillingDayBlur}
+            className="rounded-lg h-7 w-14 px-1.5 text-xs text-center"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Monto</span>
+          <span className="text-muted-foreground">$</span>
+          <Input
+            type="number"
+            min="0"
+            value={amountDraft ?? doc.rate}
+            onChange={onAmountChange}
+            onBlur={onAmountBlur}
+            className="rounded-lg h-7 w-20 px-1.5 text-xs"
+          />
+        </div>
+        <span className="text-muted-foreground">Último pago: {fmtDate(doc.lastPayment)}</span>
+      </div>
+
+      <div className="px-4 pb-4 flex items-center gap-1.5 flex-wrap">
+        <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1.5" onClick={onOpenPayment}>
+          <Plus className="w-3.5 h-3.5" /> Pago
+        </Button>
+        {!doc.isUpToDate && (
+          <Button
+            size="sm"
+            variant="outline"
+            className={`rounded-lg h-8 gap-1.5 ${
+              doc.active
+                ? "text-destructive border-destructive/30 hover:bg-destructive/5"
+                : "text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+            }`}
+            onClick={onToggleActive}
+          >
+            {doc.active ? (
+              <><Ban className="w-3.5 h-3.5" /> Desactivar perfil</>
+            ) : (
+              <><Power className="w-3.5 h-3.5" /> Reactivar perfil</>
+            )}
+          </Button>
+        )}
+        <button
+          type="button"
+          aria-label="Ver pagos"
+          className="p-2 rounded-lg hover:bg-muted text-muted-foreground ml-auto"
+          onClick={onToggleExpand}
+        >
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="px-4 pb-4 bg-muted/30">
+          {doc.payments.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-3">Sin pagos registrados todavía.</p>
+          ) : (
+            <div className="space-y-1.5 pt-2">
+              {doc.payments.map((p) => (
+                <div key={p.id} className="flex items-center justify-between text-sm bg-card rounded-lg px-3 py-2 border border-border/40">
+                  <div className="min-w-0">
+                    <span className="font-medium text-foreground">{fmtMoney(p.amount)}</span>
+                    <span className="text-muted-foreground"> · {fmtDate(p.payment_date)} · {METHOD_LABELS[p.method] || p.method}</span>
+                    {p.period_label && <span className="text-muted-foreground"> · {p.period_label}</span>}
+                    {p.notes && <p className="text-xs text-muted-foreground truncate">{p.notes}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Eliminar pago"
+                    className="p-1.5 rounded-lg hover:bg-destructive/10 flex-shrink-0"
+                    onClick={() => onDeletePayment(p.id)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Panel de negocio del plan Premium: como el cobro es manual (transferencia,
 // efectivo, etc., no hay pasarela de pagos conectada), aquí el dueño marca
-// quién está Premium, cuánto le toca pagar cada mes, y registra cada pago
-// que recibe. La app calcula solita el ciclo mensual: quién ya pagó este
-// mes, quién falta, y las sumas de ingresos esperados/cobrados/pendientes.
+// quién está Premium, cuánto y qué día del mes le toca pagar, y registra
+// cada pago que recibe. La app calcula sola quién está al día y quién va
+// retrasado (y cuántos días), usando el día de cobro de cada doctor.
 export default function AdminPremium() {
   const [specialists, setSpecialists] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [amountDrafts, setAmountDrafts] = useState({});
+  const [billingDayDrafts, setBillingDayDrafts] = useState({});
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_PAYMENT);
@@ -95,38 +224,44 @@ export default function AdminPremium() {
   const monthEnd = useMemo(() => endOfMonth(now), [now]);
   const currentMonthLabel = useMemo(() => capitalize(format(now, "MMMM yyyy", { locale: es })), [now]);
 
-  // Lo que cada doctor Premium ya pagó DENTRO del mes en curso (para el
-  // ciclo de cobro mensual, aparte del acumulado histórico de arriba).
-  const paidThisMonthByDoctor = useMemo(() => {
-    const map = {};
-    payments
-      .filter((p) => p.payment_date && isWithinInterval(parseISO(p.payment_date), { start: monthStart, end: monthEnd }))
-      .forEach((p) => {
-        if (!p.specialist_id) return;
-        map[p.specialist_id] = (map[p.specialist_id] || 0) + (p.amount || 0);
-      });
-    return map;
-  }, [payments, monthStart, monthEnd]);
-
+  // Ciclo de cobro por doctor: cada uno tiene un "día de cobro" (día del mes,
+  // 1-28 para que exista en todos los meses). La fecha de corte del ciclo
+  // actual es la ocurrencia más reciente de ese día que ya pasó (o es hoy).
+  // Si el último pago registrado es posterior a esa fecha de corte, está al
+  // día; si no, lleva retraso, y se cuentan los días desde el corte.
   const premiumRows = useMemo(
     () =>
       premiumDoctors
         .map((doc) => {
           const rate = doc.monthly_amount || DEFAULT_RATE;
-          const paidThisMonth = paidThisMonthByDoctor[doc.id] || 0;
+          const billingDay = Math.min(28, Math.max(1, doc.billing_day || (
+            doc.premium_activated_at ? new Date(doc.premium_activated_at).getDate() : DEFAULT_BILLING_DAY
+          )));
+          let dueDate = new Date(now.getFullYear(), now.getMonth(), billingDay);
+          if (dueDate > now) {
+            dueDate = new Date(now.getFullYear(), now.getMonth() - 1, billingDay);
+          }
+          const lastPayment = revenueByDoctor[doc.id]?.last || null;
+          const isUpToDate = !!(lastPayment && new Date(lastPayment) >= dueDate);
+          const daysLate = isUpToDate ? 0 : Math.max(0, differenceInCalendarDays(now, dueDate));
           return {
             ...doc,
             rate,
+            billingDay,
+            dueDate,
             totalRevenue: revenueByDoctor[doc.id]?.total || 0,
-            lastPayment: revenueByDoctor[doc.id]?.last || null,
+            lastPayment,
             payments: revenueByDoctor[doc.id]?.list || [],
-            paidThisMonth,
-            isPaidThisMonth: paidThisMonth >= rate,
+            isUpToDate,
+            daysLate,
           };
         })
-        .sort((a, b) => b.totalRevenue - a.totalRevenue),
-    [premiumDoctors, revenueByDoctor, paidThisMonthByDoctor]
+        .sort((a, b) => b.daysLate - a.daysLate || b.totalRevenue - a.totalRevenue),
+    [premiumDoctors, revenueByDoctor, now]
   );
+
+  const onTimeDoctors = useMemo(() => premiumRows.filter((d) => d.isUpToDate), [premiumRows]);
+  const lateDoctors = useMemo(() => premiumRows.filter((d) => !d.isUpToDate), [premiumRows]);
 
   const totalRevenue = useMemo(() => payments.reduce((sum, p) => sum + (p.amount || 0), 0), [payments]);
   const revenueThisMonth = useMemo(
@@ -136,13 +271,8 @@ export default function AdminPremium() {
         .reduce((sum, p) => sum + (p.amount || 0), 0),
     [payments, monthStart, monthEnd]
   );
-  // Suma automática mensual: cuánto debería entrar este mes (según el monto
-  // de cada doctor Premium) vs. cuánto ya entró vs. cuánto falta.
+  // Cuánto debería entrar este mes según el monto de cada doctor Premium.
   const expectedThisMonth = useMemo(() => premiumRows.reduce((sum, d) => sum + d.rate, 0), [premiumRows]);
-  const pendingThisMonth = useMemo(
-    () => premiumRows.reduce((sum, d) => sum + Math.max(d.rate - d.paidThisMonth, 0), 0),
-    [premiumRows]
-  );
 
   // Ingresos por mes, últimos 6 meses (histórico, se recalcula solo).
   const chartData = useMemo(() => {
@@ -156,21 +286,6 @@ export default function AdminPremium() {
       return { label: format(month, "MMM yy", { locale: es }), Ingresos: total };
     });
   }, [payments, now]);
-
-  const togglePremium = async (id, nombre, currentPlan) => {
-    const next = currentPlan === "premium" ? "gratis" : "premium";
-    if (next === "gratis" && !confirm(`¿Quitar el plan Premium a ${nombre}? Su historial de pagos se conserva.`)) return;
-    const prevActivatedAt = specialists.find((d) => d.id === id)?.premium_activated_at;
-    const nextActivatedAt = next === "premium" ? new Date().toISOString() : prevActivatedAt;
-    setSpecialists((prev) => prev.map((d) => (d.id === id ? { ...d, plan_slug: next, premium_activated_at: nextActivatedAt } : d)));
-    try {
-      await base44.entities.Specialist.update(id, { plan_slug: next, premium_activated_at: nextActivatedAt || null });
-      toast.success(next === "premium" ? `${nombre} ahora es Premium` : `${nombre} ahora es Gratis`);
-    } catch (e) {
-      setSpecialists((prev) => prev.map((d) => (d.id === id ? { ...d, plan_slug: currentPlan, premium_activated_at: prevActivatedAt } : d)));
-      toast.error("No se pudo actualizar: " + e.message);
-    }
-  };
 
   const handleAmountBlur = async (doc) => {
     const raw = amountDrafts[doc.id];
@@ -186,6 +301,36 @@ export default function AdminPremium() {
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, monthly_amount: prevAmount } : d)));
       toast.error("No se pudo actualizar el monto: " + e.message);
+    }
+  };
+
+  const handleBillingDayBlur = async (doc) => {
+    const raw = billingDayDrafts[doc.id];
+    if (raw === undefined) return;
+    const value = Math.min(28, Math.max(1, Number(raw) || doc.billingDay));
+    setBillingDayDrafts((prev) => { const next = { ...prev }; delete next[doc.id]; return next; });
+    if (!value || value === doc.billingDay) return;
+    const prevValue = doc.billing_day;
+    setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, billing_day: value } : d)));
+    try {
+      await base44.entities.Specialist.update(doc.id, { billing_day: value });
+      toast.success(`Día de cobro de ${doc.full_name} actualizado al día ${value}`);
+    } catch (e) {
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, billing_day: prevValue } : d)));
+      toast.error("No se pudo actualizar el día de cobro: " + e.message);
+    }
+  };
+
+  const toggleActive = async (doc) => {
+    const next = !doc.active;
+    if (!next && !confirm(`¿Desactivar el perfil de ${doc.full_name} mientras no ha pagado? Dejará de verse en el directorio hasta que lo reactives.`)) return;
+    setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, active: next } : d)));
+    try {
+      await base44.entities.Specialist.update(doc.id, { active: next });
+      toast.success(next ? `${doc.full_name} reactivado` : `${doc.full_name} desactivado`);
+    } catch (e) {
+      setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, active: !next } : d)));
+      toast.error("No se pudo actualizar: " + e.message);
     }
   };
 
@@ -258,7 +403,8 @@ export default function AdminPremium() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground mb-6">
-        Cobro manual: tú recibes el pago (transferencia, efectivo, etc.) y lo registras aquí. La app calcula sola quién ya pagó {currentMonthLabel.toLowerCase()} y las sumas del mes.
+        Cobro manual: tú recibes el pago (transferencia, efectivo, etc.) y lo registras aquí. Cada doctor tiene su
+        propio día de cobro del mes; la app calcula sola quién está al día y quién va retrasado, y cuántos días.
       </p>
 
       {/* KPIs del ciclo mensual */}
@@ -266,7 +412,7 @@ export default function AdminPremium() {
         <KpiCard icon={Crown} label="Doctores Premium" value={premiumDoctors.length} color="text-purple-500" />
         <KpiCard icon={TrendingUp} label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} color="text-blue-500" />
         <KpiCard icon={DollarSign} label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} color="text-emerald-600" />
-        <KpiCard icon={AlertCircle} label={`Pendiente ${currentMonthLabel}`} value={fmtMoney(pendingThisMonth)} color="text-amber-500" />
+        <KpiCard icon={AlertTriangle} label="Retrasados" value={lateDoctors.length} color="text-red-500" />
         <KpiCard icon={Receipt} label="Ingresos totales" value={fmtMoney(totalRevenue)} color="text-slate-500" />
       </div>
 
@@ -287,121 +433,80 @@ export default function AdminPremium() {
         </ResponsiveContainer>
       </div>
 
-      {/* Tabla de doctores Premium con estado de cobro del mes */}
-      <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
-        <div className="px-5 py-3 border-b border-border/50">
-          <h2 className="font-heading font-semibold text-sm text-foreground">Doctores en plan Premium ({premiumRows.length})</h2>
+      {/* Doctores Premium: al día vs. retrasados, en dos columnas */}
+      {premiumRows.length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border/50 text-center py-16 text-muted-foreground px-5">
+          <Crown className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p>Todavía no hay doctores en plan Premium.</p>
+          <p className="text-xs mt-1">Márcalos como Premium desde la pestaña Doctores.</p>
         </div>
-        {premiumRows.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground px-5">
-            <Crown className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p>Todavía no hay doctores en plan Premium.</p>
-            <p className="text-xs mt-1">Márcalos como Premium desde la pestaña Doctores.</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-border/40">
-            {premiumRows.map((doc) => (
-              <div key={doc.id}>
-                <div className="flex items-center gap-4 px-5 py-4 flex-wrap">
-                  {doc.profile_photo ? (
-                    <img src={doc.profile_photo} alt={doc.full_name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0 flex items-center justify-center text-muted-foreground text-sm font-bold">
-                      {(doc.full_name || "D")[0]}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-[160px]">
-                    <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.specialty}{doc.premium_activated_at ? ` · Premium desde ${fmtDate(doc.premium_activated_at)}` : ""}
-                    </p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-heading font-bold text-foreground">{fmtMoney(doc.totalRevenue)}</p>
-                    <p className="text-xs text-muted-foreground">Último pago: {fmtDate(doc.lastPayment)}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1.5" onClick={() => openPaymentDialog(doc)}>
-                      <Plus className="w-3.5 h-3.5" /> Pago
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-lg h-8 gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/5"
-                      onClick={() => togglePremium(doc.id, doc.full_name, "premium")}
-                    >
-                      Quitar Premium
-                    </Button>
-                    <button
-                      type="button"
-                      aria-label="Ver pagos"
-                      className="p-2 rounded-lg hover:bg-muted text-muted-foreground"
-                      onClick={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
-                    >
-                      {expandedId === doc.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-                  </div>
+      ) : (
+        <div className="grid lg:grid-cols-2 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+              <h2 className="font-heading font-semibold text-sm text-foreground">Al día con su pago ({onTimeDoctors.length})</h2>
+            </div>
+            <div className="space-y-3">
+              {onTimeDoctors.length === 0 ? (
+                <div className="bg-card border border-border/50 rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                  Ningún doctor está al día todavía.
                 </div>
-
-                {/* Ciclo de cobro del mes en curso */}
-                <div className="flex items-center gap-4 px-5 pb-4 flex-wrap text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-muted-foreground">Monto mensual:</span>
-                    <span className="text-muted-foreground">$</span>
-                    <Input
-                      type="number"
-                      min="0"
-                      value={amountDrafts[doc.id] ?? doc.rate}
-                      onChange={(e) => setAmountDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
-                      onBlur={() => handleAmountBlur(doc)}
-                      className="rounded-lg h-7 w-20 px-2 text-xs"
-                    />
-                  </div>
-                  {doc.isPaidThisMonth ? (
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-green-100 text-green-700 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Pagado {currentMonthLabel}
-                    </span>
-                  ) : (
-                    <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-700 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      Pendiente {currentMonthLabel} ({fmtMoney(doc.rate - doc.paidThisMonth)})
-                    </span>
-                  )}
-                </div>
-
-                {expandedId === doc.id && (
-                  <div className="px-5 pb-4 bg-muted/30">
-                    {doc.payments.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-3">Sin pagos registrados todavía.</p>
-                    ) : (
-                      <div className="space-y-1.5 pt-2">
-                        {doc.payments.map((p) => (
-                          <div key={p.id} className="flex items-center justify-between text-sm bg-card rounded-lg px-3 py-2 border border-border/40">
-                            <div className="min-w-0">
-                              <span className="font-medium text-foreground">{fmtMoney(p.amount)}</span>
-                              <span className="text-muted-foreground"> · {fmtDate(p.payment_date)} · {METHOD_LABELS[p.method] || p.method}</span>
-                              {p.period_label && <span className="text-muted-foreground"> · {p.period_label}</span>}
-                              {p.notes && <p className="text-xs text-muted-foreground truncate">{p.notes}</p>}
-                            </div>
-                            <button
-                              type="button"
-                              aria-label="Eliminar pago"
-                              className="p-1.5 rounded-lg hover:bg-destructive/10 flex-shrink-0"
-                              onClick={() => handleDeletePayment(p.id)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+              ) : (
+                onTimeDoctors.map((doc) => (
+                  <PremiumDoctorCard
+                    key={doc.id}
+                    doc={doc}
+                    onOpenPayment={() => openPaymentDialog(doc)}
+                    onToggleActive={() => toggleActive(doc)}
+                    expanded={expandedId === doc.id}
+                    onToggleExpand={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                    onDeletePayment={handleDeletePayment}
+                    amountDraft={amountDrafts[doc.id]}
+                    onAmountChange={(e) => setAmountDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                    onAmountBlur={() => handleAmountBlur(doc)}
+                    billingDayDraft={billingDayDrafts[doc.id]}
+                    onBillingDayChange={(e) => setBillingDayDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                    onBillingDayBlur={() => handleBillingDayBlur(doc)}
+                  />
+                ))
+              )}
+            </div>
           </div>
-        )}
-      </div>
+
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
+              <h2 className="font-heading font-semibold text-sm text-foreground">Retrasados en su pago ({lateDoctors.length})</h2>
+            </div>
+            <div className="space-y-3">
+              {lateDoctors.length === 0 ? (
+                <div className="bg-card border border-border/50 rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                  Nadie está retrasado.
+                </div>
+              ) : (
+                lateDoctors.map((doc) => (
+                  <PremiumDoctorCard
+                    key={doc.id}
+                    doc={doc}
+                    onOpenPayment={() => openPaymentDialog(doc)}
+                    onToggleActive={() => toggleActive(doc)}
+                    expanded={expandedId === doc.id}
+                    onToggleExpand={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                    onDeletePayment={handleDeletePayment}
+                    amountDraft={amountDrafts[doc.id]}
+                    onAmountChange={(e) => setAmountDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                    onAmountBlur={() => handleAmountBlur(doc)}
+                    billingDayDraft={billingDayDrafts[doc.id]}
+                    onBillingDayChange={(e) => setBillingDayDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                    onBillingDayBlur={() => handleBillingDayBlur(doc)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
