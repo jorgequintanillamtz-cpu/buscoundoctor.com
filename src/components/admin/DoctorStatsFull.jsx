@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Eye, MousePointerClick, CalendarCheck, TrendingUp, BarChart3, Stethoscope } from "lucide-react";
+import { TrendingUp, BarChart3, Stethoscope } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
@@ -11,12 +11,11 @@ import {
 } from "date-fns";
 import { es } from "date-fns/locale";
 
-function KpiCard({ icon: Icon, label, sub, value, color }) {
+function KpiCard({ label, sub, value }) {
   return (
     <div className="bg-card rounded-2xl border border-border/50 p-5">
-      <Icon className={`w-6 h-6 ${color} mb-3`} />
-      <p className="font-heading font-bold text-2xl text-foreground">{value.toLocaleString("es-MX")}</p>
-      <p className="text-sm font-medium text-foreground mt-0.5">{label}</p>
+      <p className="text-sm font-semibold text-foreground mb-1">{label}</p>
+      <p className="font-heading font-extrabold text-3xl text-foreground">{value.toLocaleString("es-MX")}</p>
       <p className="text-xs text-muted-foreground mt-1">{sub}</p>
     </div>
   );
@@ -101,25 +100,19 @@ export default function DoctorStatsFull({ specialistId }) {
       {/* KPI cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <KpiCard
-          icon={Eye}
           label="Impresiones"
           sub="Tu perfil apareció en pantalla — últimos 30 días"
           value={kpis.impressions30}
-          color="text-brand-blue"
         />
         <KpiCard
-          icon={MousePointerClick}
           label="Clicks al perfil"
           sub="Un paciente entró a tu perfil — últimos 30 días"
           value={kpis.clicks30}
-          color="text-brand-navy"
         />
         <KpiCard
-          icon={CalendarCheck}
           label="Citas agendadas"
           sub="Solicitudes de cita — últimos 30 días"
           value={kpis.contacts30}
-          color="text-emerald-600"
         />
       </div>
 
