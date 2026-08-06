@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { loadPremiumStatuses, mergePremiumStatus } from "@/api/premiumStatus";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
   Stethoscope, TrendingUp, BarChart3,
@@ -41,10 +42,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const [specialists, payments] = await Promise.all([
+      const [rawSpecialists, payments, premiumStatuses] = await Promise.all([
         base44.entities.Specialist.list(),
         base44.entities.PremiumPayment.list(),
+        loadPremiumStatuses(),
       ]);
+      const specialists = mergePremiumStatus(rawSpecialists, premiumStatuses);
 
       const activeDoctors = specialists.filter((s) => s.active).length;
       const premiumDoctors = specialists.filter((s) => s.plan_slug === "premium").length;
