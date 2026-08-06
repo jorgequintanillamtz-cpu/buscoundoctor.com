@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, FileText, CheckCircle2, XCircle, Loader2, ExternalLink, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/api/activityLog";
 
 // Misma lista de tipos de documento que usa DocumentManager.jsx (el
 // componente que vive dentro del editor de cada doctor), para que las
@@ -61,6 +62,14 @@ function PendingDocCard({ doc, specialist, user, onReviewed }) {
         }
       }
       toast.success(status === "approved" ? "Documento aprobado" : "Documento rechazado");
+      logActivity({
+        type: status === "approved" ? "documento_aprobado" : "documento_rechazado",
+        description: status === "approved"
+          ? `Se aprobó "${typeLabel}" de ${specialist ? specialist.full_name : "un doctor"}`
+          : `Se rechazó "${typeLabel}" de ${specialist ? specialist.full_name : "un doctor"}. Motivo: ${reason || "sin motivo"}`,
+        specialistId: doc.specialist_id,
+        specialistName: specialist ? specialist.full_name : "",
+      });
       onReviewed(doc.id);
     } catch (e) {
       toast.error("Error: " + e.message);
