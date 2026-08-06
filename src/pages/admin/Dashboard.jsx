@@ -38,7 +38,13 @@ function AlertCard({ to, icon: Icon, label, count, hue }) {
         <p className={`font-heading font-bold text-lg leading-none ${urgent ? c.valueText : "text-foreground"}`}>
           {count}
         </p>
-        <p className="text-[11px] text-muted-foreground leading-tight mt-1">{label}</p>
+        <span
+          className={`inline-block text-[10px] font-semibold leading-tight mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${
+            urgent ? `${c.iconBg} ${c.iconText}` : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {label}
+        </span>
       </div>
     </Link>
   );
@@ -51,7 +57,9 @@ function StatCard({ icon: Icon, label, value, iconBg, iconColor }) {
         <Icon className="w-4 h-4" />
       </div>
       <p className="font-heading font-bold text-lg text-foreground leading-tight">{value}</p>
-      <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{label}</p>
+      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${iconBg} ${iconColor}`}>
+        {label}
+      </span>
     </div>
   );
 }
