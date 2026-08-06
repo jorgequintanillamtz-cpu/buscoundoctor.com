@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Crown, DollarSign, TrendingUp, Plus, Loader2, Trash2,
-  ChevronDown, ChevronUp, Stethoscope, Receipt, AlertTriangle, CheckCircle2, Ban, Power,
+  Crown, Plus, Loader2, Trash2,
+  ChevronDown, ChevronUp, Stethoscope, AlertTriangle, CheckCircle2, Ban, Power,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
