@@ -502,15 +502,18 @@ export default function AdminPremium() {
       <p className="text-sm text-muted-foreground mb-6">
         Cobro manual: tú recibes el pago (transferencia, efectivo, etc.) y lo registras aquí. Cada doctor tiene su
         propio día de cobro del mes; la app calcula sola quién está al día y quién va retrasado, y cuántos días.
+        También puedes ponerlo en modo prueba por un tiempo: mientras dure, no cuenta en las ventas ni aparece como
+        retrasado.
       </p>
 
       {/* KPIs del ciclo mensual */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <KpiCard label="Doctores Premium" value={premiumDoctors.length} tone="navy" />
-        <KpiCard label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} tone="blue" />
-        <KpiCard label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} tone="navy" />
+        <KpiCard label="En prueba" value={trialDoctors.length} tone="blue" />
+        <KpiCard label={`Esperado ${currentMonthLabel}`} value={fmtMoney(expectedThisMonth)} tone="navy" />
+        <KpiCard label={`Cobrado ${currentMonthLabel}`} value={fmtMoney(revenueThisMonth)} tone="blue" />
         <AlertKpiCard label="Retrasados" value={lateDoctors.length} active={lateDoctors.length > 0} />
-        <KpiCard label="Ingresos totales" value={fmtMoney(totalRevenue)} tone="blue" />
+        <KpiCard label="Ingresos totales" value={fmtMoney(totalRevenue)} tone="navy" />
       </div>
 
       {/* Gráfica de ingresos por mes */}
@@ -530,7 +533,7 @@ export default function AdminPremium() {
         </ResponsiveContainer>
       </div>
 
-      {/* Doctores Premium: al día vs. retrasados, en dos columnas */}
+      {/* Doctores Premium: en prueba, al día y retrasados, en tres columnas */}
       {premiumRows.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border/50 text-center py-16 text-muted-foreground px-5">
           <Crown className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -538,7 +541,41 @@ export default function AdminPremium() {
           <p className="text-xs mt-1">Márcalos como Premium desde la pestaña Doctores.</p>
         </div>
       ) : (
-        <div className="grid lg:grid-cols-2 gap-4">
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full bg-brand-blue flex-shrink-0" />
+              <h2 className="font-heading font-semibold text-sm text-foreground">En prueba ({trialDoctors.length})</h2>
+            </div>
+            <div className="space-y-3">
+              {trialDoctors.length === 0 ? (
+                <div className="bg-card border border-border/50 rounded-2xl p-6 text-center text-sm text-muted-foreground">
+                  Ningún doctor en prueba ahora mismo.
+                </div>
+              ) : (
+                trialDoctors.map((doc) => (
+                  <PremiumDoctorCard
+                    key={doc.id}
+                    doc={doc}
+                    onOpenPayment={() => openPaymentDialog(doc)}
+                    onToggleActive={() => toggleActive(doc)}
+                    onStartTrial={(days) => startTrial(doc, days)}
+                    onEndTrial={() => endTrial(doc)}
+                    expanded={expandedId === doc.id}
+                    onToggleExpand={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
+                    onDeletePayment={handleDeletePayment}
+                    amountDraft={amountDrafts[doc.id]}
+                    onAmountChange={(e) => setAmountDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                    onAmountBlur={() => handleAmountBlur(doc)}
+                    billingDayDraft={billingDayDrafts[doc.id]}
+                    onBillingDayChange={(e) => setBillingDayDrafts((prev) => ({ ...prev, [doc.id]: e.target.value }))}
+                    onBillingDayBlur={() => handleBillingDayBlur(doc)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
@@ -556,6 +593,8 @@ export default function AdminPremium() {
                     doc={doc}
                     onOpenPayment={() => openPaymentDialog(doc)}
                     onToggleActive={() => toggleActive(doc)}
+                    onStartTrial={(days) => startTrial(doc, days)}
+                    onEndTrial={() => endTrial(doc)}
                     expanded={expandedId === doc.id}
                     onToggleExpand={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
                     onDeletePayment={handleDeletePayment}
@@ -588,6 +627,8 @@ export default function AdminPremium() {
                     doc={doc}
                     onOpenPayment={() => openPaymentDialog(doc)}
                     onToggleActive={() => toggleActive(doc)}
+                    onStartTrial={(days) => startTrial(doc, days)}
+                    onEndTrial={() => endTrial(doc)}
                     expanded={expandedId === doc.id}
                     onToggleExpand={() => setExpandedId(expandedId === doc.id ? null : doc.id)}
                     onDeletePayment={handleDeletePayment}
