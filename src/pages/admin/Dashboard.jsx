@@ -11,10 +11,23 @@ import {
 // toma este color; en 0 se queda neutra (gris). Todas las clases están
 // escritas literalmente aquí para que Tailwind las detecte en el build.
 const ALERT_HUES = {
-  amber: { bg: "bg-amber-50", border: "border-amber-200 hover:border-amber-300", iconBg: "bg-amber-100", iconText: "text-amber-600", valueText: "text-amber-700" },
-  blue: { bg: "bg-blue-50", border: "border-blue-200 hover:border-blue-300", iconBg: "bg-blue-100", iconText: "text-blue-600", valueText: "text-blue-700" },
-  pink: { bg: "bg-pink-50", border: "border-pink-200 hover:border-pink-300", iconBg: "bg-pink-100", iconText: "text-pink-600", valueText: "text-pink-700" },
-  orange: { bg: "bg-orange-50", border: "border-orange-200 hover:border-orange-300", iconBg: "bg-orange-100", iconText: "text-orange-600", valueText: "text-orange-700" },
+  amber: { bg: "bg-amber-100", border: "border-amber-200 hover:border-amber-300", iconBg: "bg-white/70", iconText: "text-amber-700", valueText: "text-amber-800", labelBg: "bg-amber-200/70", labelText: "text-amber-800" },
+  blue: { bg: "bg-blue-100", border: "border-blue-200 hover:border-blue-300", iconBg: "bg-white/70", iconText: "text-blue-700", valueText: "text-blue-800", labelBg: "bg-blue-200/70", labelText: "text-blue-800" },
+  pink: { bg: "bg-pink-100", border: "border-pink-200 hover:border-pink-300", iconBg: "bg-white/70", iconText: "text-pink-700", valueText: "text-pink-800", labelBg: "bg-pink-200/70", labelText: "text-pink-800" },
+  orange: { bg: "bg-orange-100", border: "border-orange-200 hover:border-orange-300", iconBg: "bg-white/70", iconText: "text-orange-700", valueText: "text-orange-800", labelBg: "bg-orange-200/70", labelText: "text-orange-800" },
+};
+
+// Paleta para las tarjetas de métricas (Negocio / Catálogo): toda la caja se
+// rellena de color, no solo el ícono. Clases escritas literalmente para que
+// Tailwind las detecte en el build.
+const STAT_HUES = {
+  emerald: { bg: "bg-emerald-100", border: "border-emerald-200", iconBg: "bg-white/70", iconText: "text-emerald-700", labelBg: "bg-emerald-200/70", labelText: "text-emerald-800" },
+  blue: { bg: "bg-blue-100", border: "border-blue-200", iconBg: "bg-white/70", iconText: "text-blue-700", labelBg: "bg-blue-200/70", labelText: "text-blue-800" },
+  purple: { bg: "bg-purple-100", border: "border-purple-200", iconBg: "bg-white/70", iconText: "text-purple-700", labelBg: "bg-purple-200/70", labelText: "text-purple-800" },
+  indigo: { bg: "bg-indigo-100", border: "border-indigo-200", iconBg: "bg-white/70", iconText: "text-indigo-700", labelBg: "bg-indigo-200/70", labelText: "text-indigo-800" },
+  orange: { bg: "bg-orange-100", border: "border-orange-200", iconBg: "bg-white/70", iconText: "text-orange-700", labelBg: "bg-orange-200/70", labelText: "text-orange-800" },
+  pink: { bg: "bg-pink-100", border: "border-pink-200", iconBg: "bg-white/70", iconText: "text-pink-700", labelBg: "bg-pink-200/70", labelText: "text-pink-800" },
+  sky: { bg: "bg-sky-100", border: "border-sky-200", iconBg: "bg-white/70", iconText: "text-sky-700", labelBg: "bg-sky-200/70", labelText: "text-sky-800" },
 };
 
 function AlertCard({ to, icon: Icon, label, count, hue }) {
@@ -40,7 +53,7 @@ function AlertCard({ to, icon: Icon, label, count, hue }) {
         </p>
         <span
           className={`inline-block text-[10px] font-semibold leading-tight mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${
-            urgent ? `${c.iconBg} ${c.iconText}` : "bg-muted text-muted-foreground"
+            urgent ? `${c.labelBg} ${c.labelText}` : "bg-muted text-muted-foreground"
           }`}
         >
           {label}
@@ -50,14 +63,15 @@ function AlertCard({ to, icon: Icon, label, count, hue }) {
   );
 }
 
-function StatCard({ icon: Icon, label, value, iconBg, iconColor }) {
+function StatCard({ icon: Icon, label, value, hue }) {
+  const c = STAT_HUES[hue];
   return (
-    <div className="bg-card rounded-xl border border-border/50 p-3.5">
-      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 ${iconBg} ${iconColor}`}>
+    <div className={`rounded-xl border p-3.5 ${c.bg} ${c.border}`}>
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2.5 ${c.iconBg} ${c.iconText}`}>
         <Icon className="w-4 h-4" />
       </div>
       <p className="font-heading font-bold text-lg text-foreground leading-tight">{value}</p>
-      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${iconBg} ${iconColor}`}>
+      <span className={`inline-block text-[10px] font-semibold mt-1.5 px-2 py-0.5 rounded-full truncate max-w-full ${c.labelBg} ${c.labelText}`}>
         {label}
       </span>
     </div>
@@ -165,11 +179,11 @@ export default function Dashboard() {
         <SectionLabel icon={TrendingUp} bg="bg-blue-50" text="text-blue-700">Negocio</SectionLabel>
         <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-3">
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
-            <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} iconBg="bg-emerald-50" iconColor="text-emerald-600" />
-            <StatCard icon={FileText} label="Publicados / borrador" value={`${business.publishedDoctors} / ${business.draftDoctors}`} iconBg="bg-blue-50" iconColor="text-blue-600" />
-            <StatCard icon={Crown} label="Doctores en Premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} iconBg="bg-purple-50" iconColor="text-purple-600" />
-            <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} iconBg="bg-indigo-50" iconColor="text-indigo-600" />
-            <StatCard icon={Calendar} label="Solicitudes de cita (total)" value={business.totalRequests} iconBg="bg-orange-50" iconColor="text-orange-600" />
+            <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} hue="emerald" />
+            <StatCard icon={FileText} label="Publicados / borrador" value={`${business.publishedDoctors} / ${business.draftDoctors}`} hue="blue" />
+            <StatCard icon={Crown} label="Doctores en Premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} hue="purple" />
+            <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} hue="indigo" />
+            <StatCard icon={Calendar} label="Solicitudes de cita (total)" value={business.totalRequests} hue="orange" />
           </div>
         </div>
       </section>
@@ -189,9 +203,9 @@ export default function Dashboard() {
         <SectionLabel icon={Heart} bg="bg-emerald-50" text="text-emerald-700">Catálogo</SectionLabel>
         <div className="bg-emerald-50/30 border border-emerald-100 rounded-2xl p-3">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
-            <StatCard icon={Heart} label="Especialidades" value={catalog.specialties} iconBg="bg-pink-50" iconColor="text-pink-600" />
-            <StatCard icon={MapPin} label="Zonas" value={catalog.zones} iconBg="bg-orange-50" iconColor="text-orange-600" />
-            <StatCard icon={FileText} label="Artículos" value={catalog.posts} iconBg="bg-sky-50" iconColor="text-sky-600" />
+            <StatCard icon={Heart} label="Especialidades" value={catalog.specialties} hue="pink" />
+            <StatCard icon={MapPin} label="Zonas" value={catalog.zones} hue="orange" />
+            <StatCard icon={FileText} label="Artículos" value={catalog.posts} hue="sky" />
           </div>
         </div>
       </section>
