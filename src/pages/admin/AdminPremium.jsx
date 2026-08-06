@@ -16,6 +16,7 @@ import {
 } from "date-fns";
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
+import { logActivity } from "@/api/activityLog";
 
 const METHOD_LABELS = {
   transferencia: "Transferencia",
@@ -379,6 +380,12 @@ export default function AdminPremium() {
     try {
       await base44.entities.Specialist.update(doc.id, { monthly_amount: value });
       toast.success(`Monto mensual de ${doc.full_name} actualizado a ${fmtMoney(value)}`);
+      logActivity({
+        type: "monto_actualizado",
+        description: `Monto mensual de ${doc.full_name} actualizado a ${fmtMoney(value)}`,
+        specialistId: doc.id,
+        specialistName: doc.full_name,
+      });
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, monthly_amount: prevAmount } : d)));
       toast.error("No se pudo actualizar el monto: " + e.message);
@@ -396,6 +403,12 @@ export default function AdminPremium() {
     try {
       await base44.entities.Specialist.update(doc.id, { billing_day: value });
       toast.success(`Día de cobro de ${doc.full_name} actualizado al día ${value}`);
+      logActivity({
+        type: "dia_cobro_actualizado",
+        description: `Día de cobro de ${doc.full_name} actualizado al día ${value}`,
+        specialistId: doc.id,
+        specialistName: doc.full_name,
+      });
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, billing_day: prevValue } : d)));
       toast.error("No se pudo actualizar el día de cobro: " + e.message);
@@ -413,6 +426,12 @@ export default function AdminPremium() {
     try {
       await base44.entities.Specialist.update(doc.id, { trial_ends_at: iso });
       toast.success(`${doc.full_name} en prueba hasta el ${fmtDate(iso)}`);
+      logActivity({
+        type: "prueba_iniciada",
+        description: `${doc.full_name} entró en modo prueba hasta el ${fmtDate(iso)}`,
+        specialistId: doc.id,
+        specialistName: doc.full_name,
+      });
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: prevValue } : d)));
       toast.error("No se pudo activar la prueba: " + e.message);
@@ -425,6 +444,12 @@ export default function AdminPremium() {
     try {
       await base44.entities.Specialist.update(doc.id, { trial_ends_at: null });
       toast.success(`Prueba de ${doc.full_name} terminada`);
+      logActivity({
+        type: "prueba_terminada",
+        description: `Se terminó manualmente la prueba de ${doc.full_name}`,
+        specialistId: doc.id,
+        specialistName: doc.full_name,
+      });
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, trial_ends_at: prevValue } : d)));
       toast.error("No se pudo terminar la prueba: " + e.message);
@@ -438,6 +463,12 @@ export default function AdminPremium() {
     try {
       await base44.entities.Specialist.update(doc.id, { active: next });
       toast.success(next ? `${doc.full_name} reactivado` : `${doc.full_name} desactivado`);
+      logActivity({
+        type: next ? "perfil_activado" : "perfil_desactivado",
+        description: next ? `Se reactivó el perfil de ${doc.full_name}` : `Se desactivó el perfil de ${doc.full_name} por falta de pago`,
+        specialistId: doc.id,
+        specialistName: doc.full_name,
+      });
     } catch (e) {
       setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, active: !next } : d)));
       toast.error("No se pudo actualizar: " + e.message);
@@ -473,7 +504,14 @@ export default function AdminPremium() {
         method: form.method,
         notes: form.notes.trim(),
       });
+      const paidDoc = premiumRows.find((d) => d.id === form.specialist_id);
       toast.success("Pago registrado");
+      logActivity({
+        type: "pago_registrado",
+        description: `Se registró un pago de ${fmtMoney(amountNum)} de ${paidDoc?.full_name || "un doctor"}`,
+        specialistId: form.specialist_id,
+        specialistName: paidDoc?.full_name || "",
+      });
       setDialogOpen(false);
       load();
     } catch (e) {
@@ -482,11 +520,17 @@ export default function AdminPremium() {
     setSaving(false);
   };
 
-  const handleDeletePayment = async (id) => {
+  const handleDeletePayment = async (id, doc) => {
     if (!confirm("¿Eliminar este pago del historial?")) return;
     try {
       await base44.entities.PremiumPayment.delete(id);
       toast.success("Pago eliminado");
+      logActivity({
+        type: "pago_eliminado",
+        description: `Se eliminó un pago del historial de ${doc?.full_name || "un doctor"}`,
+        specialistId: doc?.id || "",
+        specialistName: doc?.full_name || "",
+      });
       load();
     } catch (e) {
       toast.error("Error: " + e.message);
