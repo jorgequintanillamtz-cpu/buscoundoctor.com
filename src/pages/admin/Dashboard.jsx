@@ -82,7 +82,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const [specialists, specialties, zones, posts, requests, documents, reviews] = await Promise.all([
+      const [specialists, specialties, zones, posts, requests, documents, reviews, payments] = await Promise.all([
         base44.entities.Specialist.list(),
         base44.entities.Specialty.list(),
         base44.entities.Zone.list(),
@@ -90,6 +90,7 @@ export default function Dashboard() {
         base44.entities.AppointmentRequest.list(),
         base44.entities.SpecialistDocument.list(),
         base44.entities.Review.list(),
+        base44.entities.PremiumPayment.list(),
       ]);
 
       const pendingDocs = documents.filter(
@@ -100,9 +101,18 @@ export default function Dashboard() {
       const pendingRequests = requests.filter((r) => (r.status || "pendiente") === "pendiente").length;
 
       const activeDoctors = specialists.filter((s) => s.active).length;
-      const premiumSpecialists = specialists.filter((s) => s.plan_slug === "premium");
-      const premiumDoctors = premiumSpecialists.length;
-      const monthlyValue = premiumSpecialists.reduce((sum, s) => sum + (s.monthly_amount || 999), 0);
+      const premiumDoctors = specialists.filter((s) => s.plan_slug === "premium").length;
+
+      // Valor ventas al mes = solo lo YA cobrado este mes (pagos registrados
+      // en PremiumPayment con fecha dentro del mes en curso), no lo esperado.
+      const now = new Date();
+      const monthlyValue = payments
+        .filter((p) => {
+          if (!p.payment_date) return false;
+          const d = new Date(p.payment_date);
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        })
+        .reduce((sum, p) => sum + (p.amount || 0), 0);
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -115,7 +125,6 @@ export default function Dashboard() {
         alerts: { pendingDocs, pendingDoctors, pendingReviews, pendingRequests },
         business: {
           activeDoctors,
-          totalDoctors: specialists.length,
           newLast30,
           premiumDoctors,
           monthlyValue,
@@ -151,9 +160,9 @@ export default function Dashboard() {
         <SectionLabel icon={TrendingUp}>Resumen</SectionLabel>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
           <StatCard icon={TrendingUp} label="Registros nuevos (30 días)" value={business.newLast30} tone="blue" />
-          <StatCard icon={CheckCircle2} label="Doctores activos" value={`${business.activeDoctors} / ${business.totalDoctors}`} tone="navy" />
-          <StatCard icon={Crown} label="Doctores premium" value={`${business.premiumDoctors} / ${business.totalDoctors}`} tone="blue" />
-          <StatCard icon={DollarSign} label="Valor ventas al mes" value={fmtMoney(business.monthlyValue)} tone="navy" />
+          <StatCard icon={CheckCircle2} label="Doctores activos" value={business.activeDoctors} tone="navy" />
+          <StatCard icon={Crown} label="Doctores premium" value={business.premiumDoctors} tone="blue" />
+          <StatCard icon={DollarSign} label="Valor ventas al mes (cobrado)" value={fmtMoney(business.monthlyValue)} tone="navy" />
         </div>
       </section>
 
