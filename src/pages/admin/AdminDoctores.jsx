@@ -1,17 +1,46 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock, Stethoscope, Crown } from "lucide-react";
+import {
+  Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock,
+  Stethoscope, Crown, Search, ArrowUpDown, CheckSquare, Square, Calendar, Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
+
+const VERIFICATION_LABELS = {
+  pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
+  verified: { label: "Cédula verificada", icon: ShieldCheck, cls: "bg-green-100 text-green-700" },
+  rejected: { label: "Cédula rechazada", icon: XCircle, cls: "bg-red-100 text-red-700" },
+};
 
 export default function AdminDoctores() {
   const [doctors, setDoctors] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("todos");
 
+  const [search, setSearch] = useState("");
+  const [specialtyFilter, setSpecialtyFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos"); // todos | activos | inactivos
+  const [sortOrder, setSortOrder] = useState("recientes"); // recientes | citas | nombre
+
+  const [selectedPending, setSelectedPending] = useState(new Set());
+  const [rejectDialog, setRejectDialog] = useState({ open: false, ids: [], motivo: "" });
+  const [rejecting, setRejecting] = useState(false);
+
   useEffect(() => {
-    base44.entities.Specialist.list("-created_date").then(d => { setDoctors(d); setLoading(false); });
+    Promise.all([
+      base44.entities.Specialist.list("-created_date"),
+      base44.entities.AppointmentRequest.list("-created_date", 2000),
+    ]).then(([d, r]) => {
+      setDoctors(d);
+      setRequests(r);
+      setLoading(false);
+    });
   }, []);
 
   const handleDelete = async (id, nombre) => {
@@ -54,6 +83,23 @@ export default function AdminDoctores() {
     }
   };
 
+  // Activar/desactivar el perfil directamente desde la lista (por ejemplo,
+  // mientras un doctor Premium no ha pagado). Deja de verse en el directorio
+  // hasta que se reactive.
+  const toggleActive = async (doc) => {
+    const isActive = doc.active !== false;
+    const next = !isActive;
+    if (!next && !confirm(`¿Desactivar el perfil de ${doc.full_name}? Dejará de verse en el directorio hasta que lo reactives.`)) return;
+    setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: next } : d));
+    try {
+      await base44.entities.Specialist.update(doc.id, { active: next });
+      toast.success(next ? `${doc.full_name} reactivado` : `${doc.full_name} desactivado`);
+    } catch (e) {
+      setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: isActive } : d));
+      toast.error("No se pudo actualizar: " + e.message);
+    }
+  };
+
   // Perfiles registrados vía /registro-medico: pendientes de revisión o borradores con dueño asignado
   const pendientes = useMemo(
     () => doctors.filter(s => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)),
@@ -75,6 +121,56 @@ export default function AdminDoctores() {
     () => doctors.filter(s => !(s.publication_status === "draft" && !s.owner_user_id)),
     [doctors]
   );
+
+  const specialtyOptions = useMemo(() => {
+    const set = new Set(doctoresReales.map(d => d.specialty).filter(Boolean));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
+  }, [doctoresReales]);
+
+  // Citas generadas por doctor (total histórico y este mes), para dar
+  // contexto rápido en la lista sin tener que ir a /admin/solicitudes.
+  const requestCountsByDoctor = useMemo(() => {
+    const now = new Date();
+    const mStart = startOfMonth(now);
+    const mEnd = endOfMonth(now);
+    const map = {};
+    requests.forEach(r => {
+      if (!r.specialist_id) return;
+      if (!map[r.specialist_id]) map[r.specialist_id] = { total: 0, thisMonth: 0 };
+      map[r.specialist_id].total += 1;
+      if (r.created_date && isWithinInterval(parseISO(r.created_date), { start: mStart, end: mEnd })) {
+        map[r.specialist_id].thisMonth += 1;
+      }
+    });
+    return map;
+  }, [requests]);
+
+  // Lista "Todos" filtrada por búsqueda/especialidad/estado y ordenada.
+  const visibleDoctors = useMemo(() => {
+    let list = doctoresReales;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(d =>
+        (d.full_name || "").toLowerCase().includes(q) ||
+        (d.professional_license_number || "").toLowerCase().includes(q)
+      );
+    }
+    if (specialtyFilter) list = list.filter(d => d.specialty === specialtyFilter);
+    if (statusFilter === "activos") list = list.filter(d => d.active !== false);
+    if (statusFilter === "inactivos") list = list.filter(d => d.active === false);
+
+    const withCounts = list.map(d => ({
+      ...d,
+      totalCitas: requestCountsByDoctor[d.id]?.total || 0,
+      citasMes: requestCountsByDoctor[d.id]?.thisMonth || 0,
+    }));
+
+    if (sortOrder === "citas") withCounts.sort((a, b) => b.totalCitas - a.totalCitas);
+    else if (sortOrder === "nombre") withCounts.sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "es"));
+    // "recientes" ya viene ordenado por created_date desc desde el fetch inicial
+
+    return withCounts;
+  }, [doctoresReales, search, specialtyFilter, statusFilter, sortOrder, requestCountsByDoctor]);
 
   const STEP_LABELS = {
     datos: "Datos básicos",
@@ -101,19 +197,45 @@ export default function AdminDoctores() {
   const featuredCount = useMemo(() => doctors.filter(d => d.featured).length, [doctors]);
   const premiumCount = useMemo(() => doctors.filter(d => d.plan_slug === "premium").length, [doctors]);
 
-  const handleApprove = async (id, nombre) => {
-    await base44.entities.Specialist.update(id, { publication_status: "published" });
-    setDoctors(prev => prev.map(d => d.id === id ? { ...d, publication_status: "published" } : d));
-    toast.success(`Perfil de ${nombre} aprobado y publicado`);
+  const togglePendingSelected = (id) => {
+    setSelectedPending(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   };
 
-  const handleReject = async (id, nombre) => {
-    const motivo = prompt(`Motivo de rechazo para "${nombre}":`);
-    if (motivo === null) return; // canceló
-    if (!motivo.trim()) { toast.error("Debes ingresar un motivo de rechazo"); return; }
-    await base44.entities.Specialist.update(id, { publication_status: "rejected" });
-    setDoctors(prev => prev.map(d => d.id === id ? { ...d, publication_status: "rejected" } : d));
-    toast.success(`Perfil de ${nombre} rechazado`);
+  const toggleSelectAllPending = () => {
+    setSelectedPending(prev => (prev.size === pendientes.length ? new Set() : new Set(pendientes.map(d => d.id))));
+  };
+
+  const handleBulkApprove = async (ids) => {
+    if (ids.length === 0) return;
+    try {
+      await Promise.all(ids.map(id => base44.entities.Specialist.update(id, { publication_status: "published" })));
+      setDoctors(prev => prev.map(d => (ids.includes(d.id) ? { ...d, publication_status: "published" } : d)));
+      setSelectedPending(new Set());
+      toast.success(`${ids.length} perfil${ids.length !== 1 ? "es" : ""} aprobado${ids.length !== 1 ? "s" : ""} y publicado${ids.length !== 1 ? "s" : ""}`);
+    } catch (e) {
+      toast.error("No se pudo aprobar: " + e.message);
+    }
+  };
+
+  const openRejectDialog = (ids) => setRejectDialog({ open: true, ids, motivo: "" });
+
+  const confirmReject = async () => {
+    if (!rejectDialog.motivo.trim()) { toast.error("Debes ingresar un motivo de rechazo"); return; }
+    setRejecting(true);
+    try {
+      await Promise.all(rejectDialog.ids.map(id => base44.entities.Specialist.update(id, { publication_status: "rejected" })));
+      setDoctors(prev => prev.map(d => (rejectDialog.ids.includes(d.id) ? { ...d, publication_status: "rejected" } : d)));
+      setSelectedPending(new Set());
+      toast.success(`${rejectDialog.ids.length} perfil${rejectDialog.ids.length !== 1 ? "es" : ""} rechazado${rejectDialog.ids.length !== 1 ? "s" : ""}`);
+      setRejectDialog({ open: false, ids: [], motivo: "" });
+    } catch (e) {
+      toast.error("No se pudo rechazar: " + e.message);
+    }
+    setRejecting(false);
   };
 
   if (loading) {
@@ -137,16 +259,16 @@ export default function AdminDoctores() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 w-fit">
-          <Star className="w-4 h-4 text-amber-500 flex-shrink-0" fill="currentColor" />
-          <p className="text-sm text-amber-800">
+        <div className="flex items-center gap-2 bg-amber-500 rounded-xl px-4 py-2.5 w-fit">
+          <Star className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" />
+          <p className="text-sm text-white">
             <span className="font-semibold">{featuredCount}</span> destacado{featuredCount !== 1 ? "s" : ""} para la página principal
-            {featuredCount > 6 && <span className="text-amber-600"> — solo se muestran los primeros 6</span>}
+            {featuredCount > 6 && <span className="text-white/80"> — solo se muestran los primeros 6</span>}
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-xl px-4 py-2.5 w-fit">
-          <Crown className="w-4 h-4 text-purple-500 flex-shrink-0" fill="currentColor" />
-          <p className="text-sm text-purple-800">
+        <div className="flex items-center gap-2 bg-purple-500 rounded-xl px-4 py-2.5 w-fit">
+          <Crown className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" />
+          <p className="text-sm text-white">
             <span className="font-semibold">{premiumCount}</span> doctor{premiumCount !== 1 ? "es" : ""} en plan Premium
           </p>
         </div>
@@ -182,73 +304,142 @@ export default function AdminDoctores() {
 
       {/* Listado general: perfiles reales (publicados o en revisión formal) */}
       {tab === "todos" && (
-        doctoresReales.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <p className="mb-4">No hay doctores registrados todavía.</p>
-            <Button asChild className="rounded-xl gap-2">
-              <Link to="/admin/doctores/nuevo"><Plus className="w-4 h-4" /> Agregar el primero</Link>
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {doctoresReales.map(doc => (
-              <div key={doc.id} className="bg-card rounded-2xl border border-border/50 p-4 flex items-center gap-4">
-                {doc.profile_photo ? (
-                  <img src={doc.profile_photo} alt={doc.full_name} loading="lazy" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0 flex items-center justify-center text-muted-foreground text-lg font-bold">
-                    {(doc.full_name || "D")[0]}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{doc.specialty} {doc.city ? `· ${doc.city}` : ""}</p>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => toggleFeatured(doc.id, doc.full_name, !!doc.featured)}
-                    title={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
-                    aria-label={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors flex-shrink-0 ${
-                      doc.featured
-                        ? "bg-amber-100 border-amber-200 text-amber-500 hover:bg-amber-200"
-                        : "bg-transparent border-border text-muted-foreground hover:border-amber-300 hover:text-amber-400"
-                    }`}
-                  >
-                    <Star className="w-4 h-4" fill={doc.featured ? "currentColor" : "none"} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => togglePremium(doc.id, doc.full_name, doc.plan_slug || "gratis")}
-                    title={doc.plan_slug === "premium" ? "Cambiar a plan Gratis" : "Marcar como Premium (cobro manual)"}
-                    className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 transition-colors flex-shrink-0 ${
-                      doc.plan_slug === "premium"
-                        ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                        : "bg-muted text-muted-foreground hover:bg-purple-50 hover:text-purple-600"
-                    }`}
-                  >
-                    <Crown className="w-3 h-3" fill={doc.plan_slug === "premium" ? "currentColor" : "none"} />
-                    {doc.plan_slug === "premium" ? "Premium" : "Gratis"}
-                  </button>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${doc.active !== false ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
-                    {doc.active !== false ? "Activo" : "Inactivo"}
-                  </span>
-                  <Link to={`/admin/doctores/editar/${doc.id}`}>
-                    <Button variant="ghost" size="icon" aria-label="Editar doctor" className="rounded-xl h-8 w-8">
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                  <Button variant="ghost" size="icon" aria-label="Eliminar doctor" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.full_name)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+        <>
+          {doctoresReales.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <div className="relative flex-1 min-w-[200px] max-w-xs">
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar por nombre o cédula..."
+                  className="rounded-xl pl-9"
+                />
               </div>
-            ))}
-          </div>
-        )
+              <select
+                value={specialtyFilter}
+                onChange={(e) => setSpecialtyFilter(e.target.value)}
+                className="h-10 rounded-xl border border-input bg-background px-3 text-sm"
+              >
+                <option value="">Todas las especialidades</option>
+                {specialtyOptions.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-10 rounded-xl border border-input bg-background px-3 text-sm"
+              >
+                <option value="todos">Todos los estados</option>
+                <option value="activos">Activos</option>
+                <option value="inactivos">Inactivos</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => setSortOrder(prev => (prev === "recientes" ? "citas" : prev === "citas" ? "nombre" : "recientes"))}
+                className="h-10 rounded-xl border border-input bg-background px-3 text-sm flex items-center gap-1.5 text-muted-foreground hover:text-foreground flex-shrink-0"
+                title="Cambiar orden"
+              >
+                <ArrowUpDown className="w-3.5 h-3.5" />
+                {sortOrder === "recientes" ? "Más recientes" : sortOrder === "citas" ? "Más citas" : "Nombre A-Z"}
+              </button>
+            </div>
+          )}
+
+          {doctoresReales.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <p className="mb-4">No hay doctores registrados todavía.</p>
+              <Button asChild className="rounded-xl gap-2">
+                <Link to="/admin/doctores/nuevo"><Plus className="w-4 h-4" /> Agregar el primero</Link>
+              </Button>
+            </div>
+          ) : visibleDoctors.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <Search className="w-10 h-10 mx-auto mb-3 opacity-40" />
+              <p>Ningún doctor coincide con la búsqueda o los filtros.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {visibleDoctors.map(doc => {
+                const verification = VERIFICATION_LABELS[doc.license_verification_status] || VERIFICATION_LABELS.pending;
+                const VerificationIcon = verification.icon;
+                const isActive = doc.active !== false;
+                return (
+                  <div key={doc.id} className="bg-card rounded-2xl border border-border/50 p-4 flex items-center gap-4 flex-wrap">
+                    {doc.profile_photo ? (
+                      <img src={doc.profile_photo} alt={doc.full_name} loading="lazy" className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0 flex items-center justify-center text-muted-foreground text-lg font-bold">
+                        {(doc.full_name || "D")[0]}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{doc.full_name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {doc.specialty} {doc.city ? `· ${doc.city}` : ""} {doc.professional_license_number ? `· Céd. ${doc.professional_license_number}` : ""}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${verification.cls}`}>
+                          <VerificationIcon className="w-3 h-3" /> {verification.label}
+                        </span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-brand-bluePale text-brand-navy flex items-center gap-1">
+                          <Calendar className="w-3 h-3" /> {doc.totalCitas} cita{doc.totalCitas !== 1 ? "s" : ""} total{doc.totalCitas !== 1 ? "es" : ""}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => toggleFeatured(doc.id, doc.full_name, !!doc.featured)}
+                        title={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
+                        aria-label={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors flex-shrink-0 ${
+                          doc.featured
+                            ? "bg-amber-100 border-amber-200 text-amber-500 hover:bg-amber-200"
+                            : "bg-transparent border-border text-muted-foreground hover:border-amber-300 hover:text-amber-400"
+                        }`}
+                      >
+                        <Star className="w-4 h-4" fill={doc.featured ? "currentColor" : "none"} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => togglePremium(doc.id, doc.full_name, doc.plan_slug || "gratis")}
+                        title={doc.plan_slug === "premium" ? "Cambiar a plan Gratis" : "Marcar como Premium (cobro manual)"}
+                        className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 transition-colors flex-shrink-0 ${
+                          doc.plan_slug === "premium"
+                            ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                            : "bg-muted text-muted-foreground hover:bg-purple-50 hover:text-purple-600"
+                        }`}
+                      >
+                        <Crown className="w-3 h-3" fill={doc.plan_slug === "premium" ? "currentColor" : "none"} />
+                        {doc.plan_slug === "premium" ? "Premium" : "Gratis"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleActive(doc)}
+                        title={isActive ? "Desactivar perfil" : "Reactivar perfil"}
+                        className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors flex-shrink-0 ${
+                          isActive
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-muted text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                        }`}
+                      >
+                        {isActive ? "Activo" : "Inactivo"}
+                      </button>
+                      <Link to={`/admin/doctores/editar/${doc.id}`}>
+                        <Button variant="ghost" size="icon" aria-label="Editar doctor" className="rounded-xl h-8 w-8">
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <Button variant="ghost" size="icon" aria-label="Eliminar doctor" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.full_name)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* Registros en progreso: borradores anónimos guardados paso a paso */}
@@ -318,52 +509,105 @@ export default function AdminDoctores() {
             <p>No hay perfiles pendientes de revisión.</p>
           </div>
         ) : (
-          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border/50 bg-muted/50">
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Cédula</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Registro</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendientes.map(doc => (
-                    <tr key={doc.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 font-medium text-foreground">
-                        {doc.full_name}
-                        {doc.specialty && <span className="block text-xs text-muted-foreground font-normal">{doc.specialty}</span>}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{doc.professional_license_number || "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
-                        {doc.created_date ? new Date(doc.created_date).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-700">
-                          {doc.publication_status === "pending_review" ? "Pendiente" : "Borrador"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleApprove(doc.id, doc.full_name)}>
-                            <BadgeCheck className="w-4 h-4" /> Aprobar
-                          </Button>
-                          <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => handleReject(doc.id, doc.full_name)}>
-                            <XCircle className="w-4 h-4" /> Rechazar
-                          </Button>
-                        </div>
-                      </td>
+          <div>
+            {selectedPending.size > 0 && (
+              <div className="flex items-center gap-2 mb-3 bg-brand-bluePale rounded-xl px-4 py-2.5 flex-wrap">
+                <span className="text-sm text-brand-navy font-medium flex-1">
+                  {selectedPending.size} seleccionado{selectedPending.size !== 1 ? "s" : ""}
+                </span>
+                <Button size="sm" className="rounded-lg gap-1.5 bg-emerald-600 hover:bg-emerald-700" onClick={() => handleBulkApprove(Array.from(selectedPending))}>
+                  <BadgeCheck className="w-4 h-4" /> Aprobar seleccionados
+                </Button>
+                <Button size="sm" variant="outline" className="rounded-lg gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => openRejectDialog(Array.from(selectedPending))}>
+                  <XCircle className="w-4 h-4" /> Rechazar seleccionados
+                </Button>
+              </div>
+            )}
+            <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/50 bg-muted/50">
+                      <th className="text-left px-4 py-3 w-10">
+                        <button type="button" onClick={toggleSelectAllPending} aria-label="Seleccionar todos" className="text-muted-foreground hover:text-foreground">
+                          {selectedPending.size === pendientes.length ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                        </button>
+                      </th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden sm:table-cell">Cédula</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Registro</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {pendientes.map(doc => (
+                      <tr key={doc.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3">
+                          <button type="button" onClick={() => togglePendingSelected(doc.id)} aria-label="Seleccionar" className="text-muted-foreground hover:text-foreground">
+                            {selectedPending.has(doc.id) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                          </button>
+                        </td>
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          {doc.full_name}
+                          {doc.specialty && <span className="block text-xs text-muted-foreground font-normal">{doc.specialty}</span>}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{doc.professional_license_number || "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                          {doc.created_date ? new Date(doc.created_date).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-700">
+                            {doc.publication_status === "pending_review" ? "Pendiente" : "Borrador"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleBulkApprove([doc.id])}>
+                              <BadgeCheck className="w-4 h-4" /> Aprobar
+                            </Button>
+                            <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => openRejectDialog([doc.id])}>
+                              <XCircle className="w-4 h-4" /> Rechazar
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )
       )}
+
+      <Dialog open={rejectDialog.open} onOpenChange={(open) => setRejectDialog(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-heading">
+              Rechazar {rejectDialog.ids.length > 1 ? `${rejectDialog.ids.length} perfiles` : "perfil"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Motivo de rechazo *</label>
+              <Input
+                value={rejectDialog.motivo}
+                onChange={(e) => setRejectDialog(prev => ({ ...prev, motivo: e.target.value }))}
+                placeholder="Ej: Cédula no coincide con el nombre registrado"
+                className="rounded-xl"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setRejectDialog({ open: false, ids: [], motivo: "" })} className="rounded-xl">Cancelar</Button>
+              <Button variant="destructive" onClick={confirmReject} disabled={rejecting} className="rounded-xl">
+                {rejecting && <Loader2 className="w-4 h-4 animate-spin mr-1.5" />}
+                Rechazar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
