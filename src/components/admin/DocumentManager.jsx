@@ -90,7 +90,12 @@ function DocTypeCard({ type, doc, isAdmin, user, onUploaded, onReviewed }) {
     <div className="border border-border/50 rounded-xl p-4 space-y-3">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">{type.label}</p>
+          <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+            {type.label}
+            {!type.required && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Opcional</span>
+            )}
+          </p>
           <p className="text-xs text-muted-foreground">{type.hint}</p>
         </div>
         {st && <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${st.color}`}>{st.label}</span>}
