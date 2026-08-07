@@ -1,10 +1,128 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Clock, Stethoscope } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Clock, Stethoscope, CheckCircle2, XCircle, Loader2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import moment from "moment";
+import { logActivity } from "@/api/activityLog";
+
+// Tarjeta de un artículo enviado por un doctor y esperando revisión: mismo
+// patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
+// los documentos de verificación, para que la experiencia del admin sea
+// consistente en todo el panel.
+function PendingBlogCard({ post, onReviewed }) {
+  const [rejecting, setRejecting] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [reviewing, setReviewing] = useState(false);
+
+  const approve = async () => {
+    setReviewing(true);
+    try {
+      await base44.entities.BlogPost.update(post.id, {
+        published: true,
+        review_status: "approved",
+        rejection_reason: "",
+      });
+      toast.success(`Artículo "${post.title}" aprobado y publicado`);
+      logActivity({
+        type: "blog_aprobado",
+        description: `Se aprobó y publicó el artículo "${post.title}" de ${post.author || "un doctor"}`,
+        specialistId: post.submitted_by_specialist_id,
+        specialistName: post.author || "",
+      });
+      onReviewed();
+    } catch (e) {
+      toast.error("Error: " + e.message);
+    }
+    setReviewing(false);
+  };
+
+  const confirmReject = async () => {
+    if (!rejectReason.trim()) { toast.error("El motivo de rechazo es obligatorio"); return; }
+    setReviewing(true);
+    try {
+      await base44.entities.BlogPost.update(post.id, {
+        published: false,
+        review_status: "rejected",
+        rejection_reason: rejectReason.trim(),
+      });
+      toast.success(`Artículo "${post.title}" rechazado`);
+      logActivity({
+        type: "blog_rechazado",
+        description: `Se rechazó el artículo "${post.title}" de ${post.author || "un doctor"}. Motivo: ${rejectReason.trim()}`,
+        specialistId: post.submitted_by_specialist_id,
+        specialistName: post.author || "",
+      });
+      setRejecting(false);
+      setRejectReason("");
+      onReviewed();
+    } catch (e) {
+      toast.error("Error: " + e.message);
+    }
+    setReviewing(false);
+  };
+
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 space-y-3">
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-foreground">{post.title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5 flex-wrap">
+          <span className="bg-brand-bluePale text-brand-navy px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+            <UserRound className="w-3 h-3" /> {post.author || "Doctor"}
+          </span>
+          <span>Enviado el {moment(post.created_date).format("DD MMM YYYY")}</span>
+        </p>
+      </div>
+
+      {post.excerpt && <p className="text-sm text-muted-foreground">{post.excerpt}</p>}
+
+      {post.image && (
+        <img src={post.image} alt="" className="w-full max-h-40 object-cover rounded-xl" />
+      )}
+
+      <Link
+        to={`/admin/blog/editar/${post.id}`}
+        className="text-primary hover:underline text-sm flex items-center gap-1.5 w-fit"
+      >
+        <Pencil className="w-3.5 h-3.5" /> Ver / editar contenido completo
+      </Link>
+
+      <div className="pt-2 border-t border-border/40">
+        {rejecting ? (
+          <div className="space-y-2">
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Motivo de rechazo (obligatorio, el doctor lo verá)"
+              className="w-full text-sm border border-input rounded-xl p-2 min-h-[60px]"
+            />
+            <div className="flex gap-2">
+              <Button size="sm" variant="destructive" className="rounded-xl" disabled={reviewing} onClick={confirmReject}>
+                {reviewing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                Confirmar rechazo
+              </Button>
+              <Button size="sm" variant="outline" className="rounded-xl" onClick={() => { setRejecting(false); setRejectReason(""); }}>
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" className="rounded-xl gap-1.5" disabled={reviewing} onClick={approve}>
+              {reviewing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+              Aprobar y publicar
+            </Button>
+            <Button size="sm" variant="outline" className="rounded-xl gap-1.5" disabled={reviewing} onClick={() => setRejecting(true)}>
+              <XCircle className="w-3.5 h-3.5 text-red-500" />
+              Rechazar
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminBlog() {
   const [posts, setPosts] = useState([]);
@@ -17,6 +135,16 @@ export default function AdminBlog() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const pendingPosts = useMemo(
+    () => posts.filter((p) => p.submitted_by_specialist_id && p.review_status === "pending_review"),
+    [posts]
+  );
+  // El listado general no repite lo que ya se muestra arriba en la cola de pendientes.
+  const otherPosts = useMemo(
+    () => posts.filter((p) => !(p.submitted_by_specialist_id && p.review_status === "pending_review")),
+    [posts]
+  );
 
   const togglePublish = async (post) => {
     const newPublished = !post.published;
@@ -55,14 +183,32 @@ export default function AdminBlog() {
         </Link>
       </div>
 
+      {/* Cola de artículos enviados por doctores, esperando aprobar o rechazar */}
+      {pendingPosts.length > 0 && (
+        <div className="mb-8">
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+            Pendientes de revisión
+            <span className="text-xs bg-amber-500 text-white rounded-full px-2 py-0.5">{pendingPosts.length}</span>
+          </h2>
+          <div className="space-y-3 max-w-2xl">
+            {pendingPosts.map((post) => (
+              <PendingBlogCard key={post.id} post={post} onReviewed={load} />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-3">
-        {posts.map(post => (
+        {otherPosts.map(post => (
           <div key={post.id} className="bg-card rounded-2xl border border-border/50 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="font-heading font-semibold text-foreground line-clamp-1">{post.title}</h3>
               <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
                 {post.submitted_by_specialist_id && (
                   <span className="bg-brand-bluePale text-brand-navy px-2 py-0.5 rounded-full font-medium">Enviado por médico</span>
+                )}
+                {post.submitted_by_specialist_id && post.review_status === "rejected" && (
+                  <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Rechazado</span>
                 )}
                 {post.category && <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded-full">{post.category}</span>}
                 <span>{moment(post.created_date).format("DD MMM YYYY")}</span>
@@ -78,6 +224,9 @@ export default function AdminBlog() {
                   </span>
                 )}
               </div>
+              {post.review_status === "rejected" && post.rejection_reason && (
+                <p className="text-xs text-red-500 mt-1">Motivo de rechazo: {post.rejection_reason}</p>
+              )}
             </div>
             <div className="flex items-center gap-1">
               <button onClick={() => togglePublish(post)} aria-label={post.published ? "Despublicar artículo" : "Publicar artículo"} className="p-2 rounded-lg hover:bg-muted transition-colors" title={post.published ? "Despublicar" : "Publicar"}>
