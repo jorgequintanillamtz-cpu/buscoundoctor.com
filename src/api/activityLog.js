@@ -23,17 +23,20 @@ export const ACTIVITY_TYPE_LABELS = {
   documento_rechazado: "Documento rechazado",
   resena_aprobada: "Reseña aprobada",
   resena_eliminada: "Reseña eliminada",
+  blog_aprobado: "Artículo de blog aprobado",
+  blog_rechazado: "Artículo de blog rechazado",
 };
 
 // Agrupación por "tono" (positivo/negativo/neutro), usada para colorear la
 // fila en la página de historial sin tener que repetir esta lista ahí.
 export const ACTIVITY_POSITIVE = new Set([
   "premium_activado", "prueba_iniciada", "perfil_activado", "destacado_activado",
-  "pago_registrado", "doctor_aprobado", "documento_aprobado", "resena_aprobada",
+  "pago_registrado", "doctor_aprobado", "documento_aprobado", "resena_aprobada", "blog_aprobado",
 ]);
 export const ACTIVITY_NEGATIVE = new Set([
   "premium_desactivado", "perfil_desactivado", "destacado_desactivado", "pago_eliminado",
   "doctor_rechazado", "doctor_eliminado", "registro_eliminado", "documento_rechazado", "resena_eliminada",
+  "blog_rechazado",
 ]);
 
 // Registra un movimiento en el historial. Es "best effort": si falla, no
