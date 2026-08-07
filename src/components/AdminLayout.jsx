@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History } from "lucide-react";
+import { loadPendingCounts } from "@/api/pendingCounts";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
 // el menú se pueda escanear de un vistazo: Resumen primero, luego lo
@@ -46,10 +48,30 @@ const adminNavSections = [
 // (ahí no caben encabezados de sección, es un solo scroll).
 const adminNavItems = adminNavSections.flatMap((section) => section.items);
 
+// Círculo rojo con el número de pendientes, junto al item del menú que
+// corresponda (Doctores, Verificaciones). No se muestra si no hay nada
+// pendiente.
+function PendingBadge({ count }) {
+  if (!count) return null;
+  return (
+    <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 // Layout exclusivo del panel de administración (dueños de la plataforma).
 // El panel de médicos vive por completo aparte, en /panel-medico.
 export default function AdminLayout() {
   const location = useLocation();
+  const [pendingCounts, setPendingCounts] = useState({});
+
+  // Se vuelve a calcular cada vez que cambias de página, para que si
+  // acabas de aprobar o rechazar algo, el número se actualice al volver
+  // a ver el menú (sin tener que refrescar la app entera).
+  useEffect(() => {
+    loadPendingCounts().then(setPendingCounts).catch(() => {});
+  }, [location.pathname]);
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path;
@@ -85,7 +107,8 @@ export default function AdminLayout() {
                       }`}
                     >
                       <item.icon className="w-4 h-4" />
-                      {item.label}
+                      <span className="flex-1">{item.label}</span>
+                      <PendingBadge count={pendingCounts[item.path]} />
                     </Link>
                   ))}
                 </div>
@@ -116,6 +139,7 @@ export default function AdminLayout() {
                 >
                   <item.icon className="w-3.5 h-3.5" />
                   {item.label}
+                  <PendingBadge count={pendingCounts[item.path]} />
                 </Link>
               ))}
             </div>
