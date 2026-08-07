@@ -256,11 +256,16 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
           {drafts.map((d) => {
             const st = STATUS_INFO[d.review_status] || STATUS_INFO.pending_review;
             return (
-              <div key={d.id} className="flex items-center justify-between gap-3 border border-border/50 rounded-xl p-3">
-                <p className="text-sm font-medium truncate">{d.title}</p>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 flex-shrink-0 ${st.color}`}>
-                  <st.icon className="w-3 h-3" /> {st.label}
-                </span>
+              <div key={d.id} className="border border-border/50 rounded-xl p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium truncate">{d.title}</p>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1 flex-shrink-0 ${st.color}`}>
+                    <st.icon className="w-3 h-3" /> {st.label}
+                  </span>
+                </div>
+                {d.review_status === "rejected" && d.rejection_reason && (
+                  <p className="text-xs text-red-500 mt-1.5">Motivo: {d.rejection_reason}</p>
+                )}
               </div>
             );
           })}
