@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, FileText, CheckCircle2, XCircle, Loader2, ExternalLink, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { notifyDocumentApproved, notifyDocumentRejected } from "@/api/doctorNotify";
 import { useAdminBadges } from "@/components/adminBadges";
 
 // Misma lista de tipos de documento que usa DocumentManager.jsx (el
@@ -68,6 +69,11 @@ export function PendingDocCard({ doc, specialist, user, onReviewed }) {
         specialistId: doc.specialist_id,
         specialistName: specialist ? specialist.full_name : "",
       });
+      if (specialist) {
+        status === "approved"
+          ? notifyDocumentApproved(specialist, typeLabel)
+          : notifyDocumentRejected(specialist, typeLabel, reason);
+      }
       onReviewed(doc.id);
     } catch (e) {
       toast.error("Error: " + e.message);
