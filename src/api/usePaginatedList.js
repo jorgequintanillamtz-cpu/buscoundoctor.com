@@ -15,7 +15,6 @@ export function usePaginatedList(items, { pageSize = 20, resetKey } = {}) {
 
   useEffect(() => {
     setPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey]);
 
   useEffect(() => {
