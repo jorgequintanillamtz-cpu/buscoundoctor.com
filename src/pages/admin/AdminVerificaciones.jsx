@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, FileText, CheckCircle2, XCircle, Loader2, ExternalLink, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { useAdminBadges } from "@/api/adminBadges";
 
 // Misma lista de tipos de documento que usa DocumentManager.jsx (el
 // componente que vive dentro del editor de cada doctor), para que las
@@ -148,6 +149,7 @@ export default function AdminVerificaciones() {
   const [specialistsById, setSpecialistsById] = useState({});
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { refresh: refreshBadges } = useAdminBadges();
 
   const load = async () => {
     const [allDocs, allSpecialists, me] = await Promise.all([
@@ -165,6 +167,7 @@ export default function AdminVerificaciones() {
 
   const handleReviewed = (docId) => {
     setDocs((prev) => prev.filter((d) => d.id !== docId));
+    refreshBadges();
   };
 
   // Cédula profesional primero: es el documento que más le importa al
