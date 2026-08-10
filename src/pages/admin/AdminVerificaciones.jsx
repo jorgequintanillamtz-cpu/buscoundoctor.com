@@ -29,7 +29,7 @@ function fmtDate(d) {
 // Tarjeta de un documento pendiente: mismo comportamiento de aprobar/rechazar
 // que DocumentManager.jsx, pero aquí junta TODOS los doctores en una sola
 // bandeja en vez de tener que entrar uno por uno a revisar.
-function PendingDocCard({ doc, specialist, user, onReviewed }) {
+export function PendingDocCard({ doc, specialist, user, onReviewed }) {
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [reviewing, setReviewing] = useState(false);
