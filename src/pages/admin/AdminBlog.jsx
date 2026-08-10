@@ -8,7 +8,7 @@ import moment from "moment";
 import { logActivity } from "@/api/activityLog";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
-import { useAdminBadges } from "@/api/adminBadges";
+import { useAdminBadges } from "@/components/adminBadges";
 
 // Tarjeta de un artículo enviado por un doctor y esperando revisión: mismo
 // patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
