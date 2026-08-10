@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Check, Trash2, Star, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { usePaginatedList } from "@/api/usePaginatedList";
+import Pagination from "@/components/admin/Pagination";
 
 function StarDisplay({ rating }) {
   return (
@@ -55,6 +57,10 @@ export default function AdminReviews() {
   const pending = reviews.filter((r) => !r.approved);
   const approved = reviews.filter((r) => r.approved);
   const displayed = tab === "pending" ? pending : approved;
+  const { pageItems: pagedDisplayed, page, setPage, totalPages } = usePaginatedList(displayed, {
+    pageSize: 20,
+    resetKey: tab,
+  });
 
   if (loading) {
     return (
@@ -94,7 +100,7 @@ export default function AdminReviews() {
         <p className="text-muted-foreground text-sm">No hay reseñas en esta sección.</p>
       ) : (
         <div className="space-y-3">
-          {displayed.map((r) => (
+          {pagedDisplayed.map((r) => (
             <div key={r.id} className="bg-card rounded-2xl border border-border/50 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -130,6 +136,7 @@ export default function AdminReviews() {
           ))}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={displayed.length} pageSize={20} />
     </div>
   );
 }
