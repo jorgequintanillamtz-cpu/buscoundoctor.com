@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
@@ -254,6 +255,7 @@ export default function AdminDoctores() {
       const approvedDocs = doctors.filter(d => ids.includes(d.id));
       approvedDocs.forEach(d => {
         logActivity({ type: "doctor_aprobado", description: `Se aprobó y publicó el perfil de ${d.full_name}`, specialistId: d.id, specialistName: d.full_name });
+        notifyProfileApproved(d);
       });
       setSelectedPending(new Set());
       toast.success(`${ids.length} perfil${ids.length !== 1 ? "es" : ""} aprobado${ids.length !== 1 ? "s" : ""} y publicado${ids.length !== 1 ? "s" : ""}`);
@@ -279,6 +281,7 @@ export default function AdminDoctores() {
           specialistId: d.id,
           specialistName: d.full_name,
         });
+        notifyProfileRejected(d, rejectDialog.motivo.trim());
       });
       setSelectedPending(new Set());
       toast.success(`${rejectDialog.ids.length} perfil${rejectDialog.ids.length !== 1 ? "es" : ""} rechazado${rejectDialog.ids.length !== 1 ? "s" : ""}`);
