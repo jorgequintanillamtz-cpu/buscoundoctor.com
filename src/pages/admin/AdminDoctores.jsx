@@ -14,7 +14,7 @@ import { logActivity } from "@/api/activityLog";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
-import { useAdminBadges } from "@/api/adminBadges";
+import { useAdminBadges } from "@/components/adminBadges";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
