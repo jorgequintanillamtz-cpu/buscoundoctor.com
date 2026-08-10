@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, DollarSign, TrendingUp } from "lucide-react";
@@ -16,7 +16,13 @@ import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import SeoScoreManager from "@/components/admin/SeoScoreManager";
-import { EMPTY_FORM, generateSlug } from "@/pages/admin/AdminDoctorEditor";
+import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
+
+// El estado del formulario (campos vacíos, generar slug, armar payload,
+// autoguardado, recalcular score) vive en src/api/specialistForm.js,
+// compartido con AdminDoctorEditor.jsx. Aquí solo se agrega `stripFields`
+// para que un doctor nunca pueda tocar desde su propio panel los campos
+// que controla el admin (verificación, visibilidad, destacado).
 
 const SECTION_GROUPS = [
   { group: "Inicio", items: [
@@ -46,15 +52,19 @@ export default function DoctorPanel() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading | ready | no-profile | wrong-role
   const [specialistId, setSpecialistId] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const { form, setForm, formRef, update, buildData } = useSpecialistForm({ stripFields: DOCTOR_RESTRICTED_FIELDS });
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [section, setSection] = useState("resumen");
   const [seoChecklist, setSeoChecklist] = useState(null);
-  const autoSaveRef = useRef(null);
-  const formRef = useRef(form);
+  const recalcScoreShared = useRecalculateScore(setForm);
 
-  useEffect(() => { formRef.current = form; }, [form]);
+  const recalculateScore = async (idOverride) => {
+    const id = idOverride || specialistId;
+    if (!id) return;
+    const checklist = await recalcScoreShared(id);
+    if (checklist) setSeoChecklist(checklist);
+  };
 
   useEffect(() => {
     let active = true;
@@ -78,7 +88,7 @@ export default function DoctorPanel() {
       const specialist = own[0];
       setSpecialistId(specialist.id);
       setForm({
-        ...EMPTY_FORM,
+        ...EMPTY_SPECIALIST_FORM,
         ...specialist,
         services: specialist.services || [],
         insurers_relation: specialist.insurers_relation || [],
@@ -92,60 +102,13 @@ export default function DoctorPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (status !== "ready") return;
-    autoSaveRef.current = setInterval(async () => {
-      const f = formRef.current;
-      if (!f.full_name) return;
-      try {
-        await base44.entities.Specialist.update(specialistId, buildData(f));
-        setLastSaved(new Date());
-        recalculateScore();
-      } catch {}
-    }, 30000);
-    return () => clearInterval(autoSaveRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, specialistId]);
-
-  const update = useCallback((field, value) => {
-    setForm((prev) => {
-      const next = { ...prev, [field]: value };
-      if (field === "full_name" && !prev._slugManual) {
-        next.slug = generateSlug(value);
-      }
-      return next;
-    });
-  }, []);
-
-  const buildData = (f) => {
-    const data = {
-      ...f,
-      years_experience: f.years_experience ? Number(f.years_experience) : undefined,
-      rating: f.rating ? Number(f.rating) : undefined,
-      slug: f.slug || generateSlug(f.full_name),
-    };
-    delete data.publication_status;
-    delete data.license_verification_status;
-    delete data.license_verified_at;
-    delete data.license_verified_by;
-    delete data.active;
-    delete data.featured;
-    delete data._slugManual;
-    return data;
-  };
-
-  const recalculateScore = async (idOverride) => {
-    const id = idOverride || specialistId;
-    if (!id) return;
-    try {
-      const res = await base44.functions.invoke("recalculateSpecialistScore", { specialist_id: id });
-      const data = res.data || res;
-      if (typeof data.completeness_score === "number") {
-        setForm((prev) => ({ ...prev, completeness_score: data.completeness_score, seo_score: data.seo_score ?? prev.seo_score }));
-      }
-      if (data.checklist) setSeoChecklist(data.checklist);
-    } catch {}
-  };
+  useAutoSaveSpecialist({
+    enabled: status === "ready",
+    specialistId,
+    formRef,
+    buildData,
+    onSaved: () => { setLastSaved(new Date()); recalculateScore(); },
+  });
 
   const handleSaveChanges = async () => {
     setSaving(true);
