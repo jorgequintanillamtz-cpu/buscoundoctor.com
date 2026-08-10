@@ -14,6 +14,7 @@ import { logActivity } from "@/api/activityLog";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import { useAdminBadges } from "@/api/adminBadges";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
@@ -22,6 +23,7 @@ const VERIFICATION_LABELS = {
 };
 
 export default function AdminDoctores() {
+  const { refresh: refreshBadges } = useAdminBadges();
   const [doctors, setDoctors] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +57,7 @@ export default function AdminDoctores() {
       setDoctors(prev => prev.filter(d => d.id !== id));
       toast.success("Doctor eliminado por completo");
       logActivity({ type: "doctor_eliminado", description: `Se eliminó por completo el perfil de ${nombre}`, specialistName: nombre });
+      refreshBadges();
     } catch (e) {
       toast.error("No se pudo eliminar: " + e.message);
     }
@@ -222,6 +225,7 @@ export default function AdminDoctores() {
       setDoctors(prev => prev.filter(d => d.id !== id));
       toast.success("Registro eliminado por completo");
       logActivity({ type: "registro_eliminado", description: `Se eliminó el registro en progreso de ${nombre}`, specialistName: nombre });
+      refreshBadges();
     } catch (e) {
       toast.error("No se pudo eliminar: " + e.message);
     }
@@ -253,6 +257,7 @@ export default function AdminDoctores() {
       });
       setSelectedPending(new Set());
       toast.success(`${ids.length} perfil${ids.length !== 1 ? "es" : ""} aprobado${ids.length !== 1 ? "s" : ""} y publicado${ids.length !== 1 ? "s" : ""}`);
+      refreshBadges();
     } catch (e) {
       toast.error("No se pudo aprobar: " + e.message);
     }
@@ -278,6 +283,7 @@ export default function AdminDoctores() {
       setSelectedPending(new Set());
       toast.success(`${rejectDialog.ids.length} perfil${rejectDialog.ids.length !== 1 ? "es" : ""} rechazado${rejectDialog.ids.length !== 1 ? "s" : ""}`);
       setRejectDialog({ open: false, ids: [], motivo: "" });
+      refreshBadges();
     } catch (e) {
       toast.error("No se pudo rechazar: " + e.message);
     }
