@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History } from "lucide-react";
-import { AdminBadgeProvider, useAdminBadges } from "@/api/adminBadges";
+import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
 // el menú se pueda escanear de un vistazo: Resumen primero, luego lo
