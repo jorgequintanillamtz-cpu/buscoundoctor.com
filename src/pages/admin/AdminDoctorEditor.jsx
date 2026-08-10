@@ -19,74 +19,31 @@ export { generateSlug } from "@/api/specialistForm";
 // Este editor ahora es exclusivo del panel de administración (/admin/doctores/editar/:id),
 // protegido por RequireAdmin. Los médicos administran su propio perfil en /panel-medico
 // (ver src/pages/DoctorPanel.jsx), que es una página completamente separada.
-
-export const EMPTY_FORM = {
-  full_name: "",
-  slug: "",
-  professional_license_number: "",
-  specialty: "",
-  subspecialty: "",
-  description: "",
-  years_experience: "",
-  rating: "",
-  location: "",
-  city: "Monterrey",
-  zone: "",
-  address: "",
-  whatsapp: "",
-  email: "",
-  instagram: "",
-  modality: "presencial",
-  schedule: "",
-  services: [],
-  insurers_relation: [],
-  gallery: [],
-  video_url: "",
-  certifications: "",
-  profile_photo: "",
-  featured: false,
-  active: true,
-  price_range: "$$",
-  completeness_score: 0,
-  seo_score: 0,
-};
-
-export function generateSlug(nombre) {
-  return (nombre || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
+// El estado del formulario (campos vacíos, generar slug, armar payload, autoguardado,
+// recalcular score) vive en src/api/specialistForm.js, compartido con DoctorPanel.jsx.
 
 export default function AdminDoctorEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  const { form, setForm, formRef, update, buildData } = useSpecialistForm();
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
-  const autoSaveRef = useRef(null);
-  const formRef = useRef(form);
   const [section, setSection] = useState(isEditing ? "resumen" : "perfil");
-
-  useEffect(() => { formRef.current = form; }, [form]);
+  const recalculateScore = useRecalculateScore(setForm);
 
   useEffect(() => {
     let active = true;
     (async () => {
       if (isEditing) {
-        const list = await base44.entities.Specialist.list();
+        const matches = await base44.entities.Specialist.filter({ id });
         if (!active) return;
-        const item = list.find(d => d.id === id);
+        const item = matches[0];
         if (item) {
           setForm({
-            ...EMPTY_FORM,
+            ...EMPTY_SPECIALIST_FORM,
             ...item,
             services: item.services || [],
             insurers_relation: item.insurers_relation || [],
@@ -99,53 +56,16 @@ export default function AdminDoctorEditor() {
       }
     })();
     return () => { active = false; };
-  }, [id, isEditing]);
-
-  // Auto-save every 30s
-  useEffect(() => {
-    if (!isEditing) return;
-    autoSaveRef.current = setInterval(async () => {
-      const f = formRef.current;
-      if (!f.full_name) return;
-      try {
-        await base44.entities.Specialist.update(id, buildData(f));
-        setLastSaved(new Date());
-        recalculateScore(id);
-      } catch {}
-    }, 30000);
-    return () => clearInterval(autoSaveRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isEditing]);
 
-  const update = useCallback((field, value) => {
-    setForm(prev => {
-      const next = { ...prev, [field]: value };
-      if (field === "full_name" && !prev._slugManual) {
-        next.slug = generateSlug(value);
-      }
-      return next;
-    });
-  }, []);
-
-  const buildData = (f) => {
-    const data = {
-      ...f,
-      years_experience: f.years_experience ? Number(f.years_experience) : undefined,
-      rating: f.rating ? Number(f.rating) : undefined,
-      slug: f.slug || generateSlug(f.full_name),
-    };
-    return data;
-  };
-
-  const recalculateScore = async (specialistId) => {
-    try {
-      const res = await base44.functions.invoke('recalculateSpecialistScore', { specialist_id: specialistId });
-      const data = res.data || res;
-      if (typeof data.completeness_score === 'number') {
-        setForm(prev => ({ ...prev, completeness_score: data.completeness_score, seo_score: data.seo_score ?? prev.seo_score }));
-      }
-    } catch {}
-  };
+  useAutoSaveSpecialist({
+    enabled: isEditing,
+    specialistId: id,
+    formRef,
+    buildData,
+    onSaved: () => { setLastSaved(new Date()); recalculateScore(id); },
+  });
 
   const handleSaveChanges = async () => {
     setSaving(true);
