@@ -12,6 +12,8 @@ import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
+import { usePaginatedList } from "@/api/usePaginatedList";
+import Pagination from "@/components/admin/Pagination";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
@@ -197,6 +199,10 @@ export default function AdminDoctores() {
 
     return withCounts;
   }, [doctoresReales, search, specialtyFilter, statusFilter, sortOrder, requestCountsByDoctor]);
+
+  const {
+    pageItems: pagedDoctors, page: doctorsPage, setPage: setDoctorsPage, totalPages: doctorsTotalPages,
+  } = usePaginatedList(visibleDoctors, { pageSize: 20, resetKey: `${search}|${specialtyFilter}|${statusFilter}|${sortOrder}` });
 
   const STEP_LABELS = {
     datos: "Datos básicos",
