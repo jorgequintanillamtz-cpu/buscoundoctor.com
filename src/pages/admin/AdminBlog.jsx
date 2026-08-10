@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import moment from "moment";
 import { logActivity } from "@/api/activityLog";
+import { usePaginatedList } from "@/api/usePaginatedList";
+import Pagination from "@/components/admin/Pagination";
 
 // Tarjeta de un artículo enviado por un doctor y esperando revisión: mismo
 // patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
@@ -145,6 +147,8 @@ export default function AdminBlog() {
     () => posts.filter((p) => !(p.submitted_by_specialist_id && p.review_status === "pending_review")),
     [posts]
   );
+  const { pageItems: pagedPosts, page: postsPage, setPage: setPostsPage, totalPages: postsTotalPages } =
+    usePaginatedList(otherPosts, { pageSize: 20 });
 
   const togglePublish = async (post) => {
     const newPublished = !post.published;
@@ -199,7 +203,7 @@ export default function AdminBlog() {
       )}
 
       <div className="space-y-3">
-        {otherPosts.map(post => (
+        {pagedPosts.map(post => (
           <div key={post.id} className="bg-card rounded-2xl border border-border/50 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 min-w-0">
               <h3 className="font-heading font-semibold text-foreground line-clamp-1">{post.title}</h3>
@@ -245,6 +249,13 @@ export default function AdminBlog() {
           <div className="text-center py-16 text-muted-foreground">No hay artículos aún.</div>
         )}
       </div>
+      <Pagination
+        page={postsPage}
+        totalPages={postsTotalPages}
+        onPageChange={setPostsPage}
+        total={otherPosts.length}
+        pageSize={20}
+      />
     </div>
   );
 }
