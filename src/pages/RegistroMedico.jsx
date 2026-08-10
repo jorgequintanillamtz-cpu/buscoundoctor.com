@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Camera, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
-import { generateSlug } from "@/pages/admin/AdminDoctorEditor";
+import { generateSlug } from "@/api/specialistForm";
 import Logo from "@/components/Logo";
 
 // Convierte una imagen a WebP (más liviana) y la renombra antes de subirla,
