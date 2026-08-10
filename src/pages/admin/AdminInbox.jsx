@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
 import { useAdminBadges } from "@/components/adminBadges";
 import { PendingDocCard } from "@/pages/admin/AdminVerificaciones";
@@ -34,6 +35,7 @@ function PendingDoctorCard({ doc, onReviewed }) {
         specialistId: doc.id,
         specialistName: doc.full_name,
       });
+      notifyProfileApproved(doc);
       onReviewed();
       refreshBadges();
     } catch (e) {
@@ -54,6 +56,7 @@ function PendingDoctorCard({ doc, onReviewed }) {
         specialistId: doc.id,
         specialistName: doc.full_name,
       });
+      notifyProfileRejected(doc, rejectReason.trim());
       setRejecting(false);
       setRejectReason("");
       onReviewed();
