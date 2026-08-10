@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { History, Search, Stethoscope } from "lucide-react";
 import { ACTIVITY_TYPE_LABELS, ACTIVITY_POSITIVE, ACTIVITY_NEGATIVE } from "@/api/activityLog";
+import { usePaginatedList } from "@/api/usePaginatedList";
+import Pagination from "@/components/admin/Pagination";
 
 function fmtDateTime(d) {
   if (!d) return "—";
@@ -58,6 +60,11 @@ export default function AdminHistorial() {
     return list;
   }, [logs, typeFilter, search]);
 
+  const { pageItems: pagedLogs, page, setPage, totalPages } = usePaginatedList(filteredLogs, {
+    pageSize: 30,
+    resetKey: `${typeFilter}|${search}`,
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -104,7 +111,7 @@ export default function AdminHistorial() {
         </div>
       ) : (
         <div className="bg-card border border-border/50 rounded-2xl divide-y divide-border/50 overflow-hidden">
-          {filteredLogs.map((log) => {
+          {pagedLogs.map((log) => {
             const tone = toneFor(log.type);
             return (
               <div key={log.id} className="flex items-start gap-3 px-4 py-3.5">
@@ -123,6 +130,7 @@ export default function AdminHistorial() {
           })}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filteredLogs.length} pageSize={30} />
     </div>
   );
 }
