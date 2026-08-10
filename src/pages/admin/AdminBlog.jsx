@@ -8,6 +8,7 @@ import moment from "moment";
 import { logActivity } from "@/api/activityLog";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import { useAdminBadges } from "@/api/adminBadges";
 
 // Tarjeta de un artículo enviado por un doctor y esperando revisión: mismo
 // patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
@@ -17,6 +18,7 @@ function PendingBlogCard({ post, onReviewed }) {
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [reviewing, setReviewing] = useState(false);
+  const { refresh: refreshBadges } = useAdminBadges();
 
   const approve = async () => {
     setReviewing(true);
@@ -34,6 +36,7 @@ function PendingBlogCard({ post, onReviewed }) {
         specialistName: post.author || "",
       });
       onReviewed();
+      refreshBadges();
     } catch (e) {
       toast.error("Error: " + e.message);
     }
@@ -59,6 +62,7 @@ function PendingBlogCard({ post, onReviewed }) {
       setRejecting(false);
       setRejectReason("");
       onReviewed();
+      refreshBadges();
     } catch (e) {
       toast.error("Error: " + e.message);
     }
