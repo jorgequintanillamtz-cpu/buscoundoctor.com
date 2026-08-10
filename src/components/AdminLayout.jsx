@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History } from "lucide-react";
-import { loadPendingCounts } from "@/api/pendingCounts";
+import { AdminBadgeProvider, useAdminBadges } from "@/api/adminBadges";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
 // el menú se pueda escanear de un vistazo: Resumen primero, luego lo
@@ -63,15 +62,16 @@ function PendingBadge({ count }) {
 // Layout exclusivo del panel de administración (dueños de la plataforma).
 // El panel de médicos vive por completo aparte, en /panel-medico.
 export default function AdminLayout() {
-  const location = useLocation();
-  const [pendingCounts, setPendingCounts] = useState({});
+  return (
+    <AdminBadgeProvider>
+      <AdminLayoutContent />
+    </AdminBadgeProvider>
+  );
+}
 
-  // Se vuelve a calcular cada vez que cambias de página, para que si
-  // acabas de aprobar o rechazar algo, el número se actualice al volver
-  // a ver el menú (sin tener que refrescar la app entera).
-  useEffect(() => {
-    loadPendingCounts().then(setPendingCounts).catch(() => {});
-  }, [location.pathname]);
+function AdminLayoutContent() {
+  const location = useLocation();
+  const { pendingCounts } = useAdminBadges();
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path;
