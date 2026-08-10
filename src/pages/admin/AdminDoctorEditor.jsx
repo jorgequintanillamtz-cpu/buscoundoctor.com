@@ -55,7 +55,6 @@ export default function AdminDoctorEditor() {
       }
     })();
     return () => { active = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isEditing]);
 
   useAutoSaveSpecialist({
