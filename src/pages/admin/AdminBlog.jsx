@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import moment from "moment";
 import { logActivity } from "@/api/activityLog";
+import { notifyBlogApproved, notifyBlogRejected, findSpecialistById } from "@/api/doctorNotify";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import { useAdminBadges } from "@/components/adminBadges";
@@ -35,6 +36,9 @@ export function PendingBlogCard({ post, onReviewed }) {
         specialistId: post.submitted_by_specialist_id,
         specialistName: post.author || "",
       });
+      findSpecialistById(post.submitted_by_specialist_id).then((specialist) => {
+        if (specialist) notifyBlogApproved(specialist, post.title);
+      });
       onReviewed();
       refreshBadges();
     } catch (e) {
@@ -58,6 +62,9 @@ export function PendingBlogCard({ post, onReviewed }) {
         description: `Se rechazó el artículo "${post.title}" de ${post.author || "un doctor"}. Motivo: ${rejectReason.trim()}`,
         specialistId: post.submitted_by_specialist_id,
         specialistName: post.author || "",
+      });
+      findSpecialistById(post.submitted_by_specialist_id).then((specialist) => {
+        if (specialist) notifyBlogRejected(specialist, post.title, rejectReason.trim());
       });
       setRejecting(false);
       setRejectReason("");
