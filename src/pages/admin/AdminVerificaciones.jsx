@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, FileText, CheckCircle2, XCircle, Loader2, ExternalLink, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
-import { useAdminBadges } from "@/api/adminBadges";
+import { useAdminBadges } from "@/components/adminBadges";
 
 // Misma lista de tipos de documento que usa DocumentManager.jsx (el
 // componente que vive dentro del editor de cada doctor), para que las
