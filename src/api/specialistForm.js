@@ -134,6 +134,5 @@ export function useAutoSaveSpecialist({ enabled, specialistId, formRef, buildDat
       } catch {}
     }, 30000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, specialistId]);
 }
