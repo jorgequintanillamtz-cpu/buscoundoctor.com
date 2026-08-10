@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, DollarSign, TrendingUp } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -99,7 +99,6 @@ export default function DoctorPanel() {
       recalculateScore(specialist.id);
     })();
     return () => { active = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useAutoSaveSpecialist({
