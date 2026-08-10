@@ -14,7 +14,7 @@ import { useAdminBadges } from "@/components/adminBadges";
 // patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
 // los documentos de verificación, para que la experiencia del admin sea
 // consistente en todo el panel.
-function PendingBlogCard({ post, onReviewed }) {
+export function PendingBlogCard({ post, onReviewed }) {
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [reviewing, setReviewing] = useState(false);
