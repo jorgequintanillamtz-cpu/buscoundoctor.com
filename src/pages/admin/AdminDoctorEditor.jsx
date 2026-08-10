@@ -14,7 +14,6 @@ import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM } from "@/api/specialistForm";
-export { generateSlug } from "@/api/specialistForm";
 
 // Este editor ahora es exclusivo del panel de administración (/admin/doctores/editar/:id),
 // protegido por RequireAdmin. Los médicos administran su propio perfil en /panel-medico
