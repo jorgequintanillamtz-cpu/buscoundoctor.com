@@ -14,6 +14,8 @@ import {
   startOfWeek, eachWeekOfInterval, subWeeks, format, isWithinInterval, endOfWeek, parseISO,
 } from "date-fns";
 import { es } from "date-fns/locale";
+import { usePaginatedList } from "@/api/usePaginatedList";
+import Pagination from "@/components/admin/Pagination";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -212,7 +214,9 @@ export default function AdminSolicitudes() {
     [requests, selectedDoctor]
   );
 
-  const recentRequests = useMemo(() => requests.slice(0, 30), [requests]);
+  const {
+    pageItems: pagedRequests, page: requestsPage, setPage: setRequestsPage, totalPages: requestsTotalPages,
+  } = usePaginatedList(requests, { pageSize: 20 });
 
   if (loading) {
     return (
@@ -340,18 +344,25 @@ export default function AdminSolicitudes() {
       {/* Solicitudes recientes */}
       <section>
         <h2 className="font-heading font-semibold text-base text-foreground mb-4">Solicitudes recientes</h2>
-        {recentRequests.length === 0 ? (
+        {pagedRequests.length === 0 ? (
           <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
             <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
             <p className="text-sm font-medium text-foreground">Todavía no hay solicitudes de cita.</p>
           </div>
         ) : (
           <div className="space-y-3 max-w-2xl">
-            {recentRequests.map((req) => (
+            {pagedRequests.map((req) => (
               <RequestCard key={req.id} req={req} />
             ))}
           </div>
         )}
+        <Pagination
+          page={requestsPage}
+          totalPages={requestsTotalPages}
+          onPageChange={setRequestsPage}
+          total={requests.length}
+          pageSize={20}
+        />
       </section>
     </div>
   );
