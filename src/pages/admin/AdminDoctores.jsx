@@ -405,7 +405,7 @@ export default function AdminDoctores() {
             </div>
           ) : (
             <div className="space-y-3">
-              {visibleDoctors.map(doc => {
+              {pagedDoctors.map(doc => {
                 const verification = VERIFICATION_LABELS[doc.license_verification_status] || VERIFICATION_LABELS.pending;
                 const VerificationIcon = verification.icon;
                 const isActive = doc.active !== false;
@@ -485,6 +485,13 @@ export default function AdminDoctores() {
               })}
             </div>
           )}
+          <Pagination
+            page={doctorsPage}
+            totalPages={doctorsTotalPages}
+            onPageChange={setDoctorsPage}
+            total={visibleDoctors.length}
+            pageSize={20}
+          />
         </>
       )}
 
