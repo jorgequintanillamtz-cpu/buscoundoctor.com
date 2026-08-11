@@ -30,7 +30,6 @@ export const EMPTY_SPECIALIST_FORM = {
   insurers_relation: [],
   gallery: [],
   video_url: "",
-  certifications: "",
   profile_photo: "",
   featured: false,
   active: true,
