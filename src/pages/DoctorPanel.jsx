@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -14,6 +14,7 @@ import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import DoctorAppointmentRequests from "@/components/admin/DoctorAppointmentRequests";
 import DoctorReviews from "@/components/admin/DoctorReviews";
+import DoctorPremiumStatus from "@/components/admin/DoctorPremiumStatus";
 import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
@@ -38,6 +39,7 @@ const SECTION_GROUPS = [
     { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
   ]},
   { group: "Negocio", items: [
+    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
     { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
     { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
@@ -319,6 +321,7 @@ export default function DoctorPanel() {
             {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} />}
             {section === "seo" && <SeoScoreManager seoScore={form.seo_score || 0} checklist={seoChecklist} onNavigate={setSection} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
+            {section === "plan" && <DoctorPremiumStatus specialistId={specialistId} specialistName={form.full_name} />}
             {section === "solicitudes" && <DoctorAppointmentRequests specialistId={specialistId} />}
             {section === "resenas" && <DoctorReviews specialistId={specialistId} />}
             {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={specialistId} />}
