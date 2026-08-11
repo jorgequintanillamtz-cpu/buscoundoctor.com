@@ -392,6 +392,15 @@ export default function AdminDoctores() {
             <span className="text-xs bg-blue-500 text-white rounded-full px-1.5 min-w-[18px] text-center">{enProgreso.length}</span>
           )}
         </button>
+        <button
+          onClick={() => setTab("papelera")}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5 ${tab === "papelera" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Papelera
+          {enPapelera.length > 0 && (
+            <span className="text-xs bg-red-500 text-white rounded-full px-1.5 min-w-[18px] text-center">{enPapelera.length}</span>
+          )}
+        </button>
       </div>
 
       {/* Listado general: perfiles reales (publicados o en revisión formal) */}
@@ -522,7 +531,7 @@ export default function AdminDoctores() {
                           <Pencil className="w-4 h-4" />
                         </Button>
                       </Link>
-                      <Button variant="ghost" size="icon" aria-label="Eliminar doctor" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.full_name)}>
+                      <Button variant="ghost" size="icon" aria-label="Mover a la papelera" title="Mover a la papelera" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.full_name)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -588,6 +597,53 @@ export default function AdminDoctores() {
                           )}
                           <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => handleDeleteDraft(doc.id, doc.full_name)}>
                             <Trash2 className="w-4 h-4" /> Eliminar
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      )}
+
+      {/* Papelera: perfiles movidos aquí desde "Eliminar", restaurables o borrables definitivamente */}
+      {tab === "papelera" && (
+        enPapelera.length === 0 ? (
+          <div className="text-center py-16 text-muted-foreground">
+            <Trash2 className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p>La papelera está vacía.</p>
+          </div>
+        ) : (
+          <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/50 bg-muted/50">
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Movido a papelera</th>
+                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enPapelera.map(doc => (
+                    <tr key={doc.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-foreground">
+                        {doc.full_name}
+                        {doc.specialty && <span className="block text-xs text-muted-foreground font-normal">{doc.specialty}</span>}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                        {doc.deleted_at ? new Date(doc.deleted_at).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleRestore(doc.id, doc.full_name)}>
+                            <RotateCcw className="w-4 h-4" /> Restaurar
+                          </Button>
+                          <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => handlePermanentDelete(doc.id, doc.full_name)}>
+                            <Trash2 className="w-4 h-4" /> Eliminar definitivamente
                           </Button>
                         </div>
                       </td>
