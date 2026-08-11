@@ -41,10 +41,10 @@ const SECTION_GROUPS = [
   { group: "Negocio", items: [
     { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
     { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
-    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
+    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
   ]},
   { group: "Contenido", items: [
     { key: "casos", label: "Casos de éxito", icon: Sparkles, requiresSaved: true },
