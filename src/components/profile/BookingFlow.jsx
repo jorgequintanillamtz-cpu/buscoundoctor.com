@@ -29,6 +29,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [reason, setReason] = useState("");
   const [insurerName, setInsurerName] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -46,6 +47,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
   const canConfirm =
     name.trim() &&
+    phone.replace(/\D/g, "").length >= 10 &&
     (offices.length === 0 || !!office) &&
     (services.length === 0 || !!service || isOtro);
 
@@ -57,6 +59,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     setIsOtro(services.length === 0);
     setConsultaOpen(false);
     setName("");
+    setPhone("");
   };
 
   const handleConfirm = async () => {
@@ -68,6 +71,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
       await base44.entities.AppointmentRequest.create({
         patient_name: name,
+        phone,
         reason: reasonText,
         specialist_id: specialist.id,
         specialist_name: specialist.full_name,
@@ -78,12 +82,13 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         service_price: service?.price,
         insurer_name: insuranceLabel,
       });
-      notifyNewAppointmentRequest(specialist, { patient_name: name, reason: reasonText });
+      notifyNewAppointmentRequest(specialist, { patient_name: name, phone, reason: reasonText });
 
       const lines = [
         `Hola, me gustaría consultar horarios disponibles para agendar una cita con ${specialist.full_name}.`,
         "",
         `Nombre: ${name}`,
+        `Teléfono: ${phone}`,
         office ? `Hospital/consultorio: ${office.name || office.address_line}` : null,
         `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}`,
         service ? `Servicio: ${service.name} ($${service.price?.toLocaleString("es-MX")} MXN)` : null,
@@ -237,6 +242,14 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Tu nombre"
+        className="w-full h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
+      />
+
+      <input
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="Tu número de teléfono"
+        type="tel"
         className="w-full h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
       />
 
