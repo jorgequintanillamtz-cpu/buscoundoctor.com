@@ -29,6 +29,7 @@ const NAV_SECTIONS = [
   { id: "especialidades", label: "Especialidades" },
   { id: "experiencia", label: "Experiencia" },
   { id: "estudios", label: "Estudios" },
+  { id: "certificaciones", label: "Certificaciones" },
   { id: "hospitales", label: "Hospitales" },
   { id: "servicios", label: "Servicios" },
   { id: "opiniones", label: "Opiniones" },
@@ -363,14 +364,9 @@ export default function SpecialistProfile() {
                 <video src={specialist.video_url} controls className="w-full rounded-2xl max-h-64 bg-black" playsInline />
               </div>
             )}
-            {(specialist.professional_license_number || specialist.certifications) && (
+            {specialist.professional_license_number && (
               <div className="mt-5 pt-5 border-t border-border/50 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                {specialist.professional_license_number && (
-                  <span><strong className="text-foreground font-medium">Cédula profesional:</strong> {specialist.professional_license_number}</span>
-                )}
-                {specialist.certifications && (
-                  <span><strong className="text-foreground font-medium">Cédula de especialidad / certificaciones:</strong> {specialist.certifications}</span>
-                )}
+                <span><strong className="text-foreground font-medium">Cédula profesional:</strong> {specialist.professional_license_number}</span>
               </div>
             )}
 
@@ -417,6 +413,11 @@ export default function SpecialistProfile() {
           {/* ESTUDIOS */}
           <div className="order-6 lg:order-4">
             <EducationTimeline specialistId={specialist.id} variant="estudios" />
+          </div>
+
+          {/* CERTIFICACIONES */}
+          <div className="order-6b lg:order-4">
+            <EducationTimeline specialistId={specialist.id} variant="certificaciones" />
           </div>
 
           {/* HOSPITALES */}
