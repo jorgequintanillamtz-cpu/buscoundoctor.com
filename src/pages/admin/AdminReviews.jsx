@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Check, Trash2, Star, Stethoscope } from "lucide-react";
+import { Check, XCircle, RotateCcw, Star, Stethoscope, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
 import { usePaginatedList } from "@/api/usePaginatedList";
@@ -16,14 +17,26 @@ function StarDisplay({ rating }) {
   );
 }
 
+// A diferencia de antes, "rechazar" ya no borra la reseña: la marca como
+// rechazada con un motivo obligatorio y queda en su propia pestaña, igual
+// que el flujo de doctores/documentos/blog. Nada se elimina de forma
+// permanente desde aquí.
 export default function AdminReviews() {
   const [reviews, setReviews] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("pending");
+  const [rejectingId, setRejectingId] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const all = await base44.entities.Review.list("-created_date");
+    const [all, me] = await Promise.all([
+      base44.entities.Review.list("-created_date"),
+      base44.auth.me().catch(() => null),
+    ]);
     setReviews(all);
+    setUser(me);
     setLoading(false);
   };
 
@@ -31,32 +44,64 @@ export default function AdminReviews() {
 
   const approve = async (id) => {
     const review = reviews.find((r) => r.id === id);
-    await base44.entities.Review.update(id, { approved: true });
-    toast.success("Reseña aprobada");
-    logActivity({
-      type: "resena_aprobada",
-      description: `Se aprobó la reseña de ${review?.patient_name || "un paciente"} para ${review?.specialist_name || "un doctor"}`,
-      specialistName: review?.specialist_name || "",
-    });
-    load();
+    setSaving(true);
+    try {
+      await base44.entities.Review.update(id, {
+        approved: true,
+        rejected: false,
+        rejection_reason: "",
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: user?.id || "",
+      });
+      toast.success("Reseña aprobada");
+      logActivity({
+        type: "resena_aprobada",
+        description: `Se aprobó la reseña de ${review?.patient_name || "un paciente"} para ${review?.specialist_name || "un doctor"}`,
+        specialistName: review?.specialist_name || "",
+      });
+      load();
+    } catch (e) {
+      toast.error("No se pudo aprobar: " + e.message);
+    }
+    setSaving(false);
   };
 
-  const remove = async (id) => {
-    if (!confirm("¿Eliminar esta reseña?")) return;
-    const review = reviews.find((r) => r.id === id);
-    await base44.entities.Review.delete(id);
-    toast.success("Reseña eliminada");
-    logActivity({
-      type: "resena_eliminada",
-      description: `Se eliminó la reseña de ${review?.patient_name || "un paciente"} para ${review?.specialist_name || "un doctor"}`,
-      specialistName: review?.specialist_name || "",
-    });
-    load();
+  const openReject = (id) => {
+    setRejectingId(id);
+    setRejectReason("");
   };
 
-  const pending = reviews.filter((r) => !r.approved);
-  const approved = reviews.filter((r) => r.approved);
-  const displayed = tab === "pending" ? pending : approved;
+  const confirmReject = async () => {
+    if (!rejectReason.trim()) { toast.error("Debes ingresar un motivo de rechazo"); return; }
+    const review = reviews.find((r) => r.id === rejectingId);
+    setSaving(true);
+    try {
+      await base44.entities.Review.update(rejectingId, {
+        approved: false,
+        rejected: true,
+        rejection_reason: rejectReason.trim(),
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: user?.id || "",
+      });
+      toast.success("Reseña rechazada");
+      logActivity({
+        type: "resena_rechazada",
+        description: `Se rechazó la reseña de ${review?.patient_name || "un paciente"} para ${review?.specialist_name || "un doctor"}. Motivo: ${rejectReason.trim()}`,
+        specialistName: review?.specialist_name || "",
+      });
+      setRejectingId(null);
+      setRejectReason("");
+      load();
+    } catch (e) {
+      toast.error("No se pudo rechazar: " + e.message);
+    }
+    setSaving(false);
+  };
+
+  const pending = reviews.filter((r) => !r.approved && !r.rejected);
+  const approved = reviews.filter((r) => r.approved && !r.rejected);
+  const rejected = reviews.filter((r) => r.rejected);
+  const displayed = tab === "pending" ? pending : tab === "approved" ? approved : rejected;
   const { pageItems: pagedDisplayed, page, setPage, totalPages } = usePaginatedList(displayed, {
     pageSize: 20,
     resetKey: tab,
@@ -94,6 +139,12 @@ export default function AdminReviews() {
         >
           Aprobadas ({approved.length})
         </button>
+        <button
+          onClick={() => setTab("rejected")}
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${tab === "rejected" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+        >
+          Rechazadas ({rejected.length})
+        </button>
       </div>
 
       {displayed.length === 0 ? (
@@ -110,9 +161,12 @@ export default function AdminReviews() {
                   </div>
                   <StarDisplay rating={r.rating} />
                   <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{r.comment}</p>
+                  {r.rejected && r.rejection_reason && (
+                    <p className="text-xs text-red-600 mt-2">Motivo de rechazo: {r.rejection_reason}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  {!r.approved && (
+                  {!r.approved && !r.rejected && (
                     <button
                       onClick={() => approve(r.id)}
                       aria-label="Aprobar reseña"
@@ -122,16 +176,48 @@ export default function AdminReviews() {
                       <Check className="w-4 h-4 text-green-600" />
                     </button>
                   )}
-                  <button
-                    onClick={() => remove(r.id)}
-                    aria-label="Eliminar reseña"
-                    className="p-2 rounded-xl hover:bg-destructive/10 transition-colors"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </button>
+                  {!r.rejected && (
+                    <button
+                      onClick={() => openReject(r.id)}
+                      aria-label="Rechazar reseña"
+                      className="p-2 rounded-xl hover:bg-destructive/10 transition-colors"
+                      title="Rechazar"
+                    >
+                      <XCircle className="w-4 h-4 text-destructive" />
+                    </button>
+                  )}
+                  {r.rejected && (
+                    <button
+                      onClick={() => approve(r.id)}
+                      aria-label="Aprobar de todas formas"
+                      className="p-2 rounded-xl hover:bg-green-50 transition-colors"
+                      title="Aprobar de todas formas"
+                    >
+                      <RotateCcw className="w-4 h-4 text-green-600" />
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {rejectingId === r.id && (
+                <div className="mt-3 pt-3 border-t border-border/40 space-y-2">
+                  <textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Motivo de rechazo (obligatorio)"
+                    className="w-full text-sm border border-input rounded-xl p-2 min-h-[60px]"
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="destructive" className="rounded-xl" disabled={saving} onClick={confirmReject}>
+                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
+                      Confirmar rechazo
+                    </Button>
+                    <Button size="sm" variant="outline" className="rounded-xl" onClick={() => { setRejectingId(null); setRejectReason(""); }}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
