@@ -70,6 +70,29 @@ export function notifyBlogRejected(doc, postTitle, reason) {
   );
 }
 
+export function notifyNewAppointmentRequest(doc, request) {
+  const lines = [
+    `Hola ${doc?.full_name || ""},`,
+    "",
+    `Tienes una nueva solicitud de cita en ${SITE_NAME}:`,
+    "",
+    `Paciente: ${request?.patient_name || ""}`,
+    request?.phone ? `Teléfono: ${request.phone}` : null,
+    request?.reason ? `Motivo: ${request.reason}` : null,
+    request?.preferred_date
+      ? `Fecha preferida: ${request.preferred_date}${request.preferred_time ? ` a las ${request.preferred_time}` : ""}`
+      : null,
+    request?.comments ? `Comentarios: ${request.comments}` : null,
+    "",
+    "Puedes ver el detalle completo (y el resto de tus solicitudes) en tu panel:",
+    PANEL_URL,
+    "",
+    "Saludos,",
+    `Equipo de ${SITE_NAME}`,
+  ].filter((line) => line !== null);
+  return sendNotification(doc?.email, `Nueva solicitud de cita — ${SITE_NAME}`, lines.join("\n"));
+}
+
 // El doctor que envía un artículo desde su panel no siempre tiene su email
 // a la mano en el componente que aprueba/rechaza (BlogPost solo guarda su
 // nombre como autor). Esta función lo busca por su id de Specialist.
