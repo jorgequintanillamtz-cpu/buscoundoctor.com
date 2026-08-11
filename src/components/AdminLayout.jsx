@@ -3,9 +3,13 @@ import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpC
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
-// el menú se pueda escanear de un vistazo: Resumen primero, luego lo
-// operativo del día a día, después contenido del sitio, y configuración
-// al final (lo que casi nunca cambia).
+// el menú se pueda escanear de un vistazo: Resumen primero; luego
+// Operación, con las 4 colas de revisión que alimentan la Bandeja de
+// entrada juntas y en el mismo orden que ahí (Doctores, Verificaciones,
+// Blog, Reseñas), seguidas de lo operativo que no es cola de aprobación
+// (Solicitudes, Premium) y el Historial como bitácora al final; después
+// Contenido (solo texto/imagen del sitio, sin cola de revisión); y
+// Configuración al final (lo que casi nunca cambia).
 const adminNavSections = [
   {
     label: "Resumen",
@@ -19,16 +23,16 @@ const adminNavSections = [
       { path: "/admin/bandeja", label: "Bandeja de entrada", icon: Inbox },
       { path: "/admin/doctores", label: "Doctores", icon: Users },
       { path: "/admin/verificaciones", label: "Verificaciones", icon: ShieldCheck },
+      { path: "/admin/blog", label: "Blog", icon: FileText },
+      { path: "/admin/resenas", label: "Reseñas", icon: Star },
       { path: "/admin/solicitudes", label: "Solicitudes de cita", icon: Calendar },
       { path: "/admin/premium", label: "Premium", icon: Crown },
-      { path: "/admin/resenas", label: "Reseñas", icon: Star },
       { path: "/admin/historial", label: "Historial", icon: History },
     ],
   },
   {
     label: "Contenido",
     items: [
-      { path: "/admin/blog", label: "Blog", icon: FileText },
       { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
       { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
     ],
