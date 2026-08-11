@@ -17,9 +17,11 @@ export const ACTIVITY_TYPE_LABELS = {
   dia_cobro_actualizado: "Día de cobro actualizado",
   doctor_aprobado: "Doctor aprobado",
   doctor_rechazado: "Doctor rechazado",
-  doctor_eliminado: "Doctor movido a la papelera",
+  doctor_eliminado: "Doctor eliminado permanentemente",
+  doctor_papelera: "Doctor movido a la papelera",
   doctor_restaurado: "Doctor restaurado",
-  registro_eliminado: "Registro en progreso movido a la papelera",
+  registro_eliminado: "Registro en progreso eliminado permanentemente",
+  registro_papelera: "Registro en progreso movido a la papelera",
   documento_aprobado: "Documento aprobado",
   documento_rechazado: "Documento rechazado",
   resena_aprobada: "Reseña aprobada",
@@ -37,8 +39,8 @@ export const ACTIVITY_POSITIVE = new Set([
 ]);
 export const ACTIVITY_NEGATIVE = new Set([
   "premium_desactivado", "perfil_desactivado", "destacado_desactivado", "pago_eliminado",
-  "doctor_rechazado", "doctor_eliminado", "registro_eliminado", "documento_rechazado", "resena_eliminada",
-  "resena_rechazada", "blog_rechazado",
+  "doctor_rechazado", "doctor_eliminado", "doctor_papelera", "registro_eliminado", "registro_papelera",
+  "documento_rechazado", "resena_eliminada", "resena_rechazada", "blog_rechazado",
 ]);
 
 // Registra un movimiento en el historial. Es "best effort": si falla, no
