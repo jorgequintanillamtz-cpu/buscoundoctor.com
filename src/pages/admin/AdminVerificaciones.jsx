@@ -163,8 +163,15 @@ export default function AdminVerificaciones() {
       base44.entities.Specialist.list(),
       base44.auth.me().catch(() => null),
     ]);
-    setDocs(allDocs.filter((d) => d.upload_status === "uploaded" || d.upload_status === "under_review"));
-    setSpecialistsById(Object.fromEntries(allSpecialists.map((s) => [s.id, s])));
+    const specialistsMap = Object.fromEntries(allSpecialists.map((s) => [s.id, s]));
+    // Si el doctor está en la papelera, su documento deja de ser relevante
+    // para revisión hasta que se restaure.
+    setDocs(
+      allDocs.filter(
+        (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsMap[d.specialist_id]?.deleted_at
+      )
+    );
+    setSpecialistsById(specialistsMap);
     setUser(me);
     setLoading(false);
   };
