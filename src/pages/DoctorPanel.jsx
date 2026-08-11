@@ -27,24 +27,27 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SP
 // para que un doctor nunca pueda tocar desde su propio panel los campos
 // que controla el admin (verificación, visibilidad, destacado).
 
+// Dos tipos de sección: las que solo INFORMAN al doctor (estadísticas,
+// solicitudes recibidas, reseñas de pacientes, estatus de su plan) van
+// primero en "Resumen y actividad"; el resto son secciones que el doctor
+// tiene que LLENAR con su propia información (datos de perfil, servicios,
+// documentos, contenido), agrupadas por tipo después.
 const SECTION_GROUPS = [
-  { group: "Inicio", items: [
+  { group: "Resumen y actividad", items: [
     { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
     { key: "seo", label: "Score SEO", icon: TrendingUp, requiresSaved: true },
+    { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
+    { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
+    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
   ]},
   { group: "Mi perfil", items: [
     { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
     { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
     { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
     { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
-  ]},
-  { group: "Negocio", items: [
-    { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
-    { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
-    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
   ]},
   { group: "Contenido", items: [
     { key: "casos", label: "Casos de éxito", icon: Sparkles, requiresSaved: true },
