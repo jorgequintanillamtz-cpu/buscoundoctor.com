@@ -16,17 +16,17 @@ const DEGREES = [
 
 const DEGREE_LABEL = (v) => DEGREES.find((d) => d.v === v)?.label || v;
 
-const emptyEducation = () => ({
+const emptyEducation = (defaultType) => ({
   institution_name: "",
-  degree_type: "especialidad",
+  degree_type: defaultType || "especialidad",
   field_of_study: "",
   start_year: "",
   end_year: "",
   comment: "",
 });
 
-function EducationForm({ initial, onCancel, onSave, saving }) {
-  const [edu, setEdu] = useState(initial || emptyEducation());
+function EducationForm({ initial, onCancel, onSave, saving, degreeOptions, defaultType }) {
+  const [edu, setEdu] = useState(initial || emptyEducation(defaultType));
 
   const submit = () => {
     if (!edu.institution_name.trim()) { toast.error("La institución es obligatoria"); return; }
@@ -53,7 +53,7 @@ function EducationForm({ initial, onCancel, onSave, saving }) {
             onChange={(e) => setEdu({ ...edu, degree_type: e.target.value })}
             className="w-full h-9 px-3 text-sm bg-background border border-input rounded-xl"
           >
-            {DEGREES.map((d) => (
+            {degreeOptions.map((d) => (
               <option key={d.v} value={d.v}>{d.label}</option>
             ))}
           </select>
@@ -114,24 +114,37 @@ function EducationForm({ initial, onCancel, onSave, saving }) {
   );
 }
 
-export default function EducationManager({ specialistId }) {
+// `types` filtra qué degree_type maneja esta instancia del componente: se
+// reusa tal cual para "Formación académica" (todo menos certificación) y
+// para "Certificaciones" (solo certificación), sin duplicar la lógica de
+// CRUD ni la entidad de datos — ambas viven en SpecialistEducation.
+export default function EducationManager({
+  specialistId,
+  types = DEGREES.map((d) => d.v),
+  title = "Formación académica",
+  emptyLabel = "Sin formación académica registrada. Agrega la primera.",
+  defaultType,
+}) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState(null);
 
+  const degreeOptions = DEGREES.filter((d) => types.includes(d.v));
+  const resolvedDefaultType = defaultType || degreeOptions[0]?.v || "especialidad";
+
   const load = useCallback(async () => {
     if (!specialistId) { setLoading(false); return; }
     setLoading(true);
     try {
       const list = await base44.entities.SpecialistEducation.filter({ specialist_id: specialistId });
-      setItems(list.sort((a, b) => (b.end_year || 0) - (a.end_year || 0)));
+      setItems(list.filter((it) => types.includes(it.degree_type)).sort((a, b) => (b.end_year || 0) - (a.end_year || 0)));
     } catch {
       toast.error("Error al cargar formación académica");
     }
     setLoading(false);
-  }, [specialistId]);
+  }, [specialistId, types]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -140,7 +153,7 @@ export default function EducationManager({ specialistId }) {
     try {
       const payload = {
         institution_name: data.institution_name,
-        degree_type: data.degree_type,
+        degree_type: data.degree_type || resolvedDefaultType,
         field_of_study: data.field_of_study || "",
         start_year: data.start_year ? Number(data.start_year) : undefined,
         end_year: data.end_year ? Number(data.end_year) : undefined,
@@ -176,7 +189,7 @@ export default function EducationManager({ specialistId }) {
   return (
     <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Formación académica</h2>
+        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">{title}</h2>
         {editingId === null && (
           <Button size="sm" variant="outline" onClick={() => setEditingId("new")} className="rounded-xl gap-1.5">
             <Plus className="w-4 h-4" /> Agregar
@@ -191,17 +204,17 @@ export default function EducationManager({ specialistId }) {
       ) : (
         <div className="space-y-3">
           {editingId === "new" && (
-            <EducationForm onCancel={() => setEditingId(null)} onSave={save} saving={saving} />
+            <EducationForm onCancel={() => setEditingId(null)} onSave={save} saving={saving} degreeOptions={degreeOptions} defaultType={resolvedDefaultType} />
           )}
 
           {items.length === 0 && editingId !== "new" && (
-            <p className="text-sm text-muted-foreground py-4 text-center">Sin formación académica registrada. Agrega la primera.</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">{emptyLabel}</p>
           )}
 
           {items.map((edu) => (
             <div key={edu.id} className="border border-border/60 rounded-xl p-4 space-y-2">
               {editingId === edu.id ? (
-                <EducationForm initial={{ ...edu }} onCancel={() => setEditingId(null)} onSave={save} saving={saving} />
+                <EducationForm initial={{ ...edu }} onCancel={() => setEditingId(null)} onSave={save} saving={saving} degreeOptions={degreeOptions} defaultType={resolvedDefaultType} />
               ) : (
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-0.5 min-w-0">
