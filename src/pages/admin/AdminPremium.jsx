@@ -261,7 +261,9 @@ export default function AdminPremium() {
       base44.entities.PremiumPayment.list("-payment_date", 1000),
       loadPremiumStatuses(),
     ]);
-    setSpecialists(mergePremiumStatus(specs, premiumStatuses));
+    // Los doctores en la papelera dejan de contar para Premium: ya no se
+    // les cobra ni aparecen como retrasados.
+    setSpecialists(mergePremiumStatus(specs.filter((s) => !s.deleted_at), premiumStatuses));
     setPayments(pays);
     setLoading(false);
   };
