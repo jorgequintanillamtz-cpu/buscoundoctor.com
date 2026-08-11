@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Upload, X, Plus, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
+import { Upload, X, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -60,7 +59,7 @@ export default function DoctorEditorPerfil({ form, update }) {
   const imageInsertRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingGaleria, setUploadingGaleria] = useState(false);
-  const [uploadingInline, setUploadingInline] = useState(false);
+
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showEspecialidadList, setShowEspecialidadList] = useState(false);
@@ -120,7 +119,6 @@ export default function DoctorEditorPerfil({ form, update }) {
   const handleInlineImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploadingInline(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       const el = contentRef.current;
@@ -131,7 +129,6 @@ export default function DoctorEditorPerfil({ form, update }) {
       update("description", content.slice(0, start) + md + content.slice(end));
       toast.success("Imagen insertada");
     } catch { toast.error("Error al subir imagen"); }
-    setUploadingInline(false);
   };
 
   return (
