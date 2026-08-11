@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock,
-  Stethoscope, Crown, Search, ArrowUpDown, CheckSquare, Square, Calendar, Loader2,
+  Stethoscope, Crown, Search, ArrowUpDown, CheckSquare, Square, Calendar, Loader2, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,13 +51,43 @@ export default function AdminDoctores() {
     });
   }, []);
 
+  // "Eliminar" ya no borra nada de inmediato: manda el perfil a la papelera
+  // (deja de verse en el sitio) y se puede restaurar después. El borrado
+  // permanente en cascada (reseñas, consultorios, documentos, etc.) solo
+  // pasa desde la pestaña Papelera, como acción aparte y explícita.
   const handleDelete = async (id, nombre) => {
-    if (!confirm(`¿Eliminar al doctor "${nombre}"? Esto también borra sus reseñas, consultorios, servicios, documentos y estadísticas.`)) return;
+    if (!confirm(`¿Mover a la papelera al doctor "${nombre}"? Dejará de verse en el sitio, pero podrás restaurarlo después desde la pestaña Papelera.`)) return;
+    const deletedAt = new Date().toISOString();
+    try {
+      await base44.entities.Specialist.update(id, { active: false, deleted_at: deletedAt });
+      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: false, deleted_at: deletedAt } : d)));
+      toast.success("Doctor movido a la papelera");
+      logActivity({ type: "doctor_papelera", description: `Se movió a la papelera el perfil de ${nombre}`, specialistId: id, specialistName: nombre });
+      refreshBadges();
+    } catch (e) {
+      toast.error("No se pudo mover a la papelera: " + e.message);
+    }
+  };
+
+  const handleRestore = async (id, nombre) => {
+    try {
+      await base44.entities.Specialist.update(id, { active: true, deleted_at: null });
+      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: true, deleted_at: null } : d)));
+      toast.success(`${nombre} fue restaurado`);
+      logActivity({ type: "doctor_restaurado", description: `Se restauró el perfil de ${nombre} desde la papelera`, specialistId: id, specialistName: nombre });
+      refreshBadges();
+    } catch (e) {
+      toast.error("No se pudo restaurar: " + e.message);
+    }
+  };
+
+  const handlePermanentDelete = async (id, nombre) => {
+    if (!confirm(`¿Eliminar PERMANENTEMENTE a "${nombre}"? Se borrarán también sus reseñas, consultorios, servicios, documentos y estadísticas. Esta acción no se puede deshacer.`)) return;
     try {
       await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
       setDoctors(prev => prev.filter(d => d.id !== id));
       toast.success("Doctor eliminado por completo");
-      logActivity({ type: "doctor_eliminado", description: `Se eliminó por completo el perfil de ${nombre}`, specialistName: nombre });
+      logActivity({ type: "doctor_eliminado", description: `Se eliminó de forma permanente el perfil de ${nombre}`, specialistName: nombre });
       refreshBadges();
     } catch (e) {
       toast.error("No se pudo eliminar: " + e.message);
@@ -133,8 +163,9 @@ export default function AdminDoctores() {
   };
 
   // Perfiles registrados vía /registro-medico: pendientes de revisión o borradores con dueño asignado
+  // (se excluye lo que está en la papelera de las 3 pestañas operativas).
   const pendientes = useMemo(
-    () => doctors.filter(s => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)),
+    () => doctors.filter(s => !s.deleted_at && (s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id))),
     [doctors]
   );
 
@@ -143,16 +174,21 @@ export default function AdminDoctores() {
   // abandona el registro, el perfil queda aquí (sin dueño todavía) para que
   // se pueda dar seguimiento manualmente.
   const enProgreso = useMemo(
-    () => doctors.filter(s => s.publication_status === "draft" && !s.owner_user_id),
+    () => doctors.filter(s => !s.deleted_at && s.publication_status === "draft" && !s.owner_user_id),
     [doctors]
   );
 
   // "Todos" muestra los perfiles reales (publicados o en revisión formal);
-  // los borradores anónimos viven solo en la pestaña "En progreso".
+  // los borradores anónimos viven solo en la pestaña "En progreso", y lo
+  // eliminado vive solo en "Papelera".
   const doctoresReales = useMemo(
-    () => doctors.filter(s => !(s.publication_status === "draft" && !s.owner_user_id)),
+    () => doctors.filter(s => !s.deleted_at && !(s.publication_status === "draft" && !s.owner_user_id)),
     [doctors]
   );
+
+  // Perfiles movidos a la papelera: dejaron de verse en el sitio pero se
+  // pueden restaurar, o eliminar de forma permanente y en cascada.
+  const enPapelera = useMemo(() => doctors.filter(s => !!s.deleted_at), [doctors]);
 
   const specialtyOptions = useMemo(() => {
     const set = new Set(doctoresReales.map(d => d.specialty).filter(Boolean));
@@ -220,15 +256,16 @@ export default function AdminDoctores() {
   };
 
   const handleDeleteDraft = async (id, nombre) => {
-    if (!confirm(`¿Eliminar el registro en progreso de "${nombre}"?`)) return;
+    if (!confirm(`¿Mover a la papelera el registro en progreso de "${nombre}"?`)) return;
+    const deletedAt = new Date().toISOString();
     try {
-      await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
-      setDoctors(prev => prev.filter(d => d.id !== id));
-      toast.success("Registro eliminado por completo");
-      logActivity({ type: "registro_eliminado", description: `Se eliminó el registro en progreso de ${nombre}`, specialistName: nombre });
+      await base44.entities.Specialist.update(id, { active: false, deleted_at: deletedAt });
+      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: false, deleted_at: deletedAt } : d)));
+      toast.success("Registro movido a la papelera");
+      logActivity({ type: "registro_papelera", description: `Se movió a la papelera el registro en progreso de ${nombre}`, specialistName: nombre });
       refreshBadges();
     } catch (e) {
-      toast.error("No se pudo eliminar: " + e.message);
+      toast.error("No se pudo mover a la papelera: " + e.message);
     }
   };
 
