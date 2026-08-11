@@ -47,7 +47,8 @@ export default function Dashboard() {
         base44.entities.PremiumPayment.list(),
         loadPremiumStatuses(),
       ]);
-      const specialists = mergePremiumStatus(rawSpecialists, premiumStatuses);
+      // Los doctores en la papelera no cuentan en las métricas del dashboard.
+      const specialists = mergePremiumStatus(rawSpecialists, premiumStatuses).filter((s) => !s.deleted_at);
 
       const activeDoctors = specialists.filter((s) => s.active).length;
       const premiumDoctors = specialists.filter((s) => s.plan_slug === "premium").length;
