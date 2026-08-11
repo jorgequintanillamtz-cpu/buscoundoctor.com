@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -13,6 +13,7 @@ import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import DoctorAppointmentRequests from "@/components/admin/DoctorAppointmentRequests";
+import DoctorReviews from "@/components/admin/DoctorReviews";
 import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
@@ -38,6 +39,7 @@ const SECTION_GROUPS = [
   ]},
   { group: "Negocio", items: [
     { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
+    { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
@@ -318,6 +320,7 @@ export default function DoctorPanel() {
             {section === "seo" && <SeoScoreManager seoScore={form.seo_score || 0} checklist={seoChecklist} onNavigate={setSection} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
             {section === "solicitudes" && <DoctorAppointmentRequests specialistId={specialistId} />}
+            {section === "resenas" && <DoctorReviews specialistId={specialistId} />}
             {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={specialistId} />}
             {section === "formacion" && <EducationManager specialistId={specialistId} />}
             {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
