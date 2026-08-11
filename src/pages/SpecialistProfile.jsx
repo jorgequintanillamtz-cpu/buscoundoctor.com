@@ -481,7 +481,7 @@ export default function SpecialistProfile() {
           <div className="order-12 lg:order-10">
             <SpecialistCases specialistId={specialist.id} />
           </div>
-          <div className="order-13 lg:order-11">
+          <div className="order-[13] lg:order-11">
             <SpecialistPosts specialistId={specialist.id} />
           </div>
 
@@ -491,7 +491,7 @@ export default function SpecialistProfile() {
               derecha se mantiene pegado — incluya también esta sección. Un sticky
               solo puede quedarse fijo mientras su propio contenedor tenga alto de
               sobra; si esta sección quedaba fuera del grid, no contaba. */}
-          <div className="order-14 lg:order-12">
+          <div className="order-[14] lg:order-12">
             <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
           </div>
       </div>
