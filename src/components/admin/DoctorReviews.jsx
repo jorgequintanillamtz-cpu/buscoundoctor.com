@@ -67,8 +67,8 @@ export default function DoctorReviews({ specialistId }) {
       .finally(() => setLoading(false));
   }, [specialistId]);
 
-  const approvedReviews = useMemo(() => reviews.filter((r) => r.approved), [reviews]);
-  const pendingReviews = useMemo(() => reviews.filter((r) => !r.approved), [reviews]);
+  const approvedReviews = useMemo(() => reviews.filter((r) => r.approved && !r.rejected), [reviews]);
+  const pendingReviews = useMemo(() => reviews.filter((r) => !r.approved && !r.rejected), [reviews]);
 
   const average = useMemo(() => {
     if (approvedReviews.length === 0) return 0;
