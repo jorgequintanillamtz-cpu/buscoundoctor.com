@@ -596,7 +596,7 @@ export default function AdminDoctores() {
                             </Button>
                           )}
                           <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => handleDeleteDraft(doc.id, doc.full_name)}>
-                            <Trash2 className="w-4 h-4" /> Eliminar
+                            <Trash2 className="w-4 h-4" /> Papelera
                           </Button>
                         </div>
                       </td>
