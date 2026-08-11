@@ -15,19 +15,24 @@ export async function loadPendingCounts() {
     loadPremiumStatuses(),
   ]);
 
-  const pendingDoctors = specialists.filter(
+  // Los doctores en la papelera no cuentan para ninguna cola: ya no son
+  // relevantes operativamente hasta que se restauren.
+  const activeSpecialists = specialists.filter((s) => !s.deleted_at);
+  const specialistsById = Object.fromEntries(specialists.map((s) => [s.id, s]));
+
+  const pendingDoctors = activeSpecialists.filter(
     (s) => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)
   ).length;
 
   const pendingDocuments = docs.filter(
-    (d) => d.upload_status === "uploaded" || d.upload_status === "under_review"
+    (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at
   ).length;
 
   const pendingBlogPosts = posts.filter(
-    (p) => p.submitted_by_specialist_id && p.review_status === "pending_review"
+    (p) => p.submitted_by_specialist_id && p.review_status === "pending_review" && !specialistsById[p.submitted_by_specialist_id]?.deleted_at
   ).length;
 
-  const lateDoctors = computeLateDoctors(mergePremiumStatus(specialists, premiumStatuses), payments).length;
+  const lateDoctors = computeLateDoctors(mergePremiumStatus(activeSpecialists, premiumStatuses), payments).length;
 
   return {
     "/admin/doctores": pendingDoctors,
