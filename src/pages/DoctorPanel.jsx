@@ -39,9 +39,9 @@ const SECTION_GROUPS = [
     { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
   ]},
   { group: "Negocio", items: [
-    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
     { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
     { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
+    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
