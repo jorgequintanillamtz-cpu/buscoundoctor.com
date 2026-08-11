@@ -212,23 +212,25 @@ export default function AdminInbox() {
     [specialists]
   );
 
+  // Los doctores en la papelera no aparecen en ninguna de las 4 colas: ya
+  // no son relevantes operativamente hasta que se restauren.
   const pendingDoctors = useMemo(
-    () => specialists.filter((s) => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)),
+    () => specialists.filter((s) => !s.deleted_at && (s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id))),
     [specialists]
   );
 
   const pendingDocs = useMemo(
-    () => docs.filter((d) => d.upload_status === "uploaded" || d.upload_status === "under_review"),
-    [docs]
+    () => docs.filter((d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at),
+    [docs, specialistsById]
   );
 
   const pendingPosts = useMemo(
-    () => posts.filter((p) => p.submitted_by_specialist_id && p.review_status === "pending_review"),
-    [posts]
+    () => posts.filter((p) => p.submitted_by_specialist_id && p.review_status === "pending_review" && !specialistsById[p.submitted_by_specialist_id]?.deleted_at),
+    [posts, specialistsById]
   );
 
   const lateDoctors = useMemo(
-    () => computeLateDoctors(mergePremiumStatus(specialists, premiumStatuses), payments),
+    () => computeLateDoctors(mergePremiumStatus(specialists.filter((s) => !s.deleted_at), premiumStatuses), payments),
     [specialists, premiumStatuses, payments]
   );
 
