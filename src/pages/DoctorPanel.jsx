@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, Award } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -43,7 +43,6 @@ const SECTION_GROUPS = [
   { group: "Mi perfil", items: [
     { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
     { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
-    { key: "certificaciones", label: "Certificaciones", icon: Award, requiresSaved: true },
     { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
     { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
@@ -329,21 +328,7 @@ export default function DoctorPanel() {
             {section === "solicitudes" && <DoctorAppointmentRequests specialistId={specialistId} />}
             {section === "resenas" && <DoctorReviews specialistId={specialistId} />}
             {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={specialistId} />}
-            {section === "formacion" && (
-              <EducationManager
-                specialistId={specialistId}
-                types={["licenciatura", "especialidad", "subespecialidad", "maestria", "doctorado"]}
-              />
-            )}
-            {section === "certificaciones" && (
-              <EducationManager
-                specialistId={specialistId}
-                types={["certificacion"]}
-                defaultType="certificacion"
-                title="Certificaciones"
-                emptyLabel="Sin certificaciones registradas. Agrega la primera (ej. un curso o diplomado adicional a tu especialidad)."
-              />
-            )}
+            {section === "formacion" && <EducationManager specialistId={specialistId} />}
             {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
             {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
             {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
