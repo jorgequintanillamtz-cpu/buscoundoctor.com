@@ -171,12 +171,7 @@ export function renderEmail({
         </tr>
       </table>`
     : "";
-  // El título de la bienvenida incrusta el logo en línea en vez de escribir
-  // "BuscoUnDoctor" como texto — así el correo solo tiene 2 apariciones del
-  // logo (header + este título), no 3.
-  const heroTitleHtml = hero && hero.titleBefore !== undefined
-    ? `${esc(hero.titleBefore)}<img src="${LOGO_URL}" alt="BuscoUnDoctor" height="20" style="height:20px;width:auto;vertical-align:-4px;display:inline-block;border:0;" />${esc(hero.titleAfter)}`
-    : esc(hero?.title || "");
+  const heroTitleHtml = esc(hero?.title || "");
   const heroHtml = hero
     ? `
       <tr>
