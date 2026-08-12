@@ -37,7 +37,7 @@ export function PendingBlogCard({ post, onReviewed }) {
         specialistName: post.author || "",
       });
       findSpecialistById(post.submitted_by_specialist_id).then((specialist) => {
-        if (specialist) notifyBlogApproved(specialist, post.title);
+        if (specialist) notifyBlogApproved(specialist, post.title, post.slug);
       });
       onReviewed();
       refreshBadges();
