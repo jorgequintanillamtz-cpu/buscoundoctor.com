@@ -504,15 +504,16 @@ export default function AdminPremium() {
     if (!form.payment_date) { toast.error("La fecha es obligatoria"); return; }
     setSaving(true);
     try {
+      const paidDoc = premiumRows.find((d) => d.id === form.specialist_id);
       await base44.entities.PremiumPayment.create({
         specialist_id: form.specialist_id,
+        owner_user_id: paidDoc?.owner_user_id || null,
         amount: amountNum,
         payment_date: form.payment_date,
         period_label: form.period_label.trim(),
         method: form.method,
         notes: form.notes.trim(),
       });
-      const paidDoc = premiumRows.find((d) => d.id === form.specialist_id);
       toast.success("Pago registrado");
       logActivity({
         type: "pago_registrado",
