@@ -7,6 +7,7 @@ import {
   infoBox,
   stepRow,
   stepList,
+  STEP_ICONS,
   esc,
   escMultiline,
 } from "@/api/emailTemplate";
@@ -51,13 +52,15 @@ export function notifyWelcome(doc) {
   const steps = stepList([
     stepRow(
       1,
+      STEP_ICONS.cedula,
       "Verifica tu cédula profesional",
-      "Sube tu cédula y tu identificación oficial. Los perfiles verificados generan más confianza y se destacan con un sello especial.",
+      "Sube tu cédula y tu identificación oficial. Los perfiles verificados generan más confianza y se destacan con un sello especial en tu perfil público.",
       "Subir documentos",
       PANEL_URL
     ),
     stepRow(
       2,
+      STEP_ICONS.biografia,
       "Completa tu biografía",
       "Escribe al menos 50 palabras sobre tu experiencia y enfoque. Es lo que más ayuda a que Google y tus pacientes confíen en tu perfil.",
       "Escribir biografía",
@@ -65,6 +68,7 @@ export function notifyWelcome(doc) {
     ),
     stepRow(
       3,
+      STEP_ICONS.zona,
       "Agrega tu zona de cobertura",
       "Registra tu consultorio con su zona para aparecer en búsquedas como “cardiólogo en San Pedro”.",
       "Agregar consultorio",
@@ -72,9 +76,26 @@ export function notifyWelcome(doc) {
     ),
     stepRow(
       4,
+      STEP_ICONS.formacion,
       "Suma tu formación e idiomas",
       "Agrega tus estudios, certificaciones y los idiomas que hablas — ayuda a que los pacientes elijan tu perfil.",
       "Completar formación",
+      PANEL_URL
+    ),
+    stepRow(
+      5,
+      STEP_ICONS.aseguradoras,
+      "Indica las aseguradoras que aceptas",
+      "Si trabajas con seguros de gastos médicos, marchándolos ayuda a que pacientes con esa cobertura te encuentren primero.",
+      "Elegir aseguradoras",
+      PANEL_URL
+    ),
+    stepRow(
+      6,
+      STEP_ICONS.servicios,
+      "Agrega tus servicios y precios",
+      "Lista los servicios que ofreces y, si quieres, un rango de precio — le da al paciente una idea clara antes de contactarte.",
+      "Agregar servicios",
       PANEL_URL
     ),
   ]);
