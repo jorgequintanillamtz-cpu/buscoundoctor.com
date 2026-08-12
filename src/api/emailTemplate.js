@@ -98,21 +98,36 @@ export function infoBox(label, text, tone = "red") {
     </table>`;
 }
 
-// Un paso numerado (para el correo de bienvenida: "completa tu perfil paso
-// a paso"). Círculo con el número, título en negrita, descripción corta y
-// un link opcional. `title`/`description` deben venir ya escapados si son
-// texto libre.
-export function stepRow(number, title, description, linkLabel, linkUrl) {
+// Iconos generados para cada paso del correo de bienvenida (planos, en los
+// colores de marca, subidos al storage de la plataforma). Viven aquí para
+// que doctorNotify.js solo tenga que referenciarlos por nombre.
+export const STEP_ICONS = {
+  cedula: "https://media.base44.com/images/public/69daf616236dcba44672309d/0dc3ab7b1_generated_image.png",
+  biografia: "https://media.base44.com/images/public/69daf616236dcba44672309d/1ef57c620_generated_image.png",
+  zona: "https://media.base44.com/images/public/69daf616236dcba44672309d/7bf1e1f1b_generated_image.png",
+  formacion: "https://media.base44.com/images/public/69daf616236dcba44672309d/885688158_generated_image.png",
+  aseguradoras: "https://media.base44.com/images/public/69daf616236dcba44672309d/53f0eb4be_generated_image.png",
+  servicios: "https://media.base44.com/images/public/69daf616236dcba44672309d/59e74a669_generated_image.png",
+};
+
+// Un paso ilustrado (para el correo de bienvenida: "completa tu perfil paso
+// a paso"). Icono a la izquierda, "Paso N" + título en negrita + descripción
+// corta + link opcional. `title`/`description` deben venir ya escapados si
+// son texto libre.
+export function stepRow(number, iconUrl, title, description, linkLabel, linkUrl) {
   const link = linkLabel && linkUrl
     ? `<a href="${linkUrl}" style="font-size:13px;font-weight:600;color:${BRAND.blue};text-decoration:none;">${esc(linkLabel)} &rarr;</a>`
     : "";
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;">
       <tr>
-        <td width="34" valign="top" style="padding-right:14px;">
-          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="26" height="26" style="width:26px;height:26px;border-radius:50%;background:${BRAND.navy};font-size:12px;font-weight:700;color:#ffffff;text-align:center;line-height:26px;">${number}</td></tr></table>
+        <td width="52" valign="top" style="padding-right:14px;">
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="48" height="48" style="width:48px;height:48px;border-radius:10px;background:${BRAND.blueLight};text-align:center;">
+            <img src="${iconUrl}" width="30" height="30" alt="" style="width:30px;height:30px;margin-top:9px;border:0;" />
+          </td></tr></table>
         </td>
-        <td valign="top" style="padding-top:2px;">
+        <td valign="top">
+          <p style="margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:${BRAND.blue};">Paso ${number}</p>
           <p style="margin:0 0 3px;font-size:14.5px;font-weight:700;color:${INK};">${title}</p>
           <p style="margin:0 0 6px;font-size:13.5px;line-height:1.55;color:${INK_MUTED};">${description}</p>
           ${link}
