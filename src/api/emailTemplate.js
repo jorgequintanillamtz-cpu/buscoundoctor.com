@@ -4,11 +4,12 @@
 // estándar para que se vea bien en Gmail/Outlook/Apple Mail) con el logo y
 // los colores de marca, en vez de mandar texto plano.
 //
-// Diseño deliberadamente sobrio: sin píldoras de color ni cajas saturadas.
-// Un solo acento de marca (el botón) y texto de color solo para indicar
-// estado (aprobado/rechazado), como en los correos transaccionales de
-// productos B2B serios (Stripe, Linear) en vez de un look "startup con
-// muchos colores".
+// Diseño sobrio pero con presencia de marca: header sólido en azul marino
+// (para que se distinga de inmediato en la bandeja de entrada) y cuerpo
+// restringido — sin píldoras de color ni cajas saturadas, un solo acento
+// para el botón y texto de color solo para indicar estado. El objetivo es
+// que se vea como el correo transaccional de un producto serio (Stripe,
+// Linear) y no como una plantilla genérica de newsletter.
 //
 // No usamos JSX/React aquí a propósito: esto corre como string plano que se
 // manda tal cual al proveedor de correo, no se renderiza en el navegador.
@@ -97,10 +98,40 @@ export function infoBox(label, text, tone = "red") {
     </table>`;
 }
 
+// Un paso numerado (para el correo de bienvenida: "completa tu perfil paso
+// a paso"). Círculo con el número, título en negrita, descripción corta y
+// un link opcional. `title`/`description` deben venir ya escapados si son
+// texto libre.
+export function stepRow(number, title, description, linkLabel, linkUrl) {
+  const link = linkLabel && linkUrl
+    ? `<a href="${linkUrl}" style="font-size:13px;font-weight:600;color:${BRAND.blue};text-decoration:none;">${esc(linkLabel)} &rarr;</a>`
+    : "";
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr>
+        <td width="34" valign="top" style="padding-right:14px;">
+          <table role="presentation" cellpadding="0" cellspacing="0"><tr><td width="26" height="26" style="width:26px;height:26px;border-radius:50%;background:${BRAND.navy};font-size:12px;font-weight:700;color:#ffffff;text-align:center;line-height:26px;">${number}</td></tr></table>
+        </td>
+        <td valign="top" style="padding-top:2px;">
+          <p style="margin:0 0 3px;font-size:14.5px;font-weight:700;color:${INK};">${title}</p>
+          <p style="margin:0 0 6px;font-size:13.5px;line-height:1.55;color:${INK_MUTED};">${description}</p>
+          ${link}
+        </td>
+      </tr>
+    </table>`;
+}
+
+export function stepList(rowsHtml) {
+  return rowsHtml.filter(Boolean).join("");
+}
+
 // Arma el correo completo. `bodyHtml` es HTML ya construido (párrafos,
-// detailTable, infoBox, etc.) que se inserta dentro de la tarjeta.
+// detailTable, infoBox, stepRow, etc.) que se inserta dentro de la tarjeta.
 // `badge`/`badgeTone` se muestran como una pequeña etiqueta de texto (sin
 // fondo) encima del título, no como píldora de color.
+// `hero` (opcional): franja de bienvenida justo debajo del header, para
+// correos que necesitan más presencia visual (ej. bienvenida) — el resto
+// de los correos no la usan.
 export function renderEmail({
   preheader = "",
   badge,
@@ -109,6 +140,7 @@ export function renderEmail({
   bodyHtml,
   ctaLabel,
   ctaUrl,
+  hero,
 }) {
   const kickerColor = TONES[badgeTone] || TONES.neutral;
   const kickerHtml = badge
@@ -124,6 +156,16 @@ export function renderEmail({
         </tr>
       </table>`
     : "";
+  const heroHtml = hero
+    ? `
+      <tr>
+        <td style="background-color:${BRAND.blueLight};padding:32px 40px;text-align:center;">
+          ${hero.eyebrow ? `<p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${BRAND.blue};">${esc(hero.eyebrow)}</p>` : ""}
+          <h1 style="margin:0;font-size:22px;line-height:1.35;color:${BRAND.navy};font-weight:700;">${esc(hero.title)}</h1>
+          ${hero.subtitle ? `<p style="margin:8px 0 0;font-size:14.5px;line-height:1.6;color:${INK_MUTED};">${esc(hero.subtitle)}</p>` : ""}
+        </td>
+      </tr>`
+    : "";
 
   return `<!doctype html>
 <html lang="es">
@@ -137,12 +179,13 @@ export function renderEmail({
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${PAGE_BG};padding:40px 12px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${BORDER};border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
             <tr>
-              <td style="padding:20px 40px;border-bottom:1px solid ${BORDER};">
-                <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="26" style="height:26px;width:auto;display:inline-block;border:0;" />
+              <td style="background-color:${BRAND.navy};padding:24px 40px;text-align:center;">
+                <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="30" style="height:30px;width:auto;display:inline-block;border:0;" />
               </td>
             </tr>
+            ${heroHtml}
             <tr>
               <td style="padding:36px 40px 4px;">
                 ${kickerHtml}
