@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { GraduationCap, Briefcase, Building2, Award } from "lucide-react";
+import { GraduationCap, Briefcase, Building2 } from "lucide-react";
 
 const DEGREE_LABELS = {
   licenciatura: "Licenciatura",
@@ -12,20 +12,13 @@ const DEGREE_LABELS = {
 };
 
 // "Estudios" cubre la formación de base (licenciatura, maestría, doctorado).
-// "Experiencia" cubre el recorrido clínico (especialidad, subespecialidad).
-// "Certificaciones" tiene sección propia y visible (cursos, diplomados,
-// certificaciones adicionales) en vez de mezclarse dentro de Experiencia,
-// para que un doctor con varias certificaciones destaque ese contenido.
+// "Experiencia" cubre el recorrido clínico (especialidad, subespecialidad,
+// certificaciones) — es lo más cercano a un historial profesional que existe
+// hoy en los datos reales del especialista. No inventamos un historial
+// laboral con fechas que nadie puede editar en el panel de admin.
 const DEGREE_GROUPS = {
   estudios: ["licenciatura", "maestria", "doctorado"],
-  experiencia: ["especialidad", "subespecialidad"],
-  certificaciones: ["certificacion"],
-};
-
-const VARIANT_META = {
-  experiencia: { heading: "Experiencia", icon: Briefcase },
-  estudios: { heading: "Estudios", icon: GraduationCap },
-  certificaciones: { heading: "Certificaciones", icon: Award },
+  experiencia: ["especialidad", "subespecialidad", "certificacion"],
 };
 
 export default function EducationTimeline({ specialistId, variant = "estudios", currentOffices = [], yearsExperience }) {
@@ -61,8 +54,9 @@ export default function EducationTimeline({ specialistId, variant = "estudios", 
     return null;
   };
 
-  const { heading, icon: Icon } = VARIANT_META[variant] || VARIANT_META.estudios;
-  const sectionId = variant;
+  const heading = variant === "experiencia" ? "Experiencia" : "Estudios";
+  const Icon = variant === "experiencia" ? Briefcase : GraduationCap;
+  const sectionId = variant === "experiencia" ? "experiencia" : "estudios";
 
   return (
     <div id={sectionId} className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
