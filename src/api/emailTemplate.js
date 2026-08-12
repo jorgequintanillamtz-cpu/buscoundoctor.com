@@ -4,6 +4,12 @@
 // estándar para que se vea bien en Gmail/Outlook/Apple Mail) con el logo y
 // los colores de marca, en vez de mandar texto plano.
 //
+// Diseño deliberadamente sobrio: sin píldoras de color ni cajas saturadas.
+// Un solo acento de marca (el botón) y texto de color solo para indicar
+// estado (aprobado/rechazado), como en los correos transaccionales de
+// productos B2B serios (Stripe, Linear) en vez de un look "startup con
+// muchos colores".
+//
 // No usamos JSX/React aquí a propósito: esto corre como string plano que se
 // manda tal cual al proveedor de correo, no se renderiza en el navegador.
 
@@ -22,11 +28,17 @@ export const SITE_URL = "https://buscoundoctor.com";
 export const LOGO_URL =
   "https://base44.app/api/apps/69daf616236dcba44672309d/files/mp/public/69daf616236dcba44672309d/493678fd4_buscoundoctor-logo.png";
 
+const INK = "#101828";
+const INK_MUTED = "#475467";
+const INK_FAINT = "#667085";
+const BORDER = "#E4E7EC";
+const PAGE_BG = "#F4F6F8";
+
+// Solo texto de color para indicar estado — sin fondos ni píldoras.
 const TONES = {
-  blue: { bg: "#DCE9FF", text: "#0B1E4D" },
-  green: { bg: "#D1FAE5", text: "#047857" },
-  red: { bg: "#FEE2E2", text: "#B91C1C" },
-  purple: { bg: "#F3E8FF", text: "#7E22CE" },
+  neutral: BRAND.navy,
+  green: "#0F7B4E",
+  red: "#B3261E",
 };
 
 // Escapa cualquier texto que venga de un formulario (nombre, comentario,
@@ -54,8 +66,8 @@ export function detailRow(label, value) {
   if (!value) return "";
   return `
     <tr>
-      <td style="padding:7px 0;font-size:13px;color:#64748B;width:130px;vertical-align:top;">${esc(label)}</td>
-      <td style="padding:7px 0;font-size:14px;color:#0B1E4D;font-weight:600;vertical-align:top;">${value}</td>
+      <td style="padding:9px 0;font-size:13px;color:${INK_FAINT};width:132px;vertical-align:top;border-bottom:1px solid ${BORDER};">${esc(label)}</td>
+      <td style="padding:9px 0;font-size:14px;color:${INK};font-weight:600;vertical-align:top;border-bottom:1px solid ${BORDER};">${value}</td>
     </tr>`;
 }
 
@@ -63,43 +75,51 @@ export function detailTable(rowsHtml) {
   const rows = rowsHtml.filter(Boolean).join("");
   if (!rows) return "";
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0;border-top:1px solid #EAF2FF;border-bottom:1px solid #EAF2FF;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border-top:1px solid ${BORDER};">
       ${rows}
     </table>`;
 }
 
-// Caja destacada para motivos de rechazo (o cualquier texto que merezca
-// resaltarse). `text` debe venir ya escapado (usa escMultiline()).
+// Caja de motivo (rechazo, etc.): franja de color a la izquierda sobre
+// fondo neutro, no un bloque saturado. `text` debe venir ya escapado (usa
+// escMultiline() antes).
 export function infoBox(label, text, tone = "red") {
-  const t = TONES[tone] || TONES.red;
+  const color = TONES[tone] || TONES.red;
   return `
-    <div style="background:${t.bg};border-radius:12px;padding:14px 16px;margin:18px 0;">
-      <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:${t.text};text-transform:uppercase;letter-spacing:.04em;">${esc(label)}</p>
-      <p style="margin:0;font-size:14px;line-height:1.55;color:#334155;">${text}</p>
-    </div>`;
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+      <tr>
+        <td style="width:3px;background:${color};border-radius:0;"></td>
+        <td style="background:#FAFAFB;padding:12px 16px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.04em;">${esc(label)}</p>
+          <p style="margin:0;font-size:14px;line-height:1.55;color:${INK_MUTED};">${text}</p>
+        </td>
+      </tr>
+    </table>`;
 }
 
 // Arma el correo completo. `bodyHtml` es HTML ya construido (párrafos,
 // detailTable, infoBox, etc.) que se inserta dentro de la tarjeta.
+// `badge`/`badgeTone` se muestran como una pequeña etiqueta de texto (sin
+// fondo) encima del título, no como píldora de color.
 export function renderEmail({
   preheader = "",
   badge,
-  badgeTone = "blue",
+  badgeTone = "neutral",
   title,
   bodyHtml,
   ctaLabel,
   ctaUrl,
 }) {
-  const tone = TONES[badgeTone] || TONES.blue;
-  const badgeHtml = badge
-    ? `<span style="display:inline-block;background:${tone.bg};color:${tone.text};font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 12px;border-radius:999px;">${esc(badge)}</span>`
+  const kickerColor = TONES[badgeTone] || TONES.neutral;
+  const kickerHtml = badge
+    ? `<p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${kickerColor};">${esc(badge)}</p>`
     : "";
   const ctaHtml = ctaLabel && ctaUrl
     ? `
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:26px 0 4px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 4px;">
         <tr>
-          <td style="border-radius:10px;background:${BRAND.blue};">
-            <a href="${ctaUrl}" style="display:inline-block;padding:12px 24px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(ctaLabel)} &rarr;</a>
+          <td style="border-radius:6px;background:${BRAND.navy};">
+            <a href="${ctaUrl}" style="display:inline-block;padding:11px 22px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(ctaLabel)}</a>
           </td>
         </tr>
       </table>`
@@ -112,34 +132,34 @@ export function renderEmail({
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${esc(title)}</title>
   </head>
-  <body style="margin:0;padding:0;background-color:${BRAND.blueLight};">
+  <body style="margin:0;padding:0;background-color:${PAGE_BG};">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</div>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.blueLight};padding:32px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${PAGE_BG};padding:40px 12px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${BORDER};border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
             <tr>
-              <td style="background-color:${BRAND.navy};padding:22px 32px;text-align:center;">
-                <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="34" style="height:34px;width:auto;display:inline-block;border:0;" />
+              <td style="padding:20px 40px;border-bottom:1px solid ${BORDER};">
+                <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="26" style="height:26px;width:auto;display:inline-block;border:0;" />
               </td>
             </tr>
             <tr>
-              <td style="padding:28px 32px 8px;">
-                ${badgeHtml}
-                <h1 style="margin:14px 0 0;font-size:21px;line-height:1.35;color:${BRAND.navy};font-family:Georgia,'Times New Roman',serif;">${esc(title)}</h1>
+              <td style="padding:36px 40px 4px;">
+                ${kickerHtml}
+                <h1 style="margin:0;font-size:19px;line-height:1.4;color:${INK};font-weight:700;">${esc(title)}</h1>
               </td>
             </tr>
             <tr>
-              <td style="padding:10px 32px 0;font-size:14.5px;line-height:1.65;color:#334155;">
+              <td style="padding:12px 40px 0;font-size:14.5px;line-height:1.65;color:${INK_MUTED};">
                 ${bodyHtml}
                 ${ctaHtml}
               </td>
             </tr>
             <tr>
-              <td style="padding:32px 32px 28px;">
-                <div style="border-top:1px solid #EAF2FF;padding-top:18px;font-size:12px;line-height:1.7;color:#94A3B8;">
+              <td style="padding:36px 40px 32px;">
+                <div style="border-top:1px solid ${BORDER};padding-top:16px;font-size:12px;line-height:1.7;color:#98A2B3;">
                   Este es un correo automático de BuscoUnDoctor — no es necesario responderlo.<br/>
-                  <a href="${SITE_URL}" style="color:${BRAND.blue};text-decoration:none;">buscoundoctor.com</a> · Monterrey, Nuevo León
+                  <a href="${SITE_URL}" style="color:#98A2B3;text-decoration:underline;">buscoundoctor.com</a> · Monterrey, Nuevo León
                 </div>
               </td>
             </tr>
