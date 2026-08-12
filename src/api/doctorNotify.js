@@ -5,6 +5,8 @@ import {
   detailRow,
   detailTable,
   infoBox,
+  stepRow,
+  stepList,
   esc,
   escMultiline,
 } from "@/api/emailTemplate";
