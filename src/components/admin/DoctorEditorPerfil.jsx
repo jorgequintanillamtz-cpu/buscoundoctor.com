@@ -228,6 +228,15 @@ export default function DoctorEditorPerfil({ form, update }) {
               />
             </div>
 
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">Cédula / Certificaciones</label>
+              <Input
+                value={form.certifications}
+                onChange={e => update("certifications", e.target.value)}
+                className="rounded-xl font-mono"
+                placeholder="Cédula: 1234567 | Especialidad en ... - UDEM"
+              />
+            </div>
           </div>
         </div>
       </div>
