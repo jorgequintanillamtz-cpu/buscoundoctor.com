@@ -175,6 +175,7 @@ export function renderEmail({
     ? `
       <tr>
         <td style="background-color:${BRAND.blueLight};padding:32px 40px;text-align:center;">
+          <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="22" style="height:22px;width:auto;display:inline-block;border:0;margin-bottom:16px;" />
           ${hero.eyebrow ? `<p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${BRAND.blue};">${esc(hero.eyebrow)}</p>` : ""}
           <h1 style="margin:0;font-size:22px;line-height:1.35;color:${BRAND.navy};font-weight:700;">${esc(hero.title)}</h1>
           ${hero.subtitle ? `<p style="margin:8px 0 0;font-size:14.5px;line-height:1.6;color:${INK_MUTED};">${esc(hero.subtitle)}</p>` : ""}
