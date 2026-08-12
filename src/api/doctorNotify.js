@@ -41,6 +41,63 @@ function profileLink(doc) {
   return doc?.slug ? `${SITE_URL}/especialista/${doc.slug}` : null;
 }
 
+// Correo de bienvenida: se manda una sola vez, justo cuando se crea el
+// perfil del doctor (createDoctorProfile). El wizard de registro ya pidió
+// nombre, especialidad, WhatsApp, cédula y zona/modalidad — estos 4 pasos
+// son justo lo que falta para que el perfil compita bien en el directorio
+// y para desbloquear el sello de "Verificado". El orden importa: primero
+// lo que genera más confianza (cédula) y más impacto en SEO.
+export function notifyWelcome(doc) {
+  const steps = stepList([
+    stepRow(
+      1,
+      "Verifica tu cédula profesional",
+      "Sube tu cédula y tu identificación oficial. Los perfiles verificados generan más confianza y se destacan con un sello especial.",
+      "Subir documentos",
+      PANEL_URL
+    ),
+    stepRow(
+      2,
+      "Completa tu biografía",
+      "Escribe al menos 50 palabras sobre tu experiencia y enfoque. Es lo que más ayuda a que Google y tus pacientes confíen en tu perfil.",
+      "Escribir biografía",
+      PANEL_URL
+    ),
+    stepRow(
+      3,
+      "Agrega tu zona de cobertura",
+      "Registra tu consultorio con su zona para aparecer en búsquedas como “cardiólogo en San Pedro”.",
+      "Agregar consultorio",
+      PANEL_URL
+    ),
+    stepRow(
+      4,
+      "Suma tu formación e idiomas",
+      "Agrega tus estudios, certificaciones y los idiomas que hablas — ayuda a que los pacientes elijan tu perfil.",
+      "Completar formación",
+      PANEL_URL
+    ),
+  ]);
+  const html = renderEmail({
+    preheader: "Bienvenido a BuscoUnDoctor. Sigue estos pasos para completar tu perfil.",
+    hero: {
+      eyebrow: "Cuenta creada",
+      title: `¡Bienvenido a ${SITE_NAME}, ${doc?.full_name || "doctor(a)"}!`,
+      subtitle: "Tu perfil ya existe, pero le faltan algunos datos para verse profesional y aparecer bien en las búsquedas. Toma unos minutos para completarlo.",
+    },
+    title: "Primeros pasos para completar tu perfil",
+    bodyHtml: `
+      <div style="margin:18px 0 4px;">
+        ${steps}
+      </div>
+      <p style="margin:8px 0 0;font-size:13px;color:#98A2B3;">Un admin de nuestro equipo revisará tu cédula en cuanto la subas — normalmente en menos de 24 horas.</p>
+    `,
+    ctaLabel: "Completar mi perfil",
+    ctaUrl: PANEL_URL,
+  });
+  return sendNotification(doc?.email, `Bienvenido a ${SITE_NAME} — completa tu perfil`, html);
+}
+
 export function notifyProfileApproved(doc) {
   const link = profileLink(doc);
   const html = renderEmail({
