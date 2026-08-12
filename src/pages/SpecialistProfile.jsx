@@ -29,7 +29,6 @@ const NAV_SECTIONS = [
   { id: "especialidades", label: "Especialidades" },
   { id: "experiencia", label: "Experiencia" },
   { id: "estudios", label: "Estudios" },
-  { id: "certificaciones", label: "Certificaciones" },
   { id: "hospitales", label: "Hospitales" },
   { id: "servicios", label: "Servicios" },
   { id: "opiniones", label: "Opiniones" },
@@ -350,7 +349,7 @@ export default function SpecialistProfile() {
         ))}
       </nav>
 
-      <div className="mt-6 order-1 lg:order-8">
+      <div className="mt-6 order-1 lg:order-7">
           {/* OPINIONES: en el DOM permanece en el orden lógico de escritorio,
               pero en móvil se muestra primero (order-1) por conversión —
               exactamente lo que pidió Jorge: hero → opiniones → resto. */}
@@ -364,9 +363,14 @@ export default function SpecialistProfile() {
                 <video src={specialist.video_url} controls className="w-full rounded-2xl max-h-64 bg-black" playsInline />
               </div>
             )}
-            {specialist.professional_license_number && (
+            {(specialist.professional_license_number || specialist.certifications) && (
               <div className="mt-5 pt-5 border-t border-border/50 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                <span><strong className="text-foreground font-medium">Cédula profesional:</strong> {specialist.professional_license_number}</span>
+                {specialist.professional_license_number && (
+                  <span><strong className="text-foreground font-medium">Cédula profesional:</strong> {specialist.professional_license_number}</span>
+                )}
+                {specialist.certifications && (
+                  <span><strong className="text-foreground font-medium">Cédula de especialidad / certificaciones:</strong> {specialist.certifications}</span>
+                )}
               </div>
             )}
 
@@ -415,18 +419,13 @@ export default function SpecialistProfile() {
             <EducationTimeline specialistId={specialist.id} variant="estudios" />
           </div>
 
-          {/* CERTIFICACIONES */}
-          <div className="order-7 lg:order-5">
-            <EducationTimeline specialistId={specialist.id} variant="certificaciones" />
-          </div>
-
           {/* HOSPITALES */}
-          <div className="order-8 lg:order-6">
+          <div className="order-7 lg:order-5">
             <PublicOfficeList specialistId={specialist.id} />
           </div>
 
           {/* SERVICIOS */}
-          <div className="order-9 lg:order-7">
+          <div className="order-8 lg:order-6">
             <SpecialistServices specialistId={specialist.id} />
           </div>
 
@@ -435,7 +434,7 @@ export default function SpecialistProfile() {
               que en móvil no se renderiza — así el contenido sigue presente
               e indexable en el HTML que ve el rastreador mobile-first. */}
           {showMobileExtras && (
-            <div className="order-10 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
+            <div className="order-9 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
               {resolvedInsurers.length > 0 && (
                 <div>
                   <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Acepta seguros</h3>
@@ -473,15 +472,15 @@ export default function SpecialistProfile() {
           )}
 
           {/* FAQ */}
-          <div className="order-11 lg:order-9">
+          <div className="order-10 lg:order-8">
             <FaqSection specialist={specialist} />
           </div>
 
           {/* Contenido adicional existente (se conserva para no perder SEO/indexación previa) */}
-          <div className="order-12 lg:order-10">
+          <div className="order-11 lg:order-9">
             <SpecialistCases specialistId={specialist.id} />
           </div>
-          <div className="order-[13] lg:order-11">
+          <div className="order-12 lg:order-10">
             <SpecialistPosts specialistId={specialist.id} />
           </div>
 
@@ -491,7 +490,7 @@ export default function SpecialistProfile() {
               derecha se mantiene pegado — incluya también esta sección. Un sticky
               solo puede quedarse fijo mientras su propio contenedor tenga alto de
               sobra; si esta sección quedaba fuera del grid, no contaba. */}
-          <div className="order-[14] lg:order-12">
+          <div className="order-13 lg:order-11">
             <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
           </div>
       </div>
