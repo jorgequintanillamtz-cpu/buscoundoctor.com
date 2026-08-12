@@ -41,9 +41,7 @@ function renderEmail({ preheader, title, bodyHtml, ctaLabel, ctaUrl, hero }) {
   const ctaHtml = ctaLabel && ctaUrl
     ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 4px;"><tr><td style="border-radius:6px;background:${NAVY};"><a href="${ctaUrl}" style="display:inline-block;padding:11px 22px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">${esc(ctaLabel)}</a></td></tr></table>`
     : '';
-  const heroTitleHtml = hero && hero.titleBefore !== undefined
-    ? `${esc(hero.titleBefore)}<img src="${LOGO_URL}" alt="BuscoUnDoctor" height="20" style="height:20px;width:auto;vertical-align:-4px;display:inline-block;border:0;" />${esc(hero.titleAfter)}`
-    : esc(hero?.title || '');
+  const heroTitleHtml = esc(hero?.title || '');
   const heroHtml = hero
     ? `<tr><td style="background-color:${BLUE_LIGHT};padding:32px 40px;text-align:center;">${hero.eyebrow ? `<p style="margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:${BLUE};">${esc(hero.eyebrow)}</p>` : ''}<h1 style="margin:0;font-size:22px;line-height:1.35;color:${NAVY};font-weight:700;">${heroTitleHtml}</h1>${hero.subtitle ? `<p style="margin:8px 0 0;font-size:14.5px;line-height:1.6;color:${INK_MUTED};">${esc(hero.subtitle)}</p>` : ''}</td></tr>`
     : '';
@@ -70,8 +68,7 @@ Deno.serve(async (req) => {
       preheader: 'Bienvenido a BuscoUnDoctor. Sigue estos pasos para completar tu perfil.',
       hero: {
         eyebrow: 'Cuenta creada',
-        titleBefore: '¡Bienvenido a ',
-        titleAfter: ', Dr. Roberto!',
+        title: '¡Bienvenido, Dr. Roberto!',
         subtitle: 'Tu perfil ya existe, pero le faltan algunos datos para verse profesional y aparecer bien en las búsquedas. Toma unos minutos para completarlo.',
       },
       title: 'Primeros pasos para completar tu perfil',
@@ -80,7 +77,7 @@ Deno.serve(async (req) => {
       ctaUrl: PANEL_URL,
     });
 
-    await base44.integrations.Core.SendEmail({ to, subject: 'Bienvenido a BuscoUnDoctor — completa tu perfil (v7, 6 pasos)', body: html, from_name: SITE_NAME });
+    await base44.integrations.Core.SendEmail({ to, subject: 'Bienvenido a BuscoUnDoctor — completa tu perfil (v8, sin logo en título)', body: html, from_name: SITE_NAME });
     return Response.json({ ok: true, sent_to: to });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
