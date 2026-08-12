@@ -103,7 +103,8 @@ export function notifyWelcome(doc) {
     preheader: "Bienvenido a BuscoUnDoctor. Sigue estos pasos para completar tu perfil.",
     hero: {
       eyebrow: "Cuenta creada",
-      title: `¡Bienvenido a ${SITE_NAME}, ${doc?.full_name || "doctor(a)"}!`,
+      titleBefore: "¡Bienvenido a ",
+      titleAfter: `, ${doc?.full_name || "doctor(a)"}!`,
       subtitle: "Tu perfil ya existe, pero le faltan algunos datos para verse profesional y aparecer bien en las búsquedas. Toma unos minutos para completarlo.",
     },
     title: "Primeros pasos para completar tu perfil",
