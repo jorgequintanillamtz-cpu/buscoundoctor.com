@@ -46,7 +46,11 @@ export async function savePremiumStatus(doc, patch) {
     await base44.entities.PremiumStatus.update(doc._premiumStatusId, patch);
     return doc._premiumStatusId;
   }
-  const created = await base44.entities.PremiumStatus.create({ specialist_id: doc.id, ...patch });
+  const created = await base44.entities.PremiumStatus.create({
+    specialist_id: doc.id,
+    owner_user_id: doc.owner_user_id || null,
+    ...patch,
+  });
   return created.id;
 }
 
