@@ -15,8 +15,12 @@ export const BRAND = {
 };
 
 export const SITE_URL = "https://buscoundoctor.com";
+// PNG (no webp): varios clientes de correo (Outlook de escritorio, algunos
+// proxies de imágenes de Gmail) no soportan webp o no respetan bien su canal
+// alfa, y el logo terminaba viéndose con un fondo sólido en vez de
+// transparente. PNG tiene soporte universal de transparencia en correo.
 export const LOGO_URL =
-  "https://media.base44.com/images/public/69daf616236dcba44672309d/9f4cfcd01_buscoundoctor.webp";
+  "https://base44.app/api/apps/69daf616236dcba44672309d/files/mp/public/69daf616236dcba44672309d/493678fd4_buscoundoctor-logo.png";
 
 const TONES = {
   blue: { bg: "#DCE9FF", text: "#0B1E4D" },
