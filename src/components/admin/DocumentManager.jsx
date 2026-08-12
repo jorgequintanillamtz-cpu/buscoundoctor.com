@@ -22,7 +22,7 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function DocTypeCard({ type, doc, isAdmin, user, onUploaded, onReviewed }) {
+function DocTypeCard({ type, doc, isAdmin, user, ownerUserId, onUploaded, onReviewed }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -38,6 +38,7 @@ function DocTypeCard({ type, doc, isAdmin, user, onUploaded, onReviewed }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.entities.SpecialistDocument.create({
         specialist_id: doc?.specialist_id || onUploaded.specialistId,
+        owner_user_id: ownerUserId || null,
         document_type: type.value,
         file_url,
         upload_status: "uploaded",
@@ -167,6 +168,7 @@ export default function DocumentManager({ specialistId }) {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [ownerUserId, setOwnerUserId] = useState(null);
 
   const isAdmin = user && (user.role === "admin" || user.role === "superadmin");
 
@@ -180,6 +182,7 @@ export default function DocumentManager({ specialistId }) {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    base44.entities.Specialist.get(specialistId).then((s) => setOwnerUserId(s?.owner_user_id || null)).catch(() => {});
     load();
   }, [specialistId]);
 
@@ -208,6 +211,7 @@ export default function DocumentManager({ specialistId }) {
               doc={latestByType(type.value)}
               isAdmin={isAdmin}
               user={user}
+              ownerUserId={ownerUserId}
               onUploaded={{ specialistId, reload: load }}
             />
           ))}
