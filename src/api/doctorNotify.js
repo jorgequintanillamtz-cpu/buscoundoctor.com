@@ -162,7 +162,7 @@ export function notifyNewAppointmentRequest(doc, request) {
   const html = renderEmail({
     preheader: "Tienes una nueva solicitud de cita.",
     badge: "Nueva solicitud",
-    badgeTone: "blue",
+    badgeTone: "neutral",
     title: "Tienes una nueva solicitud de cita",
     bodyHtml: `
       <p>Hola ${greet(doc)},</p>
