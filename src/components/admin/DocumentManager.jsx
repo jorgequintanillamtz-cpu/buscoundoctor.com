@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { notifyDocumentApproved, notifyDocumentRejected } from "@/api/doctorNotify";
 
 const DOC_TYPES = [
   { value: "cedula_profesional", label: "Cédula profesional", hint: "Tu cédula de médico general/cirujano", required: true },
@@ -22,7 +23,7 @@ function fmtDate(d) {
   return new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function DocTypeCard({ type, doc, isAdmin, user, ownerUserId, onUploaded, onReviewed }) {
+function DocTypeCard({ type, doc, isAdmin, user, specialist, onUploaded, onReviewed }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [rejecting, setRejecting] = useState(false);
@@ -38,7 +39,7 @@ function DocTypeCard({ type, doc, isAdmin, user, ownerUserId, onUploaded, onRevi
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.entities.SpecialistDocument.create({
         specialist_id: doc?.specialist_id || onUploaded.specialistId,
-        owner_user_id: ownerUserId || null,
+        owner_user_id: specialist?.owner_user_id || null,
         document_type: type.value,
         file_url,
         upload_status: "uploaded",
@@ -73,6 +74,11 @@ function DocTypeCard({ type, doc, isAdmin, user, ownerUserId, onUploaded, onRevi
         }
       }
       toast.success(status === "approved" ? "Documento aprobado" : "Documento rechazado");
+      if (specialist) {
+        status === "approved"
+          ? notifyDocumentApproved(specialist, type.label)
+          : notifyDocumentRejected(specialist, type.label, reason);
+      }
       onUploaded.reload();
     } catch (e) {
       toast.error("Error: " + e.message);
@@ -168,7 +174,7 @@ export default function DocumentManager({ specialistId }) {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [ownerUserId, setOwnerUserId] = useState(null);
+  const [specialist, setSpecialist] = useState(null);
 
   const isAdmin = user && (user.role === "admin" || user.role === "superadmin");
 
@@ -182,7 +188,7 @@ export default function DocumentManager({ specialistId }) {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
-    base44.entities.Specialist.get(specialistId).then((s) => setOwnerUserId(s?.owner_user_id || null)).catch(() => {});
+    base44.entities.Specialist.get(specialistId).then(setSpecialist).catch(() => {});
     load();
   }, [specialistId]);
 
@@ -211,7 +217,7 @@ export default function DocumentManager({ specialistId }) {
               doc={latestByType(type.value)}
               isAdmin={isAdmin}
               user={user}
-              ownerUserId={ownerUserId}
+              specialist={specialist}
               onUploaded={{ specialistId, reload: load }}
             />
           ))}
