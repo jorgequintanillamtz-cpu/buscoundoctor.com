@@ -86,7 +86,7 @@ export function notifyWelcome(doc) {
       5,
       STEP_ICONS.aseguradoras,
       "Indica las aseguradoras que aceptas",
-      "Si trabajas con seguros de gastos médicos, marchándolos ayuda a que pacientes con esa cobertura te encuentren primero.",
+      "Si trabajas con seguros de gastos médicos, marchárlas en tu perfil ayuda a que pacientes con esa cobertura te encuentren primero.",
       "Elegir aseguradoras",
       PANEL_URL
     ),
