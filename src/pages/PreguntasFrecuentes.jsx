@@ -183,7 +183,7 @@ export default function PreguntasFrecuentes() {
                   <h2 className="font-heading font-bold text-lg text-foreground">{currentGroup.name}</h2>
                   {specialtyMatch && (
                     <Link
-                      to={`/especialidad/${specialtyMatch.slug}`}
+                      to={`/${specialtyMatch.profession_slug}/monterrey`}
                       className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all flex-shrink-0"
                     >
                       Ver especialistas <ArrowRight className="w-3.5 h-3.5" />
