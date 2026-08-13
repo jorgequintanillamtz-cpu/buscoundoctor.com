@@ -46,12 +46,18 @@ function calcSEO(form, specialtyOptions = []) {
   const hasExternalLink = content.match(/\[.+\]\(https?:\/\/[^)]+\)/);
   const hasExcerpt = (form.excerpt || "").length > 20;
 
-  // Enlaces internos a /:professionSlug/monterrey deben apuntar a especialidades reales
-  const specialtyLinkMatches = [...(form.content || "").matchAll(/\/([a-z0-9-]+)\/monterrey\b/g)];
+  // Enlaces internos a /:professionSlug/:citySlug deben tener ciudad. El primer
+  // segmento ahora es dinámico (antes era el prefijo fijo "/especialidad/"), así
+  // que solo se reconoce un enlace de especialidad si el primer segmento coincide
+  // con un profession_slug real conocido.
   const knownSlugs = new Set(specialtyOptions.map(s => s.profession_slug).filter(Boolean));
+  const escapedSlugs = [...knownSlugs].map(s => s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'));
+  const specialtyLinkMatches = escapedSlugs.length > 0
+    ? [...(form.content || "").matchAll(new RegExp(`/(${escapedSlugs.join("|")})(/[a-z0-9-]+)?`, "g"))]
+    : [];
   const brokenSpecialtyLinks = specialtyLinkMatches
-    .map(m => m[1])
-    .filter(s => !knownSlugs.has(s));
+    .filter(m => !m[2])
+    .map(m => m[1]);
   const internalLinksValid = specialtyLinkMatches.length === 0 || brokenSpecialtyLinks.length === 0;
 
   const checks = [
@@ -72,7 +78,7 @@ function calcSEO(form, specialtyOptions = []) {
     { label: "Artículo tiene extracto/resumen", ok: hasExcerpt },
     {
       label: brokenSpecialtyLinks.length > 0
-        ? `Enlaces a especialidades válidos (roto: /${brokenSpecialtyLinks[0]}/monterrey)`
+        ? `Enlaces a especialidades válidos (falta ciudad en: /${brokenSpecialtyLinks[0]})`
         : "Enlaces a especialidades válidos",
       ok: internalLinksValid,
     },
