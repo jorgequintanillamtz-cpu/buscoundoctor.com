@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
+import { resolveCitySlug } from "@/lib/citySlug";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -60,7 +61,8 @@ export default function SearchBar({ className = "" }) {
       return;
     }
     // Fuera de la lista: navegar a la página SEO de especialidad (o combinada con zona)
-    const base = `/${resolvedSpecialty.profession_slug}/monterrey`;
+    const citySlug = resolveCitySlug(zones, zone?.name);
+    const base = `/${resolvedSpecialty.profession_slug}/${citySlug}`;
     navigate(zone ? `${base}/${slugify(zone.name)}` : base);
   };
 
