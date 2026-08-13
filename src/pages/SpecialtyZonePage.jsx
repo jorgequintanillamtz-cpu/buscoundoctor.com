@@ -29,7 +29,7 @@ function setMeta(name, content) {
 }
 
 export default function SpecialtyZonePage() {
-  const { slug, zonaSlug } = useParams();
+  const { professionSlug, zonaSlug } = useParams();
   const [specialty, setSpecialty] = useState(null);
   const [zone, setZone] = useState(null);
   const [specialists, setSpecialists] = useState([]);
@@ -40,7 +40,7 @@ export default function SpecialtyZonePage() {
     let active = true;
     (async () => {
       const [specList, zoneList, allSpecs] = await Promise.all([
-        base44.entities.Specialty.filter({ slug }),
+        base44.entities.Specialty.filter({ profession_slug: professionSlug }),
         base44.entities.Zone.filter({ active: true }),
         base44.entities.Specialist.filter({ active: true }),
       ]);
@@ -54,7 +54,7 @@ export default function SpecialtyZonePage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [slug, zonaSlug]);
+  }, [professionSlug, zonaSlug]);
 
   const filtered = useMemo(() => {
     if (!specialty || !zone) return [];
@@ -103,7 +103,7 @@ export default function SpecialtyZonePage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink asChild><Link to={`/especialidad/${specialty.slug}`}>{specialty.name}</Link></BreadcrumbLink>
+            <BreadcrumbLink asChild><Link to={`/${specialty.profession_slug}/monterrey`}>{specialty.name}</Link></BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -130,7 +130,7 @@ export default function SpecialtyZonePage() {
             Puedes ver todos los especialistas de esta especialidad en otras zonas.
           </p>
           <Button variant="outline" className="mt-5 rounded-xl" asChild>
-            <Link to={`/especialidad/${specialty.slug}`}>Ver {specialty.name} en todas las zonas</Link>
+            <Link to={`/${specialty.profession_slug}/monterrey`}>Ver {specialty.name} en todas las zonas</Link>
           </Button>
         </div>
       ) : (
