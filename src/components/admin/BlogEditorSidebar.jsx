@@ -46,9 +46,9 @@ function calcSEO(form, specialtyOptions = []) {
   const hasExternalLink = content.match(/\[.+\]\(https?:\/\/[^)]+\)/);
   const hasExcerpt = (form.excerpt || "").length > 20;
 
-  // Enlaces internos a /especialidad/:slug deben apuntar a especialidades reales
-  const specialtyLinkMatches = [...(form.content || "").matchAll(/\/especialidad\/([a-z0-9-]+)/g)];
-  const knownSlugs = new Set(specialtyOptions.map(s => s.slug));
+  // Enlaces internos a /:professionSlug/monterrey deben apuntar a especialidades reales
+  const specialtyLinkMatches = [...(form.content || "").matchAll(/\/([a-z0-9-]+)\/monterrey\b/g)];
+  const knownSlugs = new Set(specialtyOptions.map(s => s.profession_slug).filter(Boolean));
   const brokenSpecialtyLinks = specialtyLinkMatches
     .map(m => m[1])
     .filter(s => !knownSlugs.has(s));
@@ -72,7 +72,7 @@ function calcSEO(form, specialtyOptions = []) {
     { label: "Artículo tiene extracto/resumen", ok: hasExcerpt },
     {
       label: brokenSpecialtyLinks.length > 0
-        ? `Enlaces a especialidades válidos (roto: /especialidad/${brokenSpecialtyLinks[0]})`
+        ? `Enlaces a especialidades válidos (roto: /${brokenSpecialtyLinks[0]}/monterrey)`
         : "Enlaces a especialidades válidos",
       ok: internalLinksValid,
     },
