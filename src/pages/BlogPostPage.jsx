@@ -283,7 +283,7 @@ export default function BlogPostPage() {
             <p className="font-heading font-bold text-lg">Encuentra un {specialty.name} cerca de ti</p>
             <p className="text-sm text-primary-foreground/80 mt-1">Explora especialistas disponibles en tu zona.</p>
           </div>
-          <Link to={`/especialidad/${specialty.slug}`} className="inline-flex items-center justify-center rounded-xl bg-background text-primary px-4 py-2 text-sm font-semibold hover:bg-background/90 transition-colors flex-shrink-0">
+          <Link to={`/${specialty.profession_slug}/monterrey`} className="inline-flex items-center justify-center rounded-xl bg-background text-primary px-4 py-2 text-sm font-semibold hover:bg-background/90 transition-colors flex-shrink-0">
             Ver {specialty.name}
           </Link>
         </div>
