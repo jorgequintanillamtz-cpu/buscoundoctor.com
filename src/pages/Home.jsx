@@ -8,6 +8,7 @@ import SearchableSelect from "../components/SearchableSelect";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
 import Logo from "../components/Logo";
+import { resolveCitySlug } from "@/lib/citySlug";
 
 // `mobile: true` marca las 5 filas más importantes, que son las únicas que
 // se muestran en el slider/tabla recortada de móvil (el resto solo aparece
@@ -124,10 +125,11 @@ export default function Home() {
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     const specialtyObj = specialties.find((s) => s.name === heroSpecialty);
     if (specialtyObj) {
+      const citySlug = resolveCitySlug(zones, heroZone);
       if (heroZone) {
-        navigate(`/${specialtyObj.profession_slug}/monterrey/${slugify(heroZone)}`);
+        navigate(`/${specialtyObj.profession_slug}/${citySlug}/${slugify(heroZone)}`);
       } else {
-        navigate(`/${specialtyObj.profession_slug}/monterrey`);
+        navigate(`/${specialtyObj.profession_slug}/${citySlug}`);
       }
       return;
     }
