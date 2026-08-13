@@ -120,14 +120,14 @@ export default function Home() {
   const blogScrollRef = useRef(null);
 
   const submitHeroSearch = () => {
-    // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
-    // filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
+    // Navega a las páginas SEO dedicadas (/:professionSlug/monterrey[/:zonaSlug]) en vez
+    // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     const specialtyObj = specialties.find((s) => s.name === heroSpecialty);
     if (specialtyObj) {
       if (heroZone) {
-        navigate(`/especialidad/${specialtyObj.slug}/${slugify(heroZone)}`);
+        navigate(`/${specialtyObj.profession_slug}/monterrey/${slugify(heroZone)}`);
       } else {
-        navigate(`/especialidad/${specialtyObj.slug}`);
+        navigate(`/${specialtyObj.profession_slug}/monterrey`);
       }
       return;
     }
@@ -351,7 +351,7 @@ export default function Home() {
               {sortByPopularity(specialties).slice(0, 5).map((s) => (
                 <Link
                   key={s.id}
-                  to={`/especialidad/${s.slug}`}
+                  to={`/${s.profession_slug}/monterrey`}
                   className="text-xs sm:text-sm font-medium text-brand-blue bg-brand-bluePale hover:bg-brand-blue hover:text-white transition-colors rounded-full px-3 py-1.5"
                 >
                   {s.name}
