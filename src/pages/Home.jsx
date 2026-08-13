@@ -353,7 +353,7 @@ export default function Home() {
               {sortByPopularity(specialties).slice(0, 5).map((s) => (
                 <Link
                   key={s.id}
-                  to={`/${s.profession_slug}/monterrey`}
+                  to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
                   className="text-xs sm:text-sm font-medium text-brand-blue bg-brand-bluePale hover:bg-brand-blue hover:text-white transition-colors rounded-full px-3 py-1.5"
                 >
                   {s.name}
