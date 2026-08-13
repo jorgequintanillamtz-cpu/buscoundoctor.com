@@ -10,7 +10,6 @@ import {
   BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Stethoscope } from "lucide-react";
-import { slugify as citySlugify } from "@/lib/citySlug";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -30,7 +29,7 @@ function setMeta(name, content) {
 }
 
 export default function SpecialtyZonePage() {
-  const { professionSlug, zonaSlug } = useParams();
+  const { professionSlug, citySlug, zonaSlug } = useParams();
   const [specialty, setSpecialty] = useState(null);
   const [zone, setZone] = useState(null);
   const [specialists, setSpecialists] = useState([]);
@@ -47,7 +46,7 @@ export default function SpecialtyZonePage() {
       ]);
       if (!active) return;
       const spec = specList[0];
-      const zn = zoneList.find((z) => slugify(z.name) === zonaSlug);
+      const zn = zoneList.find((z) => slugify(z.name) === zonaSlug && slugify(z.city) === citySlug);
       if (!spec || !zn) { setNotFound(true); setLoading(false); return; }
       setSpecialty(spec);
       setZone(zn);
@@ -55,7 +54,7 @@ export default function SpecialtyZonePage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [professionSlug, zonaSlug]);
+  }, [professionSlug, citySlug, zonaSlug]);
 
   const filtered = useMemo(() => {
     if (!specialty || !zone) return [];
@@ -104,7 +103,7 @@ export default function SpecialtyZonePage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink asChild><Link to={`/${specialty.profession_slug}/monterrey`}>{specialty.name}</Link></BreadcrumbLink>
+            <BreadcrumbLink asChild><Link to={`/${specialty.profession_slug}/${citySlug}`}>{specialty.name}</Link></BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -131,7 +130,7 @@ export default function SpecialtyZonePage() {
             Puedes ver todos los especialistas de esta especialidad en otras zonas.
           </p>
           <Button variant="outline" className="mt-5 rounded-xl" asChild>
-            <Link to={`/${specialty.profession_slug}/monterrey`}>Ver {specialty.name} en todas las zonas</Link>
+            <Link to={`/${specialty.profession_slug}/${citySlug}`}>Ver {specialty.name} en todas las zonas</Link>
           </Button>
         </div>
       ) : (
