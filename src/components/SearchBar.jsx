@@ -60,7 +60,7 @@ export default function SearchBar({ className = "" }) {
       return;
     }
     // Fuera de la lista: navegar a la página SEO de especialidad (o combinada con zona)
-    const base = `/especialidad/${resolvedSpecialty.slug}`;
+    const base = `/${resolvedSpecialty.profession_slug}/monterrey`;
     navigate(zone ? `${base}/${slugify(zone.name)}` : base);
   };
 
