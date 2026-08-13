@@ -10,6 +10,7 @@ import {
   BreadcrumbPage, BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Stethoscope } from "lucide-react";
+import { slugify as citySlugify } from "@/lib/citySlug";
 
 const slugify = (s) => (s || "")
   .toLowerCase()
