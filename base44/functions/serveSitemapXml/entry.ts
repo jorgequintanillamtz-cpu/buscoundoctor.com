@@ -29,10 +29,14 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.Condition.filter({ active: true }),
     ]);
 
+    // Mapa especialidad -> profession_slug (URL pública /:professionSlug/:citySlug,
+    // no el slug interno). Especialidades sin profession_slug configurado se
+    // excluyen del sitemap a propósito -- mejor no listarlas que listar una URL
+    // que 404.
     const specByName = {};
-    specialties.forEach((s) => { specByName[s.name] = s.slug; });
+    specialties.forEach((s) => { if (s.profession_slug) specByName[s.name] = s.profession_slug; });
     const zoneByName = {};
-    zones.forEach((z) => { zoneByName[z.name] = slugify(z.name); });
+    zones.forEach((z) => { zoneByName[z.name] = { zoneSlug: slugify(z.name), citySlug: slugify(z.city) }; });
 
     const urls = [];
 
@@ -40,21 +44,26 @@ Deno.serve(async (req) => {
     const staticPaths = ["/", "/especialistas", "/blog", "/nosotros", "/contacto", "/preguntas-frecuentes", "/planes", "/para-medicos"];
     staticPaths.forEach((p) => urls.push({ loc: ORIGIN + p, priority: "1.0", changefreq: "weekly" }));
 
-    // 2) Especialidades publicadas -> /especialidad/:slug
+    // 2) Especialidades publicadas -> /:professionSlug/:citySlug (una entrada por
+    // cada ciudad que ya tenga alguna zona activa, no solo Monterrey)
+    const activeCities = Array.from(new Set(zones.map((z) => z.city).filter(Boolean)));
     specialties.forEach((s) => {
-      if (s.slug) urls.push({ loc: `${ORIGIN}/especialidad/${s.slug}`, priority: "0.8", changefreq: "weekly" });
+      if (!s.profession_slug) return;
+      activeCities.forEach((city) => {
+        urls.push({ loc: `${ORIGIN}/${s.profession_slug}/${slugify(city)}`, priority: "0.8", changefreq: "weekly" });
+      });
     });
 
-    // 3) Combinaciones especialidad + zona con >=1 médico publicado -> /especialidad/:slug/:zonaSlug
+    // 3) Combinaciones especialidad + zona con >=1 médico publicado -> /:professionSlug/:citySlug/:zonaSlug
     const comboSet = new Set();
     specialists.forEach((sp) => {
-      const specSlug = specByName[sp.specialty];
+      const professionSlug = specByName[sp.specialty];
       const zoneName = sp.zone || sp.location;
-      const zoneSlug = zoneByName[zoneName];
-      if (specSlug && zoneSlug) comboSet.add(`${specSlug}/${zoneSlug}`);
+      const zoneInfo = zoneByName[zoneName];
+      if (professionSlug && zoneInfo) comboSet.add(`${professionSlug}/${zoneInfo.citySlug}/${zoneInfo.zoneSlug}`);
     });
     Array.from(comboSet).forEach((combo) => {
-      urls.push({ loc: `${ORIGIN}/especialidad/${combo}`, priority: "0.7", changefreq: "weekly" });
+      urls.push({ loc: `${ORIGIN}/${combo}`, priority: "0.7", changefreq: "weekly" });
     });
 
     // 4) Especialistas publicados -> /especialista/:slug
