@@ -61,13 +61,13 @@ export default function Header() {
       : picked?.type === "condition"
         ? specialties.find((s) => s.name === picked.ref.specialty)
         : null;
-    // Navega a las páginas SEO dedicadas (/especialidad/:slug[/:zonaSlug]) en vez del
-    // filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
+    // Navega a las páginas SEO dedicadas (/:professionSlug/monterrey[/:zonaSlug]) en vez
+    // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     if (resolvedSpecialty) {
       if (searchZone) {
-        navigate(`/especialidad/${resolvedSpecialty.slug}/${slugify(searchZone)}`);
+        navigate(`/${resolvedSpecialty.profession_slug}/monterrey/${slugify(searchZone)}`);
       } else {
-        navigate(`/especialidad/${resolvedSpecialty.slug}`);
+        navigate(`/${resolvedSpecialty.profession_slug}/monterrey`);
       }
       return;
     }
