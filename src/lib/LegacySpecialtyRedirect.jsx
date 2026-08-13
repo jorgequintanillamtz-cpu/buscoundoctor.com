@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Stethoscope } from "lucide-react";
-import { resolveCitySlug } from "@/lib/citySlug";
+import { resolveCitySlug, slugify } from "@/lib/citySlug";
 
 // Redirige las URLs viejas /especialidad/:slug[/:zonaSlug] a las nuevas
 // /:professionSlug/:citySlug[/:zonaSlug]. Existió como único patrón hasta
@@ -25,7 +25,7 @@ export default function LegacySpecialtyRedirect() {
       // La URL vieja guardaba el nombre de la zona ya slugificado, no el
       // nombre real, así que hay que volver a encontrarlo comparando contra
       // el slug de cada zona activa.
-      const zoneMatch = zonaSlug ? zones.find((z) => resolveCitySlug([z], z.name) && z.name && z.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-") === zonaSlug) : null;
+      const zoneMatch = zonaSlug ? zones.find((z) => slugify(z.name) === zonaSlug) : null;
       const citySlug = resolveCitySlug(zones, zoneMatch?.name);
       setTarget(`/${spec.profession_slug}/${citySlug}${zonaSlug ? `/${zonaSlug}` : ""}`);
     }).catch(() => { if (active) setTarget(null); });
