@@ -62,7 +62,7 @@ function setMeta(name, content) {
 }
 
 // Mismo slugify que usan SpecialtyZonePage/Header/Home para armar las URLs
-// /especialidad/:slug/:zonaSlug — se duplica aquí porque no hay un util
+// /:professionSlug/monterrey/:zonaSlug — se duplica aquí porque no hay un util
 // compartido en el proyecto (patrón ya existente en el resto del código).
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -222,7 +222,7 @@ export default function ConditionDetailPage() {
 
   // Chips "[Especialidad] en [Zona]" para dirigir la búsqueda local (Monterrey,
   // San Pedro Garza García, y cualquier zona que se agregue después) hacia las
-  // páginas /especialidad/:slug/:zonaSlug ya existentes. Ordenadas por cuántos
+  // páginas /:professionSlug/monterrey/:zonaSlug ya existentes. Ordenadas por cuántos
   // especialistas de esta condición hay en cada zona, para mostrar primero la
   // más relevante.
   const zoneStats = useMemo(() => {
