@@ -12,7 +12,7 @@ export default function AdminSpecialties() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", slug: "", icon: "", description: "", active: true });
+  const [form, setForm] = useState({ name: "", slug: "", profession_slug: "", icon: "", description: "", active: true });
 
   const load = async () => {
     const data = await base44.entities.Specialty.list("-created_date");
@@ -26,13 +26,13 @@ export default function AdminSpecialties() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", slug: "", icon: "", description: "", active: true });
+    setForm({ name: "", slug: "", profession_slug: "", icon: "", description: "", active: true });
     setDialogOpen(true);
   };
 
   const openEdit = (item) => {
     setEditing(item);
-    setForm({ name: item.name, slug: item.slug, icon: item.icon || "", description: item.description || "", active: item.active !== false });
+    setForm({ name: item.name, slug: item.slug, profession_slug: item.profession_slug || "", icon: item.icon || "", description: item.description || "", active: item.active !== false });
     setDialogOpen(true);
   };
 
@@ -110,6 +110,11 @@ export default function AdminSpecialties() {
             <div>
               <label className="text-sm font-medium mb-1 block">Slug</label>
               <Input value={form.slug} onChange={e => update("slug", e.target.value)} placeholder="auto-generado" className="rounded-xl" />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Slug de profesión (URL pública)</label>
+              <Input value={form.profession_slug} onChange={e => update("profession_slug", e.target.value)} placeholder="ej. ginecologo (para /ginecologo/monterrey)" className="rounded-xl" />
+              <p className="text-xs text-muted-foreground mt-1">Profesión en singular, sin acentos. Define la URL pública del directorio: /{form.profession_slug || "..."}/monterrey</p>
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Ícono (nombre Lucide)</label>
