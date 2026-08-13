@@ -10,6 +10,11 @@
       "type": "string",
       "title": "Slug"
     },
+    "profession_slug": {
+      "type": "string",
+      "title": "Slug de profesi\u00f3n (URL)",
+      "description": "Nombre de la profesi\u00f3n en singular, sin acentos, para las URLs p\u00fablicas /{profession_slug}/monterrey (ej. 'ginecologo' para Ginecolog\u00eda). No confundir con 'slug', que sigue siendo el identificador interno de la especialidad."
+    },
     "icon": {
       "type": "string",
       "title": "\u00cdcono"
