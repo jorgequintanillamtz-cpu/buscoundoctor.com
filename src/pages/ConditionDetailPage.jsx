@@ -113,7 +113,7 @@ export default function ConditionDetailPage() {
       setZones(zoneList);
       setRelatedConditions(allConditions.filter((c) => c.slug !== found.slug).slice(0, 8));
       setRelatedPosts(blogPosts.slice(0, 3));
-      setSpecialtySlug(specialtyRecord?.slug || null);
+      setSpecialtySlug(specialtyRecord?.profession_slug || null);
       setFaqs(faqItems);
       setLoading(false);
     })();
@@ -287,7 +287,7 @@ export default function ConditionDetailPage() {
             {zoneStats.map(({ zone, slug, count }) => (
               <Link
                 key={zone.id}
-                to={`/especialidad/${specialtySlug}/${slug}`}
+                to={`/${specialtySlug}/monterrey/${slug}`}
                 className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue hover:bg-brand-blue hover:text-white transition-colors rounded-full pl-3 pr-3.5 py-1.5 text-xs font-medium"
               >
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
@@ -385,7 +385,7 @@ export default function ConditionDetailPage() {
             </p>
           </div>
           <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
-            <Link to={specialists.length > 0 && specialtySlug ? `/especialidad/${specialtySlug}` : "/especialistas"}>
+            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/monterrey` : "/especialistas"}>
               {specialists.length > 0 ? "Ver todos" : "Ver especialistas"} <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
