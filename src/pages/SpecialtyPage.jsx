@@ -23,7 +23,7 @@ function setMeta(name, content) {
 }
 
 export default function SpecialtyPage() {
-  const { slug } = useParams();
+  const { professionSlug } = useParams();
   const [specialty, setSpecialty] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [specialists, setSpecialists] = useState([]);
@@ -43,7 +43,7 @@ export default function SpecialtyPage() {
     let active = true;
     (async () => {
       const [specList, allSpecs, zoneList] = await Promise.all([
-        base44.entities.Specialty.filter({ slug }),
+        base44.entities.Specialty.filter({ profession_slug: professionSlug }),
         base44.entities.Specialist.filter({ active: true }),
         base44.entities.Zone.filter({ active: true }),
       ]);
@@ -65,7 +65,7 @@ export default function SpecialtyPage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [slug]);
+  }, [professionSlug]);
 
   useEffect(() => {
     if (!specialty) return;
@@ -188,7 +188,7 @@ export default function SpecialtyPage() {
           <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Subespecialidades</h2>
           <div className="flex flex-wrap gap-2">
             {subspecialties.map(sub => (
-              <Link key={sub.id} to={`/especialidad/${sub.slug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+              <Link key={sub.id} to={`/${sub.profession_slug}/monterrey`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
                 {sub.name}
               </Link>
             ))}
