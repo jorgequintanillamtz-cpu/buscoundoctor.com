@@ -5,22 +5,26 @@ import { Sparkles, ChevronDown, ArrowRight, MessageCircleQuestion, Stethoscope }
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
+import { resolveCitySlug } from "@/lib/citySlug";
 
 export default function PreguntasFrecuentes() {
   const [faqs, setFaqs] = useState([]);
   const [specialties, setSpecialties] = useState([]);
+  const [zones, setZones] = useState([]);
   const [activeGroup, setActiveGroup] = useState(null);
   const [openId, setOpenId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const [items, specs] = await Promise.all([
+      const [items, specs, zoneList] = await Promise.all([
         base44.entities.FaqItem.filter({ status: "publicado" }),
         base44.entities.Specialty.filter({ active: true }),
+        base44.entities.Zone.filter({ active: true }),
       ]);
       setFaqs(items);
       setSpecialties(specs);
+      setZones(zoneList);
       setLoading(false);
     }
     load();
@@ -183,7 +187,7 @@ export default function PreguntasFrecuentes() {
                   <h2 className="font-heading font-bold text-lg text-foreground">{currentGroup.name}</h2>
                   {specialtyMatch && (
                     <Link
-                      to={`/${specialtyMatch.profession_slug}/monterrey`}
+                      to={`/${specialtyMatch.profession_slug}/${resolveCitySlug(zones)}`}
                       className="text-sm font-medium text-brand-blue flex items-center gap-1 hover:gap-2 transition-all flex-shrink-0"
                     >
                       Ver especialistas <ArrowRight className="w-3.5 h-3.5" />
