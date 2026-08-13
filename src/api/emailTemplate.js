@@ -198,7 +198,7 @@ export function renderEmail({
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
             <tr>
               <td style="background-color:${BRAND.navy};padding:24px 40px;text-align:center;">
-                <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="30" style="height:30px;width:auto;display:inline-block;border:0;" />
+                <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="39" style="height:39px;width:auto;display:inline-block;border:0;" />
               </td>
             </tr>
             ${heroHtml}
