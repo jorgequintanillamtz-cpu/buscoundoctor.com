@@ -9,6 +9,7 @@ import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
+import { resolveCitySlug } from "@/lib/citySlug";
 
 // Detecta si el contenido es HTML legado o Markdown puro
 function isHtmlContent(content) {
@@ -47,7 +48,12 @@ export default function BlogPostPage() {
   const [specialists, setSpecialists] = useState([]);
   const [specialty, setSpecialty] = useState(null);
   const [related, setRelated] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -283,7 +289,7 @@ export default function BlogPostPage() {
             <p className="font-heading font-bold text-lg">Encuentra un {specialty.name} cerca de ti</p>
             <p className="text-sm text-primary-foreground/80 mt-1">Explora especialistas disponibles en tu zona.</p>
           </div>
-          <Link to={`/${specialty.profession_slug}/monterrey`} className="inline-flex items-center justify-center rounded-xl bg-background text-primary px-4 py-2 text-sm font-semibold hover:bg-background/90 transition-colors flex-shrink-0">
+          <Link to={`/${specialty.profession_slug}/${resolveCitySlug(zones)}`} className="inline-flex items-center justify-center rounded-xl bg-background text-primary px-4 py-2 text-sm font-semibold hover:bg-background/90 transition-colors flex-shrink-0">
             Ver {specialty.name}
           </Link>
         </div>
