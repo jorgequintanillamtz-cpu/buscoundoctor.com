@@ -114,7 +114,7 @@ export default function AdminSpecialties() {
             <div>
               <label className="text-sm font-medium mb-1 block">Slug de profesión (URL pública)</label>
               <Input value={form.profession_slug} onChange={e => update("profession_slug", e.target.value)} placeholder="ej. ginecologo (para /ginecologo/monterrey)" className="rounded-xl" />
-              <p className="text-xs text-muted-foreground mt-1">Profesión en singular, sin acentos. Define la URL pública del directorio: /{form.profession_slug || "..."}/monterrey</p>
+              <p className="text-xs text-muted-foreground mt-1">Profesión en singular, sin acentos. Define la URL pública del directorio: /{form.profession_slug || "..."}/{'{ciudad}'} (ej. /{form.profession_slug || "ginecologo"}/monterrey)</p>
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Ícono (nombre Lucide)</label>
