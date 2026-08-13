@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
 import Logo from "@/components/Logo";
 import { buildSearchOptions } from "@/lib/searchOptions";
+import { resolveCitySlug } from "@/lib/citySlug";
 
 const triggerClass =
   "h-auto text-sm font-medium text-foreground bg-transparent";
