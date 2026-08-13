@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Stethoscope } from "lucide-react";
+import { resolveCitySlug } from "@/lib/citySlug";
 
 // Redirige las URLs viejas /especialidad/:slug[/:zonaSlug] a las nuevas
-// /:professionSlug/monterrey[/:zonaSlug]. Existió como único patrón hasta
+// /:professionSlug/:citySlug[/:zonaSlug]. Existió como único patrón hasta
 // que se cambió a la profesión en singular (más cercano a cómo busca la
 // gente, ej. "ginecologo" en vez de "ginecologia"); esto evita que
 // cualquier enlace ya compartido (o indexado en el futuro) rompa.
@@ -14,11 +15,19 @@ export default function LegacySpecialtyRedirect() {
 
   useEffect(() => {
     let active = true;
-    base44.entities.Specialty.filter({ slug }).then((list) => {
+    Promise.all([
+      base44.entities.Specialty.filter({ slug }),
+      base44.entities.Zone.filter({ active: true }),
+    ]).then(([specList, zones]) => {
       if (!active) return;
-      const spec = list[0];
+      const spec = specList[0];
       if (!spec?.profession_slug) { setTarget(null); return; }
-      setTarget(`/${spec.profession_slug}/monterrey${zonaSlug ? `/${zonaSlug}` : ""}`);
+      // La URL vieja guardaba el nombre de la zona ya slugificado, no el
+      // nombre real, así que hay que volver a encontrarlo comparando contra
+      // el slug de cada zona activa.
+      const zoneMatch = zonaSlug ? zones.find((z) => resolveCitySlug([z], z.name) && z.name && z.name.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-") === zonaSlug) : null;
+      const citySlug = resolveCitySlug(zones, zoneMatch?.name);
+      setTarget(`/${spec.profession_slug}/${citySlug}${zonaSlug ? `/${zonaSlug}` : ""}`);
     }).catch(() => { if (active) setTarget(null); });
     return () => { active = false; };
   }, [slug, zonaSlug]);
