@@ -71,7 +71,7 @@ export default function DoctorEditorPerfil({ form, update }) {
       setEspecialidades(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
     }).catch(() => {});
     // La zona debe salir del mismo catálogo que usan las páginas
-    // /especialidad/:slug/:zona (antes era texto libre y el valor nunca
+    // /:professionSlug/monterrey/:zona (antes era texto libre y el valor nunca
     // hacía match con el nombre real de la Zona, así que esos filtros
     // nunca encontraban al doctor aunque sí estuviera en esa zona).
     base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
