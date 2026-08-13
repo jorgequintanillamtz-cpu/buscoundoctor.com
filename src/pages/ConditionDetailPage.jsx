@@ -62,7 +62,7 @@ function setMeta(name, content) {
 }
 
 // Mismo slugify que usan SpecialtyZonePage/Header/Home para armar las URLs
-// /:professionSlug/monterrey/:zonaSlug — se duplica aquí porque no hay un util
+// /:professionSlug/:citySlug/:zonaSlug — se duplica aquí porque no hay un util
 // compartido en el proyecto (patrón ya existente en el resto del código).
 const slugify = (s) => (s || "")
   .toLowerCase()
@@ -72,6 +72,10 @@ const slugify = (s) => (s || "")
   .trim()
   .replace(/\s+/g, "-")
   .replace(/-+/g, "-");
+
+// Slug de ciudad de una zona (mismo criterio que src/lib/citySlug.js, que no
+// se reusa aquí para no cambiar el patrón de slugify local ya usado arriba).
+const citySlugOf = (zone) => slugify(zone?.city || "Monterrey");
 
 export default function ConditionDetailPage() {
   const { slug } = useParams();
@@ -287,7 +291,7 @@ export default function ConditionDetailPage() {
             {zoneStats.map(({ zone, slug, count }) => (
               <Link
                 key={zone.id}
-                to={`/${specialtySlug}/monterrey/${slug}`}
+                to={`/${specialtySlug}/${citySlugOf(zone)}/${slug}`}
                 className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue hover:bg-brand-blue hover:text-white transition-colors rounded-full pl-3 pr-3.5 py-1.5 text-xs font-medium"
               >
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
@@ -385,7 +389,7 @@ export default function ConditionDetailPage() {
             </p>
           </div>
           <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
-            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/monterrey` : "/especialistas"}>
+            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/${citySlugOf(zones[0])}` : "/especialistas"}>
               {specialists.length > 0 ? "Ver todos" : "Ver especialistas"} <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
