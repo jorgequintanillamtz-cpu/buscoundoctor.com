@@ -84,7 +84,7 @@ export default function SpecialtyPage() {
       "@context": "https://schema.org",
       "@type": "MedicalSpecialty",
       "name": specialty.name,
-      "description": specialty.description || `${specialty.name} en Monterrey y San Pedro Garza García.`,
+      "description": specialty.description || `${specialty.name} en ${cityName}.`,
     };
     const medScript = document.createElement("script");
     medScript.type = "application/ld+json";
@@ -112,9 +112,11 @@ export default function SpecialtyPage() {
     return () => { scripts.forEach(s => s.remove()); };
   }, [specialty, faqs]);
 
+  const cityZoneNames = useMemo(() => zones.map((z) => z.name), [zones]);
+
   const filtered = useMemo(() => {
     if (!specialty) return [];
-    let result = specialists.filter((s) => s.specialty === specialty.name);
+    let result = specialists.filter((s) => s.specialty === specialty.name && cityZoneNames.includes(s.zone || s.location));
     if (filterZone) result = result.filter((s) => s.zone === filterZone || s.location === filterZone);
     if (filterModality) result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
     if (filterPrice) result = result.filter((s) => s.price_range === filterPrice);
@@ -192,7 +194,7 @@ export default function SpecialtyPage() {
           <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Subespecialidades</h2>
           <div className="flex flex-wrap gap-2">
             {subspecialties.map(sub => (
-              <Link key={sub.id} to={`/${sub.profession_slug}/monterrey`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+              <Link key={sub.id} to={`/${sub.profession_slug}/${citySlug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
                 {sub.name}
               </Link>
             ))}
