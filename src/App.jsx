@@ -78,8 +78,8 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
-        <Route path="/:professionSlug/monterrey" element={<SpecialtyPage />} />
-        <Route path="/:professionSlug/monterrey/:zonaSlug" element={<SpecialtyZonePage />} />
+        <Route path="/:professionSlug/:citySlug" element={<SpecialtyPage />} />
+        <Route path="/:professionSlug/:citySlug/:zonaSlug" element={<SpecialtyZonePage />} />
         {/* URLs viejas (especialidad en vez de profesión): se redirigen por si
             quedan enlaces guardados o compartidos con el patrón anterior. */}
         <Route path="/especialidad/:slug" element={<LegacySpecialtyRedirect />} />
