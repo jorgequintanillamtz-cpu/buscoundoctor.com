@@ -5,6 +5,7 @@ import { Stethoscope, UserPlus, Star, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
+import { slugify } from "@/lib/citySlug";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
