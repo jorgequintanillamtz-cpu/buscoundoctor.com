@@ -66,11 +66,7 @@ export default function Header() {
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     if (resolvedSpecialty) {
       const citySlug = resolveCitySlug(zones, searchZone);
-      if (searchZone) {
-        navigate(`/${resolvedSpecialty.profession_slug}/${citySlug}/${slugify(searchZone)}`);
-      } else {
-        navigate(`/${resolvedSpecialty.profession_slug}/${citySlug}`);
-      }
+      navigate(`/${resolvedSpecialty.profession_slug}/${citySlug}`);
       return;
     }
     // Sin especialidad ni enfermedad seleccionada: no hay página dedicada solo-por-zona
@@ -125,14 +121,14 @@ export default function Header() {
               </div>
               <div className="w-px h-8 bg-border flex-shrink-0" />
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Zona</label>
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Ciudad</label>
                 <SearchableSelect
                   options={zoneOptions}
                   value={searchZone}
                   onChange={setSearchZone}
                   placeholder="Monterrey y San Pedro"
                   icon={MapPin}
-                  hint="Zona"
+                  hint="Ciudad"
                   triggerClassName={triggerClass}
                 />
               </div>
@@ -189,9 +185,9 @@ export default function Header() {
                 options={zoneOptions}
                 value={searchZone}
                 onChange={setSearchZone}
-                placeholder="Zona"
+                placeholder="Ciudad"
                 icon={MapPin}
-                hint="Zona"
+                hint="Ciudad"
                 triggerClassName={triggerClass}
               />
             </div>
