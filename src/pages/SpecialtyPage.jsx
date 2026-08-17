@@ -28,12 +28,10 @@ export default function SpecialtyPage() {
   const [specialty, setSpecialty] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [specialists, setSpecialists] = useState([]);
-  const [zones, setZones] = useState([]);
   const [cityName, setCityName] = useState("");
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
 
-  const [filterZone, setFilterZone] = useState("");
   const [filterModality, setFilterModality] = useState("");
   const [filterPrice, setFilterPrice] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,9 +49,9 @@ export default function SpecialtyPage() {
       ]);
       if (!active) return;
       const spec = specList[0];
-      const cityZones = zoneList.filter((z) => slugify(z.city) === citySlug);
-      if (!spec || cityZones.length === 0) { setNotFound(true); setLoading(false); return; }
-      setCityName(cityZones[0].city);
+      const city = zoneList.find((z) => slugify(z.name) === citySlug);
+      if (!spec || !city) { setNotFound(true); setLoading(false); return; }
+      setCityName(city.name);
       const [subs, faqItems, conditionList] = await Promise.all([
         base44.entities.Specialty.filter({ parent_specialty_id: spec.id, active: true }),
         base44.entities.FaqItem.filter({ specialty_id: spec.id, status: "publicado" }),
