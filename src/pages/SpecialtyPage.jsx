@@ -231,15 +231,6 @@ export default function SpecialtyPage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
-                <Select value={filterZone} onValueChange={setFilterZone}>
-                  <SelectTrigger className="h-10 rounded-xl text-sm"><SelectValue placeholder="Todas" /></SelectTrigger>
-                  <SelectContent>
-                    {zones.map((z) => <SelectItem key={z.id} value={z.name}>{z.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Modalidad</label>
                 <Select value={filterModality} onValueChange={setFilterModality}>
                   <SelectTrigger className="h-10 rounded-xl text-sm"><SelectValue placeholder="Todas" /></SelectTrigger>
@@ -269,11 +260,6 @@ export default function SpecialtyPage() {
         <div className="flex-1">
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {filterZone && (
-                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                  {filterZone}<button onClick={() => setFilterZone("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
-                </span>
-              )}
               {filterModality && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
                   {filterModality}<button onClick={() => setFilterModality("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
