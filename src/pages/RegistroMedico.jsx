@@ -255,7 +255,7 @@ export default function RegistroMedico() {
       if (!data.service_price || Number(data.service_price) <= 0) return "Ingresa el precio de tu consulta de primera vez";
     }
     if (stepKey === "ubicacion") {
-      if (!data.zone) return "Selecciona tu zona";
+      if (!data.zone) return "Selecciona tu ciudad";
       if (!data.address_street.trim()) return "Escribe el nombre de la calle";
       if (!data.address_ext_number.trim()) return "Escribe el número exterior";
       if (!data.address_neighborhood.trim()) return "Escribe la colonia";
@@ -439,10 +439,10 @@ export default function RegistroMedico() {
             {stepKey === "ubicacion" && (
               <StepShell title="Dirección de tu consultorio principal" subtitle="Podrás agregar más consultorios después" error={error}>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Ciudad</label>
                   <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
                     className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
-                    <option value="">Selecciona tu zona</option>
+                    <option value="">Selecciona tu ciudad</option>
                     {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
                   </select>
                 </div>
