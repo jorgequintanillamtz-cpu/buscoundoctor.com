@@ -60,10 +60,9 @@ export default function SearchBar({ className = "" }) {
       navigate(`/especialistas?${params.toString()}`);
       return;
     }
-    // Fuera de la lista: navegar a la página SEO de especialidad (o combinada con zona)
+    // Fuera de la lista: navegar a la página SEO de especialidad, ya scopeada a la ciudad elegida
     const citySlug = resolveCitySlug(zones, zone?.name);
-    const base = `/${resolvedSpecialty.profession_slug}/${citySlug}`;
-    navigate(zone ? `${base}/${slugify(zone.name)}` : base);
+    navigate(`/${resolvedSpecialty.profession_slug}/${citySlug}`);
   };
 
   return (
@@ -81,9 +80,9 @@ export default function SearchBar({ className = "" }) {
           options={zones}
           value={zoneId}
           onChange={setZoneId}
-          placeholder="Zona (opcional)"
+          placeholder="Ciudad (opcional)"
           icon={MapPin}
-          hint="Zona"
+          hint="Ciudad"
           triggerClassName="w-full sm:w-44 h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
         />
         <Button
