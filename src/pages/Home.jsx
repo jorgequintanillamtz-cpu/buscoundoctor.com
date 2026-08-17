@@ -20,7 +20,7 @@ const COMPARISON_ROWS = [
   { us: "Reseñas de varios pacientes reales", them: "La opinión de una sola persona", mobile: true },
   { us: "Encuentras opciones en minutos", them: "Esperas días a que te recomienden" },
   { us: "Precio visible antes de agendar", them: "No lo sabes hasta llegar", mobile: true },
-  { us: "Filtras por tu zona exacta", them: "Puede estar lejos sin saberlo" },
+  { us: "Filtras por ciudad", them: "Puede estar lejos sin saberlo" },
   { us: "Contacto directo por WhatsApp", them: "Depende de que te compartan el contacto", mobile: true },
   { us: "Perfil actualizado por el médico", them: "Información desactualizada" },
   { us: "Filtras por tu necesidad específica", them: "La recomendación era para alguien más" },
@@ -326,14 +326,14 @@ export default function Home() {
               </div>
               <div className="hidden sm:block w-px bg-border" />
               <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Zona</label>
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Ciudad</label>
                 <SearchableSelect
                   options={zoneOptions}
                   value={heroZone}
                   onChange={setHeroZone}
                   placeholder="Monterrey y San Pedro"
                   icon={MapPin}
-                  hint="Zona"
+                  hint="Ciudad"
                   triggerClassName={triggerClass}
                 />
               </div>
