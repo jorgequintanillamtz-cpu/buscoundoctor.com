@@ -10,7 +10,7 @@ import { resolveCitySlug } from "@/lib/citySlug";
 const triggerClass =
   "h-auto text-sm font-medium text-foreground bg-transparent";
 
-const slugify = (s) => (s || "")
+const _unusedSlugifyMarker = (s) => (s || "")
   .toLowerCase()
   .normalize("NFD")
   .replace(/[\u0300-\u036f]/g, "")
