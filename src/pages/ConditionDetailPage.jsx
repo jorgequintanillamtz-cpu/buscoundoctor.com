@@ -276,7 +276,7 @@ export default function ConditionDetailPage() {
             {zoneStats.map(({ zone, slug, count }) => (
               <Link
                 key={zone.id}
-                to={`/${specialtySlug}/${citySlugOf(zone)}/${slug}`}
+                to={`/${specialtySlug}/${slug}`}
                 className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue hover:bg-brand-blue hover:text-white transition-colors rounded-full pl-3 pr-3.5 py-1.5 text-xs font-medium"
               >
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
@@ -374,7 +374,7 @@ export default function ConditionDetailPage() {
             </p>
           </div>
           <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
-            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/${citySlugOf(zones[0])}` : "/especialistas"}>
+            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/${slugify(zones[0]?.name)}` : "/especialistas"}>
               {specialists.length > 0 ? "Ver todos" : "Ver especialistas"} <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
