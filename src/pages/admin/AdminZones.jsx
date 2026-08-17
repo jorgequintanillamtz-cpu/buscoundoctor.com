@@ -8,6 +8,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
+const STATUS_LABELS = {
+  published: "Publicados",
+  pending_review: "En revisión",
+  draft: "Borrador",
+  suspended: "Suspendidos",
+  rejected: "Rechazados",
+};
+
+const emptyStats = {
+  total: 0, activos: 0, inactivos: 0, premium: 0,
+  bySpecialty: [], byStatus: {}, avgRating: null, topSpecialty: null,
+};
+
 // Cada registro de esta entidad (Zone, el nombre interno no cambió) es una
 // ciudad completa del directorio -- ya no hay un nivel de zona/colonia
 // dentro de una ciudad. El campo `city` se mantiene igual al `name` en cada
@@ -16,6 +29,10 @@ import { toast } from "sonner";
 export default function AdminZones() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [allSpecialists, setAllSpecialists] = useState([]);
+  const [premiumIds, setPremiumIds] = useState(new Set());
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", state: "Nuevo León", active: true });
@@ -24,8 +41,6 @@ export default function AdminZones() {
   const [filterCity, setFilterCity] = useState("all");
 
   const [detailCity, setDetailCity] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailStats, setDetailStats] = useState(null);
 
   const load = async () => {
     const data = await base44.entities.Zone.list("-created_date");
@@ -33,7 +48,21 @@ export default function AdminZones() {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  const loadStats = async () => {
+    setStatsLoading(true);
+    try {
+      const [specs, premiums] = await Promise.all([
+        base44.entities.Specialist.list("-created_date", 2000),
+        base44.entities.PremiumStatus.filter({ plan_slug: "premium" }).catch(() => []),
+      ]);
+      setAllSpecialists(specs);
+      setPremiumIds(new Set(premiums.map((p) => p.specialist_id)));
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); loadStats(); }, []);
 
   const update = (f, v) => setForm(prev => ({ ...prev, [f]: v }));
 
@@ -87,18 +116,13 @@ export default function AdminZones() {
     setFilterCity("all"); // cambiar de estado resetea la ciudad elegida
   };
 
-  const openDetail = async (city) => {
-    setDetailCity(city);
-    setDetailLoading(true);
-    setDetailStats(null);
-    try {
-      const [allSpecialists, premiumStatuses] = await Promise.all([
-        base44.entities.Specialist.list("-created_date", 2000),
-        base44.entities.PremiumStatus.filter({ plan_slug: "premium" }).catch(() => []),
-      ]);
+  // Estadísticas de doctores por ciudad, calculadas una sola vez para todas
+  // las ciudades -- así el resumen en cada tarjeta y el detalle al abrirla
+  // usan el mismo cálculo, sin volver a pedir datos al hacer click.
+  const statsByCity = useMemo(() => {
+    const map = {};
+    items.forEach((city) => {
       const inCity = allSpecialists.filter((s) => (s.zone || s.location) === city.name);
-      const premiumIds = new Set(premiumStatuses.map((p) => p.specialist_id));
-
       const bySpecialty = {};
       const byStatus = {};
       let activos = 0;
@@ -115,27 +139,22 @@ export default function AdminZones() {
         if (typeof s.rating === "number") { ratingSum += s.rating; ratingCount += 1; }
       });
 
-      setDetailStats({
+      const sortedSpecialties = Object.entries(bySpecialty).sort((a, b) => b[1] - a[1]);
+      map[city.name] = {
         total: inCity.length,
         activos,
         inactivos: inCity.length - activos,
         premium,
-        bySpecialty: Object.entries(bySpecialty).sort((a, b) => b[1] - a[1]),
+        bySpecialty: sortedSpecialties,
         byStatus,
         avgRating: ratingCount > 0 ? (ratingSum / ratingCount).toFixed(1) : null,
-      });
-    } finally {
-      setDetailLoading(false);
-    }
-  };
+        topSpecialty: sortedSpecialties[0] || null,
+      };
+    });
+    return map;
+  }, [items, allSpecialists, premiumIds]);
 
-  const STATUS_LABELS = {
-    published: "Publicados",
-    pending_review: "En revisión",
-    draft: "Borrador",
-    suspended: "Suspendidos",
-    rejected: "Rechazados",
-  };
+  const statsFor = (cityName) => statsByCity[cityName] || emptyStats;
 
   if (loading) {
     return (
@@ -144,6 +163,8 @@ export default function AdminZones() {
       </div>
     );
   }
+
+  const detailStats = detailCity ? statsFor(detailCity.name) : null;
 
   return (
     <div>
@@ -178,25 +199,56 @@ export default function AdminZones() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {visibleItems.map(item => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => openDetail(item)}
-            className="text-left bg-card rounded-2xl border border-border/50 p-5 flex items-start justify-between hover:border-primary/40 hover:shadow-sm transition-all"
-          >
-            <div>
-              <h3 className="font-heading font-semibold text-foreground">{item.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{item.state}</p>
-              <span className={`inline-block w-1.5 h-1.5 rounded-full mt-2 ${item.active !== false ? 'bg-green-500' : 'bg-red-400'}`} />
-            </div>
-            <div className="flex items-center gap-1">
-              <span onClick={(e) => openEdit(item, e)} role="button" aria-label="Editar ciudad" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></span>
-              <span onClick={(e) => handleDelete(item.id, e)} role="button" aria-label="Eliminar ciudad" className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></span>
-              <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
-            </div>
-          </button>
-        ))}
+        {visibleItems.map(item => {
+          const stats = statsFor(item.name);
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setDetailCity(item)}
+              className="text-left bg-card rounded-2xl border border-border/50 p-5 hover:border-primary/40 hover:shadow-sm transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-heading font-semibold text-foreground">{item.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{item.state}</p>
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full mt-2 ${item.active !== false ? 'bg-green-500' : 'bg-red-400'}`} />
+                </div>
+                <div className="flex items-center gap-1">
+                  <span onClick={(e) => openEdit(item, e)} role="button" aria-label="Editar ciudad" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></span>
+                  <span onClick={(e) => handleDelete(item.id, e)} role="button" aria-label="Eliminar ciudad" className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
+                </div>
+              </div>
+
+              {/* Resumen: se ve de un vistazo sin tener que abrir la tarjeta */}
+              <div className="mt-4 pt-3 border-t border-border/50">
+                {statsLoading ? (
+                  <p className="text-xs text-muted-foreground">Cargando…</p>
+                ) : stats.total === 0 ? (
+                  <p className="text-xs text-muted-foreground">Sin doctores registrados</p>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 font-medium text-foreground"><Users className="w-3.5 h-3.5" /> {stats.total} doctor{stats.total !== 1 ? "es" : ""}</span>
+                      {stats.premium > 0 && (
+                        <span className="inline-flex items-center gap-1"><Crown className="w-3.5 h-3.5" /> {stats.premium} premium</span>
+                      )}
+                      {stats.avgRating && (
+                        <span className="inline-flex items-center gap-1"><Star className="w-3.5 h-3.5" /> {stats.avgRating}</span>
+                      )}
+                    </div>
+                    {stats.topSpecialty && (
+                      <p className="text-[11px] text-muted-foreground mt-1.5 truncate">
+                        Más doctores en: <span className="text-foreground font-medium">{stats.topSpecialty[0]}</span> ({stats.topSpecialty[1]})
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            </button>
+          );
+        })}
         {visibleItems.length === 0 && (
           <p className="text-sm text-muted-foreground col-span-full text-center py-10">No hay ciudades con este filtro.</p>
         )}
@@ -230,13 +282,13 @@ export default function AdminZones() {
         </DialogContent>
       </Dialog>
 
-      {/* Detalle: estadísticas de doctores de la ciudad elegida */}
+      {/* Detalle: estadísticas completas de doctores de la ciudad elegida */}
       <Dialog open={!!detailCity} onOpenChange={(open) => !open && setDetailCity(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-heading">{detailCity?.name}</DialogTitle>
           </DialogHeader>
-          {detailLoading || !detailStats ? (
+          {statsLoading || !detailStats ? (
             <div className="flex items-center justify-center py-10">
               <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
             </div>
