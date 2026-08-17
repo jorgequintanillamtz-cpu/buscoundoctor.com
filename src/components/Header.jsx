@@ -54,7 +54,7 @@ export default function Header() {
       : picked?.type === "condition"
         ? specialties.find((s) => s.name === picked.ref.specialty)
         : null;
-    // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug[/:zonaSlug]) en vez
+    // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     if (resolvedSpecialty) {
       const citySlug = resolveCitySlug(zones, searchZone);
