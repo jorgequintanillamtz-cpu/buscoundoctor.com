@@ -7,12 +7,17 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
+// Cada registro de esta entidad (Zone, el nombre interno no cambió) es una
+// ciudad completa del directorio -- ya no hay un nivel de zona/colonia
+// dentro de una ciudad. El campo `city` se mantiene igual al `name` en cada
+// guardado (varias partes del código todavía lo leen) para que no puedan
+// volver a desalinearse.
 export default function AdminZones() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", city: "Monterrey", state: "Nuevo León", active: true });
+  const [form, setForm] = useState({ name: "", state: "Nuevo León", active: true });
 
   const load = async () => {
     const data = await base44.entities.Zone.list("-created_date");
@@ -26,32 +31,33 @@ export default function AdminZones() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", city: "Monterrey", state: "Nuevo León", active: true });
+    setForm({ name: "", state: "Nuevo León", active: true });
     setDialogOpen(true);
   };
 
   const openEdit = (item) => {
     setEditing(item);
-    setForm({ name: item.name, city: item.city || "", state: item.state || "", active: item.active !== false });
+    setForm({ name: item.name, state: item.state || "", active: item.active !== false });
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
+    const payload = { ...form, city: form.name };
     if (editing) {
-      await base44.entities.Zone.update(editing.id, form);
-      toast.success("Zona actualizada");
+      await base44.entities.Zone.update(editing.id, payload);
+      toast.success("Ciudad actualizada");
     } else {
-      await base44.entities.Zone.create(form);
-      toast.success("Zona creada");
+      await base44.entities.Zone.create(payload);
+      toast.success("Ciudad creada");
     }
     setDialogOpen(false);
     load();
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar esta zona?")) return;
+    if (!confirm("¿Eliminar esta ciudad?")) return;
     await base44.entities.Zone.delete(id);
-    toast.success("Zona eliminada");
+    toast.success("Ciudad eliminada");
     load();
   };
 
@@ -66,7 +72,7 @@ export default function AdminZones() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading font-bold text-2xl text-foreground">Zonas</h1>
+        <h1 className="font-heading font-bold text-2xl text-foreground">Ciudades</h1>
         <Button className="gap-2 rounded-xl" onClick={openCreate}>
           <Plus className="w-4 h-4" /> Agregar
         </Button>
@@ -77,12 +83,12 @@ export default function AdminZones() {
           <div key={item.id} className="bg-card rounded-2xl border border-border/50 p-5 flex items-start justify-between">
             <div>
               <h3 className="font-heading font-semibold text-foreground">{item.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{item.city}, {item.state}</p>
+              <p className="text-xs text-muted-foreground mt-1">{item.state}</p>
               <span className={`inline-block w-1.5 h-1.5 rounded-full mt-2 ${item.active !== false ? 'bg-green-500' : 'bg-red-400'}`} />
             </div>
             <div className="flex gap-1">
-              <button onClick={() => openEdit(item)} aria-label="Editar zona" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-              <button onClick={() => handleDelete(item.id)} aria-label="Eliminar zona" className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+              <button onClick={() => openEdit(item)} aria-label="Editar ciudad" className="p-1.5 rounded-lg hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
+              <button onClick={() => handleDelete(item.id)} aria-label="Eliminar ciudad" className="p-1.5 rounded-lg hover:bg-destructive/10"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
             </div>
           </div>
         ))}
@@ -91,16 +97,13 @@ export default function AdminZones() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-heading">{editing ? "Editar" : "Nueva"} Zona</DialogTitle>
+            <DialogTitle className="font-heading">{editing ? "Editar" : "Nueva"} ciudad</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <label className="text-sm font-medium mb-1 block">Nombre *</label>
-              <Input value={form.name} onChange={e => update("name", e.target.value)} className="rounded-xl" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Ciudad</label>
-              <Input value={form.city} onChange={e => update("city", e.target.value)} className="rounded-xl" />
+              <label className="text-sm font-medium mb-1 block">Nombre de la ciudad *</label>
+              <Input value={form.name} onChange={e => update("name", e.target.value)} className="rounded-xl" placeholder="Ej. Monterrey" />
+              <p className="text-xs text-muted-foreground mt-1">Define el segmento de ciudad en las URLs públicas: /{'{especialidad}'}/{form.name ? form.name.toLowerCase() : "..."}</p>
             </div>
             <div>
               <label className="text-sm font-medium mb-1 block">Estado</label>
