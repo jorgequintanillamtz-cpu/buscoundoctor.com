@@ -29,24 +29,15 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.Condition.filter({ active: true }),
     ]);
 
-    // Mapa especialidad -> profession_slug (URL pública /:professionSlug/:citySlug,
-    // no el slug interno). Especialidades sin profession_slug configurado se
-    // excluyen del sitemap a propósito -- mejor no listarlas que listar una URL
-    // que 404.
-    const specByName = {};
-    specialties.forEach((s) => { if (s.profession_slug) specByName[s.name] = s.profession_slug; });
-    const zoneByName = {};
-    zones.forEach((z) => { zoneByName[z.name] = { zoneSlug: slugify(z.name), citySlug: slugify(z.city) }; });
-
+    // Páginas estáticas
     const urls = [];
-
-    // 1) Páginas estáticas
     const staticPaths = ["/", "/especialistas", "/blog", "/nosotros", "/contacto", "/preguntas-frecuentes", "/planes", "/para-medicos"];
     staticPaths.forEach((p) => urls.push({ loc: ORIGIN + p, priority: "1.0", changefreq: "weekly" }));
 
-    // 2) Especialidades publicadas -> /:professionSlug/:citySlug (una entrada por
-    // cada ciudad que ya tenga alguna zona activa, no solo Monterrey)
-    const activeCities = Array.from(new Set(zones.map((z) => z.city).filter(Boolean)));
+    // Especialidades publicadas -> /:professionSlug/:citySlug (una entrada por
+    // cada ciudad activa; el sitio ya no tiene un nivel de zona/colonia
+    // dentro de la ciudad, así que no hay combinaciones adicionales que listar).
+    const activeCities = Array.from(new Set(zones.map((z) => z.name).filter(Boolean)));
     specialties.forEach((s) => {
       if (!s.profession_slug) return;
       activeCities.forEach((city) => {
@@ -54,19 +45,7 @@ Deno.serve(async (req) => {
       });
     });
 
-    // 3) Combinaciones especialidad + zona con >=1 médico publicado -> /:professionSlug/:citySlug/:zonaSlug
-    const comboSet = new Set();
-    specialists.forEach((sp) => {
-      const professionSlug = specByName[sp.specialty];
-      const zoneName = sp.zone || sp.location;
-      const zoneInfo = zoneByName[zoneName];
-      if (professionSlug && zoneInfo) comboSet.add(`${professionSlug}/${zoneInfo.citySlug}/${zoneInfo.zoneSlug}`);
-    });
-    Array.from(comboSet).forEach((combo) => {
-      urls.push({ loc: `${ORIGIN}/${combo}`, priority: "0.7", changefreq: "weekly" });
-    });
-
-    // 4) Especialistas publicados -> /especialista/:slug
+    // Especialistas publicados -> /especialista/:slug
     specialists.forEach((sp) => {
       if (sp.slug) urls.push({ loc: `${ORIGIN}/especialista/${sp.slug}`, priority: "0.7", changefreq: "weekly" });
     });
