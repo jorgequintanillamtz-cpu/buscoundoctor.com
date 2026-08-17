@@ -186,7 +186,7 @@ export default function SpecialistList() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Zona</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Ciudad</label>
                 <Select value={filterZone} onValueChange={setFilterZone}>
                   <SelectTrigger className="h-10 rounded-xl text-sm">
                     <SelectValue placeholder="Todas" />
