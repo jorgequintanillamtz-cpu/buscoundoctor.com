@@ -41,7 +41,7 @@ const adminNavSections = [
     label: "Configuración",
     items: [
       { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
-      { path: "/admin/zonas", label: "Zonas", icon: MapPin },
+      { path: "/admin/zonas", label: "Ciudades", icon: MapPin },
       { path: "/admin/catalogos", label: "Catálogos", icon: ShieldPlus },
       { path: "/admin/planes", label: "Planes y precios", icon: Tag },
     ],
