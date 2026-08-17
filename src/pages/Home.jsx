@@ -121,7 +121,7 @@ export default function Home() {
   const blogScrollRef = useRef(null);
 
   const submitHeroSearch = () => {
-    // Navega a las páginas SEO dedicadas (/:professionSlug/monterrey[/:zonaSlug]) en vez
+    // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     const specialtyObj = specialties.find((s) => s.name === heroSpecialty);
     if (specialtyObj) {
