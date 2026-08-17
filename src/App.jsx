@@ -118,7 +118,9 @@ const AuthenticatedApp = () => {
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
           <Route path="/admin/premium" element={<AdminPremium />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />
-          <Route path="/admin/zonas" element={<AdminZones />} />
+          <Route path="/admin/ciudades" element={<AdminZones />} />
+          {/* Redirección: la página se renombró de "zonas" a "ciudades" */}
+          <Route path="/admin/zonas" element={<Navigate to="/admin/ciudades" replace />} />
           <Route path="/admin/imagenes" element={<AdminSiteImages />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
