@@ -10,14 +10,6 @@ import { resolveCitySlug } from "@/lib/citySlug";
 const triggerClass =
   "h-auto text-sm font-medium text-foreground bg-transparent";
 
-const _unusedSlugifyMarker = (s) => (s || "")
-  .toLowerCase()
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .replace(/[^a-z0-9\s-]/g, "")
-  .trim()
-  .replace(/\s+/g, "-")
-  .replace(/-+/g, "-");
 
 export default function Header() {
   const [open, setOpen] = useState(false);
