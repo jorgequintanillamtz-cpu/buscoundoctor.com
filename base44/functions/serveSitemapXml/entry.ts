@@ -50,12 +50,12 @@ Deno.serve(async (req) => {
       if (sp.slug) urls.push({ loc: `${ORIGIN}/especialista/${sp.slug}`, priority: "0.7", changefreq: "weekly" });
     });
 
-    // 5) Blog posts publicados -> /blog/:slug
+    // Blog posts publicados -> /blog/:slug
     posts.forEach((p) => {
       if (p.slug) urls.push({ loc: `${ORIGIN}/blog/${p.slug}`, priority: "0.6", changefreq: "weekly" });
     });
 
-    // 6) Enfermedades con contenido revisado/publicado -> /enfermedades/:slug
+    // Enfermedades con contenido revisado/publicado -> /enfermedades/:slug
     // Las que están en "borrador" (o sin content_status, catálogo viejo sin contenido)
     // se dejan fuera a propósito: la página las marca noindex hasta que alguien las revise.
     conditions.forEach((c) => {
@@ -79,7 +79,6 @@ Deno.serve(async (req) => {
     console.log("SITEMAP_COUNTS", JSON.stringify({
       estaticas: staticPaths.length,
       especialidades: specialties.length,
-      combinaciones: comboSet.size,
       especialistas: specialists.length,
       blogPosts: posts.length,
       enfermedades: conditions.filter(c => c.content_status === 'revisado' || c.content_status === 'publicado').length,
