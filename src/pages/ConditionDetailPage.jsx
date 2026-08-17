@@ -61,22 +61,6 @@ function setMeta(name, content) {
   el.setAttribute("content", content);
 }
 
-// Mismo slugify que usan SpecialtyZonePage/Header/Home para armar las URLs
-// /:professionSlug/:citySlug/:zonaSlug — se duplica aquí porque no hay un util
-// compartido en el proyecto (patrón ya existente en el resto del código).
-const slugify = (s) => (s || "")
-  .toLowerCase()
-  .normalize("NFD")
-  .replace(/[̀-ͯ]/g, "")
-  .replace(/[^a-z0-9\s-]/g, "")
-  .trim()
-  .replace(/\s+/g, "-")
-  .replace(/-+/g, "-");
-
-// Slug de ciudad de una zona (mismo criterio que src/lib/citySlug.js, que no
-// se reusa aquí para no cambiar el patrón de slugify local ya usado arriba).
-const citySlugOf = (zone) => slugify(zone?.city || "Monterrey");
-
 export default function ConditionDetailPage() {
   const { slug } = useParams();
   const [condition, setCondition] = useState(null);
