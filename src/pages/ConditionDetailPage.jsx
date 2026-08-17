@@ -209,10 +209,10 @@ export default function ConditionDetailPage() {
       .filter((s) => s.items.length > 0);
   }, [condition]);
 
-  // Chips "[Especialidad] en [Zona]" para dirigir la búsqueda local (Monterrey,
-  // San Pedro Garza García, y cualquier zona que se agregue después) hacia las
-  // páginas /:professionSlug/monterrey/:zonaSlug ya existentes. Ordenadas por cuántos
-  // especialistas de esta condición hay en cada zona, para mostrar primero la
+  // Chips "[Especialidad] en [Ciudad]" para dirigir la búsqueda local (Monterrey,
+  // San Pedro Garza García, y cualquier ciudad que se agregue después) hacia las
+  // páginas /:professionSlug/:citySlug ya existentes. Ordenadas por cuántos
+  // especialistas de esta condición hay en cada ciudad, para mostrar primero la
   // más relevante.
   const zoneStats = useMemo(() => {
     return zones
