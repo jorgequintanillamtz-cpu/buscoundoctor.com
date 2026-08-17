@@ -70,10 +70,10 @@ export default function DoctorEditorPerfil({ form, update }) {
     base44.entities.Specialty.filter({ active: true }).then((list) => {
       setEspecialidades(list.map((s) => s.name).sort((a, b) => a.localeCompare(b, "es")));
     }).catch(() => {});
-    // La zona debe salir del mismo catálogo que usan las páginas
-    // /:professionSlug/monterrey/:zona (antes era texto libre y el valor nunca
-    // hacía match con el nombre real de la Zona, así que esos filtros
-    // nunca encontraban al doctor aunque sí estuviera en esa zona).
+    // La ciudad debe salir del mismo catálogo que usan las páginas
+    // /:professionSlug/:citySlug (antes era texto libre y el valor nunca
+    // hacía match con el nombre real de la ciudad, así que esos filtros
+    // nunca encontraban al doctor aunque sí estuviera en esa ciudad).
     base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
   }, []);
 
@@ -304,10 +304,6 @@ export default function DoctorEditorPerfil({ form, update }) {
           </div>
           <div>
             <label className="text-sm font-medium mb-1.5 block">Ciudad</label>
-            <Input value={form.city} onChange={e => update("city", e.target.value)} className="rounded-xl" placeholder="Monterrey" />
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Zona</label>
             <Select value={form.zone} onValueChange={v => update("zone", v)}>
               <SelectTrigger className="rounded-xl"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
               <SelectContent>
