@@ -7,14 +7,6 @@ import SearchableSelect from "@/components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import { resolveCitySlug } from "@/lib/citySlug";
 
-const slugify = (s) => (s || "")
-  .toLowerCase()
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .replace(/[^a-z0-9\s-]/g, "")
-  .trim()
-  .replace(/\s+/g, "-")
-  .replace(/-+/g, "-");
 
 export default function SearchBar({ className = "" }) {
   const [specialties, setSpecialties] = useState([]);
