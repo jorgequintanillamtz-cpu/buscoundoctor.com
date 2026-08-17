@@ -74,7 +74,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
           <p className="text-[11px] text-muted-foreground mt-1">Este nombre es el que ven los pacientes en tu perfil (ej. en "Hospitales donde consulta"). Si lo dejas vacío, se muestra la dirección.</p>
         </div>
         <div>
-          <label className="text-xs font-medium mb-1 block">Zona *</label>
+          <label className="text-xs font-medium mb-1 block">Ciudad *</label>
           <select
             value={office.zone_id}
             onChange={(e) => setOffice({ ...office, zone_id: e.target.value })}
@@ -378,7 +378,7 @@ export default function OfficeManager({ specialistId }) {
                         <p className="text-xs text-muted-foreground">{office.address_line}</p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        Zona: {zoneName(office.zone_id)}{office.phone ? ` · Tel: ${office.phone}` : ""}
+                        Ciudad: {zoneName(office.zone_id)}{office.phone ? ` · Tel: ${office.phone}` : ""}
                       </p>
                       <p className="text-xs text-muted-foreground flex items-start gap-1">
                         <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" /> {fmtHours(hours)}
