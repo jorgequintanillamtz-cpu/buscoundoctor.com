@@ -89,7 +89,7 @@ export default function PublicOfficeList({ specialistId }) {
                   <p className="text-xs text-muted-foreground mt-0.5">{office.address_line}</p>
                 )}
                 {zoneName(office.zone_id) && (
-                  <p className="text-xs text-muted-foreground mt-0.5">Zona: {zoneName(office.zone_id)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Ciudad: {zoneName(office.zone_id)}</p>
                 )}
                 {office.phone && (
                   <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
