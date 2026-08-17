@@ -60,7 +60,6 @@ export default function SpecialtyPage() {
       if (!active) return;
       setSpecialty(spec);
       setSpecialists(allSpecs);
-      setZones(cityZones);
       setSubspecialties(subs);
       setFaqs(faqItems);
       setConditions(conditionList);
@@ -110,12 +109,9 @@ export default function SpecialtyPage() {
     return () => { scripts.forEach(s => s.remove()); };
   }, [specialty, faqs]);
 
-  const cityZoneNames = useMemo(() => zones.map((z) => z.name), [zones]);
-
   const filtered = useMemo(() => {
-    if (!specialty) return [];
-    let result = specialists.filter((s) => s.specialty === specialty.name && cityZoneNames.includes(s.zone || s.location));
-    if (filterZone) result = result.filter((s) => s.zone === filterZone || s.location === filterZone);
+    if (!specialty || !cityName) return [];
+    let result = specialists.filter((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
     if (filterModality) result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
     if (filterPrice) result = result.filter((s) => s.price_range === filterPrice);
     if (searchQuery) {
@@ -124,15 +120,14 @@ export default function SpecialtyPage() {
         (s) =>
           s.full_name?.toLowerCase().includes(q) ||
           s.subspecialty?.toLowerCase().includes(q) ||
-          s.zone?.toLowerCase().includes(q) ||
           s.description?.toLowerCase().includes(q)
       );
     }
     return rankSpecialists(result);
-  }, [specialty, specialists, filterZone, filterModality, filterPrice, searchQuery]);
+  }, [specialty, specialists, cityName, filterModality, filterPrice, searchQuery]);
 
-  const activeFilters = [filterZone, filterModality, filterPrice].filter(Boolean).length;
-  const clearFilters = () => { setFilterZone(""); setFilterModality(""); setFilterPrice(""); };
+  const activeFilters = [filterModality, filterPrice].filter(Boolean).length;
+  const clearFilters = () => { setFilterModality(""); setFilterPrice(""); };
 
   if (loading) {
     return (
