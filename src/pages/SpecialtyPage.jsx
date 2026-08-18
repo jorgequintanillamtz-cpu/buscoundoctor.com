@@ -9,6 +9,8 @@ import { rankSpecialists } from "@/lib/specialistRanking";
 import { slugify } from "@/lib/citySlug";
 import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
+import CountdownBox from "@/components/CountdownBox";
+import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -25,6 +27,7 @@ function setMeta(name, content) {
 
 export default function SpecialtyPage() {
   const { professionSlug, citySlug } = useParams();
+  const countdown = useCountdown(LAUNCH_DATE);
   const [specialty, setSpecialty] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [specialists, setSpecialists] = useState([]);
@@ -297,13 +300,23 @@ export default function SpecialtyPage() {
                 </div>
                 <div>
                   <h2 className="font-heading font-semibold text-base text-foreground">
-                    Estamos incorporando especialistas en {specialty.name} en {cityName}
+                    Esta página está en construcción
                   </h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Estamos verificando perfiles nuevos todo el tiempo. Mientras tanto, explora otras especialidades o enfermedades relacionadas.
+                    Estamos incorporando especialistas en {specialty.name} en {cityName}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
                   </p>
                 </div>
               </div>
+
+              {!countdown.done && (
+                <div className="flex items-center gap-2 mb-4">
+                  <CountdownBox value={countdown.days} label="Días" compact />
+                  <CountdownBox value={countdown.hours} label="Hrs" compact />
+                  <CountdownBox value={countdown.minutes} label="Min" compact />
+                  <CountdownBox value={countdown.seconds} label="Seg" compact />
+                </div>
+              )}
+
               <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
                 <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
                 <p className="text-xs text-muted-foreground flex-1">
