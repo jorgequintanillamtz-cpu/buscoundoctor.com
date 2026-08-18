@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { SlidersHorizontal, X, Search, Stethoscope } from "lucide-react";
+import { SlidersHorizontal, X, Search, Stethoscope, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,6 +74,15 @@ export default function SpecialtyPage() {
     setMeta("description", `Encuentra los mejores especialistas en ${specialty.name} en ${cityName}. Perfiles verificados con cédula profesional, reseñas y contacto directo por WhatsApp.`);
   }, [specialty, cityName]);
 
+  // Mientras la página no tenga ningún especialista real (antes de aplicar
+  // filtros), no la indexamos: así Google no acumula cientos de páginas
+  // vacías mientras se incorporan doctores. En cuanto entra el primero, la
+  // página se vuelve indexable sola, sin tocar nada a mano.
+  useEffect(() => {
+    if (!specialty || !cityName) return;
+    setMeta("robots", hasAnySpecialists ? "index, follow" : "noindex, follow");
+  }, [specialty, cityName, hasAnySpecialists]);
+
   useEffect(() => {
     if (!specialty) return;
     const scripts = [];
@@ -108,6 +117,11 @@ export default function SpecialtyPage() {
     }
     return () => { scripts.forEach(s => s.remove()); };
   }, [specialty, faqs]);
+
+  const hasAnySpecialists = useMemo(() => {
+    if (!specialty || !cityName) return false;
+    return specialists.some((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
+  }, [specialty, specialists, cityName]);
 
   const filtered = useMemo(() => {
     if (!specialty || !cityName) return [];
@@ -169,9 +183,11 @@ export default function SpecialtyPage() {
 
       <div className="mb-5">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialty.name}</h1>
-        <p className="text-sm text-muted-foreground mt-1.5">
-          {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
-        </p>
+        {hasAnySpecialists && (
+          <p className="text-sm text-muted-foreground mt-1.5">
+            {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
+          </p>
+        )}
         <section className="mt-3 max-w-3xl space-y-2">
           {(specialty.description
             ? specialty.description.split(/\n{2,}|\n/).filter(Boolean)
@@ -273,7 +289,32 @@ export default function SpecialtyPage() {
             </div>
           )}
 
-          {filtered.length === 0 ? (
+          {!hasAnySpecialists ? (
+            <div className="bg-card border border-border/50 rounded-2xl p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-11 h-11 rounded-full bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+                  <Stethoscope className="w-5 h-5 text-brand-blue" />
+                </div>
+                <div>
+                  <h2 className="font-heading font-semibold text-base text-foreground">
+                    Estamos incorporando especialistas en {specialty.name} en {cityName}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Estamos verificando perfiles nuevos todo el tiempo. Mientras tanto, explora otras especialidades o enfermedades relacionadas.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+                <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
+                <p className="text-xs text-muted-foreground flex-1">
+                  ¿Eres {specialty.name.toLowerCase()}? Sé de los primeros en aparecer aquí.
+                </p>
+                <Button variant="outline" size="sm" className="rounded-xl flex-shrink-0" asChild>
+                  <Link to="/registro-medico">Regístrate gratis</Link>
+                </Button>
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-muted-foreground">No hay especialistas en {specialty.name} con estos filtros.</p>
               <Button variant="link" className="text-primary mt-2" onClick={clearFilters}>Limpiar filtros</Button>
