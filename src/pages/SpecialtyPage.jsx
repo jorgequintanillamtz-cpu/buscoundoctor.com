@@ -74,6 +74,11 @@ export default function SpecialtyPage() {
     setMeta("description", `Encuentra los mejores especialistas en ${specialty.name} en ${cityName}. Perfiles verificados con cédula profesional, reseñas y contacto directo por WhatsApp.`);
   }, [specialty, cityName]);
 
+  const hasAnySpecialists = useMemo(() => {
+    if (!specialty || !cityName) return false;
+    return specialists.some((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
+  }, [specialty, specialists, cityName]);
+
   // Mientras la página no tenga ningún especialista real (antes de aplicar
   // filtros), no la indexamos: así Google no acumula cientos de páginas
   // vacías mientras se incorporan doctores. En cuanto entra el primero, la
@@ -117,11 +122,6 @@ export default function SpecialtyPage() {
     }
     return () => { scripts.forEach(s => s.remove()); };
   }, [specialty, faqs]);
-
-  const hasAnySpecialists = useMemo(() => {
-    if (!specialty || !cityName) return false;
-    return specialists.some((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
-  }, [specialty, specialists, cityName]);
 
   const filtered = useMemo(() => {
     if (!specialty || !cityName) return [];
