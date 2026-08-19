@@ -157,6 +157,13 @@ export default function ConditionDetailPage() {
     setMeta("robots", condition.content_status === "borrador" ? "noindex,follow" : "index,follow");
   }, [condition, cityRecord]);
 
+  // Si la URL no resuelve (enfermedad o ciudad inexistente/desactivada),
+  // marcamos noindex explícito -- de lo contrario la etiqueta robots se
+  // queda con lo que trajera la ruta anterior (la SPA no resetea <head> sola).
+  useEffect(() => {
+    if (notFound) setMeta("robots", "noindex,follow");
+  }, [notFound]);
+
   useEffect(() => {
     if (!condition || !cityRecord) return;
     const scripts = [];
