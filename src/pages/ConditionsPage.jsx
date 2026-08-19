@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { TrendingUp, Stethoscope } from "lucide-react";
+import { resolveCitySlug } from "@/lib/citySlug";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
@@ -16,14 +17,24 @@ const ALPHABET = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
 
 export default function ConditionsPage() {
   const [conditions, setConditions] = useState([]);
+  const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.Condition.filter({ active: true }).then((list) => {
+    Promise.all([
+      base44.entities.Condition.filter({ active: true }),
+      base44.entities.Zone.filter({ active: true }),
+    ]).then(([list, zoneList]) => {
       setConditions(list.sort((a, b) => a.name.localeCompare(b.name, "es")));
+      setZones(zoneList);
       setLoading(false);
     });
   }, []);
+
+  // Este listado no está separado por ciudad, así que enlaza a la ciudad por
+  // defecto (la primera activa); una vez adentro, cada página de enfermedad
+  // ya deja elegir otra ciudad si aplica.
+  const defaultCitySlug = useMemo(() => resolveCitySlug(zones), [zones]);
 
   useEffect(() => {
     document.title = "Enfermedades: encuentra al especialista indicado | BuscoUnDoctor";
@@ -83,7 +94,7 @@ export default function ConditionsPage() {
             {popular.map((c) => (
               <Link
                 key={c.id}
-                to={`/enfermedades/${c.slug}`}
+                to={`/enfermedades/${c.slug}/${defaultCitySlug}`}
                 className="inline-flex items-center gap-1.5 bg-brand-bluePale hover:bg-brand-blue hover:text-white text-brand-navy text-sm font-medium px-4 py-2 rounded-full transition-colors"
               >
                 {c.name}
@@ -127,7 +138,7 @@ export default function ConditionsPage() {
               {byLetter[letter].map((c) => (
                 <Link
                   key={c.id}
-                  to={`/enfermedades/${c.slug}`}
+                  to={`/enfermedades/${c.slug}/${defaultCitySlug}`}
                   className="group flex items-center gap-1.5 text-sm text-foreground hover:text-brand-blue transition-colors py-0.5"
                 >
                   <span className="truncate">{c.name}</span>
