@@ -55,13 +55,15 @@ Deno.serve(async (req) => {
       if (p.slug) urls.push({ loc: `${ORIGIN}/blog/${p.slug}`, priority: "0.6", changefreq: "weekly" });
     });
 
-    // Enfermedades con contenido revisado/publicado -> /enfermedades/:slug
+    // Enfermedades con contenido revisado/publicado -> /enfermedades/:slug/:citySlug
+    // (una entrada por ciudad activa, igual que las páginas de especialidad).
     // Las que están en "borrador" (o sin content_status, catálogo viejo sin contenido)
     // se dejan fuera a propósito: la página las marca noindex hasta que alguien las revise.
     conditions.forEach((c) => {
-      if (c.slug && (c.content_status === 'revisado' || c.content_status === 'publicado')) {
-        urls.push({ loc: `${ORIGIN}/enfermedades/${c.slug}`, priority: "0.7", changefreq: "monthly" });
-      }
+      if (!c.slug || (c.content_status !== 'revisado' && c.content_status !== 'publicado')) return;
+      activeCities.forEach((city) => {
+        urls.push({ loc: `${ORIGIN}/enfermedades/${c.slug}/${slugify(city)}`, priority: "0.7", changefreq: "monthly" });
+      });
     });
 
     const xml =
