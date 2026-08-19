@@ -83,6 +83,7 @@ export default function ConditionDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [cityRecord, setCityRecord] = useState(null);
   const [specialistsBySpecialty, setSpecialistsBySpecialty] = useState([]);
+  const [activeCityNames, setActiveCityNames] = useState([]);
   const [relatedConditions, setRelatedConditions] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [specialtySlug, setSpecialtySlug] = useState(null);
@@ -99,6 +100,7 @@ export default function ConditionDetailPage() {
       const found = conditionList.find((c) => c.active !== false);
       const city = zoneList.find((z) => slugify(z.name) === citySlug);
       if (!active) return;
+      setActiveCityNames(zoneList.map((z) => z.name));
       if (!found || !city) { setNotFound(true); setLoading(false); return; }
 
       const [specialtyList, allSpecialistsForSpecialty, allConditions] = await Promise.all([
@@ -253,14 +255,17 @@ export default function ConditionDetailPage() {
     if (!cityRecord) return [];
     const allZoneNames = [...new Set(specialistsBySpecialty.map((s) => s.zone || s.location).filter(Boolean))];
     return allZoneNames
-      .filter((name) => name !== cityRecord.name)
+      // Solo ciudades activas hoy -- si un doctor quedó con una ciudad que se
+      // desactivó (ej. San Pedro en pausa), no la ofrecemos como link porque
+      // esa URL ya no resuelve (Zone.filter({active:true}) no la regresa).
+      .filter((name) => name !== cityRecord.name && activeCityNames.includes(name))
       .map((name) => ({
         name,
         slug: slugify(name),
         count: specialistsBySpecialty.filter((s) => (s.zone || s.location) === name).length,
       }))
       .sort((a, b) => b.count - a.count);
-  }, [specialistsBySpecialty, cityRecord]);
+  }, [specialistsBySpecialty, cityRecord, activeCityNames]);
 
   if (loading) {
     return (
