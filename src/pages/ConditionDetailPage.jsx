@@ -125,7 +125,15 @@ export default function ConditionDetailPage() {
   useEffect(() => {
     if (!condition || !cityRecord) return;
     const title = condition.meta_title || `Doctores para ${condition.name} en ${cityRecord.name} | BuscoUnDoctor`;
-    const description = condition.meta_description || `Encuentra especialistas verificados para tratar ${condition.name} en ${cityRecord.name}. Perfiles con cédula profesional, reseñas y contacto directo por WhatsApp.`;
+    // El fallback genérico solo se usa si la condición no tiene texto propio
+    // (no debería pasar hoy, pero cubre condiciones futuras sin contenido).
+    // Si sí hay `description`, tomamos su primera oración para que cada una
+    // de las 79 x N ciudades tenga una meta description única, en vez de
+    // repetir el mismo texto genérico en todas.
+    const description = condition.meta_description
+      || (condition.description
+        ? `${firstSentence(condition.description)} Especialistas verificados en ${cityRecord.name}.`
+        : `Encuentra especialistas verificados para tratar ${condition.name} en ${cityRecord.name}. Perfiles con cédula profesional, reseñas y contacto directo por WhatsApp.`);
     document.title = title;
     setMeta("description", description);
     // Contenido sin revisión médica todavía: no lo indexamos hasta que pase a "revisado" o "publicado".
