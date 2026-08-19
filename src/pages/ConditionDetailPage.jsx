@@ -16,6 +16,18 @@ import {
   Accordion, AccordionItem, AccordionTrigger, AccordionContent,
 } from "@/components/ui/accordion";
 
+// Toma la primera oración de un texto largo (hasta ~110 caracteres) para
+// usarla como meta description sin repetir el párrafo completo. Si no hay
+// punto cerca, corta por palabra completa y agrega …
+function firstSentence(text, maxLen = 110) {
+  const clean = (text || "").split("\n")[0].trim();
+  if (!clean) return "";
+  const dot = clean.indexOf(". ");
+  if (dot > 20 && dot < maxLen) return clean.slice(0, dot + 1);
+  if (clean.length <= maxLen) return clean;
+  return `${clean.slice(0, maxLen).replace(/\s+\S*$/, "")}…`;
+}
+
 // Tarjeta compacta para la lista de especialistas de una enfermedad: solo lo
 // esencial para comparar de un vistazo (igual que en el home), sin el detalle
 // completo de reservar cita que sí tiene SpecialistCard en otras páginas.
