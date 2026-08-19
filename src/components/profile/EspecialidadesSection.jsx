@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Stethoscope, ChevronRight } from "lucide-react";
+import { slugify } from "@/lib/citySlug";
 
 // Sección "Especialidades": no repite solo lo del hero, suma valor real
 // enlazando a las páginas de enfermedades que atiende esta especialidad
@@ -46,7 +47,7 @@ export default function EspecialidadesSection({ specialist }) {
             {conditions.map((c) => (
               <Link
                 key={c.id}
-                to={`/enfermedades/${c.slug}`}
+                to={`/enfermedades/${c.slug}/${slugify(specialist.zone || specialist.location || "Monterrey")}`}
                 className="inline-flex items-center gap-1 text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/70 px-3 py-1.5 rounded-full transition-colors"
               >
                 {c.name}
