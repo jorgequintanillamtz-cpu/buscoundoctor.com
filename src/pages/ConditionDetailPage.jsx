@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import BlogCard from "@/components/BlogCard";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import { slugify } from "@/lib/citySlug";
+import CountdownBox from "@/components/CountdownBox";
+import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -63,11 +65,12 @@ function setMeta(name, content) {
 }
 
 export default function ConditionDetailPage() {
-  const { slug } = useParams();
+  const { slug, citySlug } = useParams();
+  const countdown = useCountdown(LAUNCH_DATE);
   const [condition, setCondition] = useState(null);
   const [notFound, setNotFound] = useState(false);
-  const [specialists, setSpecialists] = useState([]);
-  const [zones, setZones] = useState([]);
+  const [cityRecord, setCityRecord] = useState(null);
+  const [specialistsBySpecialty, setSpecialistsBySpecialty] = useState([]);
   const [relatedConditions, setRelatedConditions] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [specialtySlug, setSpecialtySlug] = useState(null);
@@ -77,16 +80,19 @@ export default function ConditionDetailPage() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const conditionList = await base44.entities.Condition.filter({ slug });
+      const [conditionList, zoneList] = await Promise.all([
+        base44.entities.Condition.filter({ slug }),
+        base44.entities.Zone.filter({ active: true }),
+      ]);
       const found = conditionList.find((c) => c.active !== false);
+      const city = zoneList.find((z) => slugify(z.name) === citySlug);
       if (!active) return;
-      if (!found) { setNotFound(true); setLoading(false); return; }
+      if (!found || !city) { setNotFound(true); setLoading(false); return; }
 
-      const [specialtyList, allSpecialists, allConditions, zoneList] = await Promise.all([
+      const [specialtyList, allSpecialistsForSpecialty, allConditions] = await Promise.all([
         base44.entities.Specialty.filter({ name: found.specialty }),
         base44.entities.Specialist.filter({ specialty: found.specialty, active: true, publication_status: "published" }),
         base44.entities.Condition.filter({ specialty: found.specialty, active: true }),
-        base44.entities.Zone.filter({ active: true }),
       ]);
       if (!active) return;
 
@@ -98,8 +104,8 @@ export default function ConditionDetailPage() {
       if (!active) return;
 
       setCondition(found);
-      setSpecialists(allSpecialists);
-      setZones(zoneList);
+      setCityRecord(city);
+      setSpecialistsBySpecialty(allSpecialistsForSpecialty);
       setRelatedConditions(allConditions.filter((c) => c.slug !== found.slug).slice(0, 8));
       setRelatedPosts(blogPosts.slice(0, 3));
       setSpecialtySlug(specialtyRecord?.profession_slug || null);
@@ -107,20 +113,30 @@ export default function ConditionDetailPage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [slug]);
+  }, [slug, citySlug]);
+
+  // Especialistas de esta condición en la ciudad de la URL -- el resto (otras
+  // ciudades) se usa solo para el selector "también disponible en".
+  const specialists = useMemo(() => {
+    if (!cityRecord) return [];
+    return specialistsBySpecialty.filter((s) => (s.zone || s.location) === cityRecord.name);
+  }, [specialistsBySpecialty, cityRecord]);
 
   useEffect(() => {
-    if (!condition) return;
-    const title = condition.meta_title || `${condition.name}: información y especialistas | BuscoUnDoctor`;
-    const description = condition.meta_description || `Qué es ${condition.name}, cuándo consultar a un especialista y directorio de médicos verificados en Monterrey y San Pedro Garza García.`;
+    if (!condition || !cityRecord) return;
+    const title = condition.meta_title || `Doctores para ${condition.name} en ${cityRecord.name} | BuscoUnDoctor`;
+    const description = condition.meta_description || `Encuentra especialistas verificados para tratar ${condition.name} en ${cityRecord.name}. Perfiles con cédula profesional, reseñas y contacto directo por WhatsApp.`;
     document.title = title;
     setMeta("description", description);
     // Contenido sin revisión médica todavía: no lo indexamos hasta que pase a "revisado" o "publicado".
+    // A diferencia de las páginas de especialidad, esta sí se indexa aunque
+    // todavía no tenga doctores en esta ciudad -- el contenido informativo
+    // (síntomas, tratamiento, etc.) tiene valor propio independiente de eso.
     setMeta("robots", condition.content_status === "borrador" ? "noindex,follow" : "index,follow");
-  }, [condition]);
+  }, [condition, cityRecord]);
 
   useEffect(() => {
-    if (!condition) return;
+    if (!condition || !cityRecord) return;
     const scripts = [];
     // Síntomas/tratamiento/causas se escriben como listas de una línea por
     // punto, así que se parten por salto de línea simple (no por párrafo) para
@@ -135,7 +151,8 @@ export default function ConditionDetailPage() {
       "@context": "https://schema.org",
       "@type": "MedicalWebPage",
       "name": condition.name,
-      "description": condition.description || condition.meta_description || `${condition.name} en Monterrey y San Pedro Garza García.`,
+      "description": condition.description || condition.meta_description || `${condition.name} en ${cityRecord.name}.`,
+      "contentLocation": { "@type": "City", "name": cityRecord.name },
       "about": {
         "@type": "MedicalCondition",
         "name": condition.name,
@@ -175,7 +192,7 @@ export default function ConditionDetailPage() {
       scripts.push(faqScript);
     }
     return () => { scripts.forEach((s) => s.remove()); };
-  }, [condition, faqs]);
+  }, [condition, cityRecord, faqs]);
 
   // Cada campo de contenido se parte en párrafos (separados por línea en
   // blanco) y se renderiza bajo su propio H2. Las condiciones que aún no se
@@ -209,20 +226,21 @@ export default function ConditionDetailPage() {
       .filter((s) => s.items.length > 0);
   }, [condition]);
 
-  // Chips "[Especialidad] en [Ciudad]" para dirigir la búsqueda local (Monterrey,
-  // San Pedro Garza García, y cualquier ciudad que se agregue después) hacia las
-  // páginas /:professionSlug/:citySlug ya existentes. Ordenadas por cuántos
-  // especialistas de esta condición hay en cada ciudad, para mostrar primero la
-  // más relevante.
-  const zoneStats = useMemo(() => {
-    return zones
-      .map((z) => ({
-        zone: z,
-        slug: slugify(z.name),
-        count: specialists.filter((s) => s.zone === z.name || s.location === z.name).length,
+  // Otras ciudades donde también se puede consultar esta condición -- excluye
+  // la ciudad actual (ya se está viendo). Ordenadas por cuántos especialistas
+  // hay en cada una, para mostrar primero la más relevante.
+  const otherCities = useMemo(() => {
+    if (!cityRecord) return [];
+    const allZoneNames = [...new Set(specialistsBySpecialty.map((s) => s.zone || s.location).filter(Boolean))];
+    return allZoneNames
+      .filter((name) => name !== cityRecord.name)
+      .map((name) => ({
+        name,
+        slug: slugify(name),
+        count: specialistsBySpecialty.filter((s) => (s.zone || s.location) === name).length,
       }))
       .sort((a, b) => b.count - a.count);
-  }, [zones, specialists]);
+  }, [specialistsBySpecialty, cityRecord]);
 
   if (loading) {
     return (
@@ -257,30 +275,33 @@ export default function ConditionDetailPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{condition.name}</BreadcrumbPage>
+            <BreadcrumbPage>{condition.name} en {cityRecord.name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="mb-6">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{condition.name}</h1>
+        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
+          Doctores para {condition.name.toLowerCase()} en {cityRecord.name}
+        </h1>
         <Link
-          to={`/especialistas?specialty=${encodeURIComponent(condition.specialty)}`}
+          to={specialtySlug ? `/${specialtySlug}/${citySlug}` : `/especialistas?specialty=${encodeURIComponent(condition.specialty)}`}
           className="inline-block mt-1.5 text-xs font-medium text-brand-blue hover:underline"
         >
           Atendida por: {condition.specialty}
         </Link>
 
-        {specialtySlug && zoneStats.length > 0 && (
+        {specialtySlug && otherCities.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
-            {zoneStats.map(({ zone, slug, count }) => (
+            <span className="inline-flex items-center text-xs text-muted-foreground pt-1.5">También disponible en:</span>
+            {otherCities.map(({ name, slug: otherSlug, count }) => (
               <Link
-                key={zone.id}
-                to={`/${specialtySlug}/${slug}`}
+                key={name}
+                to={`/enfermedades/${slug}/${otherSlug}`}
                 className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue hover:bg-brand-blue hover:text-white transition-colors rounded-full pl-3 pr-3.5 py-1.5 text-xs font-medium"
               >
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                {condition.specialty} en {zone.name}
+                {name}
                 {count > 0 && <span className="opacity-70">· {count}</span>}
               </Link>
             ))}
@@ -315,12 +336,12 @@ export default function ConditionDetailPage() {
         </section>
       </div>
 
-      {/* Especialistas: lista real si ya hay, o captación (paciente + médico) si todavía no */}
+      {/* Especialistas: lista real si ya hay, o "en construcción" con countdown si todavía no */}
       <section className="mb-10">
         {specialists.length > 0 ? (
           <>
             <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-4">
-              Especialistas que atienden {condition.name.toLowerCase()}
+              Especialistas que atienden {condition.name.toLowerCase()} en {cityRecord.name}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {specialists.map((s) => (
@@ -336,13 +357,22 @@ export default function ConditionDetailPage() {
               </div>
               <div>
                 <h2 className="font-heading font-semibold text-base text-foreground">
-                  Aún no tenemos {condition.specialty.toLowerCase()} verificados en Monterrey
+                  Esta sección está en construcción
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Estamos incorporando especialistas verificados todo el tiempo en Monterrey y San Pedro Garza García.
+                  Estamos incorporando {condition.specialty.toLowerCase()}s verificados en {cityRecord.name}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
                 </p>
               </div>
             </div>
+
+            {!countdown.done && (
+              <div className="flex items-center gap-2 mb-4">
+                <CountdownBox value={countdown.days} label="Días" compact />
+                <CountdownBox value={countdown.hours} label="Hrs" compact />
+                <CountdownBox value={countdown.minutes} label="Min" compact />
+                <CountdownBox value={countdown.seconds} label="Seg" compact />
+              </div>
+            )}
 
             <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
               <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
@@ -370,11 +400,11 @@ export default function ConditionDetailPage() {
             <p className="text-white/70 text-sm mt-1.5 max-w-md">
               {specialists.length > 0
                 ? "Compara perfiles verificados, reseñas y contacta directo por WhatsApp."
-                : "Mientras sumamos especialistas para esta condición, conoce a los médicos verificados que ya tenemos en Monterrey y San Pedro Garza García."}
+                : `Mientras sumamos especialistas para esta condición en ${cityRecord.name}, conoce a los médicos verificados que ya tenemos.`}
             </p>
           </div>
           <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
-            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/${slugify(zones[0]?.name)}` : "/especialistas"}>
+            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/${citySlug}` : "/especialistas"}>
               {specialists.length > 0 ? "Ver todos" : "Ver especialistas"} <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
@@ -388,7 +418,7 @@ export default function ConditionDetailPage() {
             {relatedConditions.map((c) => (
               <Link
                 key={c.id}
-                to={`/enfermedades/${c.slug}`}
+                to={`/enfermedades/${c.slug}/${citySlug}`}
                 className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium"
               >
                 {c.name}
