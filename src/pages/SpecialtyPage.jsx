@@ -77,6 +77,13 @@ export default function SpecialtyPage() {
     setMeta("description", `Encuentra los mejores especialistas en ${specialty.name} en ${cityName}. Perfiles verificados con cédula profesional, reseñas y contacto directo por WhatsApp.`);
   }, [specialty, cityName]);
 
+  // Si la URL no resuelve (especialidad o ciudad inexistente/desactivada),
+  // marcamos noindex explícito -- de lo contrario la etiqueta robots se
+  // queda con lo que trajera la ruta anterior (la SPA no resetea <head> sola).
+  useEffect(() => {
+    if (notFound) setMeta("robots", "noindex, follow");
+  }, [notFound]);
+
   const hasAnySpecialists = useMemo(() => {
     if (!specialty || !cityName) return false;
     return specialists.some((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
