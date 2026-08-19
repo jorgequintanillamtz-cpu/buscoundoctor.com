@@ -219,7 +219,7 @@ export default function SpecialtyPage() {
           <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Enfermedades que tratamos</h2>
           <div className="flex flex-wrap gap-2">
             {conditions.map(c => (
-              <Link key={c.id} to={`/enfermedades/${c.slug}`} className="inline-flex items-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+              <Link key={c.id} to={`/enfermedades/${c.slug}/${citySlug}`} className="inline-flex items-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors rounded-full px-4 py-2 text-sm font-medium">
                 {c.name}
               </Link>
             ))}
