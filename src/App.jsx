@@ -46,6 +46,7 @@ import LandingMedicos from './pages/LandingMedicos';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
+import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
 import { Stethoscope } from "lucide-react";
 
 const AuthenticatedApp = () => {
@@ -85,7 +86,9 @@ const AuthenticatedApp = () => {
         <Route path="/especialidad/:slug" element={<LegacySpecialtyRedirect />} />
         <Route path="/especialidad/:slug/:zonaSlug" element={<LegacySpecialtyRedirect />} />
         <Route path="/enfermedades" element={<ConditionsPage />} />
-        <Route path="/enfermedades/:slug" element={<ConditionDetailPage />} />
+        <Route path="/enfermedades/:slug/:citySlug" element={<ConditionDetailPage />} />
+        {/* URL vieja (sin ciudad): se redirige por si quedan enlaces guardados o indexados */}
+        <Route path="/enfermedades/:slug" element={<LegacyConditionRedirect />} />
         <Route path="/blog" element={<BlogList />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/nosotros" element={<About />} />
