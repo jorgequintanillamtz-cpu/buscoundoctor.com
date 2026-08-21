@@ -77,8 +77,8 @@ export default function AdminDoctores() {
 
   const handleRestore = async (id, nombre) => {
     try {
-      await base44.entities.Specialist.update(id, { active: true, deleted_at: null });
-      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: true, deleted_at: null } : d)));
+      await base44.entities.Specialist.update(id, { active: true, deleted_at: null, suspension_reason: "" });
+      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: true, deleted_at: null, suspension_reason: "" } : d)));
       toast.success(`${nombre} fue restaurado`);
       logActivity({ type: "doctor_restaurado", description: `Se restauró el perfil de ${nombre} desde la papelera`, specialistId: id, specialistName: nombre });
       refreshBadges();
