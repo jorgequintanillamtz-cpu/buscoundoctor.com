@@ -15,9 +15,13 @@ export default function ReviewForm({ specialist }) {
   const [treatmentPerformed, setTreatmentPerformed] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Honeypot anti-bot: campo invisible que solo un script rellena. Ver
+  // nota completa en src/components/AppointmentForm.jsx.
+  const [website, setWebsite] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (website) { setSubmitted(true); return; }
     if (rating === 0) {
       toast.error("Por favor selecciona una calificación");
       return;
@@ -50,6 +54,16 @@ export default function ReviewForm({ specialist }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <input
+        type="text"
+        name="website"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+      />
       <div>
         <label className="text-sm font-medium text-foreground mb-2 block">Tu calificación *</label>
         <div className="flex gap-1">
