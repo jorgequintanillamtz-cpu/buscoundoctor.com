@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star, MessageSquareText, Stethoscope } from "lucide-react";
+import { Star, MessageSquareText, Stethoscope, ShieldCheck } from "lucide-react";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 
@@ -24,7 +24,14 @@ function ReviewCard({ review }) {
     <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 space-y-2">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <p className="text-sm font-semibold text-foreground">{review.patient_name || "Paciente"}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-foreground">{review.patient_name || "Paciente"}</p>
+            {review.verified_client && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                <ShieldCheck className="w-3 h-3" /> Cliente verificado
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2 mt-1">
             <StarRow rating={review.rating} />
             <span className="text-xs text-muted-foreground">{fmtDate(review.created_date)}</span>
