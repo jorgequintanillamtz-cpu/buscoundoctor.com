@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star } from "lucide-react";
+import { Star, ShieldCheck } from "lucide-react";
 import moment from "moment";
 
 function StarDisplay({ rating }) {
@@ -43,8 +43,15 @@ export default function ReviewList({ specialistId }) {
 
       {reviews.map((r) => (
         <div key={r.id} className="pb-4 border-b border-border/30 last:border-0 last:pb-0">
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-medium text-sm text-foreground">{r.patient_name}</span>
+          <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-sm text-foreground">{r.patient_name}</span>
+              {r.verified_client && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                  <ShieldCheck className="w-3 h-3" /> Cliente verificado
+                </span>
+              )}
+            </div>
             <span className="text-xs text-muted-foreground">{moment(r.created_date).format("DD MMM YYYY")}</span>
           </div>
           <StarDisplay rating={r.rating} />
