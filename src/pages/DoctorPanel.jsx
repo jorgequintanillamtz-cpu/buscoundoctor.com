@@ -19,8 +19,7 @@ import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import SeoScoreManager from "@/components/admin/SeoScoreManager";
-import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
-import { logActivity } from "@/api/activityLog";
+import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
 // autoguardado, recalcular score) vive en src/api/specialistForm.js,
@@ -118,35 +117,15 @@ export default function DoctorPanel() {
     specialistId,
     formRef,
     buildData,
+    contactRef: originalContactRef,
     onSaved: () => { setLastSaved(new Date()); recalculateScore(); },
   });
 
   const handleSaveChanges = async () => {
     setSaving(true);
     try {
-      const nextEmail = formRef.current.email || "";
-      const nextWhatsapp = formRef.current.whatsapp || "";
-      const prev = originalContactRef.current;
-      const emailChanged = nextEmail !== prev.email;
-      const whatsappChanged = nextWhatsapp !== prev.whatsapp;
       await base44.entities.Specialist.update(specialistId, buildData(formRef.current));
-      if (emailChanged) {
-        logActivity({
-          type: "cambio_email",
-          description: `${formRef.current.full_name || "Un doctor"} cambió su email de contacto de "${prev.email || "(vacío)"}" a "${nextEmail || "(vacío)"}"`,
-          specialistId,
-          specialistName: formRef.current.full_name || "",
-        });
-      }
-      if (whatsappChanged) {
-        logActivity({
-          type: "cambio_telefono",
-          description: `${formRef.current.full_name || "Un doctor"} cambió su WhatsApp de "${prev.whatsapp || "(vacío)"}" a "${nextWhatsapp || "(vacío)"}"`,
-          specialistId,
-          specialistName: formRef.current.full_name || "",
-        });
-      }
-      originalContactRef.current = { email: nextEmail, whatsapp: nextWhatsapp };
+      trackContactChanges(originalContactRef, formRef.current, { specialistId });
       toast.success("Cambios guardados");
       recalculateScore();
       setLastSaved(new Date());
