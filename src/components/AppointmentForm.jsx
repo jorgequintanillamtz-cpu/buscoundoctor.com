@@ -36,11 +36,17 @@ export default function AppointmentForm({ specialist, onClose, initialDate = "" 
     preferred_time: "",
     comments: "",
   });
+  // Honeypot: campo invisible para humanos (oculto con CSS, no con "display:none"
+  // ni "type=hidden" para que los bots simples que sí leen esos atributos lo
+  // detecten igual). Si llega lleno, es casi seguro un bot: se corta en
+  // silencio sin avisarle que fue detectado.
+  const [website, setWebsite] = useState("");
 
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (website) { onClose(); return; }
 
     // Save the appointment request
     await base44.entities.AppointmentRequest.create({
