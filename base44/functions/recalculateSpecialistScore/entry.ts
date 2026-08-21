@@ -15,6 +15,10 @@ Deno.serve(async (req) => {
     const sp = await s.Specialist.get(specialistId);
     if (!sp) return Response.json({ error: 'Specialist not found' }, { status: 404 });
 
+    const isAdmin = user.role === 'admin' || user.role === 'superadmin';
+    const isOwner = sp.owner_user_id && sp.owner_user_id === user.id;
+    if (!isAdmin && !isOwner) return Response.json({ error: 'Forbidden' }, { status: 403 });
+
     const [offices, docs, edu, langs] = await Promise.all([
       s.Office.filter({ specialist_id: specialistId }),
       s.SpecialistDocument.filter({ specialist_id: specialistId, document_type: 'cedula_profesional' }),
