@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star } from "lucide-react";
+import { Star, ShieldCheck } from "lucide-react";
 import moment from "moment";
 import ReviewForm from "../ReviewForm";
 
@@ -15,9 +15,9 @@ function StarDisplay({ rating, size = "w-4 h-4" }) {
 }
 
 // Sección de opiniones estilo Airbnb: promedio + distribución por estrellas +
-// comentarios + un filtro de orden real (recientes / mejor calificadas). No
-// incluimos un filtro de "pacientes verificados" porque no existe ese campo
-// en los datos — todas las reseñas mostradas ya pasaron moderación (approved).
+// comentarios + un filtro de orden real (recientes / mejor calificadas). El
+// sello "Cliente verificado" (verified_client) lo activa un admin manualmente
+// al aprobar, tras cotejar la fecha/tratamiento que reporta el paciente.
 export default function ReviewsSection({ specialistId, specialist }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -107,12 +107,22 @@ export default function ReviewsSection({ specialistId, specialist }) {
           <div className="space-y-6">
             {sortedReviews.map((r) => (
               <div key={r.id} className="pb-6 border-b border-border/30 last:border-0 last:pb-0">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="font-semibold text-base text-foreground">{r.patient_name}</span>
+                <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-base text-foreground">{r.patient_name}</span>
+                    {r.verified_client && (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <ShieldCheck className="w-3 h-3" /> Cliente verificado
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-muted-foreground">{moment(r.created_date).format("DD MMM YYYY")}</span>
                 </div>
                 <StarDisplay rating={r.rating} size="w-4 h-4" />
                 <p className="text-base text-foreground/80 mt-2.5 leading-relaxed">{r.comment}</p>
+                {r.verified_client && r.treatment_performed && (
+                  <p className="text-xs text-muted-foreground mt-2">Consulta: {r.treatment_performed}</p>
+                )}
               </div>
             ))}
           </div>
