@@ -29,6 +29,9 @@ export const ACTIVITY_TYPE_LABELS = {
   resena_rechazada: "Reseña rechazada",
   blog_aprobado: "Artículo de blog aprobado",
   blog_rechazado: "Artículo de blog rechazado",
+  cambio_email: "Email de contacto modificado",
+  cambio_telefono: "WhatsApp modificado",
+  acceso_admin_denegado: "Intento de acceso admin denegado",
 };
 
 // Agrupación por "tono" (positivo/negativo/neutro), usada para colorear la
@@ -40,7 +43,7 @@ export const ACTIVITY_POSITIVE = new Set([
 export const ACTIVITY_NEGATIVE = new Set([
   "premium_desactivado", "perfil_desactivado", "destacado_desactivado", "pago_eliminado",
   "doctor_rechazado", "doctor_eliminado", "doctor_papelera", "registro_eliminado", "registro_papelera",
-  "documento_rechazado", "resena_eliminada", "resena_rechazada", "blog_rechazado",
+  "documento_rechazado", "resena_eliminada", "resena_rechazada", "blog_rechazado", "acceso_admin_denegado",
 ]);
 
 // Registra un movimiento en el historial. Es "best effort": si falla, no
