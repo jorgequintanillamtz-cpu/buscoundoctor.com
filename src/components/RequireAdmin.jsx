@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Stethoscope } from "lucide-react";
+import { logActivity } from "@/api/activityLog";
 
 // Bloquea el acceso a rutas exclusivas de administrador.
 // - Si no hay un usuario real (sin sesión, o sesión anónima de app pública): lo manda a iniciar sesión.
@@ -19,6 +20,12 @@ export default function RequireAdmin() {
         return;
       }
       const isAdmin = u.role === "admin" || u.role === "superadmin";
+      if (!isAdmin) {
+        logActivity({
+          type: "acceso_admin_denegado",
+          description: `${u.email || u.id || "Un usuario"} (rol: ${u.role || "desconocido"}) intentó acceder a una ruta de administración sin permiso`,
+        });
+      }
       setStatus(isAdmin ? "ok" : "denied");
     })();
     return () => { active = false; };
