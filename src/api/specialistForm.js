@@ -1,5 +1,38 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { logActivity } from "@/api/activityLog";
+
+// Compara el email/whatsapp que se está por guardar contra el último valor
+// conocido (guardado en `contactRef`) y deja constancia en el historial si
+// cambiaron. Se usa tanto en el guardado manual como en el autoguardado, y
+// tanto desde el panel del propio doctor como desde el editor del admin,
+// para que un cambio de datos de contacto quede siempre registrado sin
+// importar por dónde se hizo.
+export function trackContactChanges(contactRef, current, { specialistId, byAdmin = false } = {}) {
+  if (!contactRef) return;
+  const nextEmail = current.email || "";
+  const nextWhatsapp = current.whatsapp || "";
+  const prev = contactRef.current;
+  const actor = byAdmin ? "Un admin" : (current.full_name || "Un doctor");
+  const suffix = byAdmin ? " (editado desde el panel admin)" : "";
+  if (nextEmail !== prev.email) {
+    logActivity({
+      type: "cambio_email",
+      description: `${actor} cambió el email de contacto de "${prev.email || "(vacío)"}" a "${nextEmail || "(vacío)"}"${suffix}`,
+      specialistId: specialistId || "",
+      specialistName: current.full_name || "",
+    });
+  }
+  if (nextWhatsapp !== prev.whatsapp) {
+    logActivity({
+      type: "cambio_telefono",
+      description: `${actor} cambió el WhatsApp de "${prev.whatsapp || "(vacío)"}" a "${nextWhatsapp || "(vacío)"}"${suffix}`,
+      specialistId: specialistId || "",
+      specialistName: current.full_name || "",
+    });
+  }
+  contactRef.current = { email: nextEmail, whatsapp: nextWhatsapp };
+}
 
 // Estado y lógica compartida por los dos lugares donde se edita el perfil
 // de un doctor: AdminDoctorEditor.jsx (el admin, cualquier perfil) y
@@ -122,7 +155,7 @@ export function useRecalculateScore(setForm) {
 // Autoguardado cada 30s mientras haya un perfil ya guardado. `onSaved` se
 // dispara después de cada guardado exitoso (para refrescar "Guardado a
 // las..." y, si aplica, recalcular el score).
-export function useAutoSaveSpecialist({ enabled, specialistId, formRef, buildData, onSaved }) {
+export function useAutoSaveSpecialist({ enabled, specialistId, formRef, buildData, onSaved, contactRef, byAdmin = false }) {
   useEffect(() => {
     if (!enabled || !specialistId) return;
     const interval = setInterval(async () => {
@@ -130,6 +163,7 @@ export function useAutoSaveSpecialist({ enabled, specialistId, formRef, buildDat
       if (!f.full_name) return;
       try {
         await base44.entities.Specialist.update(specialistId, buildData(f));
+        if (contactRef) trackContactChanges(contactRef, f, { specialistId, byAdmin });
         onSaved?.();
       } catch {}
     }, 30000);
