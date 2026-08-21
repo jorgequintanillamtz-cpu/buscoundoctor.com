@@ -630,6 +630,7 @@ export default function AdminDoctores() {
                   <tr className="border-b border-border/50 bg-muted/50">
                     <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
                     <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden md:table-cell">Movido a papelera</th>
+                    <th className="text-left px-4 py-3 font-medium text-muted-foreground hidden lg:table-cell">Motivo</th>
                     <th className="text-right px-4 py-3 font-medium text-muted-foreground">Acciones</th>
                   </tr>
                 </thead>
@@ -642,6 +643,9 @@ export default function AdminDoctores() {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
                         {doc.deleted_at ? new Date(doc.deleted_at).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell max-w-[220px] truncate" title={doc.suspension_reason || ""}>
+                        {doc.suspension_reason || "—"}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
