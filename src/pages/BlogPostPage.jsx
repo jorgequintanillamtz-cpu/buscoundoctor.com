@@ -329,7 +329,7 @@ export default function BlogPostPage() {
 
       <article className="max-w-none text-foreground">
         {isHtmlContent(post.content) ? (
-          <div dangerouslySetInnerHTML={{ __html: htmlWithIds || post.content }} />
+          <div dangerouslySetInnerHTML={{ __html: htmlWithIds ?? "" }} />
         ) : (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
