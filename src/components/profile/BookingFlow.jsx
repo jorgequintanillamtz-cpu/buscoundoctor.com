@@ -32,6 +32,8 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  // Honeypot anti-bot: ver nota en AppointmentForm.jsx.
+  const [website, setWebsite] = useState("");
 
   const showOfficeStep = offices.length > 1;
   const showModalityStep = specialist.modality === "ambas";
@@ -64,6 +66,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
   const handleConfirm = async () => {
     if (!canConfirm) return;
+    if (website) { onConfirmed?.(); return; }
     setSubmitting(true);
     try {
       const reasonText = service ? `Cita: ${service.name}` : (reason.trim() || "Solicitud de cita agendada desde el perfil");
@@ -130,6 +133,16 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
   return (
     <div className="space-y-4">
+      <input
+        type="text"
+        name="website"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+      />
       {showOfficeStep && (
         <div>
           <label className="text-sm font-medium text-foreground mb-2 block">Selecciona un hospital</label>
