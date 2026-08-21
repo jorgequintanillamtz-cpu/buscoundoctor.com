@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown } from "lucide-react";
@@ -20,6 +20,7 @@ import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import SeoScoreManager from "@/components/admin/SeoScoreManager";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
+import { logActivity } from "@/api/activityLog";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
 // autoguardado, recalcular score) vive en src/api/specialistForm.js,
@@ -62,6 +63,7 @@ export default function DoctorPanel() {
   const [status, setStatus] = useState("loading"); // loading | ready | no-profile | wrong-role
   const [specialistId, setSpecialistId] = useState(null);
   const { form, setForm, formRef, update, buildData } = useSpecialistForm({ stripFields: DOCTOR_RESTRICTED_FIELDS });
+  const originalContactRef = useRef({ email: "", whatsapp: "" });
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [section, setSection] = useState("resumen");
@@ -96,6 +98,7 @@ export default function DoctorPanel() {
       }
       const specialist = own[0];
       setSpecialistId(specialist.id);
+      originalContactRef.current = { email: specialist.email || "", whatsapp: specialist.whatsapp || "" };
       setForm({
         ...EMPTY_SPECIALIST_FORM,
         ...specialist,
@@ -121,7 +124,29 @@ export default function DoctorPanel() {
   const handleSaveChanges = async () => {
     setSaving(true);
     try {
+      const nextEmail = formRef.current.email || "";
+      const nextWhatsapp = formRef.current.whatsapp || "";
+      const prev = originalContactRef.current;
+      const emailChanged = nextEmail !== prev.email;
+      const whatsappChanged = nextWhatsapp !== prev.whatsapp;
       await base44.entities.Specialist.update(specialistId, buildData(formRef.current));
+      if (emailChanged) {
+        logActivity({
+          type: "cambio_email",
+          description: `${formRef.current.full_name || "Un doctor"} cambió su email de contacto de "${prev.email || "(vacío)"}" a "${nextEmail || "(vacío)"}"`,
+          specialistId,
+          specialistName: formRef.current.full_name || "",
+        });
+      }
+      if (whatsappChanged) {
+        logActivity({
+          type: "cambio_telefono",
+          description: `${formRef.current.full_name || "Un doctor"} cambió su WhatsApp de "${prev.whatsapp || "(vacío)"}" a "${nextWhatsapp || "(vacío)"}"`,
+          specialistId,
+          specialistName: formRef.current.full_name || "",
+        });
+      }
+      originalContactRef.current = { email: nextEmail, whatsapp: nextWhatsapp };
       toast.success("Cambios guardados");
       recalculateScore();
       setLastSaved(new Date());
