@@ -139,6 +139,16 @@ Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${for
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <input
+            type="text"
+            name="website"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+          />
           {/* Selector de fecha tipo calendario semanal */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">Selecciona una fecha</label>
