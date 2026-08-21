@@ -5,6 +5,7 @@ import { ChevronLeft, Tag, ChevronDown, Stethoscope } from "lucide-react";
 import moment from "moment";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import DOMPurify from "dompurify";
 import SpecialistCard from "../components/SpecialistCard";
 import BlogCard from "../components/BlogCard";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -141,14 +142,19 @@ export default function BlogPostPage() {
       .filter(Boolean);
   }, [post]);
 
-  // HTML legado: inyecta ids en los <h2> para que coincidan con el TOC
+  // HTML legado: inyecta ids en los <h2> para que coincidan con el TOC.
+  // Se sanitiza con DOMPurify antes de inyectarse via dangerouslySetInnerHTML:
+  // este contenido puede venir de un formulario enviado por un doctor
+  // (DoctorBlogSubmit.jsx) y no queremos que un <script>/onerror inyectado
+  // ahí se ejecute en el navegador de cada visitante del blog.
   const htmlWithIds = useMemo(() => {
     if (!post?.content || !isHtmlContent(post.content)) return null;
-    return post.content.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (full, attrs, inner) => {
+    const withIds = post.content.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (full, attrs, inner) => {
       if (/id\s*=/.test(attrs)) return full;
       const text = inner.replace(/<[^>]+>/g, '').trim();
       return `<h2${attrs} id="${slugify(text)}">${inner}</h2>`;
     });
+    return DOMPurify.sanitize(withIds, { USE_PROFILES: { html: true } });
   }, [post]);
 
   const handleScroll = (e, id) => {
