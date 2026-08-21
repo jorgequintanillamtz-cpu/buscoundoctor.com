@@ -93,6 +93,29 @@ export default function ReviewForm({ specialist }) {
         />
       </div>
 
+      <div className="rounded-xl border border-dashed border-border/70 p-3 space-y-3 bg-muted/30">
+        <p className="text-xs font-medium text-foreground">¿Quieres el sello "Cliente verificado"? (opcional)</p>
+        <p className="text-xs text-muted-foreground -mt-2">Compártenos estos datos para que nuestro equipo pueda confirmar tu visita.</p>
+        <div>
+          <label className="text-xs font-medium text-foreground mb-1 block">Fecha de tu consulta</label>
+          <Input
+            type="date"
+            value={consultationDate}
+            onChange={(e) => setConsultationDate(e.target.value)}
+            className="rounded-xl"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-foreground mb-1 block">¿Qué consulta o tratamiento te realizaron?</label>
+          <Input
+            value={treatmentPerformed}
+            onChange={(e) => setTreatmentPerformed(e.target.value)}
+            placeholder="Ej. Limpieza dental, consulta general..."
+            className="rounded-xl"
+          />
+        </div>
+      </div>
+
       <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl font-heading font-semibold">
         {loading ? "Enviando..." : "Enviar reseña"}
       </Button>
