@@ -175,6 +175,29 @@ export default function AdminReviews() {
                   </div>
                   <StarDisplay rating={r.rating} />
                   <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{r.comment}</p>
+                  {(r.consultation_date || r.treatment_performed) && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {r.treatment_performed && <span>Consulta/tratamiento reportado: {r.treatment_performed}</span>}
+                      {r.treatment_performed && r.consultation_date && <span> · </span>}
+                      {r.consultation_date && <span>Fecha reportada: {r.consultation_date}</span>}
+                    </p>
+                  )}
+                  {r.verified_client && (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-2">
+                      <ShieldCheck className="w-3 h-3" /> Cliente verificado
+                    </span>
+                  )}
+                  {!r.approved && !r.rejected && (
+                    <label className="flex items-center gap-2 text-xs text-foreground mt-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!!verifyChecks[r.id]}
+                        onChange={(e) => setVerifyChecks((prev) => ({ ...prev, [r.id]: e.target.checked }))}
+                        className="rounded"
+                      />
+                      Marcar como cliente verificado al aprobar
+                    </label>
+                  )}
                   {r.rejected && r.rejection_reason && (
                     <p className="text-xs text-red-600 mt-2">Motivo de rechazo: {r.rejection_reason}</p>
                   )}
@@ -188,6 +211,16 @@ export default function AdminReviews() {
                       title="Aprobar"
                     >
                       <Check className="w-4 h-4 text-green-600" />
+                    </button>
+                  )}
+                  {r.approved && !r.rejected && (
+                    <button
+                      onClick={() => toggleVerified(r)}
+                      aria-label="Alternar cliente verificado"
+                      className={`p-2 rounded-xl transition-colors ${r.verified_client ? "bg-emerald-100 hover:bg-emerald-200" : "hover:bg-emerald-50"}`}
+                      title={r.verified_client ? "Quitar sello de verificado" : "Marcar como cliente verificado"}
+                    >
+                      <ShieldCheck className={`w-4 h-4 ${r.verified_client ? "text-emerald-700" : "text-muted-foreground"}`} />
                     </button>
                   )}
                   {!r.rejected && (
