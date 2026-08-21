@@ -11,6 +11,8 @@ export default function ReviewForm({ specialist }) {
   const [hover, setHover] = useState(0);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
+  const [consultationDate, setConsultationDate] = useState("");
+  const [treatmentPerformed, setTreatmentPerformed] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +30,8 @@ export default function ReviewForm({ specialist }) {
       patient_name: name,
       rating,
       comment,
+      consultation_date: consultationDate || undefined,
+      treatment_performed: treatmentPerformed || undefined,
       approved: false,
     });
     setLoading(false);
