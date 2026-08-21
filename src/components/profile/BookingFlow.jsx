@@ -66,7 +66,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
   const handleConfirm = async () => {
     if (!canConfirm) return;
-    if (website) { onConfirmed?.(); return; }
+    if (website) return;
     setSubmitting(true);
     try {
       const reasonText = service ? `Cita: ${service.name}` : (reason.trim() || "Solicitud de cita agendada desde el perfil");
