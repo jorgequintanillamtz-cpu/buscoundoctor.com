@@ -145,8 +145,6 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
         specialty_id: specialtyId,
         author: specialistName || "",
         author_title: specialty || "",
-        published: false,
-        review_status: "pending_review",
         submitted_by_specialist_id: specialistId,
       });
       setTitle("");
