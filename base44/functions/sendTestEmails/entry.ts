@@ -51,6 +51,11 @@ function renderEmail({ preheader, title, bodyHtml, ctaLabel, ctaUrl, hero }) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const isAdmin = user.role === 'admin' || user.role === 'superadmin';
+    if (!isAdmin) return Response.json({ error: 'Forbidden' }, { status: 403 });
+
     const body = await req.json().catch(() => ({}));
     const to = body.to;
     if (!to) return Response.json({ error: 'Falta "to"' }, { status: 400 });
