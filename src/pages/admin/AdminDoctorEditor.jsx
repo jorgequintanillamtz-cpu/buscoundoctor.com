@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home } from "lucide-react";
@@ -13,7 +13,7 @@ import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
-import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM } from "@/api/specialistForm";
+import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM } from "@/api/specialistForm";
 
 // Este editor ahora es exclusivo del panel de administración (/admin/doctores/editar/:id),
 // protegido por RequireAdmin. Los médicos administran su propio perfil en /panel-medico
@@ -27,6 +27,7 @@ export default function AdminDoctorEditor() {
   const isEditing = !!id;
 
   const { form, setForm, formRef, update, buildData } = useSpecialistForm();
+  const originalContactRef = useRef({ email: "", whatsapp: "" });
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
@@ -41,6 +42,7 @@ export default function AdminDoctorEditor() {
         if (!active) return;
         const item = matches[0];
         if (item) {
+          originalContactRef.current = { email: item.email || "", whatsapp: item.whatsapp || "" };
           setForm({
             ...EMPTY_SPECIALIST_FORM,
             ...item,
@@ -62,6 +64,8 @@ export default function AdminDoctorEditor() {
     specialistId: id,
     formRef,
     buildData,
+    contactRef: originalContactRef,
+    byAdmin: true,
     onSaved: () => { setLastSaved(new Date()); recalculateScore(id); },
   });
 
@@ -71,6 +75,7 @@ export default function AdminDoctorEditor() {
       const data = buildData(formRef.current);
       if (isEditing) {
         await base44.entities.Specialist.update(id, data);
+        trackContactChanges(originalContactRef, formRef.current, { specialistId: id, byAdmin: true });
         toast.success("Cambios guardados");
         recalculateScore(id);
       } else {
@@ -98,6 +103,7 @@ export default function AdminDoctorEditor() {
       const data = { ...buildData(f), active: true };
       if (isEditing) {
         await base44.entities.Specialist.update(id, data);
+        trackContactChanges(originalContactRef, f, { specialistId: id, byAdmin: true });
         setForm(prev => ({ ...prev, active: true }));
         toast.success("Perfil publicado");
         recalculateScore(id);
