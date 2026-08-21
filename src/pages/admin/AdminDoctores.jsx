@@ -57,12 +57,18 @@ export default function AdminDoctores() {
   // pasa desde la pestaña Papelera, como acción aparte y explícita.
   const handleDelete = async (id, nombre) => {
     if (!confirm(`¿Mover a la papelera al doctor "${nombre}"? Dejará de verse en el sitio, pero podrás restaurarlo después desde la pestaña Papelera.`)) return;
+    const reason = (prompt(`Motivo (opcional) por el que se da de baja a "${nombre}":`) || "").trim();
     const deletedAt = new Date().toISOString();
     try {
-      await base44.entities.Specialist.update(id, { active: false, deleted_at: deletedAt });
-      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: false, deleted_at: deletedAt } : d)));
+      await base44.entities.Specialist.update(id, { active: false, deleted_at: deletedAt, suspension_reason: reason });
+      setDoctors(prev => prev.map(d => (d.id === id ? { ...d, active: false, deleted_at: deletedAt, suspension_reason: reason } : d)));
       toast.success("Doctor movido a la papelera");
-      logActivity({ type: "doctor_papelera", description: `Se movió a la papelera el perfil de ${nombre}`, specialistId: id, specialistName: nombre });
+      logActivity({
+        type: "doctor_papelera",
+        description: `Se movió a la papelera el perfil de ${nombre}${reason ? `. Motivo: ${reason}` : ""}`,
+        specialistId: id,
+        specialistName: nombre,
+      });
       refreshBadges();
     } catch (e) {
       toast.error("No se pudo mover a la papelera: " + e.message);
