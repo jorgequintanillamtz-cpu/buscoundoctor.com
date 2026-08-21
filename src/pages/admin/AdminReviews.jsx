@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Check, XCircle, RotateCcw, Star, Stethoscope, Loader2 } from "lucide-react";
+import { Check, XCircle, RotateCcw, Star, Stethoscope, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
@@ -29,6 +29,7 @@ export default function AdminReviews() {
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [saving, setSaving] = useState(false);
+  const [verifyChecks, setVerifyChecks] = useState({});
 
   const load = async () => {
     const [all, me] = await Promise.all([
@@ -52,6 +53,7 @@ export default function AdminReviews() {
         rejection_reason: "",
         reviewed_at: new Date().toISOString(),
         reviewed_by: user?.id || "",
+        verified_client: !!verifyChecks[id],
       });
       toast.success("Reseña aprobada");
       logActivity({
@@ -94,6 +96,18 @@ export default function AdminReviews() {
       load();
     } catch (e) {
       toast.error("No se pudo rechazar: " + e.message);
+    }
+    setSaving(false);
+  };
+
+  const toggleVerified = async (r) => {
+    setSaving(true);
+    try {
+      await base44.entities.Review.update(r.id, { verified_client: !r.verified_client });
+      toast.success(r.verified_client ? "Se quitó el sello de verificado" : "Marcada como cliente verificado");
+      load();
+    } catch (e) {
+      toast.error("No se pudo actualizar: " + e.message);
     }
     setSaving(false);
   };
