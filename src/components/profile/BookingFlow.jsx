@@ -248,6 +248,39 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
       </div>
 
       <div>
+        <label className="text-sm font-medium text-foreground mb-2 block">¿Cuándo te gustaría la cita?</label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setDateMode("asap")}
+            className={`px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+              dateMode === "asap" ? "border-brand-blue bg-brand-bluePale/60 text-brand-navy" : "border-border/50 hover:border-brand-blue/40"
+            }`}
+          >
+            Lo antes posible
+          </button>
+          <button
+            type="button"
+            onClick={() => setDateMode("specific")}
+            className={`px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+              dateMode === "specific" ? "border-brand-blue bg-brand-bluePale/60 text-brand-navy" : "border-border/50 hover:border-brand-blue/40"
+            }`}
+          >
+            Elegir una fecha
+          </button>
+        </div>
+        {dateMode === "specific" && (
+          <input
+            type="date"
+            value={specificDate}
+            min={new Date().toISOString().split("T")[0]}
+            onChange={(e) => setSpecificDate(e.target.value)}
+            className="w-full h-11 px-3.5 mt-2 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
+          />
+        )}
+      </div>
+
+      <div>
         <label className="text-sm font-medium text-foreground mb-2 block">Seguro médico</label>
         <select
           value={insurerName}
