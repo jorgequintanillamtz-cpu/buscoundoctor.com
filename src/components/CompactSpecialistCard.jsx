@@ -1,7 +1,6 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
-import VerifiedSeal from "./profile/VerifiedSeal";
+import { MapPin, BadgeCheck } from "lucide-react";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
 
@@ -29,13 +28,17 @@ export default function CompactSpecialistCard({ specialist, sourcePage = "simila
   }, [specialist?.id]);
 
   return (
+    // Tarjeta ancha a propósito (w-56/60): la primera versión era angosta y
+    // cortaba el nombre completo con "…" y el sello "Verificado" (con texto)
+    // no cabía — Jorge pidió que el nombre se vea completo y que verificado
+    // sea solo una palomita chica junto al nombre, sin la pastilla azul.
     <Link
       ref={cardRef}
       to={`/especialista/${specialist.slug}`}
       onClick={() => trackDoctorClick(specialist, sourcePage)}
-      className="group flex-shrink-0 w-[160px] sm:w-[184px] snap-start bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-3.5 flex flex-col"
+      className="group flex-shrink-0 w-56 sm:w-60 snap-start bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-4 flex flex-col"
     >
-      <div className="w-full aspect-square rounded-xl bg-accent overflow-hidden flex items-center justify-center mb-3">
+      <div className="w-full aspect-[4/3] rounded-xl bg-accent overflow-hidden flex items-center justify-center mb-3">
         {specialist.profile_photo ? (
           <img
             src={specialist.profile_photo}
@@ -50,12 +53,18 @@ export default function CompactSpecialistCard({ specialist, sourcePage = "simila
         )}
       </div>
 
-      <div className="flex items-start gap-1">
-        <h3 className="font-heading font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1 flex-1 min-w-0">
+      <div className="flex items-start gap-1.5">
+        <h3 className="font-heading font-semibold text-sm text-foreground group-hover:text-primary transition-colors leading-snug flex-1 min-w-0">
           {specialist.full_name}
         </h3>
         {specialist.license_verification_status === "verified" && (
-          <VerifiedSeal size="sm" className="flex-shrink-0 mt-0.5" />
+          <BadgeCheck
+            className="w-4 h-4 text-brand-blue flex-shrink-0 mt-0.5"
+            strokeWidth={2.5}
+            aria-label="Verificado"
+          >
+            <title>Cédula profesional verificada por BuscoUnDoctor</title>
+          </BadgeCheck>
         )}
       </div>
 
@@ -63,17 +72,23 @@ export default function CompactSpecialistCard({ specialist, sourcePage = "simila
         {specialist.specialty}
       </span>
 
-      <div className="flex items-center justify-between gap-2 mt-2 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1 min-w-0">
-          <MapPin className="w-3 h-3 flex-shrink-0" />
-          <span className="truncate">{specialist.zone || specialist.location}</span>
+      {specialist.years_experience > 0 && (
+        <span className="text-xs text-muted-foreground mt-1.5">
+          {specialist.years_experience} {specialist.years_experience === 1 ? "año" : "años"} de experiencia
         </span>
-        {specialist.rating != null && (
-          <span className="flex items-center gap-0.5 text-amber-500 font-medium flex-shrink-0">
-            ★ <span className="text-foreground">{specialist.rating.toFixed(1)}</span>
-          </span>
-        )}
-      </div>
+      )}
+
+      {specialist.rating != null && (
+        <span className="flex items-center gap-1 text-amber-500 text-xs font-medium mt-1.5">
+          {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
+          <span className="text-muted-foreground font-normal">{specialist.rating.toFixed(1)}</span>
+        </span>
+      )}
+
+      <span className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5 min-w-0">
+        <MapPin className="w-3 h-3 flex-shrink-0" />
+        <span className="truncate">{specialist.zone || specialist.location}</span>
+      </span>
     </Link>
   );
 }
