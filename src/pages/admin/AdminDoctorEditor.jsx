@@ -198,8 +198,9 @@ export default function AdminDoctorEditor() {
               size="sm"
               className="rounded-xl gap-1.5"
               onClick={async () => {
-                await notifyProfileApproved(form);
-                toast.success("Aviso de perfil aprobado reenviado");
+                const sent = await notifyProfileApproved(form);
+                if (sent) toast.success("Aviso de perfil aprobado reenviado");
+                else toast.error("No se pudo enviar: este doctor no tiene un email válido registrado");
               }}
             >
               Reenviar aviso de aprobación
