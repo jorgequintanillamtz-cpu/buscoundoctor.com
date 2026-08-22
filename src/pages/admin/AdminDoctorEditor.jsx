@@ -93,6 +93,8 @@ export default function AdminDoctorEditor() {
         navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       }
       setLastSaved(new Date());
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 3000);
     } catch (e) {
       toast.error("Error al guardar: " + e.message);
     }
@@ -115,10 +117,14 @@ export default function AdminDoctorEditor() {
         setForm(prev => ({ ...prev, active: true, publication_status: "published" }));
         if (!wasAlreadyActive) notifyProfileApproved({ ...f, ...data, id });
         toast.success("Perfil publicado");
+        setJustPublished(true);
+        setTimeout(() => setJustPublished(false), 3000);
         recalculateScore(id);
       } else {
         const created = await base44.entities.Specialist.create(data);
         toast.success("Perfil publicado");
+        setJustPublished(true);
+        setTimeout(() => setJustPublished(false), 3000);
         recalculateScore(created.id);
         navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       }
