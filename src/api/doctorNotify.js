@@ -25,7 +25,29 @@ import {
 const SITE_NAME = "BuscoUnDoctor";
 const PANEL_URL = `${SITE_URL}/panel-medico`;
 
-async function sendNotification(email, subject, html) {
+// El doctor puede tener un email de contacto público (doc.email, opcional,
+// lo llena él mismo en su perfil) que puede quedar vacío. Si falta, caemos
+// de vuelta al email de la cuenta con la que inició sesión (owner_user_id ->
+// User.email), que sí existe siempre para un doctor con cuenta creada. Sin
+// este fallback, un doctor que nunca llenó el campo "email" de su perfil
+// nunca recibe ningún aviso automático (aprobación, rechazo, etc.) aunque sí
+// tenga una cuenta real y verificada.
+async function resolveDoctorEmail(doc) {
+  if (doc?.email) return doc.email;
+  if (doc?.owner_user_id) {
+    try {
+      const owner = await base44.entities.User.get(doc.owner_user_id);
+      return owner?.email || null;
+    } catch (e) {
+      console.error("No se pudo resolver el email de la cuenta del doctor:", e);
+      return null;
+    }
+  }
+  return null;
+}
+
+async function sendNotification(doc, subject, html) {
+  const email = await resolveDoctorEmail(doc);
   if (!email) return;
   try {
     await base44.integrations.Core.SendEmail({ to: email, subject, body: html, from_name: SITE_NAME });
