@@ -6,28 +6,32 @@ import BookingFlow from "./BookingFlow";
 // el paciente fue llenando (tipo de paciente, consulta, seguro, nombre).
 export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [] }) {
   return (
-    <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto space-y-5 pb-2">
-      {/* Antes esto no tenía scroll interno a propósito (Jorge quería que la
-          caja completa acompañara el scroll de la página). El problema: en
-          pantallas más bajas (laptops pequeñas, zoom del navegador, etc.) la
-          tarjeta puede ser más alta que el viewport visible, y al quedar
-          "sticky" el botón de WhatsApp queda fuera de la vista sin forma de
-          alcanzarlo. El max-h + overflow-y-auto solo entra en juego cuando la
-          tarjeta de verdad no cabe: en pantallas altas se ve exactamente
-          igual que antes, sin barra de scroll visible. */}
-      <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-7 sm:p-8">
-        <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
-        <p className="text-sm text-muted-foreground mt-1.5 mb-6">
-          Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
-        </p>
+    <div className="sticky top-24">
+      {/* La primera versión de este fix ponía el scroll interno en TODA la
+          tarjeta (título incluido), así que al hacer scroll para alcanzar el
+          botón de WhatsApp, el título "Agendar cita" se iba también hacia
+          arriba y se veía cortado/raro — justo lo que Jorge reportó. Ahora
+          el título y el texto de abajo quedan fijos (flex-shrink-0, fuera
+          del área con scroll) y SOLO el formulario de en medio (BookingFlow
+          + la nota de "gratuito") se vuelve scrollable, y nada más cuando de
+          verdad no cabe en pantallas bajas. En pantallas altas no cambia
+          nada: no aparece barra de scroll. */}
+      <div className="bg-card rounded-3xl border border-border/50 shadow-lg max-h-[calc(100vh-7rem)] flex flex-col overflow-hidden">
+        <div className="p-7 sm:p-8 pb-0 flex-shrink-0">
+          <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
+          <p className="text-sm text-muted-foreground mt-1.5 mb-6">
+            Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
+          </p>
+        </div>
 
-        <BookingFlow specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
+        <div className="px-7 sm:px-8 pb-7 sm:pb-8 overflow-y-auto">
+          <BookingFlow specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
 
-        <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
-          El contacto y la solicitud de cita son gratuitos.
-        </p>
+          <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
+            El contacto y la solicitud de cita son gratuitos.
+          </p>
+        </div>
       </div>
-
     </div>
   );
 }
