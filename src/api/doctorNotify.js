@@ -46,13 +46,18 @@ async function resolveDoctorEmail(doc) {
   return null;
 }
 
+// Devuelve true/false para que quien llama (ej. un botón "reenviar aviso" en
+// el admin) pueda avisar honestamente si en verdad se mandó el correo, en
+// vez de asumir éxito solo porque la llamada no lanzó una excepción.
 async function sendNotification(doc, subject, html) {
   const email = await resolveDoctorEmail(doc);
-  if (!email) return;
+  if (!email) return false;
   try {
     await base44.integrations.Core.SendEmail({ to: email, subject, body: html, from_name: SITE_NAME });
+    return true;
   } catch (e) {
     console.error("No se pudo enviar el aviso por correo al doctor:", e);
+    return false;
   }
 }
 
