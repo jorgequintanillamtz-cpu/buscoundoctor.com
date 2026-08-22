@@ -76,6 +76,9 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     try {
       const reasonText = service ? `Cita: ${service.name}` : (reason.trim() || "Solicitud de cita agendada desde el perfil");
       const insuranceLabel = insurerName || "Sin seguro";
+      const preferredDateLabel = dateMode === "asap"
+        ? "Lo antes posible"
+        : new Date(`${specificDate}T00:00:00`).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
 
       await base44.entities.AppointmentRequest.create({
         patient_name: name,
@@ -89,6 +92,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         service_name: service?.name,
         service_price: service?.price,
         insurer_name: insuranceLabel,
+        preferred_date: dateMode === "asap" ? "Lo antes posible" : specificDate,
       });
       notifyNewAppointmentRequest(specialist, { patient_name: name, phone, reason: reasonText });
 
@@ -100,6 +104,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         office ? `Hospital/consultorio: ${office.name || office.address_line}` : null,
         `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}`,
         service ? `Servicio: ${service.name} ($${service.price?.toLocaleString("es-MX")} MXN)` : null,
+        `Fecha preferida: ${preferredDateLabel}`,
         isOtro && reason.trim() ? `Motivo de consulta: ${reason.trim()}` : null,
         `Seguro médico: ${insuranceLabel}`,
       ].filter(Boolean);
