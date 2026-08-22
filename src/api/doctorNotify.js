@@ -25,25 +25,23 @@ import {
 const SITE_NAME = "BuscoUnDoctor";
 const PANEL_URL = `${SITE_URL}/panel-medico`;
 
-// El doctor puede tener un email de contacto público (doc.email, opcional,
-// lo llena él mismo en su perfil) que puede quedar vacío. Si falta, caemos
-// de vuelta al email de la cuenta con la que inició sesión (owner_user_id ->
-// User.email), que sí existe siempre para un doctor con cuenta creada. Sin
-// este fallback, un doctor que nunca llenó el campo "email" de su perfil
-// nunca recibe ningún aviso automático (aprobación, rechazo, etc.) aunque sí
-// tenga una cuenta real y verificada.
+// Los avisos siempre deben ir al correo con el que el doctor se registró
+// e inició sesión (la cuenta User ligada vía owner_user_id) — es el único
+// que sabemos que existe y que el doctor de verdad revisa, porque Base44 lo
+// verifica al crear la cuenta. El campo "email" de Specialist es un dato de
+// contacto público opcional que el doctor puede dejar vacío, cambiar o
+// escribir mal, así que solo se usa como último recurso para perfiles sin
+// cuenta propia (ej. perfiles cargados y administrados solo por el admin).
 async function resolveDoctorEmail(doc) {
-  if (doc?.email) return doc.email;
   if (doc?.owner_user_id) {
     try {
       const owner = await base44.entities.User.get(doc.owner_user_id);
-      return owner?.email || null;
+      if (owner?.email) return owner.email;
     } catch (e) {
       console.error("No se pudo resolver el email de la cuenta del doctor:", e);
-      return null;
     }
   }
-  return null;
+  return doc?.email || null;
 }
 
 // Devuelve true/false para que quien llama (ej. un botón "reenviar aviso" en
