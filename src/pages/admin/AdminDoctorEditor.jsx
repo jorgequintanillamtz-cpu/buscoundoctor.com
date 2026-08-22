@@ -192,6 +192,19 @@ export default function AdminDoctorEditor() {
             {saving ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
             {form.active ? "Actualizar y publicar" : "Publicar perfil"}
           </Button>
+          {isEditing && form.active && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl gap-1.5"
+              onClick={async () => {
+                await notifyProfileApproved(form);
+                toast.success("Aviso de perfil aprobado reenviado");
+              }}
+            >
+              Reenviar aviso de aprobación
+            </Button>
+          )}
         </div>
       </div>
 
