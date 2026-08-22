@@ -6,20 +6,27 @@ import BookingFlow from "./BookingFlow";
 // el paciente fue llenando (tipo de paciente, consulta, seguro, nombre).
 export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [] }) {
   return (
-    <div className="sticky top-24">
-      {/* La primera versión de este fix ponía el scroll interno en TODA la
-          tarjeta (título incluido), así que al hacer scroll para alcanzar el
-          botón de WhatsApp, el título "Agendar cita" se iba también hacia
-          arriba y se veía cortado/raro — justo lo que Jorge reportó. Ahora
-          el título y el texto de abajo quedan fijos (flex-shrink-0, fuera
-          del área con scroll) y SOLO el formulario de en medio (BookingFlow
-          + la nota de "gratuito") se vuelve scrollable, y nada más cuando de
-          verdad no cabe en pantallas bajas. En pantallas altas no cambia
-          nada: no aparece barra de scroll. */}
-      <div className="bg-card rounded-3xl border border-border/50 shadow-lg max-h-[calc(100vh-7rem)] flex flex-col overflow-hidden">
-        <div className="p-7 sm:p-8 pb-0 flex-shrink-0">
+    // El offset ya no es un número fijo (antes top-24): usa --header-h, la
+    // altura REAL del header (que varía según si el banner "¿Eres médico?"
+    // está visible), medida en vivo por Header.jsx. Con un valor fijo, cuando
+    // el banner estaba visible el header quedaba más alto que el offset y
+    // tapaba la esquina de esta tarjeta al hacer scroll — exactamente lo que
+    // Jorge reportó. El max-height de la tarjeta usa la misma variable para
+    // no pasarse del espacio real disponible debajo del header.
+    <div className="sticky" style={{ top: "calc(var(--header-h, 6rem) + 1rem)" }}>
+      <div
+        className="bg-card rounded-3xl border border-border/50 shadow-lg flex flex-col overflow-hidden"
+        style={{ maxHeight: "calc(100vh - var(--header-h, 6rem) - 2rem)" }}
+      >
+        {/* pt/px por separado (nunca "p-8" + "pb-0"): mezclar un shorthand
+            responsivo (sm:p-8) con un override de un solo lado (pb-0) es un
+            error clásico de Tailwind — en pantallas sm+ el sm:p-8 termina
+            ganando y regresa el padding-bottom que se quería quitar, dejando
+            un espacio de sobra enorme antes de "Selecciona un hospital".
+            Escribiendo solo pt/px aquí (sin ningún pb) se evita el choque. */}
+        <div className="pt-7 sm:pt-8 px-7 sm:px-8 flex-shrink-0">
           <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
-          <p className="text-sm text-muted-foreground mt-1.5 mb-6">
+          <p className="text-sm text-muted-foreground mt-1.5 mb-4">
             Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
           </p>
         </div>
