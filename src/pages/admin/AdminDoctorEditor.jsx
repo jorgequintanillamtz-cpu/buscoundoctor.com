@@ -197,25 +197,54 @@ export default function AdminDoctorEditor() {
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={handleSaveChanges} disabled={saving} className="rounded-xl gap-1.5">
-            {saving ? <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-            Guardar cambios
+            {saving ? (
+              <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+            ) : justSaved ? (
+              <Check className="w-4 h-4 text-green-600" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            {justSaved ? "¡Guardado!" : "Guardar cambios"}
           </Button>
           <Button onClick={handlePublish} disabled={saving} className="rounded-xl gap-1.5">
-            {saving ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-            {form.active ? "Actualizar y publicar" : "Publicar perfil"}
+            {saving ? (
+              <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : justPublished ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            {justPublished ? "¡Publicado!" : (form.active ? "Actualizar y publicar" : "Publicar perfil")}
           </Button>
           {isEditing && form.active && (
             <Button
               variant="outline"
               size="sm"
-              className="rounded-xl gap-1.5"
+              disabled={resendState === "sending"}
+              className={`rounded-xl gap-1.5 ${resendState === "sent" ? "text-green-600 border-green-300" : resendState === "error" ? "text-destructive border-destructive/40" : ""}`}
               onClick={async () => {
+                setResendState("sending");
                 const sent = await notifyProfileApproved(form);
-                if (sent) toast.success("Aviso de perfil aprobado reenviado");
-                else toast.error("No se pudo enviar: este doctor no tiene un email válido registrado");
+                if (sent) {
+                  setResendState("sent");
+                  toast.success("Aviso de perfil aprobado reenviado");
+                } else {
+                  setResendState("error");
+                  toast.error("No se pudo enviar: este doctor no tiene un email válido registrado");
+                }
+                setTimeout(() => setResendState("idle"), 4000);
               }}
             >
-              Reenviar aviso de aprobación
+              {resendState === "sending" ? (
+                <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+              ) : resendState === "sent" ? (
+                <Check className="w-4 h-4" />
+              ) : resendState === "error" ? (
+                <X className="w-4 h-4" />
+              ) : (
+                <Mail className="w-4 h-4" />
+              )}
+              {resendState === "sending" ? "Enviando..." : resendState === "sent" ? "¡Reenviado!" : resendState === "error" ? "No se pudo enviar" : "Reenviar aviso de aprobación"}
             </Button>
           )}
         </div>
