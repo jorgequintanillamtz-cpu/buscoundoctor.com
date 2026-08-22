@@ -28,6 +28,8 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [consultaOpen, setConsultaOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [insurerName, setInsurerName] = useState("");
+  const [dateMode, setDateMode] = useState("asap"); // asap | specific
+  const [specificDate, setSpecificDate] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -51,7 +53,8 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     name.trim() &&
     phone.replace(/\D/g, "").length >= 10 &&
     (offices.length === 0 || !!office) &&
-    (services.length === 0 || !!service || isOtro);
+    (services.length === 0 || !!service || isOtro) &&
+    (dateMode === "asap" || !!specificDate);
 
   const reset = () => {
     setDone(false);
@@ -60,6 +63,8 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     setServiceId(services.length === 1 ? services[0].id : "");
     setIsOtro(services.length === 0);
     setConsultaOpen(false);
+    setDateMode("asap");
+    setSpecificDate("");
     setName("");
     setPhone("");
   };
