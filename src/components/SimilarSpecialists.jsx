@@ -14,9 +14,18 @@ export default function SimilarSpecialists({ specialistId, specialty, zone }) {
       try {
         const all = await base44.entities.Specialist.filter({ active: true });
         if (!active) return;
+        // Bug real: antes el filtro era "misma especialidad O misma zona", y
+        // como casi todos los doctores están en la misma zona (Monterrey),
+        // en la práctica caía cualquier especialidad ahí — el título dice
+        // "Compara con otros {especialidad} cerca de ti", así que la
+        // especialidad debe ser obligatoria. La zona ahora solo se usa para
+        // ordenar (los de la misma zona primero), no para filtrar.
         const matches = all
           .filter((s) => s.id !== specialistId)
-          .filter((s) => (specialty && s.specialty === specialty) || (zone && s.zone === zone));
+          .filter((s) => (specialty ? s.specialty === specialty : zone && s.zone === zone));
+        if (zone) {
+          matches.sort((a, b) => (a.zone === zone ? 0 : 1) - (b.zone === zone ? 0 : 1));
+        }
         // Antes eran solo 4 en una lista vertical de tarjetas grandes; con el
         // slider horizontal de tarjetas chicas caben muchas más a la vista sin
         // ocupar espacio vertical, así que mostramos hasta 10.
