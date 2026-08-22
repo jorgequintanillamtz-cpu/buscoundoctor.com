@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home } from "lucide-react";
+import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, X, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -32,6 +32,12 @@ export default function AdminDoctorEditor() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  // Estado del botón "Reenviar aviso": da confirmación visible en el propio
+  // botón (no solo un toast que puede pasar inadvertido) de si el correo en
+  // verdad se mandó o no.
+  const [resendState, setResendState] = useState("idle"); // idle | sending | sent | error
+  const [justSaved, setJustSaved] = useState(false);
+  const [justPublished, setJustPublished] = useState(false);
   const [section, setSection] = useState(isEditing ? "resumen" : "perfil");
   const recalculateScore = useRecalculateScore(setForm);
 
