@@ -38,13 +38,17 @@ export default function CompactSpecialistCard({ specialist, sourcePage = "simila
       onClick={() => trackDoctorClick(specialist, sourcePage)}
       className="group flex-shrink-0 w-56 sm:w-60 snap-start bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-4 flex flex-col"
     >
+      {/* object-contain (no object-cover): antes recortaba la foto para
+          rellenar el recuadro y a veces se comía parte de la cara/cuerpo del
+          doctor. Ahora se ve la foto completa siempre, con un pequeño marco
+          de color de fondo si la proporción no calza exacto. */}
       <div className="w-full aspect-[4/3] rounded-xl bg-accent overflow-hidden flex items-center justify-center mb-3">
         {specialist.profile_photo ? (
           <img
             src={specialist.profile_photo}
             alt={specialist.full_name}
             loading="lazy"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         ) : (
           <span className="font-heading font-bold text-2xl text-primary">
