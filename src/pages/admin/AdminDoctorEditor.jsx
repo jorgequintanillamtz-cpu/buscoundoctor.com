@@ -14,6 +14,7 @@ import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM } from "@/api/specialistForm";
+import { notifyProfileApproved } from "@/api/doctorNotify";
 
 // Este editor ahora es exclusivo del panel de administración (/admin/doctores/editar/:id),
 // protegido por RequireAdmin. Los médicos administran su propio perfil en /panel-medico
@@ -100,11 +101,13 @@ export default function AdminDoctorEditor() {
     if (!f.professional_license_number) { toast.error("La cédula profesional es obligatoria"); return; }
     setSaving(true);
     try {
-      const data = { ...buildData(f), active: true };
+      const wasAlreadyActive = form.active;
+      const data = { ...buildData(f), active: true, publication_status: "published" };
       if (isEditing) {
         await base44.entities.Specialist.update(id, data);
         trackContactChanges(originalContactRef, f, { specialistId: id, byAdmin: true });
-        setForm(prev => ({ ...prev, active: true }));
+        setForm(prev => ({ ...prev, active: true, publication_status: "published" }));
+        if (!wasAlreadyActive) notifyProfileApproved({ ...f, ...data, id });
         toast.success("Perfil publicado");
         recalculateScore(id);
       } else {
