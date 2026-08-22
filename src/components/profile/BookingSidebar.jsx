@@ -6,11 +6,15 @@ import BookingFlow from "./BookingFlow";
 // el paciente fue llenando (tipo de paciente, consulta, seguro, nombre).
 export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [] }) {
   return (
-    <div className="sticky top-24 space-y-5 pb-2">
-      {/* Sin scroll interno a propósito: Jorge quiere que la caja completa
-          acompañe el scroll de la página (subiendo y bajando junto con el
-          contenido principal) hasta llegar al final de la columna, no que
-          se quede fija con una barra de scroll propia adentro. */}
+    <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto space-y-5 pb-2">
+      {/* Antes esto no tenía scroll interno a propósito (Jorge quería que la
+          caja completa acompañara el scroll de la página). El problema: en
+          pantallas más bajas (laptops pequeñas, zoom del navegador, etc.) la
+          tarjeta puede ser más alta que el viewport visible, y al quedar
+          "sticky" el botón de WhatsApp queda fuera de la vista sin forma de
+          alcanzarlo. El max-h + overflow-y-auto solo entra en juego cuando la
+          tarjeta de verdad no cabe: en pantallas altas se ve exactamente
+          igual que antes, sin barra de scroll visible. */}
       <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-7 sm:p-8">
         <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
         <p className="text-sm text-muted-foreground mt-1.5 mb-6">
