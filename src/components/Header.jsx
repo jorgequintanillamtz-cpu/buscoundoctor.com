@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
 import Logo from "@/components/Logo";
@@ -12,6 +12,7 @@ const triggerClass =
 
 
 export default function Header() {
+  const headerRef = useRef(null);
   const [open, setOpen] = useState(false);
   // Barra fija "¿Eres médico?": visible en todas las páginas, no interrumpe la
   // navegación (no es un popup) y el usuario puede cerrarla si no le interesa.
@@ -30,6 +31,27 @@ export default function Header() {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  // Alto real del header (banner "¿Eres médico?" + barra principal) expuesto
+  // como variable CSS. Elementos sticky más abajo en la página (la tarjeta
+  // de "Agendar cita", el nav de scroll-spy) la usan para calcular su propio
+  // offset y no quedar tapados por el header cuando ambos terminan "pegados"
+  // arriba al hacer scroll. Antes esos offsets eran valores fijos (top-24,
+  // top-20) que no alcanzaban a cubrir el alto real del header cuando el
+  // banner estaba visible — con ResizeObserver esto se recalcula solo, y
+  // sigue funcionando si el banner se cierra o el header cambia de alto por
+  // cualquier otro motivo.
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const setVar = () => {
+      document.documentElement.style.setProperty("--header-h", `${el.offsetHeight}px`);
+    };
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [showDoctorBanner]);
 
   useEffect(() => {
     Promise.all([
@@ -69,7 +91,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
       {showDoctorBanner && (
         // Nota: el botón de cerrar NO va anidado dentro del <Link> (eso es HTML
         // inválido -- botón dentro de enlace -- y en móvil hacía que el tap no
