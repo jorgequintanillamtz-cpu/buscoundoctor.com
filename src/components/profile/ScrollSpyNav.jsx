@@ -49,8 +49,13 @@ export default function ScrollSpyNav({ sections }) {
   }, [sections]);
 
   return (
+    // top-20 fijo antes: si el banner "¿Eres médico?" del header estaba
+    // visible, el header quedaba más alto que ese offset y este nav se
+    // metía parcialmente debajo (mismo bug que tenía la tarjeta de Agendar
+    // cita). Usa --header-h (medido en vivo por Header.jsx) igual que ella.
     <nav
-      className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky top-20 z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm overflow-x-auto"
+      className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm overflow-x-auto"
+      style={{ top: "var(--header-h, 5rem)" }}
       aria-label="Navegación del perfil"
     >
       {sections.map((s) => (
