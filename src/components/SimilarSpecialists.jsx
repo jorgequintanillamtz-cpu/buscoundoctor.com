@@ -31,7 +31,9 @@ export default function SimilarSpecialists({ specialistId, specialty, zone }) {
 
   const heading = specialty ? `Compara con otros ${specialty} cerca de ti` : "Especialistas similares";
 
-  const scrollBy = (dir) => scrollerRef.current?.scrollBy({ left: dir * 340, behavior: "smooth" });
+  // Ancho aproximado de una tarjeta (w-56/60) + el gap-3 entre ellas, para
+  // que cada click de flecha avance ~1 tarjeta completa.
+  const scrollBy = (dir) => scrollerRef.current?.scrollBy({ left: dir * 250, behavior: "smooth" });
 
   return (
     <div className="mt-6">
