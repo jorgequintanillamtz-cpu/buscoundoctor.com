@@ -7,6 +7,7 @@ import { Loader2, Mail, Lock, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } fr
 import { toast } from "sonner";
 import { generateSlug } from "@/api/specialistForm";
 import { fileToWebP } from "@/lib/fileToWebP";
+import { EMPTY_REGISTRO_DATA } from "@/lib/registroDefaults";
 import Logo from "@/components/Logo";
 import StepShell from "@/components/registro/StepShell";
 import StepDatos from "@/components/registro/StepDatos";
@@ -32,26 +33,7 @@ function GoogleIcon(props) {
 
 const STEP_KEYS = ["datos", "ubicacion", "fotos", "cuenta"];
 
-const EMPTY_DATA = {
-  title: "",
-  full_name: "",
-  whatsapp: "",
-  specialty: "",
-  subspecialty: "",
-  cedula: "",
-  years_experience: "",
-  service_price: "",
-  modality: "presencial",
-  zone: "",
-  address_street: "",
-  address_neighborhood: "",
-  address_ext_number: "",
-  address_int_number: "",
-  address_floor: "",
-  address_postal_code: "",
-  profile_photo: "",
-  gallery: [],
-};
+const EMPTY_DATA = EMPTY_REGISTRO_DATA;
 
 // StepShell y los pasos "datos"/"ubicacion"/"fotos" vivían aquí antes, en
 // línea. Se movieron a src/components/registro/ para que
