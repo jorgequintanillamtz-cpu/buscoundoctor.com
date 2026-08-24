@@ -7,6 +7,10 @@ import { Loader2, Mail, Lock, User, CheckCircle2, ArrowLeft, ArrowRight, Camera,
 import { toast } from "sonner";
 import { generateSlug } from "@/api/specialistForm";
 import Logo from "@/components/Logo";
+import StepShell from "@/components/registro/StepShell";
+import StepDatos from "@/components/registro/StepDatos";
+import StepUbicacion from "@/components/registro/StepUbicacion";
+import StepFotos from "@/components/registro/StepFotos";
 
 // Convierte una imagen a WebP (más liviana) y la renombra antes de subirla,
 // usando canvas en el navegador. Si algo falla (formato no soportado, etc.),
@@ -79,23 +83,11 @@ const EMPTY_DATA = {
   gallery: [],
 };
 
-const StepShell = ({ title, subtitle, error, children }) => (
-  <div className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 shadow-sm">
-    <div className="text-center mb-5">
-      <Logo to="/" className="h-9 mx-auto mb-3" />
-      <h1 className="font-heading font-bold text-xl text-foreground">{title}</h1>
-      {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
-    </div>
-    {/* En pantallas más anchas (escritorio), los campos cortos se acomodan de
-        a 2 por fila en vez de una sola columna larga — los bloques que deben
-        ocupar todo el ancho llevan sm:col-span-2. */}
-    <div className="grid gap-5 sm:grid-cols-2">
-      {children}
-    </div>
-    {error && <p className="text-sm text-red-500 text-center mt-5">{error}</p>}
-  </div>
-);
-
+// StepShell y los pasos "datos"/"ubicacion"/"fotos" vivían aquí antes, en
+// línea. Se movieron a src/components/registro/ para que
+// AdminVistaRegistro.jsx (vista de previsualización del admin) los importe
+// del mismo lugar y se mantengan en sync solos: cualquier cambio a un paso
+// se ve reflejado en ambos lados sin tocar nada aparte.
 export default function RegistroMedico() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState("loading"); // loading | wizard | email-form | otp | done
@@ -368,167 +360,23 @@ export default function RegistroMedico() {
             </div>
 
             {stepKey === "datos" && (
-              <StepShell title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre completo</label>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    <button type="button" onClick={() => update("title", "Dr.")}
-                      className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                      Dr.
-                    </button>
-                    <button type="button" onClick={() => update("title", "Dra.")}
-                      className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${data.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                      Dra.
-                    </button>
-                  </div>
-                  <Input value={data.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Nombre completo" className="rounded-xl" />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">WhatsApp</label>
-                  <Input value={data.whatsapp} onChange={(e) => update("whatsapp", e.target.value)} placeholder="Ej: 8181234567" type="tel" className="rounded-xl" />
-                  <p className="text-xs text-muted-foreground mt-1">Aquí te contactarán tus pacientes directamente</p>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
-                  <select value={specialties.some((s) => s.name === data.specialty) ? data.specialty : (data.specialty ? "__otra__" : "")}
-                    onChange={(e) => update("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
-                    className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl mb-2">
-                    <option value="">Selecciona tu especialidad</option>
-                    {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
-                    <option value="__otra__">Otra (no está en la lista)</option>
-                  </select>
-                  {(data.specialty === " " || (!specialties.some((s) => s.name === data.specialty) && data.specialty)) && (
-                    <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl mb-2" />
-                  )}
-                  <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Cédula profesional</label>
-                  <Input value={data.cedula} onChange={(e) => update("cedula", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 12345678" inputMode="numeric" className="rounded-xl" />
-                  <p className="text-xs text-muted-foreground mt-1">La verificamos manualmente antes de publicar tu perfil — le da confianza a tus pacientes.</p>
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Años de experiencia (opcional)</label>
-                  <Input value={data.years_experience} onChange={(e) => update("years_experience", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 8" inputMode="numeric" className="rounded-xl" />
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio de consulta de primera vez (MXN)</label>
-                  <Input value={data.service_price} onChange={(e) => update("service_price", e.target.value.replace(/[^\d.]/g, ""))} placeholder="Ej: 800" inputMode="decimal" className="rounded-xl" />
-                  <p className="text-xs text-muted-foreground mt-1">Ayuda a tus pacientes a saber qué esperar. Podrás agregar más precios y servicios después desde tu panel.</p>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">¿Cómo atiendes?</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[["presencial", "Presencial"], ["online", "En línea"], ["ambas", "Ambas"]].map(([val, label]) => (
-                      <button key={val} type="button" onClick={() => update("modality", val)}
-                        className={`h-11 rounded-xl border text-xs font-semibold transition-colors ${data.modality === val ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </StepShell>
+              <StepDatos data={data} update={update} error={error} specialties={specialties} />
             )}
 
             {stepKey === "ubicacion" && (
-              <StepShell title="Dirección de tu consultorio principal" subtitle="Podrás agregar más consultorios después" error={error}>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Ciudad</label>
-                  <select value={data.zone} onChange={(e) => update("zone", e.target.value)}
-                    className="w-full h-11 px-3 text-sm bg-background border border-input rounded-xl">
-                    <option value="">Selecciona tu ciudad</option>
-                    {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
-                  </select>
-                </div>
-                <div className="sm:col-span-2 grid grid-cols-3 gap-2">
-                  <div className="col-span-2">
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Calle</label>
-                    <Input value={data.address_street} onChange={(e) => update("address_street", e.target.value)} placeholder="Ej: Av. Vasconcelos" className="rounded-xl" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Número ext.</label>
-                    <Input value={data.address_ext_number} onChange={(e) => update("address_ext_number", e.target.value)} placeholder="Ej: 350" className="rounded-xl" />
-                  </div>
-                </div>
-                <div className="sm:col-span-2 grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Número int. (opcional)</label>
-                    <Input value={data.address_int_number} onChange={(e) => update("address_int_number", e.target.value)} placeholder="Ej: 4B" className="rounded-xl" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Piso (opcional)</label>
-                    <Input value={data.address_floor} onChange={(e) => update("address_floor", e.target.value)} placeholder="Ej: 3" className="rounded-xl" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Colonia</label>
-                  <Input value={data.address_neighborhood} onChange={(e) => update("address_neighborhood", e.target.value)} placeholder="Ej: Valle Oriente" className="rounded-xl" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Código postal</label>
-                  <Input value={data.address_postal_code} onChange={(e) => update("address_postal_code", e.target.value.replace(/\D/g, ""))} placeholder="Ej: 66269" inputMode="numeric" className="rounded-xl" />
-                </div>
-              </StepShell>
+              <StepUbicacion data={data} update={update} error={error} zones={zones} />
             )}
 
             {stepKey === "fotos" && (
-              <StepShell title="Agrega tus fotos" subtitle="Los perfiles con foto generan más confianza — todo esto es opcional, puedes hacerlo después" error={error}>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foto de perfil</label>
-                  <p className="text-xs text-muted-foreground mb-2">Es la foto que ven los pacientes junto a tu nombre en tarjetas y resultados de búsqueda — así se vería:</p>
-                  {/* Vista previa en vivo, con los datos que ya escribió en el paso 1 */}
-                  <div className="rounded-2xl border border-dashed border-border/70 bg-muted/20 p-3 flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0 border border-border/50 flex items-center justify-center">
-                      {data.profile_photo ? (
-                        <img src={data.profile_photo} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="w-5 h-5 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">{data.title} {data.full_name || "Tu nombre"}</p>
-                      <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1">
-                        {data.specialty.trim() || "Tu especialidad"} <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" /> 4.9
-                      </p>
-                    </div>
-                  </div>
-                  {data.profile_photo ? (
-                    <Button type="button" variant="outline" size="sm" className="rounded-xl" onClick={() => update("profile_photo", "")}>Quitar foto</Button>
-                  ) : (
-                    <label className="flex items-center justify-center gap-2 h-11 rounded-xl border border-dashed border-border text-sm text-muted-foreground cursor-pointer hover:bg-accent/30 transition-colors">
-                      {uploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                      {uploadingPhoto ? "Subiendo..." : "Subir foto de perfil"}
-                      <input type="file" accept="image/*" className="hidden" onChange={handleProfilePhotoUpload} disabled={uploadingPhoto} />
-                    </label>
-                  )}
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Fotos de tu consultorio o trabajo</label>
-                  <p className="text-xs text-muted-foreground mb-2">Se muestran en una galería dentro de tu perfil público. Fotos de tu consultorio, equipo o certificados le dan confianza a pacientes que no te conocen todavía.</p>
-                  {data.gallery.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2 mb-2">
-                      {data.gallery.map((url, i) => (
-                        <div key={url + i} className="relative">
-                          <img src={url} alt="" className="w-full aspect-square rounded-lg object-cover" />
-                          <button type="button" onClick={() => update("gallery", data.gallery.filter((_, idx) => idx !== i))}
-                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-foreground text-background text-xs flex items-center justify-center">×</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <label className="flex items-center justify-center gap-2 h-11 rounded-xl border border-dashed border-border text-sm text-muted-foreground cursor-pointer hover:bg-accent/30 transition-colors">
-                    {uploadingGallery ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                    {uploadingGallery ? "Subiendo..." : "Agregar fotos"}
-                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} disabled={uploadingGallery} />
-                  </label>
-                </div>
-              </StepShell>
+              <StepFotos
+                data={data}
+                update={update}
+                error={error}
+                uploadingPhoto={uploadingPhoto}
+                uploadingGallery={uploadingGallery}
+                handleProfilePhotoUpload={handleProfilePhotoUpload}
+                handleGalleryUpload={handleGalleryUpload}
+              />
             )}
 
             {stepKey === "cuenta" && (
