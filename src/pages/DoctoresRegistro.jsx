@@ -19,11 +19,20 @@ function setMeta(name, content) {
   if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
   el.setAttribute("content", content);
 }
+function setOgMeta(property, content) {
+  let el = document.querySelector(`meta[property="${property}"]`);
+  if (!el) { el = document.createElement("meta"); el.setAttribute("property", property); document.head.appendChild(el); }
+  el.setAttribute("content", content);
+}
 function setCanonicalLink(href) {
   let el = document.head.querySelector('link[rel="canonical"]');
   if (!el) { el = document.createElement("link"); el.setAttribute("rel", "canonical"); document.head.appendChild(el); }
   el.setAttribute("href", href);
 }
+
+// Imagen que se muestra en la vista previa cuando se comparte el enlace por
+// WhatsApp u otras redes (Open Graph) -- misma imagen que usa /para-medicos.
+const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
 
 // Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar
 // cómo se ve un perfil; el perfil completo es ficticio. Misma foto que usa
@@ -80,10 +89,28 @@ export default function DoctoresRegistro() {
   };
 
   useEffect(() => {
-    document.title = "Registro para Médicos Especialistas | BuscoUnDoctor";
-    setMeta("description", "Regístrate en el directorio médico de México. Crea tu perfil profesional y consigue pacientes nuevos por especialidad y zona.");
+    const title = "Regístrate gratis en BuscoUnDoctor y consigue más pacientes";
+    // Pensado para que se vea bien y dé ganas de picarle cuando se comparte
+    // por WhatsApp (antes no había tags Open Graph, así que la vista previa
+    // solo mostraba "buscoundoctor.com" sin nada convincente).
+    const description = "Tu próximo paciente en Monterrey ya te está buscando en Google y ChatGPT. Regístrate gratis y sé de los primeros médicos visibles — oferta exclusiva para los primeros 10 doctores de cada especialidad.";
+
+    document.title = title;
+    setMeta("description", description);
     setMeta("robots", "noindex, follow");
     setCanonicalLink(PAGE_URL);
+
+    setOgMeta("og:type", "website");
+    setOgMeta("og:site_name", "BuscoUnDoctor");
+    setOgMeta("og:title", title);
+    setOgMeta("og:description", description);
+    setOgMeta("og:image", HERO_IMAGE);
+    setOgMeta("og:url", PAGE_URL);
+    setOgMeta("og:locale", "es_MX");
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", title);
+    setMeta("twitter:description", description);
+    setMeta("twitter:image", HERO_IMAGE);
   }, []);
 
   // Sticky CTA móvil: aparece después de pasar el hero, igual que en /para-medicos
