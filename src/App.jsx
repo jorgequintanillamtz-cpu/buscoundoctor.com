@@ -21,6 +21,7 @@ import Dashboard from './pages/admin/Dashboard';
 import AdminInbox from './pages/admin/AdminInbox';
 import AdminVerificaciones from './pages/admin/AdminVerificaciones';
 import AdminSolicitudes from './pages/admin/AdminSolicitudes';
+import AdminCorreos from './pages/admin/AdminCorreos';
 import AdminCatalogos from './pages/admin/AdminCatalogos';
 import AdminPremium from './pages/admin/AdminPremium';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
@@ -119,6 +120,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/bandeja" element={<AdminInbox />} />
           <Route path="/admin/verificaciones" element={<AdminVerificaciones />} />
           <Route path="/admin/solicitudes" element={<AdminSolicitudes />} />
+          <Route path="/admin/correos" element={<AdminCorreos />} />
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
           <Route path="/admin/premium" element={<AdminPremium />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />
