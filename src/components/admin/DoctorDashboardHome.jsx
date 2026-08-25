@@ -68,8 +68,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true })
     const contacts30 = contacts
       .filter((c) => c.date && isWithinInterval(parseISO(c.date), { start: last30Start, end: now }))
       .reduce((sum, c) => sum + (c.count || 0), 0);
-    const contactRate = clicks30 > 0 ? Math.round((contacts30 / clicks30) * 100) : 0;
-    return { impressions30, clicks30, contacts30, contactRate };
+    return { impressions30, clicks30, contacts30 };
   }, [impressions, clicks, contacts, last30Start, now]);
 
   // ---- Datos de la gráfica ----
@@ -149,11 +148,10 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true })
       </div>
 
       {/* 4 KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <KpiCard value={kpis.impressions30} label="Impresiones este mes" sub={isOwnProfile ? "Veces que tu perfil apareció" : "Veces que apareció en el directorio"} />
         <KpiCard value={kpis.clicks30} label="Clicks este mes" sub={isOwnProfile ? "Le dieron clic a tu perfil" : "Clicks al perfil"} />
         <KpiCard value={kpis.contacts30} label="Citas agendadas este mes" sub="Solicitudes de cita" />
-        <KpiCard value={`${kpis.contactRate}%`} label="Tasa de contacto" sub="Clicks que se volvieron cita" />
       </div>
 
       {/* Gráfica o estado vacío */}
