@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Calendar, Phone, MessageCircle, User, Stethoscope, CheckCircle2,
+  Calendar, Phone, Mail, MessageCircle, User, Stethoscope, CheckCircle2,
   TrendingUp, Users, Search, ArrowUpDown,
 } from "lucide-react";
 import {
@@ -84,6 +84,9 @@ function DoctorCard({ doc, onClick }) {
 }
 
 function RequestCard({ req, hideDoctor = false }) {
+  // Desde que la tarjeta de "Agendar cita" del perfil pide correo en vez de
+  // teléfono, una solicitud puede traer uno u otro (o ambos, si viene del
+  // formulario rápido del directorio, que todavía pide teléfono).
   const wa = waLink(req.phone);
   return (
     <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 space-y-3">
@@ -113,9 +116,16 @@ function RequestCard({ req, hideDoctor = false }) {
       )}
 
       <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/40">
-        <span className="text-xs text-muted-foreground flex items-center gap-1">
-          <Phone className="w-3.5 h-3.5" /> {req.phone}
-        </span>
+        {req.phone && (
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <Phone className="w-3.5 h-3.5" /> {req.phone}
+          </span>
+        )}
+        {req.email && (
+          <a href={`mailto:${req.email}`} className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground">
+            <Mail className="w-3.5 h-3.5" /> {req.email}
+          </a>
+        )}
         {wa && (
           <a href={wa} target="_blank" rel="noopener noreferrer">
             <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-8">
