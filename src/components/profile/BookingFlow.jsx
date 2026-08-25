@@ -31,7 +31,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [dateMode, setDateMode] = useState("asap"); // asap | specific
   const [specificDate, setSpecificDate] = useState("");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   // Honeypot anti-bot: ver nota en AppointmentForm.jsx.
@@ -49,9 +49,14 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     ? `${service.name} — $${service.price?.toLocaleString("es-MX")}`
     : "Selecciona una consulta";
 
+  // Validación simple de correo (no exhaustiva a propósito): solo busca
+  // "algo@algo.algo" para atajar errores obvios de tecleo, sin bloquear
+  // direcciones válidas pero poco comunes.
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   const canConfirm =
     name.trim() &&
-    phone.replace(/\D/g, "").length >= 10 &&
+    isValidEmail &&
     (offices.length === 0 || !!office) &&
     (services.length === 0 || !!service || isOtro) &&
     (dateMode === "asap" || !!specificDate);
@@ -66,7 +71,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     setDateMode("asap");
     setSpecificDate("");
     setName("");
-    setPhone("");
+    setEmail("");
   };
 
   const handleConfirm = async () => {
@@ -82,7 +87,8 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
       await base44.entities.AppointmentRequest.create({
         patient_name: name,
-        phone,
+        email,
+        specialty: specialist.specialty,
         reason: reasonText,
         specialist_id: specialist.id,
         specialist_name: specialist.full_name,
@@ -94,13 +100,13 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         insurer_name: insuranceLabel,
         preferred_date: dateMode === "asap" ? "Lo antes posible" : specificDate,
       });
-      notifyNewAppointmentRequest(specialist, { patient_name: name, phone, reason: reasonText });
+      notifyNewAppointmentRequest(specialist, { patient_name: name, email, reason: reasonText });
 
       const lines = [
         `Hola, me gustaría consultar horarios disponibles para agendar una cita con ${specialist.full_name}.`,
         "",
         `Nombre: ${name}`,
-        `Teléfono: ${phone}`,
+        `Correo: ${email}`,
         office ? `Hospital/consultorio: ${office.name || office.address_line}` : null,
         `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}`,
         service ? `Servicio: ${service.name} ($${service.price?.toLocaleString("es-MX")} MXN)` : null,
@@ -302,10 +308,10 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
       />
 
       <input
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        placeholder="Tu número de teléfono"
-        type="tel"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Tu correo electrónico"
+        type="email"
         className="w-full h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
       />
 
