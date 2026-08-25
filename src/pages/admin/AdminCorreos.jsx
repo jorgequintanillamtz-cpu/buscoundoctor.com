@@ -278,11 +278,7 @@ export default function AdminCorreos() {
         )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="mt-4">
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filteredLeads.length} pageSize={30} />
     </div>
   );
 }
