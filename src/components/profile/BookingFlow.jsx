@@ -31,6 +31,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [dateMode, setDateMode] = useState("asap"); // asap | specific
   const [specificDate, setSpecificDate] = useState("");
   const [name, setName] = useState("");
+  const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -71,6 +72,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
     setDateMode("asap");
     setSpecificDate("");
     setName("");
+    setAge("");
     setEmail("");
   };
 
@@ -87,6 +89,8 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
 
       await base44.entities.AppointmentRequest.create({
         patient_name: name,
+        age: age ? Number(age) : undefined,
+        city: specialist.zone || specialist.location,
         email,
         specialty: specialist.specialty,
         reason: reasonText,
@@ -100,12 +104,13 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         insurer_name: insuranceLabel,
         preferred_date: dateMode === "asap" ? "Lo antes posible" : specificDate,
       });
-      notifyNewAppointmentRequest(specialist, { patient_name: name, email, reason: reasonText });
+      notifyNewAppointmentRequest(specialist, { patient_name: name, age, email, reason: reasonText });
 
       const lines = [
         `Hola, me gustaría consultar horarios disponibles para agendar una cita con ${specialist.full_name}.`,
         "",
         `Nombre: ${name}`,
+        age ? `Edad: ${age} años` : null,
         `Correo: ${email}`,
         office ? `Hospital/consultorio: ${office.name || office.address_line}` : null,
         `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}`,
@@ -307,13 +312,26 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         className="w-full h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
       />
 
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Tu correo electrónico"
-        type="email"
-        className="w-full h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
-      />
+      {/* Edad opcional: le sirve al doctor para ver a quién está atendiendo
+          antes de contestar, y a Jorge para poder segmentar mejor la
+          publicidad más adelante. No bloquea el envío si se deja vacía. */}
+      <div className="grid grid-cols-3 gap-2">
+        <input
+          value={age}
+          onChange={(e) => setAge(e.target.value.replace(/\D/g, "").slice(0, 3))}
+          placeholder="Edad"
+          type="text"
+          inputMode="numeric"
+          className="h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
+        />
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Tu correo electrónico"
+          type="email"
+          className="col-span-2 h-11 px-3.5 rounded-xl border border-border/50 text-sm focus:outline-none focus:ring-1 focus:ring-brand-blue"
+        />
+      </div>
 
       <button
         type="button"
