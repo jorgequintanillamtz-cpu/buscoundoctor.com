@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Star, ArrowRight, BadgeCheck, Clock, Crown } from "lucide-react";
+import { Star, ArrowRight, BadgeCheck, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import Logo from "@/components/Logo";
+import CountdownBox from "@/components/CountdownBox";
 import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 
 // Misma clave que lee RegistroMedico.jsx al montar: si existe, precarga el
@@ -46,6 +47,7 @@ export default function DoctoresRegistro() {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const heroRef = useRef(null);
   const countdown = useCountdown(LAUNCH_DATE);
+  const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
   const [specialties, setSpecialties] = useState([]);
   const [step1, setStep1] = useState({
@@ -220,13 +222,16 @@ export default function DoctoresRegistro() {
 
         {/* ============ COUNTDOWN EN CHICO ============ */}
         {!countdown.done && (
-          <section aria-labelledby="countdown-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-8 text-center">
-            <span id="countdown-heading" className="sr-only">Cuenta regresiva de lanzamiento</span>
-            <div className="inline-flex items-center gap-1.5 bg-brand-bluePale/60 border border-brand-blue/10 rounded-full px-3.5 py-1.5">
-              <Clock className="w-3.5 h-3.5 text-brand-blue flex-shrink-0" />
-              <span className="text-xs sm:text-sm font-semibold text-brand-blue">
-                Lanzamos en {countdown.days}d {countdown.hours}h {countdown.minutes}m {countdown.seconds}s
-              </span>
+          <section aria-labelledby="countdown-heading" className="max-w-md mx-auto px-4 sm:px-6 pb-8 text-center">
+            <span id="countdown-heading" className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue text-[11px] font-bold tracking-wide uppercase px-3 py-1.5 rounded-full mb-3">
+              <Sparkles className="w-3 h-3" />
+              Lanzamos el {launchDateLabel}
+            </span>
+            <div className="flex items-center justify-center gap-2">
+              <CountdownBox value={countdown.days} label="Días" compact />
+              <CountdownBox value={countdown.hours} label="Horas" compact />
+              <CountdownBox value={countdown.minutes} label="Min" compact />
+              <CountdownBox value={countdown.seconds} label="Seg" compact />
             </div>
           </section>
         )}
