@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Star, ArrowRight, BadgeCheck, Sparkles, Crown, Users } from "lucide-react";
+import { Star, ArrowRight, BadgeCheck, Sparkles, Crown, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
@@ -103,6 +103,15 @@ export default function DoctoresRegistro() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-center">
           <Logo to="/" className="h-[47px] sm:h-[52px]" />
         </div>
+        {!countdown.done && (
+          <div className="bg-brand-bluePale/60 border-t border-brand-blue/10 py-1.5 px-2">
+            <p className="text-center text-xs sm:text-sm font-semibold text-brand-blue flex items-center justify-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Lanzamos en {countdown.days}d {countdown.hours}h {countdown.minutes}m {countdown.seconds}s</span>
+              <span className="hidden sm:inline text-brand-navy/70 font-normal">· Regístrate antes para salir más arriba</span>
+            </p>
+          </div>
+        )}
       </header>
 
       <main>
