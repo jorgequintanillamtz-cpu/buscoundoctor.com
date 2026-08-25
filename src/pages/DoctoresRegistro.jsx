@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Star, ArrowRight, BadgeCheck, Sparkles, Crown, Users, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,8 +53,6 @@ const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-65
 // conversión, no para posicionar en buscadores.
 export default function DoctoresRegistro() {
   const navigate = useNavigate();
-  const [showStickyCta, setShowStickyCta] = useState(false);
-  const heroRef = useRef(null);
   const countdown = useCountdown(LAUNCH_DATE);
   const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
@@ -113,16 +111,6 @@ export default function DoctoresRegistro() {
     setMeta("twitter:image", HERO_IMAGE);
   }, []);
 
-  // Sticky CTA móvil: aparece después de pasar el hero, igual que en /para-medicos
-  useEffect(() => {
-    const onScroll = () => {
-      const heroBottom = heroRef.current?.getBoundingClientRect().bottom ?? 0;
-      setShowStickyCta(heroBottom < 0);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header mínimo: solo logo, sin nav -- nada que distraiga del título y el formulario */}
@@ -143,7 +131,7 @@ export default function DoctoresRegistro() {
 
       <main>
         {/* ============ HERO (idéntico a /para-medicos) ============ */}
-        <section ref={heroRef} aria-labelledby="hero-heading" className="relative overflow-hidden">
+        <section aria-labelledby="hero-heading" className="relative overflow-hidden">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div
               className="absolute -top-24 -right-16 w-[420px] h-[420px] bg-brand-blue/10"
@@ -347,21 +335,6 @@ export default function DoctoresRegistro() {
           </p>
         </div>
       </footer>
-
-      {/* Sticky CTA móvil: aparece al pasar el hero, igual que en /para-medicos */}
-      {showStickyCta && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border/50 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-          <Button
-            asChild
-            className="w-full h-12 rounded-xl font-semibold gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white shadow-md"
-          >
-            <Link to="#paso1" onClick={(e) => { e.preventDefault(); document.getElementById("paso1")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
-              Registrar mi perfil gratis
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
