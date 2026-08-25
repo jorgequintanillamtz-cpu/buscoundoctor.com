@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Star, ArrowRight, BadgeCheck, Sparkles, Crown } from "lucide-react";
+import { Star, ArrowRight, BadgeCheck, Sparkles, Crown, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
@@ -145,6 +145,7 @@ export default function DoctoresRegistro() {
               <ul className="mt-6 space-y-2.5 inline-block text-left">
                 {[
                   { icon: Crown, text: "1 año gratis de Premium (ahorras $11,988 MXN) siendo Miembro Fundador" },
+                  { icon: Users, text: "Oferta exclusiva para los primeros 10 doctores de cada especialidad" },
                 ].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-base text-foreground font-medium">
                     <span className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
