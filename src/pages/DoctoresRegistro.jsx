@@ -204,7 +204,11 @@ export default function DoctoresRegistro() {
               </div>
             </div>
 
-            <div className="relative">
+            {/* Mockup de perfil: solo en escritorio. En móvil la página debe
+                ser nada más el título, el countdown y el formulario -- el
+                mockup no cabe bien ahí y solo alarga el scroll antes de
+                llegar a lo que de verdad convierte. */}
+            <div className="relative hidden lg:block">
               <span className="absolute -top-3 -left-3 z-10 bg-foreground text-background text-[10px] font-bold tracking-wide uppercase px-3 py-1 rounded-full shadow">
                 Ejemplo de perfil
               </span>
