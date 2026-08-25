@@ -52,6 +52,7 @@ export default function AppointmentForm({ specialist, onClose, initialDate = "" 
     await base44.entities.AppointmentRequest.create({
       ...form,
       specialty: specialist.specialty,
+      city: specialist.zone || specialist.location,
       specialist_id: specialist.id,
       specialist_name: specialist.full_name,
     });
