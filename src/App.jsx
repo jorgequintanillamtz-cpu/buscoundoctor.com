@@ -23,6 +23,7 @@ import AdminVerificaciones from './pages/admin/AdminVerificaciones';
 import AdminSolicitudes from './pages/admin/AdminSolicitudes';
 import AdminCorreos from './pages/admin/AdminCorreos';
 import AdminCatalogos from './pages/admin/AdminCatalogos';
+import AdminEnfermedades from './pages/admin/AdminEnfermedades';
 import AdminPremium from './pages/admin/AdminPremium';
 import AdminSpecialties from './pages/admin/AdminSpecialties';
 import AdminZones from './pages/admin/AdminZones';
@@ -129,6 +130,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/solicitudes" element={<AdminSolicitudes />} />
           <Route path="/admin/correos" element={<AdminCorreos />} />
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
+          <Route path="/admin/enfermedades" element={<AdminEnfermedades />} />
           <Route path="/admin/premium" element={<AdminPremium />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />
           <Route path="/admin/ciudades" element={<AdminZones />} />
