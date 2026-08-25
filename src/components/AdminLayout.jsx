@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
@@ -37,6 +37,7 @@ const adminNavSections = [
       { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
       { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
       { path: "/admin/vista-registro", label: "Vista: registro de doctores", icon: Eye },
+      { path: "/admin/enfermedades", label: "Banco de enfermedades", icon: ListChecks },
     ],
   },
   {
