@@ -45,6 +45,7 @@ import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
 import PricingPage from './pages/PricingPage';
 import AdminPlanes from './pages/admin/AdminPlanes';
 import LandingMedicos from './pages/LandingMedicos';
+import DoctoresRegistro from './pages/DoctoresRegistro';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
@@ -111,6 +112,12 @@ const AuthenticatedApp = () => {
           minimalista (sin el Header/Footer del sitio) a propósito, para no
           competir con el único CTA de la página. */}
       <Route path="/para-medicos" element={<LandingMedicos />} />
+
+      {/* Versión corta de /para-medicos para tráfico de anúncios: mismo
+          título principal + countdown chico + Paso 1, sin el resto del
+          contenido. Shell propio, sin Header/Footer del sitio, igual que
+          /para-medicos. */}
+      <Route path="/doctores-registro" element={<DoctoresRegistro />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>
