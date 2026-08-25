@@ -274,6 +274,7 @@ export function notifyNewAppointmentRequest(doc, request) {
       <p>Un paciente acaba de solicitar una cita contigo en ${SITE_NAME}.</p>
       ${detailTable([
         detailRow("Paciente", esc(request?.patient_name)),
+        request?.age ? detailRow("Edad", `${esc(request.age)} años`) : "",
         request?.phone ? detailRow("Teléfono", esc(request.phone)) : "",
         request?.email ? detailRow("Correo", esc(request.email)) : "",
         detailRow("Motivo", esc(request?.reason)),
