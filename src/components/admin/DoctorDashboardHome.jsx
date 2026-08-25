@@ -147,7 +147,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true })
         </div>
       </div>
 
-      {/* 4 KPI cards */}
+      {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <KpiCard value={kpis.impressions30} label="Impresiones este mes" sub={isOwnProfile ? "Veces que tu perfil apareció" : "Veces que apareció en el directorio"} />
         <KpiCard value={kpis.clicks30} label="Clicks este mes" sub={isOwnProfile ? "Le dieron clic a tu perfil" : "Clicks al perfil"} />
