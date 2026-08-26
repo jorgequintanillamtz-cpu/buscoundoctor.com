@@ -14,17 +14,23 @@ export default function EspecialidadesSection({ specialist }) {
     let active = true;
     if (!specialist.specialty) return;
     (async () => {
+      const curated = specialist.conditions_relation || [];
       try {
-        const list = await base44.entities.Condition.filter({ specialty: specialist.specialty, active: true });
-        if (!active) return;
-        // Si el doctor ya curó su propia lista (conditions_relation), se
-        // respeta esa selección tal cual -- solo cuando no eligió nada se
-        // cae de vuelta al listado genérico de la especialidad (primeras 8).
-        const curated = specialist.conditions_relation || [];
         if (curated.length > 0) {
-          const chosen = curated.map((id) => list.find((c) => c.id === id)).filter(Boolean);
+          // El doctor pudo haber elegido condiciones de otras especialidades
+          // (el buscador del panel lo permite), así que aquí no basta con
+          // pedir solo las de su especialidad -- se trae el banco completo
+          // y se resuelve cada id elegido tal cual, sin importar de dónde
+          // venga.
+          const all = await base44.entities.Condition.list("name", 2000);
+          if (!active) return;
+          const chosen = curated.map((id) => all.find((c) => c.id === id)).filter(Boolean);
           setConditions(chosen);
         } else {
+          // Sin curación propia: listado genérico de la especialidad
+          // (primeras 8), como antes.
+          const list = await base44.entities.Condition.filter({ specialty: specialist.specialty, active: true });
+          if (!active) return;
           setConditions(list.slice(0, 8));
         }
       } catch {}
