@@ -82,7 +82,7 @@ export default function ConditionDetailPage() {
   const [condition, setCondition] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [cityRecord, setCityRecord] = useState(null);
-  const [specialistsBySpecialty, setSpecialistsBySpecialty] = useState([]);
+  const [matchingSpecialists, setMatchingSpecialists] = useState([]);
   const [activeCityNames, setActiveCityNames] = useState([]);
   const [relatedConditions, setRelatedConditions] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
@@ -103,9 +103,17 @@ export default function ConditionDetailPage() {
       setActiveCityNames(zoneList.map((z) => z.name));
       if (!found || !city) { setNotFound(true); setLoading(false); return; }
 
-      const [specialtyList, allSpecialistsForSpecialty, allConditions] = await Promise.all([
+      const [specialtyList, allPublishedSpecialists, allConditions] = await Promise.all([
         base44.entities.Specialty.filter({ name: found.specialty }),
-        base44.entities.Specialist.filter({ specialty: found.specialty, active: true, publication_status: "published" }),
+        // Antes esto filtraba por "specialty: found.specialty", lo que solo
+        // mostraba doctores cuya especialidad principal coincidiera con la
+        // clasificación del catálogo (ej. Acupuntura para "Ansiedad y estrés"),
+        // dejando fuera a psicólogos, psiquiatras o médicos generales que
+        // también la tratan. Ahora se trae todo el directorio activo y se
+        // filtra abajo por quién marcó esta condición en su perfil
+        // (conditions_relation), sin importar su especialidad. Límite alto
+        // explícito por el mismo bug del banco de +1000 registros.
+        base44.entities.Specialist.filter({ active: true, publication_status: "published" }, "full_name", 2000),
         base44.entities.Condition.filter({ specialty: found.specialty, active: true }),
       ]);
       if (!active) return;
@@ -119,7 +127,7 @@ export default function ConditionDetailPage() {
 
       setCondition(found);
       setCityRecord(city);
-      setSpecialistsBySpecialty(allSpecialistsForSpecialty);
+      setMatchingSpecialists(allPublishedSpecialists.filter((s) => (s.conditions_relation || []).includes(found.id)));
       setRelatedConditions(allConditions.filter((c) => c.slug !== found.slug).slice(0, 8));
       setRelatedPosts(blogPosts.slice(0, 3));
       setSpecialtySlug(specialtyRecord?.profession_slug || null);
@@ -133,8 +141,8 @@ export default function ConditionDetailPage() {
   // ciudades) se usa solo para el selector "también disponible en".
   const specialists = useMemo(() => {
     if (!cityRecord) return [];
-    return specialistsBySpecialty.filter((s) => (s.zone || s.location) === cityRecord.name);
-  }, [specialistsBySpecialty, cityRecord]);
+    return matchingSpecialists.filter((s) => (s.zone || s.location) === cityRecord.name);
+  }, [matchingSpecialists, cityRecord]);
 
   useEffect(() => {
     if (!condition || !cityRecord) return;
@@ -260,7 +268,7 @@ export default function ConditionDetailPage() {
   // hay en cada una, para mostrar primero la más relevante.
   const otherCities = useMemo(() => {
     if (!cityRecord) return [];
-    const allZoneNames = [...new Set(specialistsBySpecialty.map((s) => s.zone || s.location).filter(Boolean))];
+    const allZoneNames = [...new Set(matchingSpecialists.map((s) => s.zone || s.location).filter(Boolean))];
     return allZoneNames
       // Solo ciudades activas hoy -- si un doctor quedó con una ciudad que se
       // desactivó (ej. San Pedro en pausa), no la ofrecemos como link porque
@@ -269,10 +277,10 @@ export default function ConditionDetailPage() {
       .map((name) => ({
         name,
         slug: slugify(name),
-        count: specialistsBySpecialty.filter((s) => (s.zone || s.location) === name).length,
+        count: matchingSpecialists.filter((s) => (s.zone || s.location) === name).length,
       }))
       .sort((a, b) => b.count - a.count);
-  }, [specialistsBySpecialty, cityRecord, activeCityNames]);
+  }, [matchingSpecialists, cityRecord, activeCityNames]);
 
   if (loading) {
     return (
@@ -320,7 +328,7 @@ export default function ConditionDetailPage() {
           to={specialtySlug ? `/${specialtySlug}/${citySlug}` : `/especialistas?specialty=${encodeURIComponent(condition.specialty)}`}
           className="inline-block mt-1.5 text-xs font-medium text-brand-blue hover:underline"
         >
-          Atendida por: {condition.specialty}
+          También puedes ver especialistas en: {condition.specialty}
         </Link>
 
         {specialtySlug && otherCities.length > 0 && (
@@ -392,7 +400,7 @@ export default function ConditionDetailPage() {
                   Esta sección está en construcción
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Estamos incorporando {condition.specialty.toLowerCase()}s verificados en {cityRecord.name}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
+                  Todavía ningún doctor ha marcado esta condición en su perfil en {cityRecord.name}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
                 </p>
               </div>
             </div>
@@ -409,7 +417,7 @@ export default function ConditionDetailPage() {
             <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
               <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
               <p className="text-xs text-muted-foreground flex-1">
-                ¿Eres {condition.specialty.toLowerCase()}? Sé de los primeros en aparecer aquí.
+                ¿Tú tratas esta condición? Márcala en tu perfil para ser de los primeros en aparecer aquí.
               </p>
               <Button variant="outline" size="sm" className="rounded-xl flex-shrink-0" asChild>
                 <Link to="/registro-medico">Regístrate gratis</Link>
@@ -436,7 +444,7 @@ export default function ConditionDetailPage() {
             </p>
           </div>
           <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
-            <Link to={specialists.length > 0 && specialtySlug ? `/${specialtySlug}/${citySlug}` : "/especialistas"}>
+            <Link to="/especialistas">
               {specialists.length > 0 ? "Ver todos" : "Ver especialistas"} <ArrowRight className="w-4 h-4" />
             </Link>
           </Button>
