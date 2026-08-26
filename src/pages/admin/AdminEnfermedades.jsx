@@ -38,6 +38,7 @@ export default function AdminEnfermedades() {
   const [search, setSearch] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [onlyGaps, setOnlyGaps] = useState(false);
+  const [pageSize, setPageSize] = useState(30);
   const [editing, setEditing] = useState(null); // null = cerrado, {} = nuevo, objeto = editando
   const [form, setForm] = useState(EMPTY_FORM);
   const [slugTouched, setSlugTouched] = useState(false);
@@ -77,8 +78,8 @@ export default function AdminEnfermedades() {
   }, [conditions, specialtyFilter, search, onlyGaps, specialtiesWithoutConditions]);
 
   const { pageItems: paged, page, setPage, totalPages } = usePaginatedList(filtered, {
-    pageSize: 30,
-    resetKey: `${specialtyFilter}|${search}|${onlyGaps}`,
+    pageSize,
+    resetKey: `${specialtyFilter}|${search}|${onlyGaps}|${pageSize}`,
   });
 
   const openNew = () => {
@@ -229,6 +230,18 @@ export default function AdminEnfermedades() {
           <option value="">Todas las especialidades</option>
           {specialties.map((s) => <option key={s.id}>{s.name}</option>)}
         </select>
+        <select
+          value={pageSize}
+          onChange={(e) => setPageSize(Number(e.target.value))}
+          className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          aria-label="Enfermedades por página"
+        >
+          <option value={30}>30 por página</option>
+          <option value={50}>50 por página</option>
+          <option value={100}>100 por página</option>
+          <option value={200}>200 por página</option>
+          <option value={500}>500 por página</option>
+        </select>
         {onlyGaps && (
           <button
             type="button"
@@ -295,7 +308,7 @@ export default function AdminEnfermedades() {
         )}
       </div>
 
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filtered.length} pageSize={30} />
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filtered.length} pageSize={pageSize} />
 
       {editing !== null && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto" onClick={closeModal}>
