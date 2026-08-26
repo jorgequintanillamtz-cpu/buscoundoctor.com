@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, X, Mail } from "lucide-react";
+import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, X, Mail, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -9,6 +9,7 @@ import DoctorDetailsManager from "@/components/admin/DoctorDetailsManager";
 import EducationManager from "@/components/admin/EducationManager";
 import LanguagesManager from "@/components/admin/LanguagesManager";
 import InsurersManager from "@/components/admin/InsurersManager";
+import ConditionsManager from "@/components/admin/ConditionsManager";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
@@ -55,6 +56,7 @@ export default function AdminDoctorEditor() {
             ...item,
             services: item.services || [],
             insurers_relation: item.insurers_relation || [],
+            conditions_relation: item.conditions_relation || [],
             gallery: item.gallery || [],
           });
         }
@@ -158,6 +160,7 @@ export default function AdminDoctorEditor() {
     { group: "Negocio", items: [
       { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
       { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
+      { key: "enfermedades", label: "Enfermedades que trata", icon: ListChecks, requiresSaved: false },
       { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
     ]},
     { group: "Administración", items: [
@@ -314,6 +317,7 @@ export default function AdminDoctorEditor() {
               {section === "idiomas" && <LanguagesManager specialistId={id} />}
               {section === "consultorios" && <OfficeManager specialistId={id} />}
               {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
+              {section === "enfermedades" && <ConditionsManager form={form} update={update} />}
               {section === "documentos" && <DocumentManager specialistId={id} />}
               {section === "publicacion" && (
                 <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveChanges} saving={saving} />
