@@ -5,6 +5,7 @@ import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Sparkles, Stethos
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
+import { buildSearchOptions } from "@/lib/searchOptions";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
 import Logo from "../components/Logo";
@@ -107,10 +108,16 @@ const triggerClass = "h-auto text-sm font-medium text-foreground bg-transparent"
 export default function Home() {
   const navigate = useNavigate();
   const [specialties, setSpecialties] = useState([]);
+  const [conditions, setConditions] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
-  const specialtyOptions = useMemo(() => specialties.map((s) => ({ id: s.name, name: s.name })), [specialties]);
+  // Especialidades y enfermedades combinadas en un solo buscador (mismo
+  // patrón que src/components/SearchBar.jsx): el usuario puede escribir
+  // tanto "dermatólogo" como "acné" en el buscador principal del home.
+  // `heroSpecialty` guarda el id combinado ("spec:..." o "cond:...") pese al
+  // nombre, para no tocar el resto de las referencias a esa variable.
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
   const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -123,7 +130,14 @@ export default function Home() {
   const submitHeroSearch = () => {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
-    const specialtyObj = specialties.find((s) => s.name === heroSpecialty);
+    // Si se eligió una enfermedad, se resuelve a la especialidad que la
+    // atiende (mismo criterio que SearchBar.jsx).
+    const picked = searchOptions.find((o) => o.id === heroSpecialty);
+    const specialtyObj = picked?.type === "specialty"
+      ? picked.ref
+      : picked?.type === "condition"
+        ? specialties.find((s) => s.name === picked.ref.specialty)
+        : null;
     if (specialtyObj) {
       const citySlug = resolveCitySlug(zones, heroZone);
       if (heroZone) {
@@ -146,16 +160,21 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, allActive, insurerList, siteSettings] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, allActive, insurerList, siteSettings, conditionList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
       base44.entities.Specialist.filter({ active: true }),
       base44.entities.Insurer.list('name', 50).catch(() => []),
-      base44.entities.SiteSettings.list().catch(() => [])]
+      base44.entities.SiteSettings.list().catch(() => []),
+      // Límite alto explícito: el banco ya pasa de 1000 registros y el
+      // default del backend se queda corto ahí (mismo bug que se corrigió
+      // en /admin/enfermedades y en SearchBar.jsx).
+      base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => [])]
       );
       setSpecialties(specs);
+      setConditions(conditionList);
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
@@ -313,12 +332,12 @@ export default function Home() {
             <h2 className="hidden sm:block font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
             <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad</label>
+                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
                 <SearchableSelect
-                  options={specialtyOptions}
+                  options={searchOptions}
                   value={heroSpecialty}
                   onChange={setHeroSpecialty}
-                  placeholder="¿Qué especialidad buscas?"
+                  placeholder="¿Qué especialidad o enfermedad buscas?"
                   icon={Stethoscope}
                   hint="Especialidad"
                   triggerClassName={triggerClass}
