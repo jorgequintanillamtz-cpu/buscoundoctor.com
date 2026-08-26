@@ -130,14 +130,19 @@ export default function Home() {
   const submitHeroSearch = () => {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
-    // Si se eligió una enfermedad, se resuelve a la especialidad que la
-    // atiende (mismo criterio que SearchBar.jsx).
     const picked = searchOptions.find((o) => o.id === heroSpecialty);
-    const specialtyObj = picked?.type === "specialty"
-      ? picked.ref
-      : picked?.type === "condition"
-        ? specialties.find((s) => s.name === picked.ref.specialty)
-        : null;
+    if (picked?.type === "condition") {
+      // Antes esto resolvía a "la" especialidad que clasifica la enfermedad
+      // en el catálogo (ej. Acupuntura para "Ansiedad y estrés"), lo que
+      // escondía a doctores de otras especialidades que también la tratan.
+      // Ahora se manda directo a la página de la enfermedad, que lista a
+      // quien la haya marcado en su perfil (conditions_relation) sin
+      // importar su especialidad, ya scopeada a la ciudad elegida.
+      const citySlug = resolveCitySlug(zones, heroZone);
+      navigate(`/enfermedades/${picked.ref.slug}/${citySlug}`);
+      return;
+    }
+    const specialtyObj = picked?.type === "specialty" ? picked.ref : null;
     if (specialtyObj) {
       const citySlug = resolveCitySlug(zones, heroZone);
       if (heroZone) {
