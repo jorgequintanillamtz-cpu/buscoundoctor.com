@@ -37,17 +37,24 @@ export default function SearchBar({ className = "" }) {
   const onListPage = location.pathname.startsWith("/especialistas");
   const canBuscar = onListPage ? Boolean(picked || zone) : Boolean(picked);
 
-  // Si se eligió una enfermedad, la búsqueda resuelve a la especialidad que la
-  // atiende: así el usuario ve el listado completo de doctores de esa
-  // especialidad (con filtros), no solo la página informativa de la enfermedad.
-  const resolvedSpecialty = picked?.type === "specialty"
-    ? picked.ref
-    : picked?.type === "condition"
-      ? specialties.find((s) => s.name === picked.ref.specialty)
-      : null;
+  // Las enfermedades ya no resuelven a "la" especialidad que las clasifica
+  // en el catálogo (ver handleBuscar) -- resolvedSpecialty ahora solo aplica
+  // a picks de especialidad.
+  const resolvedSpecialty = picked?.type === "specialty" ? picked.ref : null;
 
   const handleBuscar = () => {
     if (!canBuscar) return;
+    if (picked?.type === "condition") {
+      // Antes esto resolvía a "la" especialidad que clasifica la enfermedad
+      // en el catálogo (ej. Acupuntura para "Ansiedad y estrés"), lo que
+      // escondía a doctores de otras especialidades que también la tratan.
+      // Ahora se manda directo a la página de la enfermedad, que lista a
+      // quien la haya marcado en su perfil (conditions_relation) sin
+      // importar su especialidad, ya scopeada a la ciudad elegida.
+      const citySlug = resolveCitySlug(zones, zone?.name);
+      navigate(`/enfermedades/${picked.ref.slug}/${citySlug}`);
+      return;
+    }
     // En la página de lista, preservar el filtrado por query params (no romper SpecialistList)
     if (onListPage) {
       const params = new URLSearchParams();
