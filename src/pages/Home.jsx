@@ -133,13 +133,15 @@ export default function Home() {
     const picked = searchOptions.find((o) => o.id === heroSpecialty);
     if (picked?.type === "condition") {
       // Antes esto resolvía a "la" especialidad que clasifica la enfermedad
-      // en el catálogo (ej. Acupuntura para "Ansiedad y estrés"), lo que
-      // escondía a doctores de otras especialidades que también la tratan.
-      // Ahora se manda directo a la página de la enfermedad, que lista a
-      // quien la haya marcado en su perfil (conditions_relation) sin
-      // importar su especialidad, ya scopeada a la ciudad elegida.
-      const citySlug = resolveCitySlug(zones, heroZone);
-      navigate(`/enfermedades/${picked.ref.slug}/${citySlug}`);
+      // en el catálogo (ej. Acupuntura para "Ansiedad y estrés") y navegaba a
+      // su página SEO, lo que escondía a doctores de otras especialidades que
+      // también la tratan. Ahora se manda al directorio general (/especialistas)
+      // filtrado por esta enfermedad específica (conditions_relation), sin
+      // importar la especialidad de cada doctor.
+      const params = new URLSearchParams();
+      params.set("condition", picked.ref.slug);
+      if (heroZone) params.set("zone", heroZone);
+      navigate(`/especialistas?${params.toString()}`);
       return;
     }
     const specialtyObj = picked?.type === "specialty" ? picked.ref : null;
