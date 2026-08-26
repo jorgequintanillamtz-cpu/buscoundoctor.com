@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -9,6 +9,7 @@ import DoctorDetailsManager from "@/components/admin/DoctorDetailsManager";
 import EducationManager from "@/components/admin/EducationManager";
 import LanguagesManager from "@/components/admin/LanguagesManager";
 import InsurersManager from "@/components/admin/InsurersManager";
+import ConditionsManager from "@/components/admin/ConditionsManager";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
@@ -47,6 +48,7 @@ const SECTION_GROUPS = [
     { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
+    { key: "enfermedades", label: "Enfermedades que trato", icon: ListChecks, requiresSaved: false },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
   ]},
   { group: "Contenido", items: [
@@ -103,6 +105,7 @@ export default function DoctorPanel() {
         ...specialist,
         services: specialist.services || [],
         insurers_relation: specialist.insurers_relation || [],
+        conditions_relation: specialist.conditions_relation || [],
         gallery: specialist.gallery || [],
       });
       setStatus("ready");
@@ -336,6 +339,7 @@ export default function DoctorPanel() {
             {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
             {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
             {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
+            {section === "enfermedades" && <ConditionsManager form={form} update={update} />}
             {section === "documentos" && <DocumentManager specialistId={specialistId} />}
             {section === "casos" && <CasesManager specialistId={specialistId} />}
             {section === "publicaciones" && <PostsManager specialistId={specialistId} />}
