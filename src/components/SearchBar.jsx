@@ -21,7 +21,11 @@ export default function SearchBar({ className = "" }) {
     Promise.all([
       base44.entities.Specialty.filter({ active: true }).catch(() => []),
       base44.entities.Zone.filter({ active: true }).catch(() => []),
-      base44.entities.Condition.filter({ active: true }).catch(() => []),
+      // Límite alto explícito: el banco ya pasa de 1000 registros y el
+      // default del backend se queda corto ahí (mismo bug que se corrigió
+      // en /admin/enfermedades), dejando fuera del buscador principal
+      // enfermedades reales que sí están en el catálogo.
+      base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
     ]).then(([s, z, c]) => { setSpecialties(s); setZones(z); setConditions(c); });
   }, []);
 
