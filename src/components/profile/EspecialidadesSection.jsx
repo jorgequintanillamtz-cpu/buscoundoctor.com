@@ -17,11 +17,20 @@ export default function EspecialidadesSection({ specialist }) {
       try {
         const list = await base44.entities.Condition.filter({ specialty: specialist.specialty, active: true });
         if (!active) return;
-        setConditions(list.slice(0, 8));
+        // Si el doctor ya curó su propia lista (conditions_relation), se
+        // respeta esa selección tal cual -- solo cuando no eligió nada se
+        // cae de vuelta al listado genérico de la especialidad (primeras 8).
+        const curated = specialist.conditions_relation || [];
+        if (curated.length > 0) {
+          const chosen = curated.map((id) => list.find((c) => c.id === id)).filter(Boolean);
+          setConditions(chosen);
+        } else {
+          setConditions(list.slice(0, 8));
+        }
       } catch {}
     })();
     return () => { active = false; };
-  }, [specialist.specialty]);
+  }, [specialist.specialty, specialist.conditions_relation]);
 
   return (
     <div id="especialidades" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
