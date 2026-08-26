@@ -26,6 +26,12 @@ export default function SpecialistList() {
   const [filterPrice, setFilterPrice] = useState("");
   const [filterInsurer, setFilterInsurer] = useState("");
   const [searchQuery, setSearchQuery] = useState(urlParams.get("q") || "");
+  // Filtro por enfermedad (?condition=slug): llega desde el buscador cuando
+  // se elige una enfermedad en vez de una especialidad. Se guarda el registro
+  // completo (no solo el slug) para poder filtrar por conditions_relation y
+  // mostrar su nombre en el título y el chip de filtro activo.
+  const [filterConditionSlug, setFilterConditionSlug] = useState(urlParams.get("condition") || "");
+  const [conditionRecord, setConditionRecord] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -45,7 +51,16 @@ export default function SpecialistList() {
   }, []);
 
   useEffect(() => {
-    const hasFilters = !!(filterSpecialty || filterZone || filterInsurer || searchQuery);
+    if (!filterConditionSlug) { setConditionRecord(null); return; }
+    let active = true;
+    base44.entities.Condition.filter({ slug: filterConditionSlug }).then((list) => {
+      if (active) setConditionRecord(list[0] || null);
+    });
+    return () => { active = false; };
+  }, [filterConditionSlug]);
+
+  useEffect(() => {
+    const hasFilters = !!(filterSpecialty || filterZone || filterInsurer || filterConditionSlug || searchQuery);
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (hasFilters) {
       if (!metaRobots) {
@@ -57,7 +72,7 @@ export default function SpecialistList() {
     } else if (metaRobots) {
       metaRobots.remove();
     }
-  }, [filterSpecialty, filterZone, filterInsurer, searchQuery]);
+  }, [filterSpecialty, filterZone, filterInsurer, filterConditionSlug, searchQuery]);
 
   const filtered = useMemo(() => {
     let result = [...specialists];
@@ -77,6 +92,9 @@ export default function SpecialistList() {
     if (filterInsurer) {
       result = result.filter((s) => (s.insurers_relation || []).includes(filterInsurer));
     }
+    if (conditionRecord) {
+      result = result.filter((s) => (s.conditions_relation || []).includes(conditionRecord.id));
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -90,9 +108,9 @@ export default function SpecialistList() {
     }
 
     return rankSpecialists(result);
-  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, searchQuery]);
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, conditionRecord, searchQuery]);
 
-  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer].filter(Boolean).length;
+  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, filterConditionSlug].filter(Boolean).length;
 
   const clearFilters = () => {
     setFilterSpecialty("");
@@ -100,6 +118,7 @@ export default function SpecialistList() {
     setFilterModality("");
     setFilterPrice("");
     setFilterInsurer("");
+    setFilterConditionSlug("");
   };
 
   if (loading) {
@@ -125,7 +144,7 @@ export default function SpecialistList() {
       </Breadcrumb>
       <div className="mb-5">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-          {filterSpecialty || "Todos los especialistas"}
+          {conditionRecord?.name || filterSpecialty || "Todos los especialistas"}
         </h1>
         <p className="text-muted-foreground mt-1">
           {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
@@ -282,6 +301,12 @@ export default function SpecialistList() {
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {insurers.find((i) => i.id === filterInsurer)?.name}
                   <button onClick={() => setFilterInsurer("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {filterConditionSlug && (
+                <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
+                  {conditionRecord?.name || "Enfermedad"}
+                  <button onClick={() => setFilterConditionSlug("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
             </div>
