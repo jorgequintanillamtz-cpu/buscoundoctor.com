@@ -61,6 +61,7 @@ export const EMPTY_SPECIALIST_FORM = {
   schedule: "",
   services: [],
   insurers_relation: [],
+  conditions_relation: [],
   gallery: [],
   video_url: "",
   certifications: "",
