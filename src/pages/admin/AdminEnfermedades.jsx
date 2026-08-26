@@ -45,7 +45,7 @@ export default function AdminEnfermedades() {
 
   const loadData = async () => {
     const [condList, specList] = await Promise.all([
-      base44.entities.Condition.list("name", 1000),
+      base44.entities.Condition.list("name", 2000),
       base44.entities.Specialty.filter({ active: true }),
     ]);
     setConditions(condList);
