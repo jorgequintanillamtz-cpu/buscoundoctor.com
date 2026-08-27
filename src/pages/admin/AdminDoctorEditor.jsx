@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, X, Mail, ListChecks } from "lucide-react";
+import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, X, Mail, ListChecks, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -10,6 +10,7 @@ import EducationManager from "@/components/admin/EducationManager";
 import LanguagesManager from "@/components/admin/LanguagesManager";
 import InsurersManager from "@/components/admin/InsurersManager";
 import ConditionsManager from "@/components/admin/ConditionsManager";
+import HighlightsManager from "@/components/admin/HighlightsManager";
 import DoctorEditorSidebar from "@/components/admin/DoctorEditorSidebar";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
@@ -161,6 +162,7 @@ export default function AdminDoctorEditor() {
       { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
       { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
       { key: "enfermedades", label: "Enfermedades que trata", icon: ListChecks, requiresSaved: false },
+      { key: "tecnologia", label: "Tecnología y tratamientos", icon: Cpu, requiresSaved: true },
       { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
     ]},
     { group: "Administración", items: [
@@ -318,6 +320,7 @@ export default function AdminDoctorEditor() {
               {section === "consultorios" && <OfficeManager specialistId={id} />}
               {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
               {section === "enfermedades" && <ConditionsManager form={form} update={update} />}
+              {section === "tecnologia" && <HighlightsManager specialistId={id} />}
               {section === "documentos" && <DocumentManager specialistId={id} />}
               {section === "publicacion" && (
                 <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveChanges} saving={saving} />
