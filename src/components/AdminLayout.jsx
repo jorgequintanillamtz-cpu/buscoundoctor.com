@@ -7,8 +7,11 @@ import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 // Operación, con las 4 colas de revisión que alimentan la Bandeja de
 // entrada juntas y en el mismo orden que ahí (Doctores, Verificaciones,
 // Blog, Reseñas), seguidas de lo operativo que no es cola de aprobación
-// (Solicitudes, Premium) y el Historial como bitácora al final; después
-// Contenido (solo texto/imagen del sitio, sin cola de revisión); y
+// (Solicitudes, Premium) y el Historial como bitácora al final; luego
+// Bancos, los 3 catálogos de taxonomía médica que alimentan la búsqueda
+// (especialidades, subespecialidades, enfermedades) -- viven juntos y con
+// nombre consistente a propósito, en vez de regados en otras secciones;
+// después Contenido (solo texto/imagen del sitio, sin cola de revisión); y
 // Configuración al final (lo que casi nunca cambia).
 const adminNavSections = [
   {
@@ -32,19 +35,24 @@ const adminNavSections = [
     ],
   },
   {
+    label: "Bancos",
+    items: [
+      { path: "/admin/especialidades", label: "Banco de especialidades", icon: Heart },
+      { path: "/admin/subespecialidades", label: "Banco de subespecialidades", icon: GraduationCap },
+      { path: "/admin/enfermedades", label: "Banco de enfermedades", icon: ListChecks },
+    ],
+  },
+  {
     label: "Contenido",
     items: [
       { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
       { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
       { path: "/admin/vista-registro", label: "Vista: registro de doctores", icon: Eye },
-      { path: "/admin/enfermedades", label: "Banco de enfermedades", icon: ListChecks },
-      { path: "/admin/subespecialidades", label: "Banco de subespecialidades", icon: GraduationCap },
     ],
   },
   {
     label: "Configuración",
     items: [
-      { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
       { path: "/admin/ciudades", label: "Ciudades", icon: MapPin },
       { path: "/admin/catalogos", label: "Catálogos", icon: ShieldPlus },
       { path: "/admin/planes", label: "Planes y precios", icon: Tag },
