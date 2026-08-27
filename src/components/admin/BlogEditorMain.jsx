@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { fileToWebP } from "@/lib/fileToWebP";
 import { Upload, X, Eye, Edit3, Bold, Italic, Link, List, ListOrdered, Quote, Image, Minus, AlignLeft } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -87,12 +88,10 @@ export default function BlogEditorMain({ form, update }) {
 
   const uploadFeatured = async (file) => {
     if (!file || !file.type.startsWith("image/")) { toast.error("Solo imágenes JPG, PNG o WEBP"); return; }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.warning("La imagen pesa más de 2MB — puede hacer más lenta la carga de la página. Considera comprimirla antes de subirla.");
-    }
     setUploadingFeatured(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       update("image", file_url);
       if (!form.image_alt) update("image_alt", form.title || "imagen destacada");
       toast.success("Imagen destacada cargada");
@@ -108,12 +107,10 @@ export default function BlogEditorMain({ form, update }) {
   const handleInlineImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.warning("Esta imagen pesa más de 2MB — puede hacer más lenta la carga del artículo. Considera comprimirla.");
-    }
     setUploadingInline(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       const suggestedAlt = window.prompt("Describe brevemente esta imagen (alt text para SEO y accesibilidad):", file.name.split(".")[0]) || file.name.split(".")[0];
       const el = contentRef.current;
       const s = el ? el.selectionStart : (form.content || "").length;
