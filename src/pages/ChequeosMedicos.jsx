@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Checkbox } from "@/components/ui/checkbox";
 import { base44 } from "@/api/base44Client";
 import { recommendCheckups, URGENCY_LEVELS } from "@/lib/healthCheckups";
 import { slugify } from "@/lib/citySlug";
+import CheckupDonut from "@/components/CheckupDonut";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -19,6 +21,18 @@ const URGENCY_STYLES = {
   alta: "bg-red-50 text-red-700 border-red-200",
   media: "bg-amber-50 text-amber-700 border-amber-200",
   baja: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
+
+const URGENCY_BORDER = {
+  alta: "border-l-red-500",
+  media: "border-l-amber-500",
+  baja: "border-l-emerald-500",
+};
+
+const DONUT_CONFIG = {
+  alta: { color: "#ef4444", label: "Prioridad alta" },
+  media: { color: "#f59e0b", label: "Prioridad media" },
+  baja: { color: "#10b981", label: "Prioridad baja" },
 };
 
 export default function ChequeosMedicos() {
@@ -33,6 +47,7 @@ export default function ChequeosMedicos() {
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [done, setDone] = useState({});
 
   useEffect(() => {
     base44.entities.Zone.filter({ active: true })
@@ -41,7 +56,7 @@ export default function ChequeosMedicos() {
   }, []);
 
   useEffect(() => {
-    document.title = "¿Qué estudios médicos debo hacerme según mi edad? | Calculadora de Chequeos | BuscoUnDoctor";
+    document.title = "Calculadora de estudios médicos por edad | BuscoUnDoctor";
     setMeta("description", "Calculadora interactiva de chequeos médicos preventivos según tu edad, sexo y factores de riesgo. Descubre qué estudios hacer, con qué frecuencia y encuentra al especialista verificado en Monterrey y San Pedro.");
     setMeta("robots", "index, follow");
 
@@ -99,6 +114,7 @@ export default function ChequeosMedicos() {
   const reset = () => {
     setSubmitted(false);
     setError("");
+    setDone({});
   };
 
   return (

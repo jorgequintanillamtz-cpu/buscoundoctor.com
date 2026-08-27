@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import {
-  Inbox, Stethoscope, Users, ShieldCheck, FileText, Crown,
+  Inbox, Stethoscope, Users, ShieldCheck, FileText, Crown, ListChecks,
   CheckCircle2, XCircle, Loader2, PartyPopper,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -124,6 +124,27 @@ function PendingDoctorCard({ doc, onReviewed }) {
   );
 }
 
+// Tarjeta de una solicitud de enfermedad: a diferencia de las otras colas,
+// crearla o rechazarla necesita el modal completo del banco (nombre,
+// especialidad, contenido...), así que aquí solo se informa y se manda a
+// /admin/enfermedades para actuar -- mismo patrón que LatePaymentCard.
+function ConditionRequestCard({ req }) {
+  return (
+    <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-full bg-muted flex-shrink-0 flex items-center justify-center text-muted-foreground">
+        <ListChecks className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground truncate">{req.requested_name}</p>
+        <p className="text-xs text-muted-foreground truncate">Solicitada por {req.specialist_name || "un doctor"}</p>
+      </div>
+      <Button asChild size="sm" variant="outline" className="rounded-xl flex-shrink-0">
+        <Link to="/admin/enfermedades">Revisar</Link>
+      </Button>
+    </div>
+  );
+}
+
 // Tarjeta de un doctor Premium retrasado en su pago: a diferencia de las
 // otras 3 colas, aquí no hay un simple aprobar/rechazar — registrar el pago
 // o desactivar el perfil requiere el formulario completo, así que esta
@@ -184,16 +205,18 @@ export default function AdminInbox() {
   const [posts, setPosts] = useState([]);
   const [payments, setPayments] = useState([]);
   const [premiumStatuses, setPremiumStatuses] = useState([]);
+  const [conditionRequests, setConditionRequests] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const [specs, allDocs, allPosts, allPayments, statuses, me] = await Promise.all([
+    const [specs, allDocs, allPosts, allPayments, statuses, allConditionRequests, me] = await Promise.all([
       base44.entities.Specialist.list(),
       base44.entities.SpecialistDocument.list("-created_date", 500),
       base44.entities.BlogPost.list("-created_date", 500),
       base44.entities.PremiumPayment.list("-payment_date", 1000),
       loadPremiumStatuses(),
+      base44.entities.ConditionRequest.filter({ status: "pendiente" }, "-created_date").catch(() => []),
       base44.auth.me().catch(() => null),
     ]);
     setSpecialists(specs);
@@ -201,6 +224,7 @@ export default function AdminInbox() {
     setPosts(allPosts);
     setPayments(allPayments);
     setPremiumStatuses(statuses);
+    setConditionRequests(allConditionRequests);
     setUser(me);
     setLoading(false);
   };
@@ -234,7 +258,7 @@ export default function AdminInbox() {
     [specialists, premiumStatuses, payments]
   );
 
-  const totalPending = pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length;
+  const totalPending = pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
 
   if (loading) {
     return (
@@ -251,8 +275,9 @@ export default function AdminInbox() {
         <h1 className="font-heading font-bold text-2xl text-foreground">Bandeja de entrada</h1>
       </div>
       <p className="text-sm text-muted-foreground mb-6">
-        Las 4 colas de pendientes del panel, juntas en un solo lugar: doctores por aprobar, documentos por
-        verificar, artículos de blog por revisar, y doctores Premium retrasados en su pago.
+        Las 5 colas de pendientes del panel, juntas en un solo lugar: doctores por aprobar, documentos por
+        verificar, artículos de blog por revisar, doctores Premium retrasados en su pago, y solicitudes de
+        enfermedades nuevas.
       </p>
 
       {totalPending === 0 ? (
@@ -289,6 +314,12 @@ export default function AdminInbox() {
           <InboxSection icon={Crown} title="Premium retrasados en su pago" count={lateDoctors.length} emptyLabel="Nadie está retrasado.">
             {lateDoctors.map((doc) => (
               <LatePaymentCard key={doc.id} doc={doc} />
+            ))}
+          </InboxSection>
+
+          <InboxSection icon={ListChecks} title="Enfermedades solicitadas" count={conditionRequests.length} emptyLabel="No hay solicitudes de enfermedades nuevas.">
+            {conditionRequests.map((req) => (
+              <ConditionRequestCard key={req.id} req={req} />
             ))}
           </InboxSection>
         </>
