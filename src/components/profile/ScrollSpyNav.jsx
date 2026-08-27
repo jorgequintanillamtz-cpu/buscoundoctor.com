@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from "react";
 // IntersectionObserver en vez de calcular scroll a mano.
 export default function ScrollSpyNav({ sections }) {
   const [active, setActive] = useState(sections[0]?.id);
+  // Solo mostramos en la barra las secciones que de verdad tienen contenido
+  // -- varias (estudios, tecnología y tratamientos, hospitales, servicios,
+  // faq...) se auto-ocultan (return null) cuando el doctor no cargó nada, y
+  // antes el título seguía apareciendo en la barra aunque llevara a nada.
+  // Se va llenando conforme el mismo scan() de abajo va detectando qué ids
+  // sí llegaron a montarse en el DOM.
+  const [presentIds, setPresentIds] = useState(() => new Set());
   const observerRef = useRef(null);
 
   useEffect(() => {
@@ -28,14 +35,18 @@ export default function ScrollSpyNav({ sections }) {
     // Con un MutationObserver reescaneamos cada vez que cambia el DOM y
     // vamos sumando a observar las secciones que van apareciendo.
     const scan = () => {
+      let found = null;
       sections.forEach((s) => {
         if (observed.has(s.id)) return;
         const el = document.getElementById(s.id);
         if (el) {
           observed.add(s.id);
           observerRef.current.observe(el);
+          found = found || [];
+          found.push(s.id);
         }
       });
+      if (found) setPresentIds((prev) => new Set([...prev, ...found]));
     };
 
     scan();
@@ -58,7 +69,7 @@ export default function ScrollSpyNav({ sections }) {
       style={{ top: "var(--header-h, 5rem)" }}
       aria-label="Navegación del perfil"
     >
-      {sections.map((s) => (
+      {sections.filter((s) => presentIds.has(s.id)).map((s) => (
         <a
           key={s.id}
           href={`#${s.id}`}
