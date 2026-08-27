@@ -365,7 +365,7 @@ export default function ChequeosMedicos() {
                         </div>
                         {r.specialty ? (
                           <Link
-                            to={`/${r.specialty.profession_slug}/${citySlug}`}
+                            to={`/especialistas?specialty=${encodeURIComponent(r.specialty.name)}&zone=${encodeURIComponent(city)}`}
                             className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
                           >
                             Ver {r.specialty.name}
