@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { fileToWebP } from "@/lib/fileToWebP";
 import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loader2, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,8 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       setOffice((prev) => ({ ...prev, photos: [...(prev.photos || []), file_url] }));
     } catch {
       toast.error("Error al subir la foto");
