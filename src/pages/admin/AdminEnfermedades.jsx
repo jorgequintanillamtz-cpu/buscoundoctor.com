@@ -233,8 +233,58 @@ export default function AdminEnfermedades() {
         </Button>
       </div>
       <p className="text-sm text-muted-foreground mb-6">
-        Catálogo de enfermedades y padecimientos por especialidad. Alimenta las páginas públicas de enfermedades y, próximamente, la lista de la que cada doctor elige cuáles trata.
+        Catálogo de enfermedades y padecimientos por especialidad. Alimenta las páginas públicas de enfermedades y la lista de la que cada doctor elige cuáles trata.
       </p>
+
+      {requests.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Inbox className="w-4 h-4 text-muted-foreground" />
+            <h2 className="font-heading font-semibold text-sm text-foreground">Solicitudes de doctores</h2>
+            <span className="text-xs bg-amber-500 text-white rounded-full px-2 py-0.5 font-semibold">{requests.length}</span>
+          </div>
+          <div className="space-y-3">
+            {requests.map((r) => (
+              <div key={r.id} className="bg-card border border-border/50 rounded-2xl p-4">
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{r.requested_name}</p>
+                    <p className="text-xs text-muted-foreground">Solicitada por {r.specialist_name || "un doctor"}</p>
+                    {r.note && <p className="text-xs text-muted-foreground mt-1 italic">"{r.note}"</p>}
+                  </div>
+                  {rejectingId === r.id ? (
+                    <div className="w-full sm:w-auto space-y-2">
+                      <textarea
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="Motivo de rechazo"
+                        className="w-full sm:w-64 text-sm border border-input rounded-xl px-3 py-2 min-h-[50px] bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="destructive" className="rounded-xl" disabled={resolvingId === r.id} onClick={() => rejectRequest(r)}>
+                          Confirmar rechazo
+                        </Button>
+                        <Button size="sm" variant="outline" className="rounded-xl" onClick={() => { setRejectingId(null); setRejectReason(""); }}>
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={() => openNewFromRequest(r)}>
+                        <Plus className="w-3.5 h-3.5" /> Crear enfermedad
+                      </Button>
+                      <Button size="sm" variant="outline" className="rounded-xl gap-1.5" onClick={() => setRejectingId(r.id)}>
+                        <X className="w-3.5 h-3.5" /> Rechazar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-card border border-border/50 rounded-2xl p-4">
