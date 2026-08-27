@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Stethoscope, Search, X } from "lucide-react";
+import { Stethoscope, Search, X } from "lucide-react";
 import { resolveCitySlug } from "@/lib/citySlug";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage,
@@ -62,8 +62,6 @@ export default function ConditionsPage() {
     document.title = "Enfermedades: encuentra al especialista indicado | BuscoUnDoctor";
     setMeta("description", "Consulta las enfermedades y condiciones más buscadas y encuentra directamente al especialista que las atiende en Monterrey y San Pedro Garza García.");
   }, []);
-
-  const popular = useMemo(() => conditions.filter((c) => c.popular), [conditions]);
 
   // Agrupado por especialidad en vez de A-Z puro: con +1000 enfermedades en
   // el banco, una sola lista alfabética era un muro interminable de scroll
@@ -179,27 +177,6 @@ export default function ConditionsPage() {
         </section>
       ) : (
         <>
-          {/* Más buscadas */}
-          {popular.length > 0 && (
-            <section className="mb-10">
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-4 h-4 text-brand-blue" />
-                <h2 className="font-heading font-bold text-base sm:text-lg text-brand-navy">Enfermedades más buscadas</h2>
-              </div>
-              <div className="flex flex-wrap gap-2.5">
-                {popular.map((c) => (
-                  <Link
-                    key={c.id}
-                    to={`/enfermedades/${c.slug}/${defaultCitySlug}`}
-                    className="inline-flex items-center gap-1.5 bg-brand-bluePale hover:bg-brand-blue hover:text-white text-brand-navy text-sm font-medium px-4 py-2 rounded-full transition-colors"
-                  >
-                    {c.name}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
           {/* Por especialidad, en acordeón para no abrir el catálogo entero de un jalón */}
           <section className="mb-10">
             <div className="flex items-center justify-between gap-2 mb-4">
