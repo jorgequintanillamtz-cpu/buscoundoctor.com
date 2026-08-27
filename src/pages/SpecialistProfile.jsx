@@ -38,6 +38,10 @@ const NAV_SECTIONS = [
   { id: "faq", label: "Preguntas frecuentes" },
 ];
 
+// Array estáble (fuera del componente) para no invalidar el useEffect del
+// hook usePresentSectionIds en cada render.
+const NAV_SECTION_IDS = NAV_SECTIONS.map((s) => s.id);
+
 const PAYMENT_LABELS = { tarjeta: "Tarjeta", transferencia: "Transferencia", efectivo: "Efectivo" };
 
 export default function SpecialistProfile() {
