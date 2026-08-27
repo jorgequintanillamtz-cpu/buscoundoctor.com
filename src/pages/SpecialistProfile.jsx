@@ -12,6 +12,7 @@ import SpecialistCases from "../components/SpecialistCases";
 import SpecialistPosts from "../components/SpecialistPosts";
 import SpecialistServices from "../components/SpecialistServices";
 import ScrollSpyNav from "../components/profile/ScrollSpyNav";
+import { usePresentSectionIds } from "@/hooks/usePresentSectionIds";
 import EspecialidadesSection from "../components/profile/EspecialidadesSection";
 import ReviewsSection from "../components/profile/ReviewsSection";
 import FaqSection from "../components/profile/FaqSection";
@@ -206,6 +207,10 @@ export default function SpecialistProfile() {
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
 
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
+  // Mismo criterio que ScrollSpyNav (escritorio): en el nav de anclas de
+  // móvil tampoco tiene caso mostrar un título que lleva a una sección que
+  // el doctor nunca llegó a llenar.
+  const presentSectionIds = usePresentSectionIds(NAV_SECTION_IDS);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 lg:pb-10">
@@ -340,7 +345,7 @@ export default function SpecialistProfile() {
           como enlaces ancla que hacen scroll — así todo el contenido sigue
           siempre renderizado y visible para Google (no ocultamos paneles). */}
       <nav className="order-2 lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
-        {NAV_SECTIONS.map((s) => (
+        {NAV_SECTIONS.filter((s) => presentSectionIds.has(s.id)).map((s) => (
           <a
             key={s.id}
             href={`#${s.id}`}
