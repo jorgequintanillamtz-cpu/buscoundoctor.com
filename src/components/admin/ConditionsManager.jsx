@@ -58,6 +58,7 @@ export default function ConditionsManager({ form, update }) {
   }, [form.id]);
 
   const selected = form.conditions_relation || [];
+  const [savingIds, setSavingIds] = useState(() => new Set());
 
   const ownConditions = useMemo(
     () => allConditions.filter((c) => c.specialty === form.specialty),
@@ -81,9 +82,44 @@ export default function ConditionsManager({ form, update }) {
     return allConditions.filter((c) => c.name.toLowerCase().includes(q));
   }, [allConditions, ownConditions, selectedElsewhere, search]);
 
-  const toggleCondition = (id) => {
-    update("conditions_relation", selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
+  // Se guarda directo contra la base en cuanto se marca/desmarca, sin
+  // esperar al autoguardado ni a que el doctor le dé "Guardar cambios" en
+  // otra sección del panel -- así no se puede volver a perder un cambio de
+  // esta lista por no haber tocado el botón de guardar general.
+  const toggleCondition = async (id) => {
+    const previous = selected;
+    const next = previous.includes(id) ? previous.filter((x) => x !== id) : [...previous, id];
+    update("conditions_relation", next);
+    if (!form.id) return; // perfil todavía no guardado -- se creará junto con el resto del formulario
+    setSavingIds((prev) => new Set(prev).add(id));
+    try {
+      await base44.entities.Specialist.update(form.id, { conditions_relation: next });
+    } catch (e) {
+      update("conditions_relation", previous);
+      toast.error("No se pudo guardar el cambio: " + e.message);
+    }
+    setSavingIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
   };
+
+  // Resalta el texto que coincide con la búsqueda dentro del nombre, para
+  // que sea más fácil escanear resultados largos de un vistazo.
+  const highlightMatch = (name, query) => {
+    if (!query) return name;
+    const idx = name.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return name;
+    return (
+      <>
+        {name.slice(0, idx)}
+        <mark className="bg-amber-200 text-foreground rounded-sm px-0.5">{name.slice(idx, idx + query.length)}</mark>
+        {name.slice(idx + query.length)}
+      </>
+    );
+  };
+
+  // Compara nombres ignorando mayúsculas, acentos y espacios de más -- para
+  // detectar cuando el doctor está a punto de solicitar algo que ya existe
+  // en el banco con un nombre prácticamente igual.
+  const normalizeName = (s) => s.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
   // Una enfermedad por línea -- se deduplican (sin distinguir mayúsculas)
   // por si el doctor repite un nombre sin querer, y cada una queda como su
@@ -102,14 +138,40 @@ export default function ConditionsManager({ form, update }) {
     return names;
   }, [requestNames]);
 
+  // Antes de crear una solicitud, se filtra cualquier nombre que ya exista
+  // en el banco (comparación normalizada) -- no tiene caso pedirle al admin
+  // algo que el doctor ya puede marcar directo en la lista de arriba.
+  const duplicateCheck = useMemo(() => {
+    const byNorm = new Map(allConditions.map((c) => [normalizeName(c.name), c]));
+    const duplicates = [];
+    const newNames = [];
+    requestNameList.forEach((name) => {
+      const match = byNorm.get(normalizeName(name));
+      if (match) duplicates.push({ name, match });
+      else newNames.push(name);
+    });
+    return { duplicates, newNames };
+  }, [requestNameList, allConditions]);
+
   const submitRequest = async () => {
-    const names = requestNameList;
-    if (names.length === 0) { toast.error("Escribe al menos el nombre de una enfermedad"); return; }
+    const { duplicates, newNames } = duplicateCheck;
+    if (requestNameList.length === 0) { toast.error("Escribe al menos el nombre de una enfermedad"); return; }
+
+    if (duplicates.length > 0) {
+      toast.warning(
+        duplicates.length === 1
+          ? `"${duplicates[0].name}" ya está en el banco como "${duplicates[0].match.name}" -- solo márcala en la lista de arriba.`
+          : `Ya están en el banco (márcalas arriba en vez de pedirlas): ${duplicates.map((d) => d.name).join(", ")}.`
+      );
+    }
+
+    if (newNames.length === 0) return;
+
     setSubmittingRequest(true);
     try {
       const note = requestNote.trim();
       const created = await Promise.all(
-        names.map((name) => base44.entities.ConditionRequest.create({
+        newNames.map((name) => base44.entities.ConditionRequest.create({
           specialist_id: form.id,
           specialist_name: form.full_name || "",
           requested_name: name,
@@ -122,9 +184,9 @@ export default function ConditionsManager({ form, update }) {
       setRequestNote("");
       setShowRequestForm(false);
       toast.success(
-        names.length === 1
+        newNames.length === 1
           ? "Solicitud enviada. El admin la va a revisar."
-          : `${names.length} solicitudes enviadas. El admin las va a revisar.`
+          : `${newNames.length} solicitudes enviadas. El admin las va a revisar.`
       );
     } catch (e) {
       toast.error("Error al enviar: " + e.message);
@@ -173,6 +235,11 @@ export default function ConditionsManager({ form, update }) {
             rows={3}
             className="w-full bg-card text-sm rounded-lg border border-input px-3 py-2 outline-none"
           />
+          {duplicateCheck.duplicates.length > 0 && (
+            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+              Ya en el banco -- marca esta{duplicateCheck.duplicates.length !== 1 ? "s" : ""} en la lista de arriba en vez de pedirla{duplicateCheck.duplicates.length !== 1 ? "s" : ""}: {duplicateCheck.duplicates.map((d) => `"${d.name}"`).join(", ")}.
+            </p>
+          )}
           <textarea
             value={requestNote}
             onChange={(e) => setRequestNote(e.target.value)}
@@ -182,7 +249,11 @@ export default function ConditionsManager({ form, update }) {
           <div className="flex items-center gap-2">
             <Button type="button" size="sm" className="rounded-xl gap-1.5" disabled={submittingRequest || requestNameList.length === 0} onClick={submitRequest}>
               {submittingRequest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              {requestNameList.length > 1 ? `Enviar ${requestNameList.length} solicitudes` : "Enviar solicitud"}
+              {duplicateCheck.newNames.length > 1
+                ? `Enviar ${duplicateCheck.newNames.length} solicitudes`
+                : duplicateCheck.newNames.length === 1
+                  ? "Enviar solicitud"
+                  : "Marca las de arriba"}
             </Button>
             <Button
               type="button"
@@ -262,6 +333,11 @@ export default function ConditionsManager({ form, update }) {
           className="bg-transparent text-sm outline-none flex-1"
         />
       </div>
+      {isSearching && !loading && (
+        <p className="text-xs text-muted-foreground -mt-2">
+          {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} para "{search.trim()}"
+        </p>
+      )}
 
       {loading ? (
         <p className="text-sm text-muted-foreground py-4 text-center">Cargando catálogo…</p>
@@ -277,14 +353,18 @@ export default function ConditionsManager({ form, update }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-96 overflow-y-auto pr-1">
           {filtered.map((c) => (
             <label key={c.id} className="flex items-center gap-2 cursor-pointer border border-border/50 rounded-xl px-3 py-2 hover:bg-accent/30 transition-colors">
-              <input
-                type="checkbox"
-                checked={selected.includes(c.id)}
-                onChange={() => toggleCondition(c.id)}
-                className="w-4 h-4 rounded border-input accent-primary flex-shrink-0"
-              />
+              {savingIds.has(c.id) ? (
+                <Loader2 className="w-4 h-4 flex-shrink-0 animate-spin text-muted-foreground" />
+              ) : (
+                <input
+                  type="checkbox"
+                  checked={selected.includes(c.id)}
+                  onChange={() => toggleCondition(c.id)}
+                  className="w-4 h-4 rounded border-input accent-primary flex-shrink-0"
+                />
+              )}
               <span className="text-sm text-foreground flex-1 min-w-0">
-                {c.name}
+                {isSearching ? highlightMatch(c.name, search.trim()) : c.name}
                 {c.specialty !== form.specialty && (
                   <span className="block text-[10px] text-muted-foreground font-medium truncate">{c.specialty}</span>
                 )}
