@@ -83,7 +83,6 @@ export default function ConditionDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [cityRecord, setCityRecord] = useState(null);
   const [matchingSpecialists, setMatchingSpecialists] = useState([]);
-  const [activeCityNames, setActiveCityNames] = useState([]);
   const [relatedConditions, setRelatedConditions] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [specialtySlug, setSpecialtySlug] = useState(null);
@@ -100,7 +99,6 @@ export default function ConditionDetailPage() {
       const found = conditionList.find((c) => c.active !== false);
       const city = zoneList.find((z) => slugify(z.name) === citySlug);
       if (!active) return;
-      setActiveCityNames(zoneList.map((z) => z.name));
       if (!found || !city) { setNotFound(true); setLoading(false); return; }
 
       const [specialtyList, allPublishedSpecialists, allConditions] = await Promise.all([
@@ -137,12 +135,12 @@ export default function ConditionDetailPage() {
     return () => { active = false; };
   }, [slug, citySlug]);
 
-  // Especialistas de esta condición en la ciudad de la URL -- el resto (otras
-  // ciudades) se usa solo para el selector "también disponible en".
-  const specialists = useMemo(() => {
-    if (!cityRecord) return [];
-    return matchingSpecialists.filter((s) => (s.zone || s.location) === cityRecord.name);
-  }, [matchingSpecialists, cityRecord]);
+  // A diferencia de las páginas de especialidad, aquí no se restringe por
+  // ciudad exacta: la lista de doctores que marcaron esta condición
+  // (conditions_relation) todavía es angosta (feature nueva), así que se
+  // muestran los de cualquier ciudad activa -- Monterrey y San Pedro no
+  // necesitan verse por separado en esta sección.
+  const specialists = matchingSpecialists;
 
   useEffect(() => {
     if (!condition || !cityRecord) return;
@@ -263,25 +261,6 @@ export default function ConditionDetailPage() {
       .filter((s) => s.items.length > 0);
   }, [condition]);
 
-  // Otras ciudades donde también se puede consultar esta condición -- excluye
-  // la ciudad actual (ya se está viendo). Ordenadas por cuántos especialistas
-  // hay en cada una, para mostrar primero la más relevante.
-  const otherCities = useMemo(() => {
-    if (!cityRecord) return [];
-    const allZoneNames = [...new Set(matchingSpecialists.map((s) => s.zone || s.location).filter(Boolean))];
-    return allZoneNames
-      // Solo ciudades activas hoy -- si un doctor quedó con una ciudad que se
-      // desactivó (ej. San Pedro en pausa), no la ofrecemos como link porque
-      // esa URL ya no resuelve (Zone.filter({active:true}) no la regresa).
-      .filter((name) => name !== cityRecord.name && activeCityNames.includes(name))
-      .map((name) => ({
-        name,
-        slug: slugify(name),
-        count: matchingSpecialists.filter((s) => (s.zone || s.location) === name).length,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [matchingSpecialists, cityRecord, activeCityNames]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -331,23 +310,6 @@ export default function ConditionDetailPage() {
           También puedes ver especialistas en: {condition.specialty}
         </Link>
 
-        {specialtySlug && otherCities.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            <span className="inline-flex items-center text-xs text-muted-foreground pt-1.5">También disponible en:</span>
-            {otherCities.map(({ name, slug: otherSlug, count }) => (
-              <Link
-                key={name}
-                to={`/enfermedades/${slug}/${otherSlug}`}
-                className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue hover:bg-brand-blue hover:text-white transition-colors rounded-full pl-3 pr-3.5 py-1.5 text-xs font-medium"
-              >
-                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                {name}
-                {count > 0 && <span className="opacity-70">· {count}</span>}
-              </Link>
-            ))}
-          </div>
-        )}
-
         <section className="mt-4">
           <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8">
             {contentSections.length > 0 ? (
@@ -381,7 +343,7 @@ export default function ConditionDetailPage() {
         {specialists.length > 0 ? (
           <>
             <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-4">
-              Especialistas que atienden {condition.name.toLowerCase()} en {cityRecord.name}
+              Especialistas que atienden {condition.name.toLowerCase()}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {specialists.map((s) => (
@@ -400,7 +362,7 @@ export default function ConditionDetailPage() {
                   Esta sección está en construcción
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Todavía ningún doctor ha marcado esta condición en su perfil en {cityRecord.name}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
+                  Todavía ningún doctor ha marcado esta condición en su perfil. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
                 </p>
               </div>
             </div>
@@ -440,7 +402,7 @@ export default function ConditionDetailPage() {
             <p className="text-white/70 text-sm mt-1.5 max-w-md">
               {specialists.length > 0
                 ? "Compara perfiles verificados, reseñas y contacta directo por WhatsApp."
-                : `Mientras sumamos especialistas para esta condición en ${cityRecord.name}, conoce a los médicos verificados que ya tenemos.`}
+                : "Mientras sumamos especialistas para esta condición, conoce a los médicos verificados que ya tenemos."}
             </p>
           </div>
           <Button size="lg" variant="secondary" className="bg-white text-brand-navy hover:bg-white/90 font-heading font-semibold flex-shrink-0 gap-2" asChild>
