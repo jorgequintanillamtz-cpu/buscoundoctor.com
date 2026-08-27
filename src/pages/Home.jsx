@@ -59,16 +59,6 @@ function DoctorHeroIllustration({ className = "" }) {
   );
 }
 
-// Testimonios sobre la PLATAFORMA (no sobre un doctor en particular).
-// Son ejemplos ilustrativos hasta tener citas reales de pacientes/doctores
-// sobre la experiencia de usar BuscoUnDoctor — se marcan como "Ejemplo" en
-// la UI, mismo patrón usado en /para-medicos.
-const PLATFORM_TESTIMONIALS = [
-  { name: "Paciente de Monterrey", role: "Encontró especialista por WhatsApp", quote: "Busqué por zona y especialidad, vi la cédula verificada en el perfil y agendé directo por WhatsApp. Sin llamadas ni esperas." },
-  { name: "Paciente de San Pedro", role: "Comparó varios perfiles", quote: "Me gustó poder comparar varios doctores de la misma especialidad antes de decidir, con reseñas reales de otros pacientes." },
-  { name: "Paciente de Monterrey", role: "Usó el filtro de zona", quote: "Filtré por San Pedro y me salió justo lo que necesitaba, sin batallar buscando en Google página por página." },
-];
-
 const TRUST_STRIP = [
   { icon: Users, label: "Perfiles para cada especialista", key: "perfiles" },
   { icon: Star, label: "Reseñas verificadas de pacientes reales", key: "resenas" },
@@ -582,63 +572,6 @@ export default function Home() {
         <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
         <p className="text-xs text-muted-foreground">Sin sobreprecio por agendar aquí — pagas igual que directo con el médico.</p>
       </div>
-
-      {/* Testimonios sobre la plataforma (ejemplos ilustrativos hasta tener citas reales).
-          Oculta por completo en móvil para no alargar la página; queda solo en desktop. */}
-      <section className="hidden sm:block relative bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-          <div className="text-center mb-6">
-            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">¿Qué dicen de BuscoUnDoctor?</h2>
-          </div>
-          <p className="text-center text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 max-w-md mx-auto mb-8">
-            Ejemplos ilustrativos — se reemplazarán por testimonios reales.
-          </p>
-          {/* Móvil: slider horizontal para no ocupar tanto espacio vertical con las 3 tarjetas apiladas */}
-          <div
-            className="sm:hidden flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scroll-smooth"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {PLATFORM_TESTIMONIALS.map((t) =>
-            <div key={t.name + t.role} className="relative flex flex-col flex-shrink-0 w-[80vw] bg-white border border-border/60 rounded-2xl p-6 shadow-sm snap-start">
-              <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                Ejemplo
-              </span>
-              <div className="flex gap-0.5 mb-3">
-                {[1, 2, 3, 4, 5].map((s) =>
-                <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                )}
-              </div>
-              <p className="text-sm text-foreground leading-relaxed flex-1">"{t.quote}"</p>
-              <div className="mt-4 pt-4 border-t border-border/50">
-                <p className="font-heading font-semibold text-sm text-brand-navy">{t.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t.role}</p>
-              </div>
-            </div>
-            )}
-          </div>
-
-          {/* Tablet/desktop: grid como antes */}
-          <div className="hidden sm:grid sm:grid-cols-3 gap-4 sm:gap-6">
-            {PLATFORM_TESTIMONIALS.map((t) =>
-            <div key={t.name + t.role} className="relative flex flex-col bg-white border border-border/60 rounded-2xl p-6 shadow-sm">
-              <span className="absolute top-3 right-3 text-[10px] font-bold tracking-wide uppercase bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                Ejemplo
-              </span>
-              <div className="flex gap-0.5 mb-3">
-                {[1, 2, 3, 4, 5].map((s) =>
-                <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                )}
-              </div>
-              <p className="text-sm text-foreground leading-relaxed flex-1">"{t.quote}"</p>
-              <div className="mt-4 pt-4 border-t border-border/50">
-                <p className="font-heading font-semibold text-sm text-brand-navy">{t.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t.role}</p>
-              </div>
-            </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* Cómo verificamos a nuestros médicos: rápido de leer, directo a la confianza.
           Se oculta en móvil porque el mensaje ya se comunica en el subtítulo del hero. */}
