@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Stethoscope, HeartPulse, Activity, Cigarette, Dna, ClipboardList, ShieldAlert, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { Stethoscope, HeartPulse, Activity, Cigarette, Dna, ClipboardList, ShieldAlert, ArrowRight, Sparkles, CheckCircle2, Droplet, Droplets, TestTube, Microscope, Scan, ScanLine, Bone, Eye, Brain, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,6 +33,22 @@ const DONUT_CONFIG = {
   alta: { color: "#ef4444", label: "Prioridad alta" },
   media: { color: "#f59e0b", label: "Prioridad media" },
   baja: { color: "#10b981", label: "Prioridad baja" },
+};
+
+const STUDY_ICONS = {
+  presion_arterial: HeartPulse,
+  perfil_lipidos: Droplet,
+  glucosa: TestTube,
+  chequeo_general: Stethoscope,
+  papanicolaou: Microscope,
+  mastografia: Scan,
+  psa_prostata: Droplets,
+  colonoscopia: ScanLine,
+  densitometria: Bone,
+  exploracion_piel: Eye,
+  electrocardiograma: Activity,
+  salud_mental: Brain,
+  limpieza_dental: Smile,
 };
 
 export default function ChequeosMedicos() {
@@ -321,6 +337,7 @@ export default function ChequeosMedicos() {
           <div className="space-y-3">
             {results.map((r) => {
               const isDone = !!done[r.key];
+              const Icon = STUDY_ICONS[r.key] || Stethoscope;
               return (
                 <div key={r.key} className={`bg-card border border-border/50 border-l-4 ${URGENCY_BORDER[r.urgency]} rounded-2xl p-4 sm:p-5 hover:shadow-md transition-all ${isDone ? "opacity-60" : ""}`}>
                   <div className="flex gap-3 sm:gap-4">
@@ -333,6 +350,9 @@ export default function ChequeosMedicos() {
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                            <span className="w-8 h-8 rounded-lg bg-brand-bluePale text-brand-blue flex items-center justify-center flex-shrink-0">
+                              <Icon className="w-4 h-4" />
+                            </span>
                             <h3 className={`font-heading font-semibold text-foreground ${isDone ? "line-through" : ""}`}>{r.name}</h3>
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${URGENCY_STYLES[r.urgency]}`}>
                               {URGENCY_LEVELS[r.urgency].label}
@@ -343,13 +363,23 @@ export default function ChequeosMedicos() {
                             <span className="font-medium text-brand-navy">Frecuencia:</span> {r.frequency}
                           </p>
                         </div>
-                        <Link
-                          to={`/${r.specialty.profession_slug}/${citySlug}`}
-                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
-                        >
-                          Ver {r.specialty.name}
-                          <ArrowRight className="w-4 h-4" />
-                        </Link>
+                        {r.specialty ? (
+                          <Link
+                            to={`/${r.specialty.profession_slug}/${citySlug}`}
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
+                          >
+                            Ver {r.specialty.name}
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/especialistas"
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
+                          >
+                            Buscar especialista
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

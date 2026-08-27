@@ -172,6 +172,16 @@ const STUDIES = [
     frequency: () => "Anual",
     urgency: (i) => ((i.activity === "sedentario" && i.smokes) || i.age >= 70 ? "media" : "baja"),
   },
+  {
+    key: "limpieza_dental",
+    name: "Limpieza y chequeo dental",
+    why: "La salud bucal está ligada a la salud general. Una limpieza profesional cada seis meses previene caries, enfermedad de las encías y detecta problemas bucales a tiempo.",
+    specialty: null,
+    order: 13,
+    applies: (i) => i.age >= 18,
+    frequency: () => "Cada 6 meses",
+    urgency: () => "baja",
+  },
 ];
 
 // Recibe los inputs del formulario y devuelve la lista de estudios

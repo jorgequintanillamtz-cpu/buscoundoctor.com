@@ -5,8 +5,8 @@
 export default function CheckupDonut({ total, completed, color, label }) {
   const R = 34;
   const C = 2 * Math.PI * R;
-  const frac = total > 0 ? completed / total : 0;
   const pending = Math.max(total - completed, 0);
+  const frac = total > 0 ? pending / total : 0;
 
   return (
     <div className="flex flex-col items-center text-center">
@@ -26,7 +26,7 @@ export default function CheckupDonut({ total, completed, color, label }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-heading font-bold text-2xl text-foreground leading-none">{completed}</span>
+          <span className="font-heading font-bold text-2xl text-foreground leading-none">{pending}</span>
           <span className="text-[10px] text-muted-foreground mt-0.5">de {total}</span>
         </div>
       </div>
@@ -35,7 +35,7 @@ export default function CheckupDonut({ total, completed, color, label }) {
         <span className="text-xs font-semibold text-foreground">{label}</span>
       </div>
       <span className="text-[11px] text-muted-foreground mt-0.5">
-        {total === 0 ? "sin estudios" : pending === 0 ? "¡completo!" : `${pending} pendiente${pending !== 1 ? "s" : ""}`}
+        {total === 0 ? "sin estudios" : pending === 0 ? "¡completo!" : completed > 0 ? `${completed} hecho${completed !== 1 ? "s" : ""}` : "por hacer"}
       </span>
     </div>
   );
