@@ -11,6 +11,7 @@ import LanguagesManager from "@/components/admin/LanguagesManager";
 import InsurersManager from "@/components/admin/InsurersManager";
 import ConditionsManager from "@/components/admin/ConditionsManager";
 import HighlightsManager from "@/components/admin/HighlightsManager";
+import SubspecialtiesManager from "@/components/admin/SubspecialtiesManager";
 import OfficeManager from "@/components/admin/OfficeManager";
 import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
@@ -50,6 +51,7 @@ const SECTION_GROUPS = [
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
     { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
     { key: "enfermedades", label: "Enfermedades que trato", icon: ListChecks, requiresSaved: false },
+    { key: "subespecialidades", label: "Subespecialidades", icon: GraduationCap, requiresSaved: false },
     { key: "tecnologia", label: "Tecnología y tratamientos", icon: Cpu, requiresSaved: true },
     { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
   ]},
@@ -342,6 +344,7 @@ export default function DoctorPanel() {
             {section === "consultorios" && <OfficeManager specialistId={specialistId} />}
             {section === "aseguradoras" && <InsurersManager form={form} update={update} />}
             {section === "enfermedades" && <ConditionsManager form={form} update={update} />}
+            {section === "subespecialidades" && <SubspecialtiesManager form={form} update={update} />}
             {section === "tecnologia" && <HighlightsManager specialistId={specialistId} />}
             {section === "documentos" && <DocumentManager specialistId={specialistId} />}
             {section === "casos" && <CasesManager specialistId={specialistId} />}
