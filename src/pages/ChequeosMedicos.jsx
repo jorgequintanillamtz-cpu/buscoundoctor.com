@@ -94,6 +94,17 @@ export default function ChequeosMedicos() {
     });
   }, [submitted, age, sex, activity, smokes, familyHistory, chronic]);
 
+  const counts = useMemo(() => {
+    return ["alta", "media", "baja"].map((cat) => {
+      const items = results.filter((r) => r.urgency === cat);
+      return {
+        cat,
+        total: items.length,
+        completed: items.filter((r) => done[r.key]).length,
+      };
+    });
+  }, [results, done]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const ageNum = parseInt(age, 10);
@@ -108,6 +119,7 @@ export default function ChequeosMedicos() {
       return;
     }
     setError("");
+    setDone({});
     setSubmitted(true);
   };
 
@@ -126,7 +138,7 @@ export default function ChequeosMedicos() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Calculadora de chequeos médicos</BreadcrumbPage>
+            <BreadcrumbPage>Calculadora de estudios médicos</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -138,18 +150,10 @@ export default function ChequeosMedicos() {
           Herramienta interactiva
         </div>
         <h1 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground leading-tight">
-          ¿Qué estudios médicos debo hacerme según mi edad?
+          Calculadora de Estudios Médicos por Edad
         </h1>
         <p className="text-muted-foreground mt-2 text-sm">
           Responde y descubre tus chequeos recomendados al instante.
-        </p>
-      </div>
-
-      {/* Disclaimer */}
-      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-        <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <p className="text-xs sm:text-sm text-amber-800 leading-relaxed">
-          <strong>Aviso importante:</strong> esta herramienta es orientativa y educativa, no sustituye una consulta médica ni constituye un diagnóstico. Las recomendaciones son generales y deben confirmarse con un médico, quien evaluará tu historial completo y ajustará los estudios a tu caso particular.
         </p>
       </div>
 
@@ -275,6 +279,14 @@ export default function ChequeosMedicos() {
         </div>
       </form>
 
+      {/* Aviso importante (debajo de la calculadora) */}
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8">
+        <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <p className="text-xs sm:text-sm text-amber-800 leading-relaxed">
+          <strong>Aviso importante:</strong> esta herramienta es orientativa y educativa, no sustituye una consulta médica ni constituye un diagnóstico. Las recomendaciones son generales y deben confirmarse con un médico, quien evaluará tu historial completo y ajustará los estudios a tu caso particular.
+        </p>
+      </div>
+
       {/* Resultados */}
       {submitted && results.length > 0 && (
         <section className="mb-10">
@@ -285,34 +297,65 @@ export default function ChequeosMedicos() {
             </h2>
           </div>
           <p className="text-sm text-muted-foreground mb-5">
-            {results.length} chequeo{results.length !== 1 ? "s" : ""} sugerido{results.length !== 1 ? "s" : ""} según tus respuestas. Toca cada estudio para encontrar al especialista verificado que lo realiza en {city}.
+            {results.length} chequeo{results.length !== 1 ? "s" : ""} sugerido{results.length !== 1 ? "s" : ""} según tus respuestas. Marca los que ya te hayas hecho para llevar tu progreso.
           </p>
+
+          {/* Resumen rápido con donas por urgencia */}
+          <div className="bg-card border border-border/50 rounded-2xl p-5 sm:p-6 mb-5">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              {counts.map((c) => (
+                <CheckupDonut
+                  key={c.cat}
+                  total={c.total}
+                  completed={c.completed}
+                  color={DONUT_CONFIG[c.cat].color}
+                  label={DONUT_CONFIG[c.cat].label}
+                />
+              ))}
+            </div>
+            <p className="text-center text-xs text-muted-foreground mt-4">
+              Marca los estudios de la lista para actualizar tu progreso
+            </p>
+          </div>
+
           <div className="space-y-3">
-            {results.map((r) => (
-              <div key={r.key} className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 hover:border-brand-blue/30 hover:shadow-md transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                      <h3 className="font-heading font-semibold text-foreground">{r.name}</h3>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${URGENCY_STYLES[r.urgency]}`}>
-                        {URGENCY_LEVELS[r.urgency].label}
-                      </span>
+            {results.map((r) => {
+              const isDone = !!done[r.key];
+              return (
+                <div key={r.key} className={`bg-card border border-border/50 border-l-4 ${URGENCY_BORDER[r.urgency]} rounded-2xl p-4 sm:p-5 hover:shadow-md transition-all ${isDone ? "opacity-60" : ""}`}>
+                  <div className="flex gap-3 sm:gap-4">
+                    <Checkbox
+                      checked={isDone}
+                      onCheckedChange={(v) => setDone((d) => ({ ...d, [r.key]: !!v }))}
+                      className="mt-1"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                            <h3 className={`font-heading font-semibold text-foreground ${isDone ? "line-through" : ""}`}>{r.name}</h3>
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${URGENCY_STYLES[r.urgency]}`}>
+                              {URGENCY_LEVELS[r.urgency].label}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground leading-relaxed mb-2">{r.why}</p>
+                          <p className="text-xs text-foreground">
+                            <span className="font-medium text-brand-navy">Frecuencia:</span> {r.frequency}
+                          </p>
+                        </div>
+                        <Link
+                          to={`/${r.specialty.profession_slug}/${citySlug}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
+                        >
+                          Ver {r.specialty.name}
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-2">{r.why}</p>
-                    <p className="text-xs text-foreground">
-                      <span className="font-medium text-brand-navy">Frecuencia:</span> {r.frequency}
-                    </p>
                   </div>
-                  <Link
-                    to={`/${r.specialty.profession_slug}/${citySlug}`}
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
-                  >
-                    Ver {r.specialty.name}
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
