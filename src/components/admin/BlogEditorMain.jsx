@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Upload, X, Eye, Edit3, Bold, Italic, Link, List, ListOrdered, Quote, Image, Minus, AlignLeft } from "lucide-react";
+import { Upload, Eye, Edit3, Bold, Italic, Link, List, ListOrdered, Quote, Image, Minus } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { generateBlogSlug } from "@/pages/admin/BlogEditor";
 
 function TBtn({ onClick, title, children, active }) {
   return (
