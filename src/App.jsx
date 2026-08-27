@@ -43,6 +43,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import RegistroMedico from './pages/RegistroMedico';
 import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
+import ChequeosMedicos from './pages/ChequeosMedicos';
 import PricingPage from './pages/PricingPage';
 import AdminPlanes from './pages/admin/AdminPlanes';
 import LandingMedicos from './pages/LandingMedicos';
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
         <Route path="/contacto" element={<Contact />} />
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
+        <Route path="/chequeos-medicos" element={<ChequeosMedicos />} />
         <Route path="/planes" element={<PricingPage />} />
         <Route path="/aviso-de-privacidad" element={<AvisoDePrivacidad />} />
         <Route path="/terminos-y-condiciones" element={<CondicionesGenerales />} />

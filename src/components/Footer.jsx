@@ -59,6 +59,7 @@ export default function Footer() {
               <Link to="/nosotros" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Nosotros</Link>
               <Link to="/contacto" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Contacto</Link>
               <Link to="/preguntas-frecuentes" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Preguntas Frecuentes</Link>
+              <Link to="/chequeos-medicos" className="text-sm text-white/60 hover:text-brand-blue transition-colors">Calculadora de chequeos</Link>
             </div>
           </div>
 
