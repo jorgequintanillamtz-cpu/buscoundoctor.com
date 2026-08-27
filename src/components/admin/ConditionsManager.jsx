@@ -25,7 +25,7 @@ export default function ConditionsManager({ form, update }) {
 
   const [requests, setRequests] = useState([]);
   const [showRequestForm, setShowRequestForm] = useState(false);
-  const [requestName, setRequestName] = useState("");
+  const [requestNames, setRequestNames] = useState("");
   const [requestNote, setRequestNote] = useState("");
   const [submittingRequest, setSubmittingRequest] = useState(false);
 
@@ -85,23 +85,47 @@ export default function ConditionsManager({ form, update }) {
     update("conditions_relation", selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
   };
 
+  // Una enfermedad por línea -- se deduplican (sin distinguir mayúsculas)
+  // por si el doctor repite un nombre sin querer, y cada una queda como su
+  // propia solicitud (para poder aprobar/rechazar una por una en el admin).
+  const requestNameList = useMemo(() => {
+    const seen = new Set();
+    const names = [];
+    requestNames.split("\n").forEach((line) => {
+      const name = line.trim();
+      if (!name) return;
+      const key = name.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      names.push(name);
+    });
+    return names;
+  }, [requestNames]);
+
   const submitRequest = async () => {
-    const name = requestName.trim();
-    if (!name) { toast.error("Escribe el nombre de la enfermedad"); return; }
+    const names = requestNameList;
+    if (names.length === 0) { toast.error("Escribe al menos el nombre de una enfermedad"); return; }
     setSubmittingRequest(true);
     try {
-      const created = await base44.entities.ConditionRequest.create({
-        specialist_id: form.id,
-        specialist_name: form.full_name || "",
-        requested_name: name,
-        note: requestNote.trim(),
-        status: "pendiente",
-      });
-      setRequests((prev) => [created, ...prev]);
-      setRequestName("");
+      const note = requestNote.trim();
+      const created = await Promise.all(
+        names.map((name) => base44.entities.ConditionRequest.create({
+          specialist_id: form.id,
+          specialist_name: form.full_name || "",
+          requested_name: name,
+          note,
+          status: "pendiente",
+        }))
+      );
+      setRequests((prev) => [...created, ...prev]);
+      setRequestNames("");
       setRequestNote("");
       setShowRequestForm(false);
-      toast.success("Solicitud enviada. El admin la va a revisar.");
+      toast.success(
+        names.length === 1
+          ? "Solicitud enviada. El admin la va a revisar."
+          : `${names.length} solicitudes enviadas. El admin las va a revisar.`
+      );
     } catch (e) {
       toast.error("Error al enviar: " + e.message);
     }
@@ -142,29 +166,30 @@ export default function ConditionsManager({ form, update }) {
 
       {showRequestForm && (
         <div className="bg-muted/50 rounded-xl p-3 space-y-2">
-          <input
-            value={requestName}
-            onChange={(e) => setRequestName(e.target.value)}
-            placeholder="Nombre de la enfermedad"
+          <textarea
+            value={requestNames}
+            onChange={(e) => setRequestNames(e.target.value)}
+            placeholder={"Nombre de la enfermedad -- una por línea si quieres pedir varias, ej:\nAnsiedad y estrés\nMigraña crónica"}
+            rows={3}
             className="w-full bg-card text-sm rounded-lg border border-input px-3 py-2 outline-none"
           />
           <textarea
             value={requestNote}
             onChange={(e) => setRequestNote(e.target.value)}
-            placeholder="¿Por qué la quieres agregar? (opcional)"
+            placeholder="¿Por qué las quieres agregar? (opcional, aplica a todas)"
             className="w-full bg-card text-sm rounded-lg border border-input px-3 py-2 outline-none min-h-[60px]"
           />
-          <div className="flex gap-2">
-            <Button type="button" size="sm" className="rounded-xl gap-1.5" disabled={submittingRequest} onClick={submitRequest}>
+          <div className="flex items-center gap-2">
+            <Button type="button" size="sm" className="rounded-xl gap-1.5" disabled={submittingRequest || requestNameList.length === 0} onClick={submitRequest}>
               {submittingRequest ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-              Enviar solicitud
+              {requestNameList.length > 1 ? `Enviar ${requestNameList.length} solicitudes` : "Enviar solicitud"}
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               className="rounded-xl"
-              onClick={() => { setShowRequestForm(false); setRequestName(""); setRequestNote(""); }}
+              onClick={() => { setShowRequestForm(false); setRequestNames(""); setRequestNote(""); }}
             >
               Cancelar
             </Button>
