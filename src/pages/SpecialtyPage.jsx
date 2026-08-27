@@ -56,7 +56,7 @@ export default function SpecialtyPage() {
       if (!spec || !city) { setNotFound(true); setLoading(false); return; }
       setCityName(city.name);
       const [subs, faqItems, conditionList] = await Promise.all([
-        base44.entities.Specialty.filter({ parent_specialty_id: spec.id, active: true }),
+        base44.entities.Subspecialty.filter({ parent_specialty_id: spec.id, active: true }),
         base44.entities.FaqItem.filter({ specialty_id: spec.id, status: "publicado" }),
         base44.entities.Condition.filter({ specialty: spec.name, active: true }),
       ]);
@@ -213,7 +213,7 @@ export default function SpecialtyPage() {
           <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Subespecialidades</h2>
           <div className="flex flex-wrap gap-2">
             {subspecialties.map(sub => (
-              <Link key={sub.id} to={`/${sub.profession_slug}/${citySlug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+              <Link key={sub.id} to={`/especialistas?subspecialty=${sub.slug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
                 {sub.name}
               </Link>
             ))}
