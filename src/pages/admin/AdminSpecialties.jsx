@@ -70,7 +70,7 @@ export default function AdminSpecialties() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading font-bold text-2xl text-foreground">Especialidades</h1>
+        <h1 className="font-heading font-bold text-2xl text-foreground">Banco de especialidades</h1>
         <Button className="gap-2 rounded-xl" onClick={openCreate}>
           <Plus className="w-4 h-4" /> Agregar
         </Button>
