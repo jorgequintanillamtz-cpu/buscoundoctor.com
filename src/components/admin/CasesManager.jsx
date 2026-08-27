@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { fileToWebP } from "@/lib/fileToWebP";
 import { Plus, Trash2, Pencil, Sparkles, Loader2, Upload, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,8 @@ function CaseForm({ initial, onCancel, onSave, saving }) {
     if (!file) return;
     setUploadingSlot(field);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       setItem((prev) => ({ ...prev, [field]: file_url }));
     } catch {
       toast.error("Error al subir la foto");
