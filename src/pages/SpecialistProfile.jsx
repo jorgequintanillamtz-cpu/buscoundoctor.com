@@ -54,6 +54,12 @@ export default function SpecialistProfile() {
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
   const [services, setServices] = useState([]);
+  // Mismo criterio que ScrollSpyNav (escritorio): en el nav de anclas de
+  // móvil tampoco tiene caso mostrar un título que lleva a una sección que
+  // el doctor nunca llegó a llenar. Se declara aquí arriba (junto con el
+  // resto de los hooks) porque el componente tiene un return condicional
+  // más abajo mientras carga/si no encuentra al especialista.
+  const presentSectionIds = usePresentSectionIds(NAV_SECTION_IDS);
 
   useEffect(() => {
     async function load() {
@@ -211,10 +217,6 @@ export default function SpecialistProfile() {
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
 
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
-  // Mismo criterio que ScrollSpyNav (escritorio): en el nav de anclas de
-  // móvil tampoco tiene caso mostrar un título que lleva a una sección que
-  // el doctor nunca llegó a llenar.
-  const presentSectionIds = usePresentSectionIds(NAV_SECTION_IDS);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 lg:pb-10">
