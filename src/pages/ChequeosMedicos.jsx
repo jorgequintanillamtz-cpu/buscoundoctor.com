@@ -115,8 +115,8 @@ export default function ChequeosMedicos() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Encabezado */}
-      <div className="mb-6">
+      {/* Encabezado compacto */}
+      <div className="mb-5">
         <div className="inline-flex items-center gap-2 bg-brand-bluePale text-brand-navy text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
           <Sparkles className="w-3.5 h-3.5" />
           Herramienta interactiva
@@ -124,18 +124,8 @@ export default function ChequeosMedicos() {
         <h1 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-foreground leading-tight">
           ¿Qué estudios médicos debo hacerme según mi edad?
         </h1>
-        <p className="text-muted-foreground mt-3 text-sm sm:text-base leading-relaxed max-w-2xl">
-          Responde unas preguntas y recibe una lista personalizada de chequeos y estudios preventivos recomendados para tu perfil, con la frecuencia sugerida y el especialista verificado que te puede atender.
-        </p>
-      </div>
-
-      {/* Contenido estático indexable (arriba) */}
-      <div className="prose prose-sm sm:prose-base max-w-none text-muted-foreground mb-6">
-        <p>
-          La medicina preventiva es la forma más eficaz de cuidar la salud a largo plazo. Muchas enfermedades crónicas —como hipertensión, diabetes, dislipidemias y varios tipos de cáncer— se desarrollan de forma silenciosa durante años antes de provocar síntomas. Realizar los <strong>estudios médicos de tamizaje adecuados para tu edad y sexo</strong> permite detectarlas en etapas tempranas, cuando el tratamiento es más efectivo y, en muchos casos, todavía reversible.
-        </p>
-        <p>
-          Esta calculadora de chequeos médicos toma en cuenta tu edad, sexo, nivel de actividad física, tabaquismo, antecedentes familiares y condiciones crónicas para construir una lista orientativa de estudios preventivos. Cada recomendación indica por qué importa el estudio, con qué frecuencia conviene repetirlo y qué tan prioritario es para tu perfil, ajustando la urgencia según los factores de riesgo que reportes.
+        <p className="text-muted-foreground mt-2 text-sm">
+          Responde y descubre tus chequeos recomendados al instante.
         </p>
       </div>
 
@@ -148,7 +138,17 @@ export default function ChequeosMedicos() {
       </div>
 
       {/* Calculadora */}
-      <form onSubmit={handleSubmit} className="bg-card border border-border/50 rounded-2xl p-5 sm:p-7 shadow-sm mb-8">
+      <form onSubmit={handleSubmit} className="bg-card rounded-2xl shadow-lg shadow-brand-navy/5 border border-border/50 overflow-hidden mb-8">
+        <div className="bg-gradient-to-r from-brand-navy to-brand-blue px-5 sm:px-7 py-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+            <Stethoscope className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="font-heading font-bold text-white text-base sm:text-lg leading-tight">Tu perfil de salud</h2>
+            <p className="text-white/70 text-xs">Completa los campos y obtén tu plan de chequeos</p>
+          </div>
+        </div>
+        <div className="p-5 sm:p-7">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
             <label className="text-sm font-medium text-foreground mb-1.5 block">Edad <span className="text-destructive">*</span></label>
@@ -256,6 +256,7 @@ export default function ChequeosMedicos() {
             </Button>
           )}
         </div>
+        </div>
       </form>
 
       {/* Resultados */}
@@ -317,6 +318,12 @@ export default function ChequeosMedicos() {
 
       {/* Contenido estático indexable (abajo) */}
       <div className="prose prose-sm sm:prose-base max-w-none text-muted-foreground mb-8">
+        <p>
+          La medicina preventiva es la forma más eficaz de cuidar la salud a largo plazo. Muchas enfermedades crónicas —como hipertensión, diabetes, dislipidemias y varios tipos de cáncer— se desarrollan de forma silenciosa durante años antes de provocar síntomas. Realizar los <strong>estudios médicos de tamizaje adecuados para tu edad y sexo</strong> permite detectarlas en etapas tempranas, cuando el tratamiento es más efectivo y, en muchos casos, todavía reversible.
+        </p>
+        <p>
+          Esta calculadora de chequeos médicos toma en cuenta tu edad, sexo, nivel de actividad física, tabaquismo, antecedentes familiares y condiciones crónicas para construir una lista orientativa de estudios preventivos. Cada recomendación indica por qué importa el estudio, con qué frecuencia conviene repetirlo y qué tan prioritario es para tu perfil, ajustando la urgencia según los factores de riesgo que reportes.
+        </p>
         <h2 className="font-heading font-bold text-xl text-foreground">¿Por qué importan los chequeos médicos preventivos?</h2>
         <p>
           Los chequeos preventivos no son lo mismo que ir al médico cuando algo duele. Su objetivo es identificar factores de riesgo y signos tempranos de enfermedad en personas que se sienten sanas. La presión arterial alta, el colesterol elevado, la glucosa en ayuno alterada o un pólipo en el colon rara vez producen síntomas al principio, y precisamente ahí radica su peligro: cuando el cuerpo avisa, muchas veces la enfermedad ya está instalada.
