@@ -57,7 +57,9 @@ export default function Header() {
     Promise.all([
       base44.entities.Zone.filter({ active: true }).catch(() => []),
       base44.entities.Specialty.filter({ active: true }).catch(() => []),
-      base44.entities.Condition.filter({ active: true }).catch(() => []),
+      // Límite alto explícito: el banco ya pasa de 1000 registros y el default
+      // del backend se queda corto ahí (mismo bug corregido en /admin/enfermedades).
+      base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
     ]).then(([z, s, c]) => { setZones(z); setSpecialties(s); setConditions(c); });
   }, []);
 
@@ -69,13 +71,20 @@ export default function Header() {
   const submitSearch = (e) => {
     e?.preventDefault?.();
     const picked = searchOptions.find((o) => o.id === searchPick);
-    // Si se eligió una enfermedad, resolvemos la especialidad que la atiende:
-    // la búsqueda por enfermedad lleva al listado completo de esa especialidad.
-    const resolvedSpecialty = picked?.type === "specialty"
-      ? picked.ref
-      : picked?.type === "condition"
-        ? specialties.find((s) => s.name === picked.ref.specialty)
-        : null;
+    if (picked?.type === "condition") {
+      // Antes esto resolvía a "la" especialidad que clasifica la enfermedad en
+      // el catálogo (ej. Acupuntura para "Ansiedad y estrés") y navegaba a su
+      // página SEO, lo que escondía a doctores de otras especialidades que
+      // también la tratan. Ahora se manda al directorio general (/especialistas)
+      // filtrado por esta enfermedad específica (conditions_relation), sin
+      // importar la especialidad de cada doctor.
+      const params = new URLSearchParams();
+      params.set("condition", picked.ref.slug);
+      if (searchZone) params.set("zone", searchZone);
+      navigate(`/especialistas?${params.toString()}`);
+      return;
+    }
+    const resolvedSpecialty = picked?.type === "specialty" ? picked.ref : null;
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     if (resolvedSpecialty) {
