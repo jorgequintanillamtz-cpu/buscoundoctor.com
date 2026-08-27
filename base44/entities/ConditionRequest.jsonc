@@ -1,0 +1,43 @@
+{
+  "name": "ConditionRequest",
+  "type": "object",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Doctor (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialist"
+    },
+    "specialist_name": {
+      "type": "string",
+      "title": "Nombre del doctor"
+    },
+    "requested_name": {
+      "type": "string",
+      "title": "Enfermedad solicitada"
+    },
+    "note": {
+      "type": "string",
+      "title": "Nota del doctor",
+      "description": "Contexto opcional sobre por qu\u00e9 quiere que se agregue esta enfermedad al banco"
+    },
+    "status": {
+      "type": "string",
+      "title": "Estado",
+      "enum": [
+        "pendiente",
+        "aprobada",
+        "rechazada"
+      ],
+      "default": "pendiente"
+    },
+    "resolution_note": {
+      "type": "string",
+      "title": "Nota de resoluci\u00f3n",
+      "description": "Motivo de rechazo, o referencia a la enfermedad creada si se aprob\u00f3"
+    }
+  },
+  "required": [
+    "specialist_id",
+    "requested_name"
+  ]
+}
