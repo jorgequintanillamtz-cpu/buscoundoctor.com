@@ -4,8 +4,8 @@ import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/a
 // Cuenta lo que necesita atención del dueño en cada sección, para mostrar
 // el círculo rojo en el menú del admin. Mismos criterios que usa cada
 // página para su propio conteo interno (AdminDoctores, AdminVerificaciones,
-// AdminBlog, AdminPremium). "/admin/bandeja" es la suma de las 4 colas,
-// para la Bandeja de entrada unificada.
+// AdminBlog, AdminPremium, AdminEnfermedades). "/admin/bandeja" es la suma
+// de las 5 colas, para la Bandeja de entrada unificada.
 export async function loadPendingCounts() {
   const [specialists, docs, posts, payments, premiumStatuses, conditionRequests] = await Promise.all([
     base44.entities.Specialist.list(),
