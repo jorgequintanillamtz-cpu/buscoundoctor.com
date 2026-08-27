@@ -242,8 +242,8 @@ export default function SpecialistProfile() {
           hacer scroll. Dejando el stretch por default, la celda del aside se
           estira para igualar el alto de la columna izquierda (mucho más
           alta), dándole al Agendar cita todo ese rango para quedarse fijo. */}
-      <div className="lg:grid lg:grid-cols-[1fr_460px] gap-8">
-      <div className="flex flex-col">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_460px] gap-8">
+      <div className="flex flex-col min-w-0">
 
       {/* HERO */}
       <div className="pb-2">
