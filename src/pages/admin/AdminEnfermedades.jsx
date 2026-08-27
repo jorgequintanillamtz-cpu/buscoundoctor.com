@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import {
-  Stethoscope, Search, Plus, Pencil, Trash2, X, AlertTriangle, ListChecks,
+  Stethoscope, Search, Plus, Pencil, Trash2, X, AlertTriangle, ListChecks, Inbox,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -44,13 +44,26 @@ export default function AdminEnfermedades() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Solicitudes de doctores para agregar una enfermedad que no está en el
+  // banco (entidad ConditionRequest). "Crear enfermedad" abre el mismo modal
+  // de siempre con el nombre pre-llenado; al guardar, la solicitud que la
+  // originó se marca aprobada sola (ver handleSave). "Rechazar" solo pide un
+  // motivo, no crea nada.
+  const [requests, setRequests] = useState([]);
+  const [fulfillingRequestId, setFulfillingRequestId] = useState(null);
+  const [rejectingId, setRejectingId] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [resolvingId, setResolvingId] = useState(null);
+
   const loadData = async () => {
-    const [condList, specList] = await Promise.all([
+    const [condList, specList, reqList] = await Promise.all([
       base44.entities.Condition.list("name", 2000),
       base44.entities.Specialty.filter({ active: true }),
+      base44.entities.ConditionRequest.filter({ status: "pendiente" }, "-created_date").catch(() => []),
     ]);
     setConditions(condList);
     setSpecialties(specList.sort((a, b) => a.name.localeCompare(b.name, "es")));
+    setRequests(reqList);
     setLoading(false);
   };
 
@@ -83,7 +96,15 @@ export default function AdminEnfermedades() {
   });
 
   const openNew = () => {
+    setFulfillingRequestId(null);
     setForm(EMPTY_FORM);
+    setSlugTouched(false);
+    setEditing({});
+  };
+
+  const openNewFromRequest = (r) => {
+    setFulfillingRequestId(r.id);
+    setForm({ ...EMPTY_FORM, name: r.requested_name });
     setSlugTouched(false);
     setEditing({});
   };
@@ -109,7 +130,22 @@ export default function AdminEnfermedades() {
     setEditing(item);
   };
 
-  const closeModal = () => { setEditing(null); setForm(EMPTY_FORM); };
+  const closeModal = () => { setEditing(null); setForm(EMPTY_FORM); setFulfillingRequestId(null); };
+
+  const rejectRequest = async (r) => {
+    if (!rejectReason.trim()) { toast.error("Escribe un motivo de rechazo"); return; }
+    setResolvingId(r.id);
+    try {
+      await base44.entities.ConditionRequest.update(r.id, { status: "rechazada", resolution_note: rejectReason.trim() });
+      setRequests((prev) => prev.filter((x) => x.id !== r.id));
+      toast.success("Solicitud rechazada");
+      setRejectingId(null);
+      setRejectReason("");
+    } catch {
+      toast.error("No se pudo rechazar");
+    }
+    setResolvingId(null);
+  };
 
   const updateField = (key, value) => {
     setForm((prev) => {
@@ -134,6 +170,15 @@ export default function AdminEnfermedades() {
         const created = await base44.entities.Condition.create(payload);
         setConditions((prev) => [...prev, created]);
         toast.success("Enfermedad agregada");
+        if (fulfillingRequestId) {
+          try {
+            await base44.entities.ConditionRequest.update(fulfillingRequestId, {
+              status: "aprobada",
+              resolution_note: `Se agregó al banco como "${created.name}".`,
+            });
+            setRequests((prev) => prev.filter((x) => x.id !== fulfillingRequestId));
+          } catch { /* la enfermedad ya se creó bien; la solicitud puede cerrarse a mano si esto falla */ }
+        }
       } else {
         await base44.entities.Condition.update(editing.id, payload);
         setConditions((prev) => prev.map((c) => (c.id === editing.id ? { ...c, ...payload } : c)));
