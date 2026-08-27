@@ -43,7 +43,13 @@ export default function SpecialistHighlights({ specialistId }) {
           const Icon = meta.icon;
           const benefits = (h.benefits || "").split("\n").map((b) => b.trim()).filter(Boolean);
           return (
-            <div key={h.id} className="border border-border/60 rounded-2xl p-4 sm:p-5">
+            <div key={h.id} className="border border-border/60 rounded-2xl overflow-hidden">
+              {h.photo_url && (
+                <div className="w-full aspect-video bg-muted">
+                  <img src={h.photo_url} alt={h.name} loading="lazy" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Icon className="w-4 h-4 text-primary" />
@@ -61,6 +67,7 @@ export default function SpecialistHighlights({ specialistId }) {
                   ))}
                 </ul>
               )}
+              </div>
             </div>
           );
         })}
