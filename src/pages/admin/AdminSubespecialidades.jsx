@@ -51,7 +51,6 @@ export default function AdminSubespecialidades() {
       list = list.filter((s) => s.name.toLowerCase().includes(q) || specialtyName(s.parent_specialty_id).toLowerCase().includes(q));
     }
     return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, specialtyFilter, search, specialties]);
 
   const { pageItems: paged, page, setPage, totalPages } = usePaginatedList(filtered, {
