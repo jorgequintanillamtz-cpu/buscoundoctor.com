@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { fileToWebP } from "@/lib/fileToWebP";
 import { Trash2, Loader2, Image as ImageIcon, Send, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -32,7 +33,8 @@ export default function PostsManager({ specialistId }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       setImageUrl(file_url);
     } catch {
       toast.error("Error al subir la foto");
