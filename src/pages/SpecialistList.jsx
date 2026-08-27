@@ -32,6 +32,13 @@ export default function SpecialistList() {
   // mostrar su nombre en el título y el chip de filtro activo.
   const [filterConditionSlug, setFilterConditionSlug] = useState(urlParams.get("condition") || "");
   const [conditionRecord, setConditionRecord] = useState(null);
+  // Filtro por subespecialidad (?subspecialty=slug): mismo patrón que
+  // condition, pero contra el banco Subspecialty y subspecialties_relation.
+  // Esto es lo que deja que alguien busque "Cirugía Maxilofacial" y solo
+  // vea a los doctores que la tienen certificada, sin mezclarse con el
+  // listado general de su especialidad base (ej. Dentista).
+  const [filterSubspecialtySlug, setFilterSubspecialtySlug] = useState(urlParams.get("subspecialty") || "");
+  const [subspecialtyRecord, setSubspecialtyRecord] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -60,7 +67,16 @@ export default function SpecialistList() {
   }, [filterConditionSlug]);
 
   useEffect(() => {
-    const hasFilters = !!(filterSpecialty || filterZone || filterInsurer || filterConditionSlug || searchQuery);
+    if (!filterSubspecialtySlug) { setSubspecialtyRecord(null); return; }
+    let active = true;
+    base44.entities.Subspecialty.filter({ slug: filterSubspecialtySlug }).then((list) => {
+      if (active) setSubspecialtyRecord(list[0] || null);
+    });
+    return () => { active = false; };
+  }, [filterSubspecialtySlug]);
+
+  useEffect(() => {
+    const hasFilters = !!(filterSpecialty || filterZone || filterInsurer || filterConditionSlug || filterSubspecialtySlug || searchQuery);
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (hasFilters) {
       if (!metaRobots) {
@@ -72,7 +88,7 @@ export default function SpecialistList() {
     } else if (metaRobots) {
       metaRobots.remove();
     }
-  }, [filterSpecialty, filterZone, filterInsurer, filterConditionSlug, searchQuery]);
+  }, [filterSpecialty, filterZone, filterInsurer, filterConditionSlug, filterSubspecialtySlug, searchQuery]);
 
   const filtered = useMemo(() => {
     let result = [...specialists];
@@ -95,6 +111,9 @@ export default function SpecialistList() {
     if (conditionRecord) {
       result = result.filter((s) => (s.conditions_relation || []).includes(conditionRecord.id));
     }
+    if (subspecialtyRecord) {
+      result = result.filter((s) => (s.subspecialties_relation || []).includes(subspecialtyRecord.id));
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -108,9 +127,9 @@ export default function SpecialistList() {
     }
 
     return rankSpecialists(result);
-  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, conditionRecord, searchQuery]);
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, conditionRecord, subspecialtyRecord, searchQuery]);
 
-  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, filterConditionSlug].filter(Boolean).length;
+  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, filterConditionSlug, filterSubspecialtySlug].filter(Boolean).length;
 
   const clearFilters = () => {
     setFilterSpecialty("");
@@ -119,6 +138,7 @@ export default function SpecialistList() {
     setFilterPrice("");
     setFilterInsurer("");
     setFilterConditionSlug("");
+    setFilterSubspecialtySlug("");
   };
 
   if (loading) {
@@ -144,7 +164,7 @@ export default function SpecialistList() {
       </Breadcrumb>
       <div className="mb-5">
         <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-          {conditionRecord?.name || filterSpecialty || "Todos los especialistas"}
+          {subspecialtyRecord?.name || conditionRecord?.name || filterSpecialty || "Todos los especialistas"}
         </h1>
         <p className="text-muted-foreground mt-1">
           {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
@@ -307,6 +327,12 @@ export default function SpecialistList() {
                 <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
                   {conditionRecord?.name || "Enfermedad"}
                   <button onClick={() => setFilterConditionSlug("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
+                </span>
+              )}
+              {filterSubspecialtySlug && (
+                <span className="inline-flex items-center gap-1 text-xs bg-brand-bluePale text-brand-navy px-3 py-1.5 rounded-full">
+                  {subspecialtyRecord?.name || "Subespecialidad"}
+                  <button onClick={() => setFilterSubspecialtySlug("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
             </div>
