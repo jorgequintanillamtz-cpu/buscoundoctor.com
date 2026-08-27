@@ -1,0 +1,48 @@
+{
+  "name": "SpecialistHighlight",
+  "type": "object",
+  "description": "Tecnolog\u00edas/equipos y tratamientos especiales que un doctor quiere presumir en su perfil p\u00fablico (ej. una m\u00e1quina nueva, un tratamiento innovador), cada uno con su nombre y beneficios. Vive separado de Specialist a prop\u00f3sito (mismo patr\u00f3n que PremiumStatus/SpecialistEducation): los campos agregados despu\u00e9s a una entidad ya existente son los que la plataforma ha borrado solos m\u00e1s de una vez.",
+  "properties": {
+    "specialist_id": {
+      "type": "string",
+      "title": "Especialista (relaci\u00f3n)",
+      "description": "ID de registro de la entidad Specialist"
+    },
+    "type": {
+      "type": "string",
+      "title": "Tipo",
+      "enum": [
+        "tecnologia",
+        "tratamiento"
+      ],
+      "default": "tecnologia",
+      "description": "'tecnologia' = equipo/m\u00e1quina, 'tratamiento' = tratamiento especial"
+    },
+    "name": {
+      "type": "string",
+      "title": "Nombre"
+    },
+    "benefits": {
+      "type": "string",
+      "title": "Beneficios",
+      "description": "Uno por l\u00ednea, ej: Recuperaci\u00f3n m\u00e1s r\u00e1pida\\nMenos dolor post-procedimiento"
+    },
+    "photo_url": {
+      "type": "string",
+      "title": "Foto (opcional)",
+      "format": "file"
+    },
+    "display_order": {
+      "type": "number",
+      "title": "Orden de visualizaci\u00f3n",
+      "default": 0,
+      "multipleOf": 1
+    }
+  },
+  "required": [
+    "specialist_id",
+    "type",
+    "name",
+    "benefits"
+  ]
+}
