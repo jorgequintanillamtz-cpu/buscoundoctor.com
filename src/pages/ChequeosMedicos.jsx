@@ -67,12 +67,6 @@ export default function ChequeosMedicos() {
   const resultsRef = useRef(null);
 
   useEffect(() => {
-    if (submitted && results.length > 0 && resultsRef.current) {
-      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [submitted, results]);
-
-  useEffect(() => {
     base44.entities.Zone.filter({ active: true })
       .then((list) => setZones(list.map((z) => z.name)))
       .catch(() => {});
@@ -116,6 +110,12 @@ export default function ChequeosMedicos() {
       chronic: chronic === "si",
     });
   }, [submitted, age, sex, activity, smokes, familyHistory, chronic]);
+
+  useEffect(() => {
+    if (submitted && results.length > 0 && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [submitted, results]);
 
   const counts = useMemo(() => {
     return ["alta", "media", "baja"].map((cat) => {
