@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { fileToWebP } from "@/lib/fileToWebP";
 import { Upload, X, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -85,7 +86,8 @@ export default function DoctorEditorPerfil({ form, update }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       update("profile_photo", file_url);
       toast.success("Foto de perfil cargada");
     } catch { toast.error("Error al subir foto"); }
@@ -97,7 +99,10 @@ export default function DoctorEditorPerfil({ form, update }) {
     if (!files.length) return;
     setUploadingGaleria(true);
     try {
-      const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
+      const urls = await Promise.all(files.map(async (f) => {
+        const optimized = await fileToWebP(f);
+        return base44.integrations.Core.UploadFile({ file: optimized }).then((r) => r.file_url);
+      }));
       update("gallery", [...(form.gallery || []), ...urls]);
       toast.success(`${urls.length} foto(s) agregada(s)`);
     } catch { toast.error("Error al subir galería"); }
@@ -120,7 +125,8 @@ export default function DoctorEditorPerfil({ form, update }) {
     const file = e.target.files[0];
     if (!file) return;
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       const el = contentRef.current;
       const start = el ? el.selectionStart : (form.description || "").length;
       const end = el ? el.selectionEnd : start;
