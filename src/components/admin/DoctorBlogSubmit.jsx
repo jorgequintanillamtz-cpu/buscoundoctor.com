@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import { fileToWebP } from "@/lib/fileToWebP";
 import { FileText, Loader2, Send, Clock, CheckCircle2, XCircle, Image as ImageIcon, Bold, Heading2, List, CheckCircle, Circle, Stethoscope } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,8 @@ export default function DoctorBlogSubmit({ specialistId, specialistName, special
     if (!file) return;
     setUploadingImage(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const optimized = await fileToWebP(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
       setImageUrl(file_url);
     } catch {
       toast.error("Error al subir la imagen");
