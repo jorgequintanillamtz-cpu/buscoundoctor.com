@@ -7,12 +7,13 @@ import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/a
 // AdminBlog, AdminPremium). "/admin/bandeja" es la suma de las 4 colas,
 // para la Bandeja de entrada unificada.
 export async function loadPendingCounts() {
-  const [specialists, docs, posts, payments, premiumStatuses] = await Promise.all([
+  const [specialists, docs, posts, payments, premiumStatuses, conditionRequests] = await Promise.all([
     base44.entities.Specialist.list(),
     base44.entities.SpecialistDocument.list("-created_date", 500),
     base44.entities.BlogPost.list("-created_date", 500),
     base44.entities.PremiumPayment.list("-payment_date", 1000),
     loadPremiumStatuses(),
+    base44.entities.ConditionRequest.filter({ status: "pendiente" }).catch(() => []),
   ]);
 
   // Los doctores en la papelera no cuentan para ninguna cola: ya no son
@@ -33,12 +34,14 @@ export async function loadPendingCounts() {
   ).length;
 
   const lateDoctors = computeLateDoctors(mergePremiumStatus(activeSpecialists, premiumStatuses), payments).length;
+  const pendingConditionRequests = conditionRequests.length;
 
   return {
     "/admin/doctores": pendingDoctors,
     "/admin/verificaciones": pendingDocuments,
     "/admin/blog": pendingBlogPosts,
     "/admin/premium": lateDoctors,
-    "/admin/bandeja": pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors,
+    "/admin/enfermedades": pendingConditionRequests,
+    "/admin/bandeja": pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
   };
 }
