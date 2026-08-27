@@ -9,6 +9,21 @@ import { slugify } from "@/lib/citySlug";
 // (buen extra de SEO/UX vía enlazado interno, con datos reales existentes).
 export default function EspecialidadesSection({ specialist }) {
   const [conditions, setConditions] = useState([]);
+  const [subspecialtyNames, setSubspecialtyNames] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const ids = specialist.subspecialties_relation || [];
+    if (ids.length === 0) { setSubspecialtyNames([]); return; }
+    (async () => {
+      try {
+        const all = await base44.entities.Subspecialty.list("name", 500);
+        if (!active) return;
+        setSubspecialtyNames(ids.map((id) => all.find((s) => s.id === id)?.name).filter(Boolean));
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, [specialist.subspecialties_relation]);
 
   useEffect(() => {
     let active = true;
@@ -48,11 +63,17 @@ export default function EspecialidadesSection({ specialist }) {
         <span className="text-sm font-semibold bg-brand-navy text-white px-4 py-2 rounded-full">
           {specialist.specialty}
         </span>
-        {specialist.subspecialty && (
-          <span className="text-sm font-medium bg-brand-bluePale text-brand-navy px-4 py-2 rounded-full">
-            {specialist.subspecialty}
-          </span>
-        )}
+        {subspecialtyNames.length > 0
+          ? subspecialtyNames.map((name) => (
+              <span key={name} className="text-sm font-medium bg-brand-bluePale text-brand-navy px-4 py-2 rounded-full">
+                {name}
+              </span>
+            ))
+          : specialist.subspecialty && (
+              <span className="text-sm font-medium bg-brand-bluePale text-brand-navy px-4 py-2 rounded-full">
+                {specialist.subspecialty}
+              </span>
+            )}
       </div>
 
       {conditions.length > 0 && (
