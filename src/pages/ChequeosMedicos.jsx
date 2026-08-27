@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Stethoscope, HeartPulse, Activity, Cigarette, Dna, ClipboardList, ShieldAlert, ArrowRight, Sparkles, CheckCircle2, Droplet, Droplets, TestTube, Microscope, Scan, ScanLine, Bone, Eye, Brain, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,13 @@ export default function ChequeosMedicos() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState({});
+  const resultsRef = useRef(null);
+
+  useEffect(() => {
+    if (submitted && results.length > 0 && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [submitted, results]);
 
   useEffect(() => {
     base44.entities.Zone.filter({ active: true })
@@ -305,7 +312,7 @@ export default function ChequeosMedicos() {
 
       {/* Resultados */}
       {submitted && results.length > 0 && (
-        <section className="mb-10">
+        <section ref={resultsRef} className="mb-10 scroll-mt-24">
           <div className="flex items-center gap-2 mb-4">
             <Stethoscope className="w-5 h-5 text-brand-blue" />
             <h2 className="font-heading font-bold text-lg sm:text-xl text-brand-navy">
