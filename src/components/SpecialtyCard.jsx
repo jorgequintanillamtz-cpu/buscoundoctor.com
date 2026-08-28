@@ -53,7 +53,7 @@ export default function SpecialtyCard({ specialty, mobile = false }) {
             <Icon className="w-6 h-6" style={{ color: color.fg }} />
           </div>
         )}
-        <span className="text-xs font-heading font-semibold text-brand-navy leading-snug">{specialty.name}</span>
+        <span className="text-xs font-heading font-semibold text-brand-navy leading-snug">{specialty.display_name || specialty.name}</span>
       </Link>
     );
   }
@@ -75,7 +75,7 @@ export default function SpecialtyCard({ specialty, mobile = false }) {
           <Icon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: color.fg }} />
         </div>
       )}
-      <span className="text-xs sm:text-sm font-medium text-foreground text-center leading-tight">{specialty.name}</span>
+      <span className="text-xs sm:text-sm font-medium text-foreground text-center leading-tight">{specialty.display_name || specialty.name}</span>
     </Link>
   );
 }
