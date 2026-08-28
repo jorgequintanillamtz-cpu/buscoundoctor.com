@@ -136,7 +136,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
   const [heroZone, setHeroZone] = useState("");
-  const [heroImageUrl, setHeroImageUrl] = useState("");
   const [familyPhotoUrl, setFamilyPhotoUrl] = useState("");
   const [doctorPhotoUrl, setDoctorPhotoUrl] = useState("");
   const blogScrollRef = useRef(null);
@@ -199,7 +198,6 @@ export default function Home() {
       setPosts(blogPosts);
       setZones(zoneList);
       setTotalSpecialists(allActive.length);
-      setHeroImageUrl(siteSettings[0]?.hero_image_url || "");
       setFamilyPhotoUrl(siteSettings[0]?.family_photo_url || "");
       setDoctorPhotoUrl(siteSettings[0]?.doctor_photo_url || "");
 
