@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { notifyNewAppointmentRequest } from "@/api/doctorNotify";
+import { trackDoctorContact } from "@/utils/trackDoctorStats";
 
 const TIME_SLOTS = ["09:00", "10:30", "12:00", "16:00", "17:30"];
 
@@ -57,6 +58,7 @@ export default function AppointmentForm({ specialist, onClose, initialDate = "" 
       specialist_name: specialist.full_name,
     });
     notifyNewAppointmentRequest(specialist, form);
+    trackDoctorContact(specialist);
 
     // Build WhatsApp message
     const message = `Hola, me gustaría solicitar una cita.
