@@ -250,8 +250,10 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Buscador compacto en móvil: debajo del header, en todas las páginas */}
-        {
+        {/* Buscador compacto en móvil: debajo del header. En el Home, mismo
+            criterio que el de escritorio (solo tras perder de vista el
+            buscador grande del hero). */}
+        {showCompactSearch && (
           <div className="lg:hidden flex items-center gap-2">
             <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
               <SearchableSelect
@@ -283,7 +285,7 @@ export default function Header() {
               <Search className="w-4 h-4" />
             </button>
           </div>
-        }
+        )}
       </div>
 
       <div
