@@ -283,8 +283,10 @@ export default function Home() {
           </p>
 
           {/* Buscador: sin tarjeta blanca alrededor, más grande y directo
-              sobre el fondo azul — es lo central de la página. */}
-          <div className="max-w-2xl mx-auto">
+              sobre el fondo azul — es lo central de la página. El id lo usa
+              Header.jsx (IntersectionObserver) para mostrar el buscador
+              compacto del header solo cuando este sale de la vista. */}
+          <div id="hero-search-bar" className="max-w-2xl mx-auto">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 bg-white rounded-2xl sm:rounded-full shadow-2xl sm:p-2 overflow-hidden">
               <div className="flex flex-col justify-center text-left px-5 py-3.5 sm:py-2 flex-1 min-w-0">
                 <label className="text-[11px] font-semibold text-muted-foreground leading-none mb-1">Especialidad o enfermedad</label>
