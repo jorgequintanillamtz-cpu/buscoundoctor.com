@@ -178,8 +178,10 @@ export default function Header() {
         <div className="flex items-center justify-between h-20 gap-4">
           <Logo to="/" className="h-[47px] sm:h-[52px]" />
 
-          {/* Buscador compacto: en todas las páginas, incluido el Home */}
-          {
+          {/* Buscador compacto: en el Home solo aparece tras hacer scroll y
+              perder de vista el buscador grande del hero; en el resto de
+              páginas siempre está visible. */}
+          {showCompactSearch && (
             <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden">
               <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
                 <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
@@ -214,7 +216,7 @@ export default function Header() {
                 <Search className="w-4 h-4" />
               </button>
             </div>
-          }
+          )}
 
           <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             <Link
