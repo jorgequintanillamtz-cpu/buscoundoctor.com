@@ -35,26 +35,42 @@ const HOME_FAQS = [
   { question: "¿Puedo dejar una reseña de mi médico?", answer: "Sí. Desde el perfil del médico que consultaste puedes escribir una reseña con tu calificación y comentario. Las reseñas se revisan antes de publicarse para mantener la calidad de la información y evitar spam." },
 ];
 
-// Ilustración placeholder de médico (no hay foto real disponible todavía).
-// Sustituir por una fotografía real cuando esté disponible.
-function DoctorHeroIllustration({ className = "" }) {
+// Ilustración decorativa de fondo del hero: una fila de siluetas de personas
+// (pacientes y médicos, estos últimos marcados con un pequeño gafete/estetoscopio)
+// apoyadas en el borde inferior de la sección azul, al estilo de la
+// ilustración de "comunidad" que usa Doctoralia detrás de su buscador.
+const HERO_PEOPLE = [
+  { x: 10, scale: 0.72, opacity: 0.07 },
+  { x: 130, scale: 1.02, opacity: 0.12, doctor: true },
+  { x: 275, scale: 0.62, opacity: 0.08 },
+  { x: 375, scale: 0.92, opacity: 0.13 },
+  { x: 520, scale: 0.68, opacity: 0.08 },
+  { x: 645, scale: 1.08, opacity: 0.14, doctor: true },
+  { x: 800, scale: 0.72, opacity: 0.09 },
+  { x: 900, scale: 0.98, opacity: 0.12 },
+  { x: 1045, scale: 0.64, opacity: 0.08 },
+  { x: 1160, scale: 0.95, opacity: 0.13, doctor: true },
+  { x: 1300, scale: 0.7, opacity: 0.09 },
+  { x: 1400, scale: 0.6, opacity: 0.07 },
+];
+
+function HeroPeopleIllustration({ className = "" }) {
   return (
-    <svg viewBox="0 0 320 360" className={className} role="img" aria-label="Ilustración de médico">
-      <defs>
-        <clipPath id="doctorHeroFrame">
-          <path d="M160 10c85 0 150 65 150 150 0 90-65 190-150 190S10 250 10 160C10 75 75 10 160 10z" />
-        </clipPath>
-      </defs>
-      <g clipPath="url(#doctorHeroFrame)">
-        <rect width="320" height="360" fill="#EAF2FF" />
-        <path d="M55 360 C55 258 108 228 160 228 C212 228 265 258 265 360 Z" fill="#FFFFFF" />
-        <path d="M120 233 L160 272 L200 233 L188 218 L132 218 Z" fill="#2F6FED" />
-        <rect x="140" y="188" width="40" height="46" fill="#F2C29A" />
-        <circle cx="160" cy="148" r="65" fill="#F5CEA6" />
-        <path d="M96 138 C96 88 120 58 160 58 C200 58 224 88 224 138 C224 118 210 103 190 98 C175 94 145 94 130 98 C112 103 96 118 96 138Z" fill="#0B1E4D" />
-        <path d="M128 240 C128 270 148 286 160 286 C172 286 192 270 192 240" stroke="#0B1E4D" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <circle cx="160" cy="293" r="8" fill="#0B1E4D" />
-      </g>
+    <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice" className={className} aria-hidden="true">
+      {HERO_PEOPLE.map((p, i) => (
+        <g key={i} transform={`translate(${p.x}, ${200 - 170 * p.scale})`}>
+          <g transform={`scale(${p.scale})`}>
+            <path d="M0,170 L0,80 Q0,50 30,50 L70,50 Q100,50 100,80 L100,170 Z" fill="#FFFFFF" opacity={p.opacity} />
+            <circle cx="50" cy="30" r="28" fill="#FFFFFF" opacity={p.opacity} />
+            {p.doctor && (
+              <>
+                <rect x="38" y="58" width="24" height="55" rx="6" fill="#0B1E4D" opacity={Math.min(p.opacity * 1.8, 0.5)} />
+                <circle cx="50" cy="66" r="6" fill="#DCE9FF" opacity={Math.min(p.opacity * 3, 0.65)} />
+              </>
+            )}
+          </g>
+        </g>
+      ))}
     </svg>
   );
 }
