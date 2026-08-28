@@ -6,6 +6,11 @@
       "type": "string",
       "title": "Nombre"
     },
+    "display_name": {
+      "type": "string",
+      "title": "Nombre para pacientes (SEO)",
+      "description": "C\u00f3mo busca un paciente esta especialidad en internet (ej. 'Ginec\u00f3logo' en vez de 'Ginecolog\u00eda'), al estilo Doctoralia. Se usa en el buscador, t\u00edtulos de p\u00e1gina, meta descripci\u00f3n y tarjetas de doctor. Si queda vac\u00edo, se usa 'name' como respaldo."
+    },
     "slug": {
       "type": "string",
       "title": "Slug"
