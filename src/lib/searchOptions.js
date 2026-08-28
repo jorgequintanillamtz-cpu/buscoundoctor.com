@@ -7,7 +7,7 @@
 export function buildSearchOptions(specialties = [], conditions = [], subspecialties = []) {
   const specialtyOptions = specialties.map((s) => ({
     id: `spec:${s.slug}`,
-    name: s.name,
+    name: s.display_name || s.name,
     hint: "Especialidad",
     type: "specialty",
     ref: s,
