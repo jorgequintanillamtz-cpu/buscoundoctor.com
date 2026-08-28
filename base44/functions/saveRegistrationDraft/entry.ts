@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
       full_name,
       specialty,
       subspecialty: body.subspecialty || '',
+      subspecialties_relation: Array.isArray(body.subspecialties_relation) ? body.subspecialties_relation.filter(Boolean) : [],
       whatsapp,
       modality: body.modality || 'presencial',
       zone: body.zone || '',
