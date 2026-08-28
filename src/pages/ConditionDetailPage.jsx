@@ -8,6 +8,7 @@ import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import { slugify } from "@/lib/citySlug";
 import CountdownBox from "@/components/CountdownBox";
 import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -32,6 +33,7 @@ function firstSentence(text, maxLen = 110) {
 // esencial para comparar de un vistazo (igual que en el home), sin el detalle
 // completo de reservar cita que sí tiene SpecialistCard en otras páginas.
 function SpecialistMiniCard({ specialist }) {
+  const specialtyDisplay = useSpecialtyDisplay(specialist.specialty);
   return (
     <Link
       to={`/especialista/${specialist.slug}`}
@@ -59,7 +61,7 @@ function SpecialistMiniCard({ specialist }) {
           ))}
         </div>
       )}
-      <p className="text-brand-blue text-xs font-medium mt-1.5">{specialist.specialty}</p>
+      <p className="text-brand-blue text-xs font-medium mt-1.5">{specialtyDisplay}</p>
       {(specialist.zone || specialist.location) && (
         <p className="text-muted-foreground text-xs mt-1 flex items-center gap-1">
           <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -86,6 +88,7 @@ export default function ConditionDetailPage() {
   const [relatedConditions, setRelatedConditions] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [specialtySlug, setSpecialtySlug] = useState(null);
+  const [specialtyDisplayName, setSpecialtyDisplayName] = useState(null);
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -129,6 +132,7 @@ export default function ConditionDetailPage() {
       setRelatedConditions(allConditions.filter((c) => c.slug !== found.slug).slice(0, 8));
       setRelatedPosts(blogPosts.slice(0, 3));
       setSpecialtySlug(specialtyRecord?.profession_slug || null);
+      setSpecialtyDisplayName(specialtyRecord?.display_name || found.specialty);
       setFaqs(faqItems);
       setLoading(false);
     })();
@@ -307,7 +311,7 @@ export default function ConditionDetailPage() {
           to={specialtySlug ? `/${specialtySlug}/${citySlug}` : `/especialistas?specialty=${encodeURIComponent(condition.specialty)}`}
           className="inline-block mt-1.5 text-xs font-medium text-brand-blue hover:underline"
         >
-          También puedes ver especialistas en: {condition.specialty}
+          También puedes ver especialistas en: {specialtyDisplayName || condition.specialty}
         </Link>
 
         <section className="mt-4">
@@ -415,7 +419,7 @@ export default function ConditionDetailPage() {
 
       {relatedConditions.length > 0 && (
         <section className="mb-10">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-3">Otras enfermedades de {condition.specialty}</h2>
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-3">Otras enfermedades de {specialtyDisplayName || condition.specialty}</h2>
           <div className="flex flex-wrap gap-2">
             {relatedConditions.map((c) => (
               <Link
@@ -433,7 +437,7 @@ export default function ConditionDetailPage() {
       {relatedPosts.length > 0 && (
         <section className="mb-10">
           <h2 className="font-heading font-bold text-lg sm:text-xl text-foreground mb-4">
-            Artículos sobre {condition.specialty.toLowerCase()}
+            Artículos sobre {(specialtyDisplayName || condition.specialty).toLowerCase()}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {relatedPosts.map((p, i) => (
@@ -445,7 +449,7 @@ export default function ConditionDetailPage() {
 
       {faqs.length > 0 && (
         <section className="mb-6">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground mb-5">Preguntas frecuentes sobre {condition.specialty}</h2>
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground mb-5">Preguntas frecuentes sobre {specialtyDisplayName || condition.specialty}</h2>
           <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
             {faqs.map((f, i) => (
               <AccordionItem key={f.id} value={`faq-${i}`} className="px-5">
