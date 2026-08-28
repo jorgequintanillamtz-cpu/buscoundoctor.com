@@ -454,7 +454,7 @@ export default function Home() {
                 <img
                   src={familyPhotoUrl}
                   alt="Familia que agendó su cita gratis con BuscoUnDoctor"
-                  className="w-full h-48 object-cover"
+                  className="w-full aspect-[10/7] object-cover object-bottom"
                 />
               )}
               <div className="p-6">
@@ -475,7 +475,7 @@ export default function Home() {
                 <img
                   src={doctorPhotoUrl}
                   alt="Doctor registrando su perfil en BuscoUnDoctor"
-                  className="w-full h-48 object-cover"
+                  className="w-full aspect-[10/7] object-cover object-bottom"
                 />
               )}
               <div className="p-6">
