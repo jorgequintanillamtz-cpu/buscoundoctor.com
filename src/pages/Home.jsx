@@ -282,27 +282,28 @@ export default function Home() {
             Describe qué te pasa o a quién buscas: te ayudamos a encontrar y agendar con el especialista correcto.
           </p>
 
-          {/* Buscador: sin tarjeta blanca alrededor, más grande y directo
-              sobre el fondo azul — es lo central de la página. El id lo usa
-              Header.jsx (IntersectionObserver) para mostrar el buscador
-              compacto del header solo cuando este sale de la vista. */}
-          <div id="hero-search-bar" className="max-w-2xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 bg-white rounded-2xl sm:rounded-full shadow-2xl sm:p-2 overflow-hidden">
-              <div className="flex flex-col justify-center text-left px-5 py-3.5 sm:py-2 flex-1 min-w-0">
-                <label className="text-[11px] font-semibold text-muted-foreground leading-none mb-1">Especialidad o enfermedad</label>
+          {/* Buscador: sin tarjeta blanca alrededor, directo sobre el fondo
+              azul. Campos apilados (más alto, menos ancho) en vez de lado a
+              lado, para que el texto siempre quepa completo sin cortarse; y
+              sin la etiqueta chica arriba de cada campo, solo el texto
+              dentro del recuadro. El id lo usa Header.jsx
+              (IntersectionObserver) para mostrar el buscador compacto del
+              header solo cuando este sale de la vista. */}
+          <div id="hero-search-bar" className="max-w-md mx-auto">
+            <div className="flex flex-col gap-2 bg-white rounded-3xl shadow-2xl p-2">
+              <div className="flex flex-col justify-center text-left px-5 py-4">
                 <SearchableSelect
                   options={searchOptions}
                   value={heroSpecialty}
                   onChange={setHeroSpecialty}
-                  placeholder="¿Qué especialidad o enfermedad buscas?"
+                  placeholder="Especialidad o enfermedad"
                   icon={Stethoscope}
                   hint="Especialidad"
                   triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
                 />
               </div>
-              <div className="hidden sm:block w-px h-10 bg-border" />
-              <div className="flex flex-col justify-center text-left px-5 py-3.5 sm:py-2 flex-1 min-w-0 border-t sm:border-t-0 border-border/60">
-                <label className="text-[11px] font-semibold text-muted-foreground leading-none mb-1">Ciudad</label>
+              <div className="border-t border-border/60" />
+              <div className="flex flex-col justify-center text-left px-5 py-4">
                 <SearchableSelect
                   options={zoneOptions}
                   value={heroZone}
@@ -317,10 +318,10 @@ export default function Home() {
                 type="button"
                 onClick={submitHeroSearch}
                 aria-label="Buscar especialista"
-                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-base rounded-2xl sm:rounded-full flex-shrink-0 px-6 py-4 sm:w-16 sm:h-16 sm:p-0"
+                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-base rounded-2xl px-6 py-4"
               >
-                <Search className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="sm:hidden">Buscar</span>
+                <Search className="w-5 h-5" />
+                Buscar
               </button>
             </div>
           </div>
