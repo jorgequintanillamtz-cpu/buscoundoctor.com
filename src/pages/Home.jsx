@@ -75,10 +75,14 @@ function HeroPeopleIllustration({ className = "" }) {
   );
 }
 
+// Formato "headline en negritas + texto de apoyo", como la franja de datos
+// (+36M visitas, +390K profesionales...) que Doctoralia pone debajo de su
+// hero. Nosotros no tenemos esas métricas de tráfico, así que en vez de
+// inventar números usamos nuestras 3 promesas reales en ese mismo formato.
 const TRUST_STRIP = [
-  { icon: Users, label: "Perfiles para cada especialista", key: "perfiles" },
-  { icon: Star, label: "Reseñas verificadas de pacientes reales", key: "resenas" },
-  { icon: ShieldCheck, label: "Cédulas profesionales verificadas a mano", key: "cedula" },
+  { icon: Users, headline: "Perfiles verificados", caption: "de especialistas certificados", key: "perfiles" },
+  { icon: Star, headline: "Reseñas reales", caption: "de pacientes que ya agendaron", key: "resenas" },
+  { icon: ShieldCheck, headline: "Cédula profesional", caption: "verificada a mano por nuestro equipo", key: "cedula" },
 ];
 
 // Orden por demanda típica en un directorio médico (no por fecha de creación en la base de datos)
@@ -343,16 +347,16 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Fila de confianza: texto fino debajo de las pills, como el
-              disclaimer de la referencia. */}
-          <div className="hidden sm:flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-9 text-white/70 text-xs">
-            {TRUST_STRIP.map((item) => (
-              <span key={item.key} className="flex items-center gap-1.5">
-                <item.icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.key === "cedula" ? "text-emerald-400" : "text-brand-bluePale"}`} />
-                {item.key === "perfiles" ? "Perfiles verificados de especialistas" : item.label}
-              </span>
-            ))}
-          </div>
+          {/* Letras chicas debajo de las pills, mismo espíritu que el aviso
+              legal de la referencia (no diagnosticamos, aceptas nuestros
+              términos), redactado con texto propio. */}
+          <p className="mt-8 sm:mt-9 text-white/60 text-[11px] sm:text-xs leading-relaxed max-w-xl mx-auto">
+            Te ayudamos a encontrar y contactar especialistas: no ofrecemos diagnósticos ni sustituimos una consulta médica.
+            {" "}Al usar BuscoUnDoctor aceptas nuestros{" "}
+            <Link to="/terminos-y-condiciones" className="underline hover:text-white/90">Términos y condiciones</Link>
+            {" "}y nuestro{" "}
+            <Link to="/aviso-de-privacidad" className="underline hover:text-white/90">Aviso de privacidad</Link>.
+          </p>
         </div>
 
       </section>
