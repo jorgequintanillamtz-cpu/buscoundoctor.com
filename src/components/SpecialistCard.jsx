@@ -7,6 +7,7 @@ import VerifiedSeal from "./profile/VerifiedSeal";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import { base44 } from "@/api/base44Client";
+import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 
 const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
@@ -91,7 +92,7 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
               </div>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
                 <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full">
-                  {specialist.specialty}
+                  {specialtyDisplay}
                 </span>
                 {specialist.subspecialty && (
                   <span className="text-xs text-muted-foreground">· {specialist.subspecialty}</span>
