@@ -120,7 +120,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
   const [heroZone, setHeroZone] = useState("");
-  const [insurers, setInsurers] = useState([]);
   const [heroImageUrl, setHeroImageUrl] = useState("");
   const [familyPhotoUrl, setFamilyPhotoUrl] = useState("");
   const [doctorPhotoUrl, setDoctorPhotoUrl] = useState("");
@@ -166,13 +165,12 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, allActive, insurerList, siteSettings, conditionList] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, allActive, siteSettings, conditionList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
       base44.entities.Specialist.filter({ active: true }),
-      base44.entities.Insurer.list('name', 50).catch(() => []),
       base44.entities.SiteSettings.list().catch(() => []),
       // Límite alto explícito: el banco ya pasa de 1000 registros y el
       // default del backend se queda corto ahí (mismo bug que se corrigió
@@ -188,12 +186,6 @@ export default function Home() {
       setHeroImageUrl(siteSettings[0]?.hero_image_url || "");
       setFamilyPhotoUrl(siteSettings[0]?.family_photo_url || "");
       setDoctorPhotoUrl(siteSettings[0]?.doctor_photo_url || "");
-      // "Particular/Sin seguro" siempre al final, no es una aseguradora real
-      setInsurers([...insurerList].sort((a, b) => {
-        if (a.name === "Particular/Sin seguro") return 1;
-        if (b.name === "Particular/Sin seguro") return -1;
-        return 0;
-      }));
 
       setLoading(false);
     }
@@ -236,12 +228,6 @@ export default function Home() {
       </div>);
 
   }
-
-  // Aseguradoras: en móvil solo mostramos las primeras 6 (con logo) para no
-  // ocupar tanto espacio vertical, con un chip de "+N más" al final.
-  const insurersWithLogo = insurers.filter((ins) => ins.logo_url);
-  const insurersMobileVisible = insurersWithLogo.slice(0, 6);
-  const insurersMobileHiddenCount = insurers.length - insurersMobileVisible.length;
 
   return (
     <div>
@@ -469,43 +455,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Aseguradoras en nuestro sistema */}
-      {insurers.length > 0 && (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-6">
-        <div className="text-center mb-6">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground">Aseguradoras en nuestro sistema</h2>
-          <p className="text-sm text-muted-foreground mt-1">Cada médico indica en su perfil cuáles acepta — no todos aceptan todas.</p>
-        </div>
-        {/* Móvil: lista recortada + chip de "+N más" para no ocupar tanto espacio */}
-        <div className="flex sm:hidden flex-wrap items-center justify-center gap-2">
-          {insurersMobileVisible.map((ins) => (
-            <div key={ins.id} className="flex items-center gap-1.5 bg-card border border-border/50 rounded-full px-3 py-1.5">
-              <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />
-              <span className="text-xs font-medium text-foreground">{ins.name}</span>
-            </div>
-          ))}
-          {insurersMobileHiddenCount > 0 && (
-            <span className="text-xs font-semibold text-brand-blue bg-brand-bluePale rounded-full px-3 py-1.5">
-              +{insurersMobileHiddenCount} más
-            </span>
-          )}
-        </div>
-
-        {/* Desktop/tablet: lista completa */}
-        <div className="hidden sm:flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-          {insurersWithLogo.map((ins) => (
-            <div key={ins.id} className="flex items-center gap-2 bg-card border border-border/50 rounded-full px-4 py-2.5">
-              <img src={ins.logo_url} alt={ins.name} className="w-5 h-5 object-contain" />
-              <span className="text-sm font-medium text-foreground">{ins.name}</span>
-            </div>
-          ))}
-          {insurers.some((ins) => !ins.logo_url) && (
-            <span className="text-sm text-muted-foreground px-2">y muchas otras más</span>
-          )}
-        </div>
-      </section>
-      )}
 
       {/* Featured: 6 doctores distribuidos en fila completa (próximamente slider hasta 12) */}
       <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
