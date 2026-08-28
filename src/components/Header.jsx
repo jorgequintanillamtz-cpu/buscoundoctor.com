@@ -146,7 +146,7 @@ export default function Header() {
           </button>
         </div>
       )}
-      <div className="bg-brand-blueLight w-full px-4 sm:px-6 pb-3 lg:pb-0">
+      <div className={`w-full px-4 sm:px-6 pb-3 lg:pb-0 ${isHome ? "bg-brand-navy" : "bg-brand-blueLight"}`}>
         <div className="flex items-center justify-between h-20 gap-4">
           <Logo to="/" className="h-[47px] sm:h-[52px]" />
 
