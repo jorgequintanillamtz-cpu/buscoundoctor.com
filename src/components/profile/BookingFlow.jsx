@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { CheckCircle2, RotateCcw, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { notifyNewAppointmentRequest } from "@/api/doctorNotify";
+import { trackDoctorContact } from "@/utils/trackDoctorStats";
 
 // Ícono de WhatsApp (glifo real, no la burbuja genérica de lucide) para que
 // el botón se reconozca de inmediato como WhatsApp.
@@ -105,6 +106,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         preferred_date: dateMode === "asap" ? "Lo antes posible" : specificDate,
       });
       notifyNewAppointmentRequest(specialist, { patient_name: name, age, email, reason: reasonText });
+      trackDoctorContact(specialist);
 
       const lines = [
         `Hola, me gustaría consultar horarios disponibles para agendar una cita con ${specialist.full_name}.`,
