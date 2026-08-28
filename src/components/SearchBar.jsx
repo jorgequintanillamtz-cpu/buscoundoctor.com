@@ -11,6 +11,7 @@ import { resolveCitySlug } from "@/lib/citySlug";
 export default function SearchBar({ className = "" }) {
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
+  const [subspecialties, setSubspecialties] = useState([]);
   const [zones, setZones] = useState([]);
   const [pickId, setPickId] = useState("");
   const [zoneId, setZoneId] = useState("");
@@ -26,12 +27,14 @@ export default function SearchBar({ className = "" }) {
       // en /admin/enfermedades), dejando fuera del buscador principal
       // enfermedades reales que sí están en el catálogo.
       base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
-    ]).then(([s, z, c]) => { setSpecialties(s); setZones(z); setConditions(c); });
+      base44.entities.Subspecialty.filter({ active: true }).catch(() => []),
+    ]).then(([s, z, c, sub]) => { setSpecialties(s); setZones(z); setConditions(c); setSubspecialties(sub); });
   }, []);
 
-  // Especialidades y enfermedades combinadas en un solo buscador (como el de
-  // Doctoralia): el usuario puede escribir tanto "dermatólogo" como "acné".
-  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
+  // Especialidades, subespecialidades y enfermedades combinadas en un solo
+  // buscador (como el de Doctoralia): el usuario puede escribir tanto
+  // "dermatólogo" como "cirugía maxilofacial" o "acné".
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
   const picked = searchOptions.find((o) => o.id === pickId);
   const zone = zones.find((z) => z.id === zoneId);
   const onListPage = location.pathname.startsWith("/especialistas");
@@ -44,6 +47,18 @@ export default function SearchBar({ className = "" }) {
 
   const handleBuscar = () => {
     if (!canBuscar) return;
+    if (picked?.type === "subspecialty") {
+      // Sin página SEO dedicada por diseño (ver AdminSubespecialidades.jsx):
+      // se manda al directorio general filtrado por subspecialties_relation,
+      // así que solo aparecen los doctores que explícitamente la marcaron
+      // como certificada en su panel, sin mezclarse con el resto de su
+      // especialidad base.
+      const params = new URLSearchParams();
+      params.set("subspecialty", picked.ref.slug);
+      if (zone?.name) params.set("zone", zone.name);
+      navigate(`/especialistas?${params.toString()}`);
+      return;
+    }
     if (picked?.type === "condition") {
       // Antes esto resolvía a "la" especialidad que clasifica la enfermedad
       // en el catálogo (ej. Acupuntura para "Ansiedad y estrés") y navegaba a
