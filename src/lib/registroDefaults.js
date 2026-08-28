@@ -9,6 +9,7 @@ export const EMPTY_REGISTRO_DATA = {
   whatsapp: "",
   specialty: "",
   subspecialty: "",
+  subspecialties_relation: [],
   cedula: "",
   years_experience: "",
   service_price: "",
