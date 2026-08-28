@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { SlidersHorizontal, X, Search, Stethoscope, UserPlus } from "lucide-react";
+import { SlidersHorizontal, X, Search, Stethoscope, UserPlus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,6 +41,7 @@ export default function SpecialtyPage() {
   const [subspecialties, setSubspecialties] = useState([]);
   const [faqs, setFaqs] = useState([]);
   const [conditions, setConditions] = useState([]);
+  const [conditionsExpanded, setConditionsExpanded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -152,6 +153,20 @@ export default function SpecialtyPage() {
     return rankSpecialists(result);
   }, [specialty, specialists, cityName, filterModality, filterPrice, searchQuery]);
 
+  // Especialidades con muchas enfermedades cargadas (ej. Cardiología con 30+)
+  // saturaban la página con una pared de pills. Ahora se muestran primero
+  // las marcadas "popular" en el banco (o las primeras alfabéticamente si no
+  // hay ninguna marcada) y el resto queda oculto detrás de un “+N más”.
+  const CONDITIONS_PREVIEW_COUNT = 5;
+  const sortedConditions = useMemo(() => {
+    return [...conditions].sort((a, b) => {
+      if (!!a.popular !== !!b.popular) return a.popular ? -1 : 1;
+      return a.name.localeCompare(b.name, "es");
+    });
+  }, [conditions]);
+  const topConditions = sortedConditions.slice(0, CONDITIONS_PREVIEW_COUNT);
+  const restConditions = sortedConditions.slice(CONDITIONS_PREVIEW_COUNT);
+
   const activeFilters = [filterModality, filterPrice].filter(Boolean).length;
   const clearFilters = () => { setFilterModality(""); setFilterPrice(""); };
 
@@ -227,11 +242,26 @@ export default function SpecialtyPage() {
         <section className="mb-5">
           <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Enfermedades que tratamos</h2>
           <div className="flex flex-wrap gap-2">
-            {conditions.map(c => (
+            {topConditions.map(c => (
               <Link key={c.id} to={`/enfermedades/${c.slug}/${citySlug}`} className="inline-flex items-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors rounded-full px-4 py-2 text-sm font-medium">
                 {c.name}
               </Link>
             ))}
+            {conditionsExpanded && restConditions.map(c => (
+              <Link key={c.id} to={`/enfermedades/${c.slug}/${citySlug}`} className="inline-flex items-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+                {c.name}
+              </Link>
+            ))}
+            {restConditions.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setConditionsExpanded((v) => !v)}
+                className="inline-flex items-center gap-1 bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors rounded-full px-4 py-2 text-sm font-medium"
+              >
+                {conditionsExpanded ? "Ver menos" : `+${restConditions.length} más`}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${conditionsExpanded ? "rotate-180" : ""}`} />
+              </button>
+            )}
           </div>
         </section>
       )}
