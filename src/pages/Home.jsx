@@ -439,21 +439,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por qué BuscoUnDoctor: mensaje único y directo sobre precio.
+      {/* Por qué BuscoUnDoctor: es gratis para pacientes, con foto de familia.
           Solo desktop aquí — en móvil esta sección va más abajo (después de
           Especialistas destacados) y de forma más discreta, ver más abajo. */}
-      <section className="sm:bg-brand-blueLight/60">
-        <div className="hidden sm:block max-w-2xl mx-auto px-6 py-12 text-center">
-          <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
-            <CheckCircle className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
+      <section className="hidden sm:block bg-brand-blueLight/60">
+        <div className="max-w-5xl mx-auto px-6 py-14">
+          <div className="grid sm:grid-cols-2 items-center gap-10">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
+                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
+              </div>
+              <h2 className="font-heading font-bold text-3xl text-brand-navy">¡Es gratis!</h2>
+              <p className="text-muted-foreground mt-3 max-w-md">
+                Usar el buscador y agendar tu cita no tiene costo para pacientes. Pagas exactamente lo mismo que si agendaras directo con el médico — BuscoUnDoctor no le suma ni un peso a tu consulta.
+              </p>
+            </div>
+            {familyPhotoUrl && (
+              <div className="rounded-3xl overflow-hidden shadow-sm">
+                <img
+                  src={familyPhotoUrl}
+                  alt="Familia que agendó su cita gratis con BuscoUnDoctor"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">
-            Sin sobreprecio por agendar aquí
-          </h2>
-          <p className="text-muted-foreground mt-2 max-w-lg mx-auto">
-            Pagas exactamente lo mismo que si agendaras directo con el médico. BuscoUnDoctor no le suma ni un peso a tu consulta.
-          </p>
         </div>
       </section>
 
