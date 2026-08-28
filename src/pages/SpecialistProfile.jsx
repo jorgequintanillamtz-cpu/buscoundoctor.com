@@ -54,6 +54,10 @@ export default function SpecialistProfile() {
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
   const [services, setServices] = useState([]);
+  // Nombre "como lo busca el paciente" (ej. "Ginecólogo") de la especialidad
+  // del doctor, resuelto contra el banco de especialidades. Cae de regreso
+  // al nombre formal (specialist.specialty) si no hay match.
+  const [specialtyDisplay, setSpecialtyDisplay] = useState(null);
   // Mismo criterio que ScrollSpyNav (escritorio): en el nav de anclas de
   // móvil tampoco tiene caso mostrar un título que lleva a una sección que
   // el doctor nunca llegó a llenar. Se declara aquí arriba (junto con el
@@ -67,6 +71,14 @@ export default function SpecialistProfile() {
       if (results.length > 0) {
         const specialist = results[0];
         setSpecialist(specialist);
+
+        let specialtyDisplayName = specialist.specialty;
+        try {
+          const specMatches = await base44.entities.Specialty.filter({ name: specialist.specialty });
+          if (specMatches[0]?.display_name) specialtyDisplayName = specMatches[0].display_name;
+        } catch {}
+        setSpecialtyDisplay(specialtyDisplayName);
+
         try {
           const insList = await base44.entities.Insurer.list('name', 50);
           setInsurers(insList);
@@ -115,8 +127,8 @@ export default function SpecialistProfile() {
           "@context": "https://schema.org",
           "@type": "Physician",
           "name": specialist.full_name,
-          "description": specialist.description || specialist.specialty,
-          "medicalSpecialty": specialist.specialty,
+          "description": specialist.description || specialtyDisplayName,
+          "medicalSpecialty": specialtyDisplayName,
           ...(specialist.profile_photo && { "image": specialist.profile_photo }),
           "address": {
             "@type": "PostalAddress",
@@ -153,10 +165,10 @@ export default function SpecialistProfile() {
         document.head.appendChild(script);
 
         const zoneLabel = specialist.zone || specialist.location || "Monterrey";
-        const pageTitle = `${specialist.full_name} — ${specialist.specialty} en ${zoneLabel} | BuscoUnDoctor`;
+        const pageTitle = `${specialist.full_name} — ${specialtyDisplayName} en ${zoneLabel} | BuscoUnDoctor`;
         const pageDescription = specialist.description
           ? specialist.description.slice(0, 160)
-          : `Especialista en ${specialist.specialty} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
+          : `Especialista en ${specialtyDisplayName} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
 
         // Cada perfil necesita su propio <title> y meta description únicos — sin
         // esto, Google ve todos los perfiles con el mismo título genérico del
