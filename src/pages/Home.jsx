@@ -248,9 +248,10 @@ export default function Home() {
           una sola columna con el título pegado arriba, y el buscador es
           grande y vive directo sobre el fondo azul, sin tarjeta blanca
           alrededor. Las pills de especialidades flotan justo debajo, y una
-          ilustración de personas (médicos y pacientes) decora el fondo,
-          apoyada en la curva inferior. */}
-      <section className="relative bg-brand-navy overflow-hidden pb-20 sm:pb-32 pt-6 sm:pt-10">
+          ilustración de personas (médicos y pacientes) decora el fondo. El
+          azul cubre casi toda la pantalla (min-h) y termina en corte recto,
+          sin curva ondulada. */}
+      <section className="relative bg-brand-navy overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex flex-col justify-center py-16 sm:py-20">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -354,12 +355,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Curva ondulada en el borde inferior del hero */}
-        <div className="absolute bottom-0 left-0 w-full leading-none pointer-events-none">
-          <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-14 sm:h-20" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0,40 C240,90 480,0 720,25 C960,50 1200,95 1440,35 L1440,100 L0,100 Z" fill="white" />
-          </svg>
-        </div>
       </section>
 
       {/* Specialties: las 8 más buscadas */}
