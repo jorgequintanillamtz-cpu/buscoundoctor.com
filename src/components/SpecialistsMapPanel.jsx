@@ -7,6 +7,7 @@ import { Star, MapPin, Maximize2, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { resolveOfficeCoords } from "@/lib/officeGeo";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useSpecialtyDisplayMap } from "@/hooks/useSpecialtyDisplay";
 
 // Centro por defecto: Monterrey / San Pedro Garza García
 const MTY_CENTER = [25.6714, -100.3096];
@@ -72,6 +73,7 @@ function Initials({ specialist, className }) {
  * lista de doctores a la izquierda, sincronizada con los pines.
  */
 export default function SpecialistsMapPanel({ specialists }) {
+  const specialtyDisplayMap = useSpecialtyDisplayMap();
   const [offices, setOffices] = useState([]);
   const [zones, setZones] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -162,7 +164,7 @@ export default function SpecialistsMapPanel({ specialists }) {
         </div>
         <div className="min-w-0">
           <p className="font-heading font-bold text-xs text-foreground leading-tight truncate">{specialist.full_name}</p>
-          <p className="text-[11px] text-muted-foreground leading-tight truncate">{specialist.specialty}</p>
+          <p className="text-[11px] text-muted-foreground leading-tight truncate">{specialtyDisplayMap[specialist.specialty] || specialist.specialty}</p>
         </div>
       </div>
       {specialist.rating != null && (
@@ -264,7 +266,7 @@ export default function SpecialistsMapPanel({ specialists }) {
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                      {specialist.specialty}
+                      {specialtyDisplayMap[specialist.specialty] || specialist.specialty}
                       {specialist.subspecialty ? ` · ${specialist.subspecialty}` : ""}
                     </p>
                     {specialist.rating != null && (
