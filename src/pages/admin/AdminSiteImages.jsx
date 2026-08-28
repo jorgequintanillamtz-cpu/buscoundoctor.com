@@ -290,6 +290,47 @@ export default function AdminSiteImages() {
         </div>
       </section>
 
+      {/* Foto de la sección "¡Es gratis!" */}
+      <section className="bg-card rounded-2xl border border-border/50 p-5 sm:p-6 mb-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+            <ImageIcon className="w-5 h-5 text-brand-blue" />
+          </div>
+          <div>
+            <h2 className="font-heading font-semibold text-foreground">Foto de la sección "¡Es gratis!"</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Se muestra en la sección del Home que explica que agendar es gratis para pacientes. Si no subes ninguna, la sección no muestra imagen.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-start gap-4">
+          <div className="w-full sm:w-56 h-48 rounded-xl border border-border/50 bg-muted/40 overflow-hidden flex items-center justify-center flex-shrink-0">
+            {settings.family_photo_url ? (
+              <img src={settings.family_photo_url} alt="Foto de la sección Es gratis" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs text-muted-foreground text-center px-4">Sin imagen todavía</span>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 text-sm font-medium cursor-pointer hover:bg-muted transition-colors w-fit">
+              {uploadingFamily ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {settings.family_photo_url ? "Cambiar imagen" : "Subir imagen"}
+              <input type="file" accept="image/*" className="hidden" onChange={uploadFamily} disabled={uploadingFamily} />
+            </label>
+            {settings.family_photo_url && (
+              <button
+                onClick={() => saveSettings({ family_photo_url: "" })}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors w-fit"
+              >
+                <X className="w-4 h-4" />
+                Quitar imagen
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Íconos de especialidades */}
       <section className="bg-card rounded-2xl border border-border/50 p-5 sm:p-6">
         <div className="flex items-start gap-3 mb-5">
