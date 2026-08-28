@@ -111,8 +111,18 @@ export default function Header() {
     navigate(`/especialistas?${params.toString()}`);
   };
 
+  // En el Home el header comparte el mismo azul marino que el hero (sin
+  // borde/blur separador), como en la referencia de Doctoralia. En el resto
+  // de las páginas conserva el fondo claro de siempre.
   return (
-    <header ref={headerRef} className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
+    <header
+      ref={headerRef}
+      className={`sticky top-0 z-50 ${
+        isHome
+          ? "bg-brand-navy"
+          : "bg-card/80 backdrop-blur-lg border-b border-border/50"
+      }`}
+    >
       {showDoctorBanner && (
         // Nota: el botón de cerrar NO va anidado dentro del <Link> (eso es HTML
         // inválido -- botón dentro de enlace -- y en móvil hacía que el tap no
