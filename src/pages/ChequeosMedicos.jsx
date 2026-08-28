@@ -375,7 +375,7 @@ export default function ChequeosMedicos() {
                             to={`/especialistas?specialty=${encodeURIComponent(r.specialty.name)}&zone=${encodeURIComponent(city)}`}
                             className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue hover:text-brand-navy whitespace-nowrap sm:mt-1"
                           >
-                            Ver {r.specialty.name}
+                            Ver {r.specialty.display_name || r.specialty.name}
                             <ArrowRight className="w-4 h-4" />
                           </Link>
                         ) : (
