@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { MapPin, BadgeCheck } from "lucide-react";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
+import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 
 // Tarjeta chica para sliders horizontales (ej. "Compara con otros X cerca de
 // ti"): solo lo esencial para reconocer al doctor de un vistazo — foto,
@@ -11,6 +12,7 @@ import { trackDoctorClick } from "@/utils/trackDoctorClick";
 // "Agendar cita" propio: toda la tarjeta es un link al perfil, donde ya vive
 // el flujo completo de reserva (BookingSidebar/BookingFlow).
 export default function CompactSpecialistCard({ specialist, sourcePage = "similares" }) {
+  const specialtyDisplay = useSpecialtyDisplay(specialist.specialty);
   const cardRef = useRef(null);
 
   useEffect(() => {
@@ -73,7 +75,7 @@ export default function CompactSpecialistCard({ specialist, sourcePage = "simila
       </div>
 
       <span className="text-[11px] font-medium text-primary bg-accent px-2 py-0.5 rounded-full w-fit mt-1.5 line-clamp-1">
-        {specialist.specialty}
+        {specialtyDisplay}
       </span>
 
       {specialist.years_experience > 0 && (
