@@ -10,6 +10,16 @@
       "description": "Aparece como miniatura cuando alguien comparte el enlace del sitio en WhatsApp, Facebook, etc. Si se deja vac\u00eda, se usa la imagen por defecto",
       "title": "Imagen para compartir en redes sociales (Open Graph)",
       "type": "string"
+    },
+    "family_photo_url": {
+      "description": "Foto de familia para el lado 'pacientes' de la secci\u00f3n '\u00a1Es gratis!' del home. Si se deja vac\u00eda, ese lado no muestra imagen.",
+      "title": "Foto de la secci\u00f3n 'Es gratis' \u2014 lado pacientes (Home)",
+      "type": "string"
+    },
+    "doctor_photo_url": {
+      "description": "Foto para el lado 'registro de doctor' de la secci\u00f3n '\u00a1Es gratis!' del home. Si se deja vac\u00eda, ese lado no muestra imagen.",
+      "title": "Foto de la secci\u00f3n 'Es gratis' \u2014 lado doctores (Home)",
+      "type": "string"
     }
   },
   "type": "object",
