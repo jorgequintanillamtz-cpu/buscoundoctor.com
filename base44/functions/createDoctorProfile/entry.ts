@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
       slug,
       specialty: body.specialty || '',
       subspecialty: body.subspecialty || '',
+      subspecialties_relation: Array.isArray(body.subspecialties_relation) ? body.subspecialties_relation.filter(Boolean) : [],
       whatsapp: body.whatsapp || '',
       modality: body.modality || 'presencial',
       zone: body.zone || '',
