@@ -454,7 +454,7 @@ export default function Home() {
               <img
                 src={familyPhotoUrl}
                 alt="Agendar en BuscoUnDoctor es gratis para pacientes"
-                className="w-full aspect-[10/7] object-cover object-bottom rounded-3xl shadow-sm"
+                className="w-full h-auto rounded-3xl shadow-sm"
               />
             )}
             {doctorPhotoUrl && (
@@ -462,7 +462,7 @@ export default function Home() {
                 <img
                   src={doctorPhotoUrl}
                   alt="Regístrate como doctor en BuscoUnDoctor"
-                  className="w-full aspect-[10/7] object-cover object-bottom rounded-3xl shadow-sm"
+                  className="w-full h-auto rounded-3xl shadow-sm"
                 />
               </Link>
             )}
@@ -595,7 +595,7 @@ export default function Home() {
           <img
             src={familyPhotoUrl}
             alt="Agendar en BuscoUnDoctor es gratis para pacientes"
-            className="w-full aspect-[10/7] object-cover object-bottom rounded-2xl"
+            className="w-full h-auto rounded-2xl"
           />
         )}
         {doctorPhotoUrl && (
@@ -603,7 +603,7 @@ export default function Home() {
             <img
               src={doctorPhotoUrl}
               alt="Regístrate como doctor en BuscoUnDoctor"
-              className="w-full aspect-[10/7] object-cover object-bottom rounded-2xl"
+              className="w-full h-auto rounded-2xl"
             />
           </Link>
         )}
