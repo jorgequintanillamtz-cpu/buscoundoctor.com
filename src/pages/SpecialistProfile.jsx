@@ -281,7 +281,7 @@ export default function SpecialistProfile() {
               )}
             </div>
             <p className="text-brand-navy/70 font-semibold text-base sm:text-lg mt-2">
-              {specialist.specialty}
+              {specialtyDisplay || specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
             </p>
             {primaryOffice?.address_line && (
