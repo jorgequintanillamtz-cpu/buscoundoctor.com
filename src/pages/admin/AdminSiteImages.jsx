@@ -63,6 +63,7 @@ export default function AdminSiteImages() {
   const [loading, setLoading] = useState(true);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [uploadingOg, setUploadingOg] = useState(false);
+  const [uploadingFamily, setUploadingFamily] = useState(false);
 
   const [specialties, setSpecialties] = useState([]);
   const [pickerOpenFor, setPickerOpenFor] = useState(null);
@@ -121,6 +122,18 @@ export default function AdminSiteImages() {
       await saveSettings({ og_image_url: file_url });
     } catch { toast.error("Error al subir la imagen"); }
     setUploadingOg(false);
+    e.target.value = "";
+  };
+
+  const uploadFamily = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingFamily(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await saveSettings({ family_photo_url: file_url });
+    } catch { toast.error("Error al subir la imagen"); }
+    setUploadingFamily(false);
     e.target.value = "";
   };
 
