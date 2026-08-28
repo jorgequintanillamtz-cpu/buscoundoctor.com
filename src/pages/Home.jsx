@@ -441,31 +441,61 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por qué BuscoUnDoctor: es gratis para pacientes, con foto de familia.
-          Solo desktop aquí — en móvil esta sección va más abajo (después de
-          Especialistas destacados) y de forma más discreta, ver más abajo. */}
+      {/* Por qué BuscoUnDoctor: es gratis, dos columnas — pacientes a la
+          izquierda, registro de doctor a la derecha, cada una con su propia
+          foto. Solo desktop aquí — en móvil esta sección va más abajo
+          (después de Especialistas destacados) y de forma más compacta. */}
       <section className="hidden sm:block bg-brand-blueLight/60">
         <div className="max-w-5xl mx-auto px-6 py-14">
-          <div className="grid sm:grid-cols-2 items-center gap-10">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-white border border-border/60 rounded-full px-4 py-1.5 mb-4">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
-              </div>
-              <h2 className="font-heading font-bold text-3xl text-brand-navy">¡Es gratis!</h2>
-              <p className="text-muted-foreground mt-3 max-w-md">
-                Usar el buscador y agendar tu cita no tiene costo para pacientes. Pagas exactamente lo mismo que si agendaras directo con el médico — BuscoUnDoctor no le suma ni un peso a tu consulta.
-              </p>
-            </div>
-            {familyPhotoUrl && (
-              <div className="rounded-3xl overflow-hidden shadow-sm">
+          <div className="grid sm:grid-cols-2 gap-8">
+            {/* Columna pacientes */}
+            <div className="bg-white rounded-3xl overflow-hidden shadow-sm flex flex-col">
+              {familyPhotoUrl && (
                 <img
                   src={familyPhotoUrl}
                   alt="Familia que agendó su cita gratis con BuscoUnDoctor"
-                  className="w-full h-full object-cover"
+                  className="w-full h-48 object-cover"
                 />
+              )}
+              <div className="p-6">
+                <div className="inline-flex items-center gap-2 bg-brand-blueLight/60 rounded-full px-3 py-1 mb-3">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-xs font-semibold text-brand-navy uppercase tracking-wide">Precio garantizado</span>
+                </div>
+                <h2 className="font-heading font-bold text-xl text-brand-navy">¡Es gratis!</h2>
+                <p className="text-muted-foreground text-sm mt-2">
+                  Usar el buscador y agendar tu cita no tiene costo para pacientes. Pagas exactamente lo mismo que si agendaras directo con el médico — BuscoUnDoctor no le suma ni un peso a tu consulta.
+                </p>
               </div>
-            )}
+            </div>
+
+            {/* Columna doctores */}
+            <div className="bg-brand-navy rounded-3xl overflow-hidden shadow-sm flex flex-col text-white">
+              {doctorPhotoUrl && (
+                <img
+                  src={doctorPhotoUrl}
+                  alt="Doctor registrando su perfil en BuscoUnDoctor"
+                  className="w-full h-48 object-cover"
+                />
+              )}
+              <div className="p-6">
+                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 mb-3">
+                  <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale" />
+                  <span className="text-xs font-semibold text-white uppercase tracking-wide">Para médicos</span>
+                </div>
+                <h2 className="font-heading font-bold text-xl text-white">¿Eres médico?</h2>
+                <p className="text-white/80 text-sm mt-2">
+                  Crea tu perfil verificado gratis y que los pacientes que buscan tu especialidad te encuentren a ti primero.
+                </p>
+                <Link
+                  to="/registro-medico"
+                  className="inline-flex items-center gap-2 mt-4 bg-white text-brand-navy text-sm font-semibold px-4 py-2 rounded-full hover:bg-white/90 transition-colors"
+                >
+                  Crear mi perfil gratis
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
