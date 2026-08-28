@@ -584,13 +584,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* "Sin sobreprecio": versión móvil, movida aquí (debajo de Especialistas
-          destacados) y más discreta — línea de texto muted en vez de tarjeta
-          de color, para que no llame tanto la atención. Oculta en desktop,
+      {/* "¡Es gratis!": versión móvil, movida aquí (debajo de Especialistas
+          destacados) y más compacta que la de escritorio. Oculta en desktop,
           que ya tiene su propio bloque más arriba. */}
-      <div className="sm:hidden flex items-center justify-center gap-1.5 px-4 py-3 text-center">
-        <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-        <p className="text-xs text-muted-foreground">Sin sobreprecio por agendar aquí — pagas igual que directo con el médico.</p>
+      <div className="sm:hidden px-4 py-4">
+        <div className="bg-brand-blueLight/60 rounded-2xl flex items-center gap-3 p-3">
+          {familyPhotoUrl && (
+            <img
+              src={familyPhotoUrl}
+              alt="Familia que agendó su cita gratis con BuscoUnDoctor"
+              className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+            />
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+              <p className="font-heading font-bold text-sm text-brand-navy">¡Es gratis!</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Agendar aquí no tiene costo — pagas igual que directo con el médico.</p>
+          </div>
+        </div>
       </div>
 
       {/* Cómo verificamos a nuestros médicos: rápido de leer, directo a la confianza.
