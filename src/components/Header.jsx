@@ -191,13 +191,19 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             <Link
               to="/panel-medico"
-              className="text-sm font-medium text-brand-navy/70 hover:text-brand-navy transition-colors whitespace-nowrap"
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                isHome ? "text-white/80 hover:text-white" : "text-brand-navy/70 hover:text-brand-navy"
+              }`}
             >
               Iniciar sesión
             </Link>
             <Link
               to="/registro-medico"
-              className="flex items-center gap-1.5 bg-brand-navy text-white text-sm font-semibold rounded-full pl-4 pr-4 py-2.5 hover:bg-brand-navy/90 transition-colors whitespace-nowrap"
+              className={`flex items-center gap-1.5 text-sm font-semibold rounded-full pl-4 pr-4 py-2.5 transition-colors whitespace-nowrap ${
+                isHome
+                  ? "bg-white text-brand-navy hover:bg-white/90"
+                  : "bg-brand-navy text-white hover:bg-brand-navy/90"
+              }`}
             >
               <UserPlus className="w-4 h-4 flex-shrink-0" />
               ¿Eres profesional de la salud?
@@ -207,7 +213,9 @@ export default function Header() {
           <button
             onClick={() => setOpen(!open)}
             aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            className="md:hidden p-2 rounded-lg hover:bg-brand-bluePale transition-colors text-brand-navy flex-shrink-0">
+            className={`md:hidden p-2 rounded-lg transition-colors flex-shrink-0 ${
+              isHome ? "text-white hover:bg-white/15" : "text-brand-navy hover:bg-brand-bluePale"
+            }`}>
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
