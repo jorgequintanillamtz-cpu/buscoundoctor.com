@@ -77,30 +77,32 @@ export default function StepDatos({ data, update, error, specialties }) {
         {(data.specialty === " " || (!specialties.some((s) => s.name === data.specialty) && data.specialty)) && (
           <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl mb-2" />
         )}
-        {currentSpecialtyId && (
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-1.5">Subespecialidad certificada (opcional)</p>
-            {availableSubspecialties.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {availableSubspecialties.map((s) => (
-                  <label key={s.id} className="flex items-center gap-2 cursor-pointer border border-border rounded-xl px-3 py-2 hover:bg-accent/40 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={selectedSubspecialties.includes(s.id)}
-                      onChange={() => toggleSubspecialty(s.id)}
-                      className="w-4 h-4 rounded border-input accent-primary flex-shrink-0"
-                    />
-                    <span className="text-sm text-foreground flex-1 min-w-0">{s.name}</span>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground border border-dashed border-border rounded-xl px-3 py-2">
-                Todavía no hay subespecialidades cargadas para {data.specialty} en el banco.
-              </p>
-            )}
-          </div>
-        )}
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">Subespecialidad certificada (opcional)</p>
+          {!currentSpecialtyId ? (
+            <p className="text-xs text-muted-foreground border border-dashed border-border rounded-xl px-3 py-2">
+              Elige tu especialidad arriba para ver las subespecialidades disponibles.
+            </p>
+          ) : availableSubspecialties.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {availableSubspecialties.map((s) => (
+                <label key={s.id} className="flex items-center gap-2 cursor-pointer border border-border rounded-xl px-3 py-2 hover:bg-accent/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={selectedSubspecialties.includes(s.id)}
+                    onChange={() => toggleSubspecialty(s.id)}
+                    className="w-4 h-4 rounded border-input accent-primary flex-shrink-0"
+                  />
+                  <span className="text-sm text-foreground flex-1 min-w-0">{s.name}</span>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground border border-dashed border-border rounded-xl px-3 py-2">
+              Todavía no hay subespecialidades cargadas para {data.specialty} en el banco.
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="sm:col-span-2">
