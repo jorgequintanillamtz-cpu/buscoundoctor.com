@@ -26,12 +26,40 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
+  // Buscador compacto del header: en el Home arranca oculto (el buscador
+  // grande del hero ya cumple ese rol) y solo aparece cuando ese buscador
+  // grande desaparece de la vista al hacer scroll hacia abajo. En el resto
+  // de las páginas siempre está visible, como antes.
+  const [showCompactSearch, setShowCompactSearch] = useState(!isHome);
 
   // Bloquea el scroll del fondo mientras el menú móvil a pantalla completa está abierto
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
+
+  // Observa el buscador grande del hero (Home.jsx le pone id="hero-search-bar")
+  // para saber cuándo sale de la pantalla. rootMargin negativo arriba compensa
+  // el alto del header sticky, para que el compacto aparezca justo cuando el
+  // grande queda tapado por él, no antes.
+  useEffect(() => {
+    if (!isHome) {
+      setShowCompactSearch(true);
+      return;
+    }
+    setShowCompactSearch(false);
+    const target = document.getElementById("hero-search-bar");
+    if (!target) {
+      setShowCompactSearch(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowCompactSearch(!entry.isIntersecting),
+      { rootMargin: "-96px 0px 0px 0px" }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [isHome, location.pathname]);
 
   // Alto real del header (banner "¿Eres médico?" + barra principal) expuesto
   // como variable CSS. Elementos sticky más abajo en la página (la tarjeta
