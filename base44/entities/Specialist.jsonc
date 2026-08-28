@@ -20,7 +20,23 @@
     },
     "subspecialty": {
       "type": "string",
-      "title": "Subespecialidad"
+      "title": "Subespecialidad (texto libre, legado)"
+    },
+    "subspecialties_relation": {
+      "type": "array",
+      "title": "Subespecialidades (relaci\u00f3n)",
+      "description": "IDs de registros de la entidad Subspecialty",
+      "items": {
+        "type": "string"
+      }
+    },
+    "conditions_relation": {
+      "type": "array",
+      "title": "Enfermedades atendidas (relaci\u00f3n)",
+      "description": "IDs de registros de la entidad Condition",
+      "items": {
+        "type": "string"
+      }
     },
     "description": {
       "type": "string",
