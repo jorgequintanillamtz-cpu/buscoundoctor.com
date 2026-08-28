@@ -43,6 +43,22 @@ export function useSpecialtyDisplay(specialtyName) {
   return _cache?.[specialtyName] || specialtyName;
 }
 
+// Hook para cuando se necesita el mapa completo (ej. resolver nombres
+// dentro de un .map() sin poder llamar un hook por cada item — llamar hooks
+// dentro de un loop/callback violaría las reglas de hooks de React). Se usa
+// una sola vez en el componente contenedor y luego se lee el objeto plano.
+export function useSpecialtyDisplayMap() {
+  const [, forceRender] = useState(0);
+  useEffect(() => {
+    if (_cache) return;
+    const listener = () => forceRender((n) => n + 1);
+    _listeners.add(listener);
+    loadSpecialtyDisplayMap();
+    return () => _listeners.delete(listener);
+  }, []);
+  return _cache || {};
+}
+
 // Versión no-hook para usar fuera de componentes React o cuando ya se tiene
 // la lista de especialidades cargada localmente.
 export function resolveSpecialtyDisplay(specialtyName, specialties = []) {
