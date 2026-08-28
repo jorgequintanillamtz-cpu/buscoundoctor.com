@@ -48,17 +48,41 @@ export default function Header() {
       return;
     }
     setShowCompactSearch(false);
-    const target = document.getElementById("hero-search-bar");
-    if (!target) {
-      setShowCompactSearch(true);
-      return;
+
+    let intersectionObserver = null;
+    const attach = (target) => {
+      intersectionObserver = new IntersectionObserver(
+        ([entry]) => setShowCompactSearch(!entry.isIntersecting),
+        { rootMargin: "-96px 0px 0px 0px" }
+      );
+      intersectionObserver.observe(target);
+    };
+
+    const existing = document.getElementById("hero-search-bar");
+    if (existing) {
+      attach(existing);
+      return () => intersectionObserver?.disconnect();
     }
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowCompactSearch(!entry.isIntersecting),
-      { rootMargin: "-96px 0px 0px 0px" }
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
+
+    // Home.jsx muestra un loader mientras carga sus datos, así que el nodo
+    // del buscador grande todavía no existe cuando este efecto corre al
+    // montar el header (antes esto hacía que se mostrara el compacto de
+    // inmediato, por error). Se observa el DOM hasta que el buscador grande
+    // aparezca (cuando el Home termina de cargar) y recién ahí se conecta
+    // el IntersectionObserver de scroll.
+    const mutationObserver = new MutationObserver(() => {
+      const target = document.getElementById("hero-search-bar");
+      if (target) {
+        mutationObserver.disconnect();
+        attach(target);
+      }
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      mutationObserver.disconnect();
+      intersectionObserver?.disconnect();
+    };
   }, [isHome, location.pathname]);
 
   // Alto real del header (banner "¿Eres médico?" + barra principal) expuesto
