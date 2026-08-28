@@ -20,6 +20,7 @@ function getNext8Days() {
 }
 
 export default function SpecialistCard({ specialist, priority = false, sourcePage = "otro" }) {
+  const specialtyDisplay = useSpecialtyDisplay(specialist.specialty);
   const [showForm, setShowForm] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [firstConsult, setFirstConsult] = useState(null);
