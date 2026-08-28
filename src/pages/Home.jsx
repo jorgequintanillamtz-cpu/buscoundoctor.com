@@ -502,24 +502,24 @@ export default function Home() {
             <Link
               key={s.id}
               to={`/especialista/${s.slug}`}
-              className="group flex flex-col items-center w-full max-w-[10rem]"
+              className="group flex flex-col items-center w-full max-w-[11rem]"
             >
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl bg-muted overflow-hidden flex-shrink-0">
+              <div className="w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-xl bg-muted overflow-hidden flex-shrink-0">
                 {s.profile_photo ? (
                   <img src={s.profile_photo} alt={s.full_name} className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
                 ) : (
                   <div className="w-full h-full bg-brand-bluePale flex items-center justify-center">
-                    <span className="font-heading font-bold text-2xl text-brand-blue/50">
+                    <span className="font-heading font-bold text-3xl text-brand-blue/50">
                       {s.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                     </span>
                   </div>
                 )}
               </div>
               <div className="pt-3 text-center">
-                <h3 className="font-heading font-bold text-sm text-foreground leading-tight group-hover:text-brand-blue transition-colors">{s.full_name}</h3>
-                <p className="text-brand-blue text-xs font-medium mt-1">{specialtyDisplayMap[s.specialty] || s.specialty}</p>
+                <h3 className="font-heading font-bold text-base text-foreground leading-tight group-hover:text-brand-blue transition-colors">{s.full_name}</h3>
+                <p className="text-brand-blue text-sm font-medium mt-1">{specialtyDisplayMap[s.specialty] || s.specialty}</p>
                 {s.years_experience &&
-                <p className="text-muted-foreground text-[11px] mt-1">{s.years_experience}+ años de experiencia</p>
+                <p className="text-muted-foreground text-xs mt-1">{s.years_experience}+ años de experiencia</p>
                 }
               </div>
             </Link>
