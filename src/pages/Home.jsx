@@ -122,6 +122,7 @@ export default function Home() {
   const [heroZone, setHeroZone] = useState("");
   const [insurers, setInsurers] = useState([]);
   const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [familyPhotoUrl, setFamilyPhotoUrl] = useState("");
   const blogScrollRef = useRef(null);
 
   const submitHeroSearch = () => {
@@ -184,6 +185,7 @@ export default function Home() {
       setZones(zoneList);
       setTotalSpecialists(allActive.length);
       setHeroImageUrl(siteSettings[0]?.hero_image_url || "");
+      setFamilyPhotoUrl(siteSettings[0]?.family_photo_url || "");
       // "Particular/Sin seguro" siempre al final, no es una aseguradora real
       setInsurers([...insurerList].sort((a, b) => {
         if (a.name === "Particular/Sin seguro") return 1;
