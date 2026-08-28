@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { notifyNewAppointmentRequest } from "@/api/doctorNotify";
 import { trackDoctorContact } from "@/utils/trackDoctorStats";
+import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 
 const TIME_SLOTS = ["09:00", "10:30", "12:00", "16:00", "17:30"];
 
@@ -29,6 +30,7 @@ function formatDayLabel(date) {
 }
 
 export default function AppointmentForm({ specialist, onClose, initialDate = "" }) {
+  const specialtyDisplay = useSpecialtyDisplay(specialist.specialty);
   const [form, setForm] = useState({
     patient_name: "",
     phone: "",
@@ -117,7 +119,7 @@ Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${for
         {/* Nombre, especialidad y datos rápidos */}
         <div className="sticky top-0 bg-card/95 backdrop-blur-lg z-10 p-5 border-b border-border/50">
           <h2 className="font-heading font-bold text-lg text-foreground">{specialist.full_name}</h2>
-          <p className="text-sm text-muted-foreground">{specialist.specialty}</p>
+          <p className="text-sm text-muted-foreground">{specialtyDisplay}</p>
 
           {/* Datos rápidos */}
           {(specialist.license_verification_status === "verified" || specialist.years_experience) && (
