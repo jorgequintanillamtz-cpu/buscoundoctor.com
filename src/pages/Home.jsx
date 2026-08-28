@@ -245,12 +245,18 @@ export default function Home() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative bg-brand-navy overflow-hidden pb-12 sm:pb-24">
+      {/* Hero: rediseño estilo Doctoralia — el header comparte el mismo azul
+          marino (ver Header.jsx `isHome`), todo el contenido va centrado en
+          una sola columna con el título pegado arriba, y el buscador es
+          grande y vive directo sobre el fondo azul, sin tarjeta blanca
+          alrededor. Las pills de especialidades flotan justo debajo, y una
+          ilustración de personas (médicos y pacientes) decora el fondo,
+          apoyada en la curva inferior. */}
+      <section className="relative bg-brand-navy overflow-hidden pb-20 sm:pb-32 pt-6 sm:pt-10">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
-            className="absolute -top-24 -right-16 w-[420px] h-[420px] bg-brand-blue/20"
+            className="absolute -top-24 -right-16 w-[420px] h-[420px] bg-brand-blue/15"
             style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
           />
           <div
@@ -259,88 +265,31 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 sm:pt-20">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            {/* Left: título + iconos de confianza */}
-            <div className="text-left">
-              {/* Badge de ubicación: oculto en móvil para dejar el hero reducido a
-                  título + subtítulo + buscador, como la referencia de Doctoralia. */}
-              <div className="hidden sm:inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-3 sm:mb-5">
-                <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
-                <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
-              </div>
-              <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight mb-2.5 sm:mb-8">
-                <span className="text-white block">
-                  Encuentra a tu especialista
-                </span>
-                <span className="text-white block">
-                  en <span className="border-b-4 border-brand-blue">Monterrey</span> y San Pedro
-                </span>
-              </h1>
+        {/* Ilustración de personas: solo desktop (en móvil el espacio es muy
+            angosto y competiría con el buscador). Se apoya en el borde
+            inferior y queda "cortada" por la curva blanca de abajo. */}
+        <HeroPeopleIllustration className="hidden sm:block absolute bottom-0 left-0 w-full h-40 md:h-56 pointer-events-none select-none" />
 
-              {/* Subtítulo: solo en móvil, reemplaza la fila de iconos de confianza
-                  para que el hero móvil quede en título + subtítulo + buscador.
-                  Lleva el mismo escúdo verde de la sección "Cada médico, verificado
-                  a mano" de escritorio, para reforzar la confianza desde el hero. */}
-              <p className="sm:hidden flex items-center gap-2 text-white/80 text-sm leading-relaxed mb-5">
-                <ShieldCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                Cada médico, verificado a mano.
-              </p>
-
-              {/* Iconos de confianza, estilo referencia: solo desktop, en móvil se
-                  reemplazan por el subtítulo de arriba para simplificar el hero. */}
-              <div className="hidden sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-6">
-                {TRUST_STRIP.map((item) => (
-                  <div key={item.key} className="flex flex-col items-start gap-1.5 sm:gap-2 max-w-none sm:max-w-[160px]">
-                    {item.key === "resenas" ? (
-                      <div className="h-9 sm:h-11 flex items-center gap-0.5">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-400 text-amber-400" />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border border-white/30 flex items-center justify-center">
-                        <item.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${item.key === "cedula" ? "text-emerald-400" : "text-white"}`} />
-                      </div>
-                    )}
-                    <p className="text-xs sm:text-sm text-white/80 leading-snug">
-                      {item.key === "perfiles" ? "Perfiles verificados de especialistas" : item.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: ilustración (o imagen personalizada desde el admin) */}
-            <div className="relative hidden md:flex justify-center items-center">
-              <div
-                className="absolute w-[360px] h-[400px] bg-gradient-to-br from-brand-blue/50 to-brand-bluePale/20"
-                style={{ borderRadius: '62% 38% 55% 45% / 50% 60% 40% 50%' }}
-              />
-              {heroImageUrl ? (
-                <img
-                  src={heroImageUrl}
-                  alt="BuscoUnDoctor"
-                  className="relative z-10 w-72 h-80 lg:w-80 lg:h-96 object-cover rounded-[2rem] drop-shadow-2xl"
-                />
-              ) : (
-                <DoctorHeroIllustration className="relative z-10 w-64 h-72 lg:w-72 lg:h-80 drop-shadow-2xl" />
-              )}
-            </div>
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-4 sm:mb-5">
+            <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
+            <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
           </div>
-        </div>
 
-        {/* Tarjeta blanca de búsqueda: vive DENTRO del hero azul (no superpuesta
-            al borde), con azul visible arriba y abajo de ella — el azul se
-            extiende (pb-24/pb-40 arriba) para dejarle espacio antes de la curva. */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 mt-2 sm:mt-4">
-          <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8">
-            {/* En móvil se omite este encabezado: el título y subtítulo del hero ya
-                cumplen ese rol, y la tarjeta queda como "caja de buscar" pura. */}
-            <h2 className="hidden sm:block font-heading font-bold text-lg sm:text-xl text-brand-navy mb-4">Encuentra la atención que necesitas</h2>
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:border sm:border-border/60 sm:rounded-full overflow-hidden">
-              <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
+          <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4">
+            Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span> y San Pedro
+          </h1>
+          <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-7 sm:mb-9 max-w-xl mx-auto">
+            <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+            Describe qué te pasa o a quién buscas: te ayudamos a encontrar y agendar con el especialista correcto.
+          </p>
+
+          {/* Buscador: sin tarjeta blanca alrededor, más grande y directo
+              sobre el fondo azul — es lo central de la página. */}
+          <div className="max-w-2xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 bg-white rounded-2xl sm:rounded-full shadow-2xl sm:p-2 overflow-hidden">
+              <div className="flex flex-col justify-center text-left px-5 py-3.5 sm:py-2 flex-1 min-w-0">
+                <label className="text-[11px] font-semibold text-muted-foreground leading-none mb-1">Especialidad o enfermedad</label>
                 <SearchableSelect
                   options={searchOptions}
                   value={heroSpecialty}
@@ -348,12 +297,12 @@ export default function Home() {
                   placeholder="¿Qué especialidad o enfermedad buscas?"
                   icon={Stethoscope}
                   hint="Especialidad"
-                  triggerClassName={triggerClass}
+                  triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
                 />
               </div>
-              <div className="hidden sm:block w-px bg-border" />
-              <div className="flex flex-col justify-center px-4 py-2 sm:py-1.5 flex-1 min-w-0 border sm:border-0 border-border/60 rounded-full sm:rounded-none">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Ciudad</label>
+              <div className="hidden sm:block w-px h-10 bg-border" />
+              <div className="flex flex-col justify-center text-left px-5 py-3.5 sm:py-2 flex-1 min-w-0 border-t sm:border-t-0 border-border/60">
+                <label className="text-[11px] font-semibold text-muted-foreground leading-none mb-1">Ciudad</label>
                 <SearchableSelect
                   options={zoneOptions}
                   value={heroZone}
@@ -361,44 +310,54 @@ export default function Home() {
                   placeholder="Monterrey y San Pedro"
                   icon={MapPin}
                   hint="Ciudad"
-                  triggerClassName={triggerClass}
+                  triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
                 />
               </div>
               <button
                 type="button"
                 onClick={submitHeroSearch}
-                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-sm px-6 py-3 rounded-full sm:rounded-none flex-shrink-0"
+                aria-label="Buscar especialista"
+                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-base rounded-2xl sm:rounded-full flex-shrink-0 px-6 py-4 sm:w-16 sm:h-16 sm:p-0"
               >
-                <Search className="w-4 h-4" />
-                Buscar
+                <Search className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="sm:hidden">Buscar</span>
               </button>
             </div>
+          </div>
 
-            {/* Pills de especialidades populares: solo desktop, para que el buscador
-                móvil quede limpio (título + subtítulo + buscador, sin más). */}
-            <div className="hidden sm:flex flex-wrap items-center gap-2 mt-4">
-              {sortByPopularity(specialties).slice(0, 10).map((s) => (
-                <Link
-                  key={s.id}
-                  to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
-                  className="text-xs sm:text-sm font-medium text-brand-blue bg-brand-bluePale hover:bg-brand-blue hover:text-white transition-colors rounded-full px-3 py-1.5"
-                >
-                  {s.display_name || s.name}
-                </Link>
-              ))}
+          {/* Pills de especialidades populares: flotando debajo del buscador,
+              sin tarjeta que las contenga, como en la referencia. */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-5 sm:mt-6">
+            {sortByPopularity(specialties).slice(0, 8).map((s) => (
               <Link
-                to="/especialistas"
-                className="text-xs sm:text-sm font-medium text-brand-navy bg-muted hover:bg-accent transition-colors rounded-full px-3 py-1.5"
+                key={s.id}
+                to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
+                className="text-xs sm:text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors rounded-full px-3 py-1.5"
               >
-                Ver más
+                {s.display_name || s.name}
               </Link>
-            </div>
+            ))}
+            <Link
+              to="/especialistas"
+              className="text-xs sm:text-sm font-medium text-brand-navy bg-white hover:bg-white/90 transition-colors rounded-full px-3 py-1.5"
+            >
+              Ver más
+            </Link>
+          </div>
+
+          {/* Fila de confianza: texto fino debajo de las pills, como el
+              disclaimer de la referencia. */}
+          <div className="hidden sm:flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-9 text-white/70 text-xs">
+            {TRUST_STRIP.map((item) => (
+              <span key={item.key} className="flex items-center gap-1.5">
+                <item.icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.key === "cedula" ? "text-emerald-400" : "text-brand-bluePale"}`} />
+                {item.key === "perfiles" ? "Perfiles verificados de especialistas" : item.label}
+              </span>
+            ))}
           </div>
         </div>
 
-        {/* Curva ondulada en el borde inferior del hero, ahora DESPUÉS de la
-            tarjeta, para que el azul quede visible también por debajo de ella
-            antes de pasar a blanco. */}
+        {/* Curva ondulada en el borde inferior del hero */}
         <div className="absolute bottom-0 left-0 w-full leading-none pointer-events-none">
           <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-14 sm:h-20" xmlns="http://www.w3.org/2000/svg">
             <path d="M0,40 C240,90 480,0 720,25 C960,50 1200,95 1440,35 L1440,100 L0,100 Z" fill="white" />
