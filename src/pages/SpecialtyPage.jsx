@@ -73,8 +73,9 @@ export default function SpecialtyPage() {
 
   useEffect(() => {
     if (!specialty || !cityName) return;
-    document.title = `${specialty.name} en ${cityName} | BuscoUnDoctor`;
-    setMeta("description", `Encuentra los mejores especialistas en ${specialty.name} en ${cityName}. Perfiles verificados con cédula profesional, reseñas y contacto directo por WhatsApp.`);
+    const displayName = specialty.display_name || specialty.name;
+    document.title = `${displayName} en ${cityName} | BuscoUnDoctor`;
+    setMeta("description", `Encuentra los mejores especialistas en ${displayName} en ${cityName}. Perfiles verificados con cédula profesional, reseñas y contacto directo por WhatsApp.`);
   }, [specialty, cityName]);
 
   // Si la URL no resuelve (especialidad o ciudad inexistente/desactivada),
@@ -101,11 +102,12 @@ export default function SpecialtyPage() {
   useEffect(() => {
     if (!specialty) return;
     const scripts = [];
+    const displayName = specialty.display_name || specialty.name;
     const medical = {
       "@context": "https://schema.org",
       "@type": "MedicalSpecialty",
-      "name": specialty.name,
-      "description": specialty.description || `${specialty.name} en ${cityName}.`,
+      "name": displayName,
+      "description": specialty.description || `${displayName} en ${cityName}.`,
     };
     const medScript = document.createElement("script");
     medScript.type = "application/ld+json";
@@ -186,13 +188,13 @@ export default function SpecialtyPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>{specialty.name}</BreadcrumbPage>
+            <BreadcrumbPage>{specialty.display_name || specialty.name}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="mb-5">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialty.name}</h1>
+        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">{specialty.display_name || specialty.name}</h1>
         {hasAnySpecialists && (
           <p className="text-sm text-muted-foreground mt-1.5">
             {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} disponible{filtered.length !== 1 ? "s" : ""}
@@ -310,7 +312,7 @@ export default function SpecialtyPage() {
                     Esta página está en construcción
                   </h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Estamos incorporando especialistas en {specialty.name} en {cityName}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
+                    Estamos incorporando especialistas en {specialty.display_name || specialty.name} en {cityName}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
                   </p>
                 </div>
               </div>
@@ -327,7 +329,7 @@ export default function SpecialtyPage() {
               <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
                 <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
                 <p className="text-xs text-muted-foreground flex-1">
-                  ¿Eres {specialty.name.toLowerCase()}? Sé de los primeros en aparecer aquí.
+                  ¿Eres {(specialty.display_name || specialty.name).toLowerCase()}? Sé de los primeros en aparecer aquí.
                 </p>
                 <Button variant="outline" size="sm" className="rounded-xl flex-shrink-0" asChild>
                   <Link to="/registro-medico">Regístrate gratis</Link>
@@ -336,7 +338,7 @@ export default function SpecialtyPage() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-muted-foreground">No hay especialistas en {specialty.name} con estos filtros.</p>
+              <p className="text-muted-foreground">No hay especialistas en {specialty.display_name || specialty.name} con estos filtros.</p>
               <Button variant="link" className="text-primary mt-2" onClick={clearFilters}>Limpiar filtros</Button>
             </div>
           ) : (
@@ -356,7 +358,7 @@ export default function SpecialtyPage() {
 
       {faqs.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground mb-5">Preguntas frecuentes sobre {specialty.name}</h2>
+          <h2 className="font-heading font-bold text-xl sm:text-2xl text-foreground mb-5">Preguntas frecuentes sobre {specialty.display_name || specialty.name}</h2>
           <Accordion type="single" collapsible className="bg-card rounded-2xl border border-border/50 divide-y divide-border/50">
             {faqs.map((f, i) => (
               <AccordionItem key={f.id} value={`faq-${i}`} className="px-5">
