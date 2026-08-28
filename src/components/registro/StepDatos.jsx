@@ -1,4 +1,6 @@
+import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
+import { base44 } from "@/api/base44Client";
 import StepShell from "./StepShell";
 
 // Paso 1 del wizard de registro de médicos ("Cuéntanos sobre ti"). Extraído
@@ -7,6 +9,39 @@ import StepShell from "./StepShell";
 // importen del mismo lugar — cualquier cambio futuro a este paso se ve
 // reflejado en ambos automáticamente, sin tener que mantenerlos en sync a mano.
 export default function StepDatos({ data, update, error, specialties }) {
+  // El doctor ya no escribe su subespecialidad como texto libre -- la elige
+  // del banco Subspecialty (mismo banco que usa /admin/subespecialidades y
+  // el panel del doctor ya registrado), acotada a las que cuelgan de la
+  // especialidad que acaba de elegir arriba. Esto es lo que permite que el
+  // buscador principal y /especialistas?subspecialty=slug encuentren a este
+  // doctor con exactitud en cuanto termine el registro.
+  const [allSubspecialties, setAllSubspecialties] = useState([]);
+
+  useEffect(() => {
+    base44.entities.Subspecialty.list("name", 500).then((list) => {
+      setAllSubspecialties(list.filter((s) => s.active !== false));
+    }).catch(() => {});
+  }, []);
+
+  const currentSpecialtyId = useMemo(
+    () => specialties.find((s) => s.name === data.specialty)?.id,
+    [specialties, data.specialty]
+  );
+
+  const availableSubspecialties = useMemo(
+    () => allSubspecialties.filter((s) => s.parent_specialty_id === currentSpecialtyId),
+    [allSubspecialties, currentSpecialtyId]
+  );
+
+  const selectedSubspecialties = data.subspecialties_relation || [];
+
+  const toggleSubspecialty = (id) => {
+    const next = selectedSubspecialties.includes(id)
+      ? selectedSubspecialties.filter((x) => x !== id)
+      : [...selectedSubspecialties, id];
+    update("subspecialties_relation", next);
+  };
+
   return (
     <StepShell title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
       <div className="sm:col-span-2">
@@ -42,7 +77,24 @@ export default function StepDatos({ data, update, error, specialties }) {
         {(data.specialty === " " || (!specialties.some((s) => s.name === data.specialty) && data.specialty)) && (
           <Input value={data.specialty.trim()} onChange={(e) => update("specialty", e.target.value)} placeholder="Escribe tu especialidad" className="rounded-xl mb-2" />
         )}
-        <Input value={data.subspecialty} onChange={(e) => update("subspecialty", e.target.value)} placeholder="Subespecialidad (opcional)" className="rounded-xl" />
+        {currentSpecialtyId && availableSubspecialties.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">Subespecialidad certificada (opcional)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {availableSubspecialties.map((s) => (
+                <label key={s.id} className="flex items-center gap-2 cursor-pointer border border-border rounded-xl px-3 py-2 hover:bg-accent/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={selectedSubspecialties.includes(s.id)}
+                    onChange={() => toggleSubspecialty(s.id)}
+                    className="w-4 h-4 rounded border-input accent-primary flex-shrink-0"
+                  />
+                  <span className="text-sm text-foreground flex-1 min-w-0">{s.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="sm:col-span-2">
