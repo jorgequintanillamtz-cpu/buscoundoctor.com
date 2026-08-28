@@ -626,7 +626,7 @@ export default function Home() {
             <img
               src={familyPhotoUrl}
               alt="Familia que agendó su cita gratis con BuscoUnDoctor"
-              className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+              className="w-16 h-16 rounded-xl object-cover object-bottom flex-shrink-0"
             />
           )}
           <div className="min-w-0">
@@ -643,7 +643,7 @@ export default function Home() {
             <img
               src={doctorPhotoUrl}
               alt="Doctor registrando su perfil en BuscoUnDoctor"
-              className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+              className="w-16 h-16 rounded-xl object-cover object-bottom flex-shrink-0"
             />
           )}
           <div className="min-w-0 flex-1">
