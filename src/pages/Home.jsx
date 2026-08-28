@@ -108,6 +108,13 @@ export default function Home() {
   // `heroSpecialty` guarda el id combinado ("spec:..." o "cond:...") pese al
   // nombre, para no tocar el resto de las referencias a esa variable.
   const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
+  // Nombre "como lo busca el paciente" por especialidad (ej. "Ginecólogo"),
+  // para las tarjetas de doctores destacados más abajo.
+  const specialtyDisplayMap = useMemo(() => {
+    const map = {};
+    specialties.forEach((s) => { map[s.name] = s.display_name || s.name; });
+    return map;
+  }, [specialties]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
   const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -516,7 +523,7 @@ export default function Home() {
               </div>
               <div className="pt-3 text-center">
                 <h3 className="font-heading font-bold text-sm text-foreground leading-tight">{s.full_name}</h3>
-                <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
+                <p className="text-brand-blue text-xs font-medium mt-1">{specialtyDisplayMap[s.specialty] || s.specialty}</p>
                 {s.years_experience &&
                 <p className="text-muted-foreground text-[11px] mt-1">{s.years_experience}+ años</p>
                 }
@@ -546,7 +553,7 @@ export default function Home() {
               </div>
               <div className="pt-3 text-center">
                 <h3 className="font-heading font-bold text-sm text-foreground leading-tight group-hover:text-brand-blue transition-colors">{s.full_name}</h3>
-                <p className="text-brand-blue text-xs font-medium mt-1">{s.specialty}</p>
+                <p className="text-brand-blue text-xs font-medium mt-1">{specialtyDisplayMap[s.specialty] || s.specialty}</p>
                 {s.years_experience &&
                 <p className="text-muted-foreground text-[11px] mt-1">{s.years_experience}+ años de experiencia</p>
                 }
