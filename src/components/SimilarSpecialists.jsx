@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import CompactSpecialistCard from "./CompactSpecialistCard";
 import { Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 
 export default function SimilarSpecialists({ specialistId, specialty, zone }) {
+  const specialtyDisplay = useSpecialtyDisplay(specialty);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollerRef = useRef(null);
@@ -38,7 +40,7 @@ export default function SimilarSpecialists({ specialistId, specialty, zone }) {
 
   if (loading || items.length === 0) return null;
 
-  const heading = specialty ? `Compara con otros ${specialty} cerca de ti` : "Especialistas similares";
+  const heading = specialty ? `Compara con otros ${specialtyDisplay} cerca de ti` : "Especialistas similares";
 
   // Ancho aproximado de una tarjeta (w-56/60) + el gap-3 entre ellas, para
   // que cada click de flecha avance ~1 tarjeta completa.
