@@ -587,44 +587,26 @@ export default function Home() {
       </section>
 
       {/* "¡Es gratis!": versión móvil, movida aquí (debajo de Especialistas
-          destacados) y más compacta que la de escritorio — dos tarjetas
-          apiladas: pacientes y registro de doctor. Oculta en desktop, que ya
-          tiene su propio bloque de dos columnas más arriba. */}
+          destacados). Solo las imágenes, sin texto encima ni tarjeta de
+          texto debajo (a pedido explícito). Oculta en desktop, que ya tiene
+          su propio bloque de dos columnas más arriba. */}
       <div className="sm:hidden px-4 py-4 space-y-3">
-        <div className="bg-brand-blueLight/60 rounded-2xl flex items-center gap-3 p-3">
-          {familyPhotoUrl && (
-            <img
-              src={familyPhotoUrl}
-              alt="Familia que agendó su cita gratis con BuscoUnDoctor"
-              className="w-16 h-16 rounded-xl object-cover object-bottom flex-shrink-0"
-            />
-          )}
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-              <p className="font-heading font-bold text-sm text-brand-navy">¡Es gratis!</p>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Agendar aquí no tiene costo — pagas igual que directo con el médico.</p>
-          </div>
-        </div>
-
-        <Link to="/registro-medico" className="bg-brand-navy rounded-2xl flex items-center gap-3 p-3">
-          {doctorPhotoUrl && (
+        {familyPhotoUrl && (
+          <img
+            src={familyPhotoUrl}
+            alt="Agendar en BuscoUnDoctor es gratis para pacientes"
+            className="w-full aspect-[10/7] object-cover object-bottom rounded-2xl"
+          />
+        )}
+        {doctorPhotoUrl && (
+          <Link to="/registro-medico">
             <img
               src={doctorPhotoUrl}
-              alt="Doctor registrando su perfil en BuscoUnDoctor"
-              className="w-16 h-16 rounded-xl object-cover object-bottom flex-shrink-0"
+              alt="Regístrate como doctor en BuscoUnDoctor"
+              className="w-full aspect-[10/7] object-cover object-bottom rounded-2xl"
             />
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <Stethoscope className="w-3.5 h-3.5 text-brand-bluePale flex-shrink-0" />
-              <p className="font-heading font-bold text-sm text-white">¿Eres médico?</p>
-            </div>
-            <p className="text-xs text-white/70 mt-0.5">Crea tu perfil verificado gratis — toca para empezar.</p>
-          </div>
-          <ArrowRight className="w-4 h-4 text-white/70 flex-shrink-0" />
-        </Link>
+          </Link>
+        )}
       </div>
 
       {/* Cómo verificamos a nuestros médicos: rápido de leer, directo a la confianza.
