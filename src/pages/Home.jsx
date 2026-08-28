@@ -268,42 +268,43 @@ export default function Home() {
             inferior y queda "cortada" por la curva blanca de abajo. */}
         <HeroPeopleIllustration className="hidden sm:block absolute bottom-0 left-0 w-full h-40 md:h-56 pointer-events-none select-none" />
 
-        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-4 sm:mb-5">
-            <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
-            <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
+          <div className="max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-full px-4 py-1.5 mb-4 sm:mb-5">
+              <MapPin className="w-3.5 h-3.5 text-brand-bluePale" />
+              <span className="text-xs font-medium text-white">Monterrey, Nuevo León</span>
+            </div>
+
+            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4">
+              Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span> y San Pedro
+            </h1>
+            <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-7 sm:mb-9 max-w-xl mx-auto">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+              Describe qué te pasa o a quién buscas: te ayudamos a encontrar y agendar con el especialista correcto.
+            </p>
           </div>
 
-          <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4">
-            Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span> y San Pedro
-          </h1>
-          <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-7 sm:mb-9 max-w-xl mx-auto">
-            <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
-            Describe qué te pasa o a quién buscas: te ayudamos a encontrar y agendar con el especialista correcto.
-          </p>
-
           {/* Buscador: sin tarjeta blanca alrededor, directo sobre el fondo
-              azul. Campos apilados (más alto, menos ancho) en vez de lado a
-              lado, para que el texto siempre quepa completo sin cortarse; y
-              sin la etiqueta chica arriba de cada campo, solo el texto
-              dentro del recuadro. El id lo usa Header.jsx
-              (IntersectionObserver) para mostrar el buscador compacto del
-              header solo cuando este sale de la vista. */}
-          <div id="hero-search-bar" className="max-w-md mx-auto">
-            <div className="flex flex-col gap-2 bg-white rounded-3xl shadow-2xl p-2">
-              <div className="flex flex-col justify-center text-left px-5 py-4">
+              azul. Ancho (casi del largo de la página) y bajo — campos lado
+              a lado dentro de una píldora, sin la etiqueta chica arriba de
+              cada campo. El id lo usa Header.jsx (IntersectionObserver) para
+              mostrar el buscador compacto del header solo cuando este sale
+              de la vista. */}
+          <div id="hero-search-bar" className="max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 bg-white rounded-2xl sm:rounded-full shadow-2xl sm:p-2 overflow-hidden">
+              <div className="flex flex-col justify-center text-left px-6 py-3.5 sm:py-2.5 flex-1 min-w-0">
                 <SearchableSelect
                   options={searchOptions}
                   value={heroSpecialty}
                   onChange={setHeroSpecialty}
-                  placeholder="Especialidad o enfermedad"
+                  placeholder="¿Qué especialidad o enfermedad buscas?"
                   icon={Stethoscope}
                   hint="Especialidad"
                   triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
                 />
               </div>
-              <div className="border-t border-border/60" />
-              <div className="flex flex-col justify-center text-left px-5 py-4">
+              <div className="hidden sm:block w-px h-10 bg-border" />
+              <div className="flex flex-col justify-center text-left px-6 py-3.5 sm:py-2.5 flex-1 min-w-0 border-t sm:border-t-0 border-border/60">
                 <SearchableSelect
                   options={zoneOptions}
                   value={heroZone}
@@ -318,10 +319,10 @@ export default function Home() {
                 type="button"
                 onClick={submitHeroSearch}
                 aria-label="Buscar especialista"
-                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-base rounded-2xl px-6 py-4"
+                className="flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-base rounded-2xl sm:rounded-full flex-shrink-0 px-6 py-3.5 sm:w-14 sm:h-14 sm:p-0"
               >
                 <Search className="w-5 h-5" />
-                Buscar
+                <span className="sm:hidden">Buscar</span>
               </button>
             </div>
           </div>
