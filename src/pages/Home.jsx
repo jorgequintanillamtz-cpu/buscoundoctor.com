@@ -373,13 +373,13 @@ export default function Home() {
             {/* Pills de especialidades populares: solo desktop, para que el buscador
                 móvil quede limpio (título + subtítulo + buscador, sin más). */}
             <div className="hidden sm:flex flex-wrap items-center gap-2 mt-4">
-              {sortByPopularity(specialties).slice(0, 5).map((s) => (
+              {sortByPopularity(specialties).slice(0, 10).map((s) => (
                 <Link
                   key={s.id}
                   to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
                   className="text-xs sm:text-sm font-medium text-brand-blue bg-brand-bluePale hover:bg-brand-blue hover:text-white transition-colors rounded-full px-3 py-1.5"
                 >
-                  {s.name}
+                  {s.display_name || s.name}
                 </Link>
               ))}
               <Link
