@@ -20,6 +20,7 @@ export default function Header() {
   const [zones, setZones] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
+  const [subspecialties, setSubspecialties] = useState([]);
   const [searchPick, setSearchPick] = useState("");
   const [searchZone, setSearchZone] = useState("");
   const location = useLocation();
@@ -60,17 +61,28 @@ export default function Header() {
       // Límite alto explícito: el banco ya pasa de 1000 registros y el default
       // del backend se queda corto ahí (mismo bug corregido en /admin/enfermedades).
       base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
-    ]).then(([z, s, c]) => { setZones(z); setSpecialties(s); setConditions(c); });
+      base44.entities.Subspecialty.filter({ active: true }).catch(() => []),
+    ]).then(([z, s, c, sub]) => { setZones(z); setSpecialties(s); setConditions(c); setSubspecialties(sub); });
   }, []);
 
-  // Especialidades y enfermedades combinadas en un solo buscador (como el de
-  // Doctoralia): el usuario puede escribir tanto "dermatólogo" como "acné".
-  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
+  // Especialidades, subespecialidades y enfermedades combinadas en un solo
+  // buscador (como el de Doctoralia): el usuario puede escribir tanto
+  // "dermatólogo" como "cirugía maxilofacial" o "acné".
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
 
   const submitSearch = (e) => {
     e?.preventDefault?.();
     const picked = searchOptions.find((o) => o.id === searchPick);
+    if (picked?.type === "subspecialty") {
+      // Sin página SEO dedicada por diseño: se manda al directorio general
+      // filtrado por subspecialties_relation, mismo patrón que condition.
+      const params = new URLSearchParams();
+      params.set("subspecialty", picked.ref.slug);
+      if (searchZone) params.set("zone", searchZone);
+      navigate(`/especialistas?${params.toString()}`);
+      return;
+    }
     if (picked?.type === "condition") {
       // Antes esto resolvía a "la" especialidad que clasifica la enfermedad en
       // el catálogo (ej. Acupuntura para "Ansiedad y estrés") y navegaba a su
