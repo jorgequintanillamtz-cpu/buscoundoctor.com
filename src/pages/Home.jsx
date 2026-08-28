@@ -109,8 +109,6 @@ const slugify = (s) => (s || "")
   .replace(/\s+/g, "-")
   .replace(/-+/g, "-");
 
-const triggerClass = "h-auto text-sm font-medium text-foreground bg-transparent";
-
 export default function Home() {
   const navigate = useNavigate();
   const [specialties, setSpecialties] = useState([]);
