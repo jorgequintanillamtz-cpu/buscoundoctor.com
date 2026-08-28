@@ -266,7 +266,7 @@ export default function Home() {
 
         {/* Ilustración de personas: solo desktop (en móvil el espacio es muy
             angosto y competiría con el buscador). Se apoya en el borde
-            inferior y queda "cortada" por la curva blanca de abajo. */}
+            inferior recto de la sección. */}
         <HeroPeopleIllustration className="hidden sm:block absolute bottom-0 left-0 w-full h-40 md:h-56 pointer-events-none select-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
