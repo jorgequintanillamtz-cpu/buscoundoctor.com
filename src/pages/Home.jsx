@@ -210,7 +210,7 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, siteSettings, conditionList] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, siteSettings, conditionList, subspecialtyList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
@@ -219,10 +219,12 @@ export default function Home() {
       // Límite alto explícito: el banco ya pasa de 1000 registros y el
       // default del backend se queda corto ahí (mismo bug que se corrigió
       // en /admin/enfermedades y en SearchBar.jsx).
-      base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => [])]
+      base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
+      base44.entities.Subspecialty.filter({ active: true }).catch(() => [])]
       );
       setSpecialties(specs);
       setConditions(conditionList);
+      setSubspecialties(subspecialtyList);
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
