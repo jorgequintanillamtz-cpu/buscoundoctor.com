@@ -1,54 +1,53 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import {
-  Upload, X, Image as ImageIcon, Share2, Loader2,
-  Brain, Smile, Heart, Baby, Stethoscope, Sparkles, Bone, Eye, Ear,
-  Droplet, Activity, Scissors, Pill, Wind, Dumbbell, Syringe, Microscope, Users, Utensils,
-} from "lucide-react";
+import { Upload, X, Image as ImageIcon, Share2, Loader2, Stethoscope } from "lucide-react";
 
-// Mismo set de íconos disponibles que usa SpecialtyCard.jsx para renderizar
-// las especialidades en el sitio — si se agrega uno nuevo ahí, agregarlo aquí también.
-const ICONS = {
-  Brain, Smile, Heart, Baby, Stethoscope, Sparkles, Bone, Eye, Ear,
-  Droplet, Activity, Scissors, Pill, Wind, Dumbbell, Syringe, Microscope, Users, Utensils,
-};
-const ICON_NAMES = Object.keys(ICONS);
-
-// Mismo orden que usa Home.jsx para elegir las "Especialidades más
-// buscadas" — son las únicas 8 cuyo ícono se ve en la página de inicio, así
-// que son las únicas que tiene sentido editar aquí.
+// Mismo orden que usa Home.jsx para elegir las 5 "Especialidades
+// destacadas" (tarjetas grandes) de la página de inicio — son las únicas
+// cuya imagen se ve ahí, así que son las únicas que tiene sentido editar aquí.
 const POPULAR_SPECIALTY_ORDER = [
   "Dentista", "Ginecología", "Pediatría", "Dermatología", "Psicología",
-  "Nutrición", "Ortopedia y Traumatología", "Oftalmología", "Cardiología",
-  "Otorrinolaringología", "Medicina General", "Urología", "Psiquiatría",
-  "Gastroenterología", "Endocrinología",
 ];
 
-// Tamaño fijo (en px) al que se recorta/redimensiona cada ícono subido, para
-// que todos midan exactamente lo mismo sin importar la foto original.
-const ICON_IMAGE_SIZE = 480;
+// Proporción y ancho objetivo (en px) al que se recorta/redimensiona cada
+// imagen de tarjeta destacada subida, para que todas midan exactamente lo
+// mismo sin importar la foto original (rectangular, no cuadrada, porque las
+// tarjetas del Home son horizontales tipo 4:3).
+const HOME_CARD_RATIO = 4 / 3;
+const HOME_CARD_WIDTH = 800;
 
-// Recorta cualquier imagen al centro en un cuadrado 1:1, la redimensiona a un
-// tamaño fijo y la convierte a WebP — así no depende de que el admin suba
-// ya una imagen cuadrada o en el formato correcto, la app lo hace sola.
-function cropToSquareWebp(file, size = ICON_IMAGE_SIZE, quality = 0.9) {
+// Recorta cualquier imagen al centro en la proporción 4:3, la redimensiona a
+// un ancho fijo y la convierte a WebP — así no depende de que el admin suba
+// ya una imagen con la proporción o el formato correcto, la app lo hace sola.
+function cropToRatioWebp(file, ratio = HOME_CARD_RATIO, targetWidth = HOME_CARD_WIDTH, quality = 0.9) {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const side = Math.min(img.width, img.height);
-      const sx = (img.width - side) / 2;
-      const sy = (img.height - side) / 2;
+      const srcRatio = img.width / img.height;
+      let sx, sy, sw, sh;
+      if (srcRatio > ratio) {
+        sh = img.height;
+        sw = sh * ratio;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+      } else {
+        sw = img.width;
+        sh = sw / ratio;
+        sx = 0;
+        sy = (img.height - sh) / 2;
+      }
+      const targetHeight = Math.round(targetWidth / ratio);
       const canvas = document.createElement("canvas");
-      canvas.width = size;
-      canvas.height = size;
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
       const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetWidth, targetHeight);
       canvas.toBlob((blob) => {
         URL.revokeObjectURL(url);
         if (!blob) { reject(new Error("No se pudo procesar la imagen")); return; }
-        const baseName = (file.name || "icono").replace(/\.[^.]+$/, "");
+        const baseName = (file.name || "tarjeta").replace(/\.[^.]+$/, "");
         resolve(new File([blob], `${baseName}.webp`, { type: "image/webp" }));
       }, "image/webp", quality);
     };
