@@ -66,8 +66,7 @@ export default function AdminSiteImages() {
   const [uploadingDoctor, setUploadingDoctor] = useState(false);
 
   const [specialties, setSpecialties] = useState([]);
-  const [pickerOpenFor, setPickerOpenFor] = useState(null);
-  const [uploadingIconFor, setUploadingIconFor] = useState(null);
+  const [uploadingHomeCardFor, setUploadingHomeCardFor] = useState(null);
 
   useEffect(() => {
     Promise.all([
