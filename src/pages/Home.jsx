@@ -94,6 +94,18 @@ function sortByPopularity(list) {
   });
 }
 
+// Las 5 categorías destacadas de la página de inicio (estilo tarjeta grande
+// con ilustración + nombre encima, al estilo "Explore" de apps de directorio
+// tipo Dubai). Icóno/color de respaldo mientras no se suba una imagen real
+// via /admin/imagenes-del-sitio (campo home_card_image_url de Specialty).
+const FEATURED_HOME_CATEGORIES = [
+  { name: "Dentista", icon: Smile, bg: "#DBEAFE", fg: "#2563EB" },
+  { name: "Ginecología", icon: Heart, bg: "#FCE7F3", fg: "#DB2777" },
+  { name: "Pediatría", icon: Baby, bg: "#FEF3C7", fg: "#D97706" },
+  { name: "Dermatología", icon: Sparkles, bg: "#D1FAE5", fg: "#059669" },
+  { name: "Psicología", icon: Brain, bg: "#EDE9FE", fg: "#7C3AED" },
+];
+
 const slugify = (s) => (s || "")
   .toLowerCase()
   .normalize("NFD")
