@@ -492,6 +492,44 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Explora por especialidad: un slider horizontal de doctores por cada
+          especialidad. Esqueleto/mockup — todavía no hay doctores reales
+          registrados en estas 5 especialidades, así que se usan tarjetas
+          placeholder ("Doctor 1", "Doctor 2"...) sin link a ningún perfil.
+          Reemplazar por datos reales de Specialist filtrados por
+          especialidad en cuanto haya doctores dados de alta. */}
+      <section className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+          <div className="text-center mb-9">
+            <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Explora por especialidad</p>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Encuentra especialistas cerca de ti</h2>
+          </div>
+
+          {SPECIALTY_SLIDER_PLACEHOLDERS.map((spec) => (
+            <div key={spec} className="mb-10 last:mb-0">
+              <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy mb-4">{spec}</h3>
+              <div
+                className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth"
+                style={{ scrollbarWidth: 'none' }}
+              >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <div key={n} className="flex flex-col items-center flex-shrink-0 w-28 sm:w-32 snap-start">
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
+                      <span className="font-heading font-bold text-2xl text-brand-blue/50">D{n}</span>
+                    </div>
+                    <div className="pt-3 text-center">
+                      <h4 className="font-heading font-bold text-sm text-foreground leading-tight">Doctor {n}</h4>
+                      <p className="text-brand-blue text-xs font-medium mt-1">{spec}</p>
+                      <p className="text-muted-foreground text-[11px] mt-1">Próximamente</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* "¡Es gratis!": versión móvil, movida aquí (debajo de Especialistas
           destacados). Solo las imágenes, sin texto encima ni tarjeta de
           texto debajo (a pedido explícito). Oculta en desktop, que ya tiene
