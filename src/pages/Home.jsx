@@ -581,53 +581,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Preguntas frecuentes: oculta por completo en móvil para no alargar la
-          página; sigue disponible en /preguntas-frecuentes y en desktop. */}
-      <section className="hidden sm:block max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
-        <div className="relative bg-brand-navy rounded-3xl overflow-hidden p-6 sm:p-10 lg:p-14">
-          <div className="absolute -top-10 -right-10 w-56 h-56 bg-brand-blue/10 rounded-full pointer-events-none" />
-          <div className="relative grid md:grid-cols-2 gap-10 lg:gap-16">
-            <div>
-              <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-full mb-5">
-                <Sparkles className="w-3 h-3 text-brand-bluePale" />
-                Tus preguntas, respondidas
-              </span>
-              <h2 className="font-heading font-extrabold text-3xl sm:text-4xl leading-tight">
-                <span className="text-white block">Preguntas</span>
-                <span className="text-brand-bluePale block">Frecuentes</span>
-              </h2>
-              <p className="text-white/70 mt-4 leading-relaxed">
-                Reunimos las dudas más comunes sobre cómo funciona BuscoUnDoctor: qué cuesta, cómo verificamos a los médicos y cómo se agenda una cita.
-              </p>
-
-              <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h3 className="font-heading font-bold text-lg text-white">¿Sigues con dudas?</h3>
-                <p className="text-sm text-white/70 mt-2 leading-relaxed">
-                  Buscar al especialista correcto puede generar preguntas. Escríbenos y con gusto te ayudamos.
-                </p>
-                <Button className="mt-4 bg-brand-blue hover:bg-brand-blue/90 text-white rounded-xl" asChild>
-                  <Link to="/contacto">Contactar</Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {HOME_FAQS.map((f, i) => (
-                <details key={i} className="group bg-white/5 border border-white/10 rounded-2xl px-5 py-4 open:bg-white/10 transition-colors">
-                  <summary className="flex items-center justify-between gap-3 cursor-pointer list-none font-heading font-semibold text-sm sm:text-base text-white">
-                    {f.question}
-                    <span className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-bluePale group-open:rotate-45 transition-transform">
-                      <Plus className="w-3.5 h-3.5" />
-                    </span>
-                  </summary>
-                  <p className="text-sm text-white/70 leading-relaxed mt-3">{f.answer}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA: banner navy de ancho completo, rediseñado para vender mejor el
           registro al doctor — badge, checklist de beneficios concretos, prueba
           social real (número de especialistas ya inscritos) y CTA más fuerte,
