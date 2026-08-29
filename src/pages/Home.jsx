@@ -112,7 +112,7 @@ const FEATURED_HOME_CATEGORIES = [
 // campo de ciudad se queda estático a propósito, sin esta animación.
 const HERO_SPECIALTY_PLACEHOLDERS = [
   "Busca: Dentista",
-  "Busca: Ginecoólogo",
+  "Busca: Ginecólogo",
   "Busca: Dolor de cabeza",
   "Busca: Pediatra",
   "Busca: Ansiedad",
