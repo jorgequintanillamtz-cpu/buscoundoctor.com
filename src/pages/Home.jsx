@@ -157,12 +157,11 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, allActive, siteSettings, conditionList] = await Promise.all([
+      const [specs, specialists, blogPosts, zoneList, siteSettings, conditionList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
-      base44.entities.Specialist.filter({ active: true }),
       base44.entities.SiteSettings.list().catch(() => []),
       // Límite alto explícito: el banco ya pasa de 1000 registros y el
       // default del backend se queda corto ahí (mismo bug que se corrigió
@@ -174,7 +173,6 @@ export default function Home() {
       setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
-      setTotalSpecialists(allActive.length);
       setFamilyPhotoUrl(siteSettings[0]?.family_photo_url || "");
       setDoctorPhotoUrl(siteSettings[0]?.doctor_photo_url || "");
 
