@@ -353,87 +353,49 @@ export default function AdminSiteImages() {
         </div>
       </section>
 
-      {/* Íconos de especialidades */}
+      {/* Tarjetas destacadas de especialidades (Home) */}
       <section className="bg-card rounded-2xl border border-border/50 p-5 sm:p-6">
         <div className="flex items-start gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-brand-bluePale flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-brand-blue" />
+            <ImageIcon className="w-5 h-5 text-brand-blue" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="font-heading font-semibold text-foreground">Íconos de especialidades</h2>
+            <h2 className="font-heading font-semibold text-foreground">Tarjetas destacadas de especialidades (inicio)</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Son las 8 que se ven en "Especialidades más buscadas" en la página de inicio. Sube cualquier imagen (jpg, png, lo que sea) y aquí mismo se recorta automáticamente a cuadrada y se convierte a WebP, para que todas queden del mismo tamaño.
+              Son las 5 tarjetas grandes (Dentista, Ginecólogo, Pediatra, Dermatólogo, Psicólogo) que se ven en "Especialidades" en la página de inicio. Sube una ilustración horizontal para cada una; se recorta automáticamente a proporción 4:3 y se convierte a WebP. Mientras no subas imagen, se muestra un círculo de color con ícono.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {homepageSpecialties.map((s) => {
-            const CurrentIcon = ICONS[s.icon] || Heart;
-            const isOpen = pickerOpenFor === s.id;
-            const isUploading = uploadingIconFor === s.id;
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {homeCardSpecialties.map((s) => {
+            const isUploading = uploadingHomeCardFor === s.id;
             return (
-              <div key={s.id} className="relative">
-                <button
-                  onClick={() => setPickerOpenFor(isOpen ? null : s.id)}
-                  className="w-full flex flex-col items-center gap-2 p-3 rounded-xl border border-border/50 hover:border-brand-blue/40 hover:bg-brand-bluePale/30 transition-colors text-center"
-                >
-                  <span className={`w-12 h-12 flex-shrink-0 overflow-hidden flex items-center justify-center ${s.icon_image_url ? "rounded-lg" : "rounded-full bg-brand-bluePale"}`}>
-                    {s.icon_image_url ? (
-                      <img src={s.icon_image_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <CurrentIcon className="w-5 h-5 text-brand-blue" />
-                    )}
-                  </span>
-                  <span className="text-xs font-medium text-foreground truncate w-full">{s.name}</span>
-                </button>
-
-                {isOpen && (
-                  <div className="absolute z-20 top-full mt-1 left-1/2 -translate-x-1/2 w-72 bg-white rounded-2xl border border-border/50 shadow-xl p-3">
-                    <div className="flex items-center justify-between mb-2 px-1">
-                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">"{s.name}"</p>
-                      <button onClick={() => setPickerOpenFor(null)} className="text-muted-foreground hover:text-foreground">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <label className="flex items-center justify-center gap-2 w-full mb-3 px-3 py-2.5 rounded-xl border border-dashed border-brand-blue/40 bg-brand-bluePale/30 text-xs font-medium text-brand-navy cursor-pointer hover:bg-brand-bluePale/60 transition-colors">
-                      {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                      {isUploading ? "Procesando..." : "Subir imagen propia"}
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadSpecialtyIconImage(s, e)} disabled={isUploading} />
-                    </label>
-                    <p className="text-[10px] text-muted-foreground text-center -mt-2 mb-3">Se recorta a cuadrada y se convierte a WebP automáticamente</p>
-                    {s.icon_image_url && (
-                      <button
-                        onClick={() => removeSpecialtyIconImage(s)}
-                        className="flex items-center justify-center gap-1.5 w-full mb-3 text-xs font-medium text-destructive hover:underline"
-                      >
-                        <X className="w-3 h-3" />
-                        Quitar imagen y usar ícono
-                      </button>
-                    )}
-
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">O elegir un ícono</p>
-                    <div className="grid grid-cols-5 gap-1.5">
-                      {ICON_NAMES.map((name) => {
-                        const OptionIcon = ICONS[name];
-                        const active = !s.icon_image_url && (s.icon || "Heart") === name;
-                        return (
-                          <button
-                            key={name}
-                            title={name}
-                            onClick={() => changeSpecialtyIcon(s, name)}
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                              active ? "bg-brand-blue text-white" : "bg-muted text-muted-foreground hover:bg-brand-bluePale hover:text-brand-blue"
-                            }`}
-                          >
-                            <OptionIcon className="w-4 h-4" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+              <div key={s.id} className="flex flex-col gap-2">
+                <div className="w-full aspect-[4/3] rounded-xl border border-border/50 bg-muted/40 overflow-hidden flex items-center justify-center">
+                  {s.home_card_image_url ? (
+                    <img src={s.home_card_image_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground text-center px-4">Sin imagen todavía</span>
+                  )}
+                </div>
+                <p className="text-xs font-semibold text-brand-navy">{s.name}</p>
+                <div className="flex items-center gap-2">
+                  <label className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-border/60 text-xs font-medium cursor-pointer hover:bg-muted transition-colors">
+                    {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    {isUploading ? "Procesando..." : s.home_card_image_url ? "Cambiar" : "Subir"}
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadHomeCardImage(s, e)} disabled={isUploading} />
+                  </label>
+                  {s.home_card_image_url && (
+                    <button
+                      onClick={() => removeHomeCardImage(s)}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      Quitar
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
