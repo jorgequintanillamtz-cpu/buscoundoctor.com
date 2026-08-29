@@ -230,8 +230,8 @@ export default function SpecialtyPage() {
           <h2 className="font-heading font-semibold text-sm text-foreground mb-2.5">Subespecialidades</h2>
           <div className="flex flex-wrap gap-2">
             {subspecialties.map(sub => (
-              <Link key={sub.id} to={`/especialistas?subspecialty=${sub.slug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
-                {sub.name}
+              <Link key={sub.id} to={`/subespecialidad/${sub.slug}/${citySlug}`} className="inline-flex items-center bg-accent text-accent-foreground hover:bg-accent/80 transition-colors rounded-full px-4 py-2 text-sm font-medium">
+                {sub.display_name || sub.name}
               </Link>
             ))}
           </div>
