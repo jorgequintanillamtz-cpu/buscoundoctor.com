@@ -175,19 +175,12 @@ export default function AdminSiteImages() {
     }
   };
 
-  // Solo las 8 especialidades que realmente se muestran en "Especialidades
-  // más buscadas" del Home (mismo criterio que sortByPopularity().slice(0,8)).
-  const homepageSpecialties = useMemo(() => {
-    return [...specialties]
-      .sort((a, b) => {
-        const ia = POPULAR_SPECIALTY_ORDER.indexOf(a.name);
-        const ib = POPULAR_SPECIALTY_ORDER.indexOf(b.name);
-        if (ia === -1 && ib === -1) return 0;
-        if (ia === -1) return 1;
-        if (ib === -1) return -1;
-        return ia - ib;
-      })
-      .slice(0, 8);
+  // Solo las 5 especialidades que se muestran como tarjetas destacadas en
+  // el Home, en el mismo orden que usa Home.jsx.
+  const homeCardSpecialties = useMemo(() => {
+    return POPULAR_SPECIALTY_ORDER
+      .map((name) => specialties.find((s) => s.name === name))
+      .filter(Boolean);
   }, [specialties]);
 
   if (loading) {
