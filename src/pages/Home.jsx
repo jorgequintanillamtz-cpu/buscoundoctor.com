@@ -532,7 +532,12 @@ export default function Home() {
                       key={n}
                       className="flex flex-shrink-0 w-[270px] sm:w-[300px] snap-start rounded-2xl border border-border/50 bg-card overflow-hidden"
                     >
-                      <div className="w-24 sm:w-28 self-stretch flex-shrink-0 bg-brand-bluePale flex items-center justify-center">
+                      {/* Placeholder de foto: cuando haya doctores reales, subir
+                          fotos cuadradas de 1000x1000px y mostrarlas aquí con
+                          <img className="w-full h-full object-cover" .../> — el
+                          object-cover recorta la imagen cuadrada para llenar
+                          exactamente el alto del recuadro sin deformarse. */}
+                      <div className="w-24 sm:w-28 self-stretch flex-shrink-0 bg-brand-bluePale flex items-center justify-center overflow-hidden">
                         <span className="font-heading font-bold text-2xl text-brand-blue/50">D{n}</span>
                       </div>
                       <div className="flex-1 min-w-0 p-4">
