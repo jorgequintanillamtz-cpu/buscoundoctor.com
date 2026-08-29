@@ -398,7 +398,7 @@ export default function Home() {
               <Link
                 key={cat.name}
                 to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
-                className="relative flex-shrink-0 w-[46vw] max-w-[220px] aspect-[3/2] snap-start rounded-2xl overflow-hidden"
+                className="relative flex-shrink-0 w-[78vw] max-w-[320px] aspect-[3/2] snap-start rounded-2xl overflow-hidden"
               >
                 {s.home_card_image_url ? (
                   <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
