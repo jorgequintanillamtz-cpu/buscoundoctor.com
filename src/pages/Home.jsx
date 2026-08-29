@@ -157,6 +157,9 @@ export default function Home() {
   const [familyPhotoUrl, setFamilyPhotoUrl] = useState("");
   const [doctorPhotoUrl, setDoctorPhotoUrl] = useState("");
   const blogScrollRef = useRef(null);
+  // Un ref por especialidad para los sliders de "Explora por especialidad"
+  // (cada uno se desplaza de forma independiente con sus propias flechitas).
+  const specialtySliderRefs = useRef({});
 
   const submitHeroSearch = () => {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
