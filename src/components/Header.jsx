@@ -167,7 +167,7 @@ export default function Header() {
           : "bg-card/80 backdrop-blur-lg border-b border-border/50"
       }`}
     >
-      {showDoctorBanner && (
+      {showDoctorBanner && !isHome && (
         // Nota: el botón de cerrar NO va anidado dentro del <Link> (eso es HTML
         // inválido -- botón dentro de enlace -- y en móvil hacía que el tap no
         // se registrara bien). Ahora son hermanos dentro de un contenedor relativo.
