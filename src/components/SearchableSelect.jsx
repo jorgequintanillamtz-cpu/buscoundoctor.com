@@ -127,12 +127,17 @@ export default function SearchableSelect({
           {animatedPlaceholders && !query && (
             <span
               aria-hidden="true"
-              className={cn(
-                "absolute inset-0 flex items-center truncate text-muted-foreground pointer-events-none transition-opacity duration-300",
-                phVisible ? "opacity-100" : "opacity-0"
-              )}
+              className="absolute inset-0 flex items-center truncate text-muted-foreground pointer-events-none"
             >
-              {animatedPlaceholders[phIndex]}
+              {placeholderPrefix && <span className="flex-shrink-0">{placeholderPrefix}</span>}
+              <span
+                className={cn(
+                  "truncate transition-opacity duration-300",
+                  phVisible ? "opacity-100" : "opacity-0"
+                )}
+              >
+                {animatedPlaceholders[phIndex]}
+              </span>
             </span>
           )}
         </div>
