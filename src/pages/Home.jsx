@@ -59,6 +59,17 @@ function HeroPeopleIllustration({ className = "" }) {
 // Reemplazar por datos reales de Specialist en cuanto haya doctores.
 const SPECIALTY_SLIDER_PLACEHOLDERS = ["Dentista", "Ginecólogo", "Pediatra", "Dermatólogo", "Nutriólogo"];
 
+// Datos de relleno (ciudad, años de experiencia, precio de primera consulta)
+// para las tarjetas placeholder de arriba — se repiten en ciclo para las 10
+// tarjetas de cada slider, solo para dar una idea realista del formato.
+const PLACEHOLDER_DOCTOR_INFO = [
+  { city: "Monterrey", years: 8, price: 650 },
+  { city: "San Pedro Garza García", years: 12, price: 800 },
+  { city: "Monterrey", years: 5, price: 550 },
+  { city: "San Pedro Garza García", years: 15, price: 900 },
+  { city: "Monterrey", years: 10, price: 700 },
+];
+
 const TRUST_STRIP = [
   { icon: Users, headline: "Perfiles verificados", caption: "de especialistas certificados", key: "perfiles" },
   { icon: Star, headline: "Reseñas reales", caption: "de pacientes que ya agendaron", key: "resenas" },
