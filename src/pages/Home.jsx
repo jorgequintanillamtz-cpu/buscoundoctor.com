@@ -522,7 +522,7 @@ export default function Home() {
             <div key={spec} className="mb-10 last:mb-0">
               <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy mb-4">{spec}</h3>
               <div
-                className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth"
+                className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
                 style={{ scrollbarWidth: 'none' }}
               >
                 {Array.from({ length: 10 }, (_, idx) => idx + 1).map((n) => {
