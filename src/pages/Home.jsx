@@ -604,8 +604,29 @@ export default function Home() {
 
           {SPECIALTY_SLIDER_PLACEHOLDERS.map((spec) => (
             <div key={spec} className="mb-10 last:mb-0">
-              <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy mb-4">{spec}</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy">{spec}</h3>
+                <div className="hidden sm:flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scrollSpecialtySlider(spec, -1)}
+                    aria-label={`${spec}: anteriores`}
+                    className="w-9 h-9 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollSpecialtySlider(spec, 1)}
+                    aria-label={`${spec}: siguientes`}
+                    className="w-9 h-9 rounded-full border border-border/50 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
               <div
+                ref={(el) => { specialtySliderRefs.current[spec] = el; }}
                 className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth"
                 style={{ scrollbarWidth: 'none' }}
               >
