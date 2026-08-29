@@ -56,7 +56,7 @@ function HeroPeopleIllustration({ className = "" }) {
 // doctores reales registrados en estas 5 especialidades, así que cada
 // slider se llena con tarjetas placeholder ("Doctor 1", "Doctor 2"...).
 // Reemplazar por datos reales de Specialist en cuanto haya doctores.
-const SPECIALTY_SLIDER_PLACEHOLDERS = ["Dentista", "Ginecólogo", "Pediatra", "Dermatólogo", "Nutriólogo"];
+const SPECIALTY_SLIDER_PLACEHOLDERS = ["Dentista", "Dermatólogo"];
 
 // Datos de relleno (ciudad, años de experiencia, precio de primera consulta)
 // para las tarjetas placeholder de arriba — se repiten en ciclo para las 10
