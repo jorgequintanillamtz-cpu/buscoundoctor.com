@@ -148,39 +148,27 @@ export default function AdminSiteImages() {
     e.target.value = "";
   };
 
-  const changeSpecialtyIcon = async (specialty, iconName) => {
-    setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon: iconName, icon_image_url: "" } : s)));
-    setPickerOpenFor(null);
-    try {
-      await base44.entities.Specialty.update(specialty.id, { icon: iconName, icon_image_url: "" });
-      toast.success(`Ícono de "${specialty.name}" actualizado`);
-    } catch (e) {
-      toast.error("No se pudo guardar: " + e.message);
-    }
-  };
-
-  const uploadSpecialtyIconImage = async (specialty, e) => {
+  const uploadHomeCardImage = async (specialty, e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploadingIconFor(specialty.id);
+    setUploadingHomeCardFor(specialty.id);
     try {
-      const squareWebp = await cropToSquareWebp(file);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: squareWebp });
-      setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon_image_url: file_url } : s)));
-      await base44.entities.Specialty.update(specialty.id, { icon_image_url: file_url });
+      const cropped = await cropToRatioWebp(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: cropped });
+      setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, home_card_image_url: file_url } : s)));
+      await base44.entities.Specialty.update(specialty.id, { home_card_image_url: file_url });
       toast.success(`Imagen de "${specialty.name}" actualizada`);
-      setPickerOpenFor(null);
     } catch {
       toast.error("Error al subir la imagen");
     }
-    setUploadingIconFor(null);
+    setUploadingHomeCardFor(null);
     e.target.value = "";
   };
 
-  const removeSpecialtyIconImage = async (specialty) => {
-    setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, icon_image_url: "" } : s)));
+  const removeHomeCardImage = async (specialty) => {
+    setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, home_card_image_url: "" } : s)));
     try {
-      await base44.entities.Specialty.update(specialty.id, { icon_image_url: "" });
+      await base44.entities.Specialty.update(specialty.id, { home_card_image_url: "" });
       toast.success(`Se quitó la imagen de "${specialty.name}"`);
     } catch (e) {
       toast.error("No se pudo guardar: " + e.message);
