@@ -199,6 +199,12 @@ export default function Home() {
     el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
   };
 
+  const scrollSpecialtySlider = (spec, dir) => {
+    const el = specialtySliderRefs.current[spec];
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: "smooth" });
+  };
+
   useEffect(() => {
     async function load() {
       const [specs, specialists, blogPosts, zoneList, siteSettings, conditionList] = await Promise.all([
