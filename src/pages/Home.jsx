@@ -371,30 +371,77 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Specialties: las 8 más buscadas */}
+      {/* Specialties: 5 categorías destacadas, tarjetas grandes con imagen
+          (estilo "Explore" tipo Dubai). En móvil el slider se sale del
+          margen de la página por el lado derecho a propósito (bleed),
+          mostrando 2 tarjetas completas y una asomando, igual que la
+          referencia. Las imágenes se administran en
+          /admin/imagenes-del-sitio (Specialty.home_card_image_url); si aún
+          no hay imagen sube, se muestra un círculo de color + ícono. */}
       <section>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10">
           <div className="text-center mb-9">
             <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Especialidades</p>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Atención médica integral para cada necesidad</h2>
           </div>
-          {/* Móvil: slider horizontal para no ocupar tanto espacio vertical */}
-          <div
-            className="sm:hidden flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scroll-smooth"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {sortByPopularity(specialties).slice(0, 8).map((s) =>
-            <div key={s.id} className="snap-start">
-              <SpecialtyCard specialty={s} mobile />
-            </div>
-            )}
-          </div>
+        </div>
 
-          {/* Tablet/desktop: grid como antes */}
-          <div className="hidden sm:flex flex-wrap justify-center gap-x-6 sm:gap-x-10 gap-y-8">
-            {sortByPopularity(specialties).slice(0, 8).map((s) =>
-            <SpecialtyCard key={s.id} specialty={s} />
-            )}
+        {/* Móvil: bleed a la derecha, fuera del max-w-7xl a propósito */}
+        <div
+          className="sm:hidden flex gap-3 overflow-x-auto pb-2 pl-4 snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {FEATURED_HOME_CATEGORIES.map((cat) => {
+            const s = specialties.find((x) => x.name === cat.name);
+            if (!s) return null;
+            return (
+              <Link
+                key={cat.name}
+                to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
+                className="relative flex-shrink-0 w-[46vw] max-w-[220px] aspect-[4/3] snap-start rounded-2xl overflow-hidden"
+              >
+                {s.home_card_image_url ? (
+                  <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: cat.bg }}>
+                    <cat.icon className="w-9 h-9" style={{ color: cat.fg }} />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
+                <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-0 pb-10">
+          {/* Desktop: fila de 5 */}
+          <div className="hidden sm:grid grid-cols-5 gap-4">
+            {FEATURED_HOME_CATEGORIES.map((cat) => {
+              const s = specialties.find((x) => x.name === cat.name);
+              if (!s) return null;
+              return (
+                <Link
+                  key={cat.name}
+                  to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
+                  className="group relative aspect-[4/3] rounded-2xl overflow-hidden"
+                >
+                  {s.home_card_image_url ? (
+                    <img
+                      src={s.home_card_image_url}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: cat.bg }}>
+                      <cat.icon className="w-10 h-10" style={{ color: cat.fg }} />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
+                  <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
+                </Link>
+              );
+            })}
           </div>
           <div className="flex justify-center mt-10">
             <Link
