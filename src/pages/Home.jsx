@@ -532,7 +532,7 @@ export default function Home() {
                       key={n}
                       className="flex flex-shrink-0 w-[270px] sm:w-[300px] snap-start rounded-2xl border border-border/50 bg-card overflow-hidden"
                     >
-                      <div className="w-24 h-24 sm:w-28 sm:h-28 aspect-square flex-shrink-0 bg-brand-bluePale flex items-center justify-center">
+                      <div className="w-24 sm:w-28 self-stretch flex-shrink-0 bg-brand-bluePale flex items-center justify-center">
                         <span className="font-heading font-bold text-2xl text-brand-blue/50">D{n}</span>
                       </div>
                       <div className="flex-1 min-w-0 p-4">
