@@ -106,6 +106,21 @@ const FEATURED_HOME_CATEGORIES = [
   { name: "Psicología", icon: Brain, bg: "#EDE9FE", fg: "#7C3AED" },
 ];
 
+// Textos de ejemplo que rotan dentro del campo de especialidad/enfermedad
+// del buscador grande del hero (efecto tipo bestdubai.com: el placeholder va
+// cambiando solo, mostrando distintas opciones que se pueden buscar). El
+// campo de ciudad se queda estático a propósito, sin esta animación.
+const HERO_SPECIALTY_PLACEHOLDERS = [
+  "Busca: Dentista",
+  "Busca: Ginecoólogo",
+  "Busca: Dolor de cabeza",
+  "Busca: Pediatra",
+  "Busca: Ansiedad",
+  "Busca: Dermatólogo",
+  "Busca: Chequeo general",
+  "Busca: Psicólogo",
+];
+
 const slugify = (s) => (s || "")
   .toLowerCase()
   .normalize("NFD")
