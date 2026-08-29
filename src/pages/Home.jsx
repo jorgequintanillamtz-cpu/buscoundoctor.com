@@ -1,39 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Sparkles, Stethoscope, ChevronLeft, ChevronRight, Plus, CheckCircle, Check, X } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
-import Logo from "../components/Logo";
 import { resolveCitySlug } from "@/lib/citySlug";
-
-// `mobile: true` marca las 5 filas más importantes, que son las únicas que
-// se muestran en el slider/tabla recortada de móvil (el resto solo aparece
-// en la comparativa completa de escritorio).
-const COMPARISON_ROWS = [
-  { us: "Cédula profesional verificada", them: "Confías sin comprobar nada", mobile: true },
-  { us: "Varios especialistas para comparar", them: "Normalmente solo 1 o 2 nombres", mobile: true },
-  { us: "Experiencia, precios y horarios en un lugar", them: "Depende de lo que recuerden" },
-  { us: "Reseñas de varios pacientes reales", them: "La opinión de una sola persona", mobile: true },
-  { us: "Encuentras opciones en minutos", them: "Esperas días a que te recomienden" },
-  { us: "Precio visible antes de agendar", them: "No lo sabes hasta llegar", mobile: true },
-  { us: "Filtras por ciudad", them: "Puede estar lejos sin saberlo" },
-  { us: "Contacto directo por WhatsApp", them: "Depende de que te compartan el contacto", mobile: true },
-  { us: "Perfil actualizado por el médico", them: "Información desactualizada" },
-  { us: "Filtras por tu necesidad específica", them: "La recomendación era para alguien más" },
-];
-
-const HOME_FAQS = [
-  { question: "¿Cuesta usar BuscoUnDoctor?", answer: "No, usar BuscoUnDoctor es completamente gratuito para pacientes. Puedes buscar especialistas, revisar perfiles verificados y contactar directamente a cualquier médico sin costo ni necesidad de registrarte." },
-  { question: "¿Cómo se verifica a los médicos?", answer: "Cada médico debe subir su cédula profesional al crear su perfil. Un administrador de BuscoUnDoctor revisa ese documento manualmente antes de aprobar la publicación, y el sello de ‘Cédula profesional verificada’ solo aparece una vez confirmada la revisión." },
-  { question: "¿Cómo agendo una cita?", answer: "Contactas directamente al médico desde su perfil, por WhatsApp o llamada telefónica. BuscoUnDoctor no gestiona la agenda del consultorio; es el propio médico quien confirma contigo el horario disponible." },
-  { question: "¿BuscoUnDoctor da consejos médicos o diagnósticos?", answer: "No. Somos un directorio que te ayuda a encontrar y contactar especialistas; no ofrecemos diagnósticos, recomendaciones de tratamiento ni asesoría médica. Cualquier duda de salud debe consultarse directamente con un profesional." },
-  { question: "¿Puedo dejar una reseña de mi médico?", answer: "Sí. Desde el perfil del médico que consultaste puedes escribir una reseña con tu calificación y comentario. Las reseñas se revisan antes de publicarse para mantener la calidad de la información y evitar spam." },
-];
 
 // Ilustración decorativa de fondo del hero: una fila de siluetas de personas
 // (pacientes y médicos, estos últimos marcados con un pequeño gafete/estetoscopio)
