@@ -134,15 +134,18 @@ export default function Home() {
   const navigate = useNavigate();
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
+  const [subspecialties, setSubspecialties] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
-  // Especialidades y enfermedades combinadas en un solo buscador (mismo
-  // patrón que src/components/SearchBar.jsx): el usuario puede escribir
-  // tanto "dermatólogo" como "acné" en el buscador principal del home.
-  // `heroSpecialty` guarda el id combinado ("spec:..." o "cond:...") pese al
-  // nombre, para no tocar el resto de las referencias a esa variable.
-  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions), [specialties, conditions]);
+  // Especialidades, subespecialidades y enfermedades combinadas en un solo
+  // buscador (mismo patrón que Header.jsx y src/components/SearchBar.jsx):
+  // el usuario puede escribir tanto "dermatólogo" como "cirugía
+  // maxilofacial" o "acné" en el buscador principal del home.
+  // `heroSpecialty` guarda el id combinado ("spec:...", "sub:..." o
+  // "cond:...") pese al nombre, para no tocar el resto de las referencias a
+  // esa variable.
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
   // Nombre "como lo busca el paciente" por especialidad (ej. "Ginecólogo"),
   // para las tarjetas de doctores destacados más abajo.
   const specialtyDisplayMap = useMemo(() => {
