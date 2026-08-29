@@ -23,13 +23,35 @@ export default function SearchableSelect({
   hint,
   triggerClassName = "",
   contentClassName = "",
+  // Lista opcional de textos que rotan como si fueran el placeholder
+  // (efecto tipo bestdubai.com: "Find Fitness clubs" -> "Find Beach
+  // resorts"...). Si se pasa, reemplaza al placeholder estático por completo
+  // mientras el campo esté vacío; si no se pasa, el campo se comporta igual
+  // que siempre (placeholder fijo).
+  animatedPlaceholders = null,
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [rect, setRect] = useState(null);
+  const [phIndex, setPhIndex] = useState(0);
+  const [phVisible, setPhVisible] = useState(true);
   const wrapperRef = useRef(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Rota el texto de ejemplo cada ciertos segundos con un pequeño fundido
+  // (fade out -> cambia el texto -> fade in), solo si hay más de un texto.
+  useEffect(() => {
+    if (!animatedPlaceholders || animatedPlaceholders.length < 2) return;
+    const interval = setInterval(() => {
+      setPhVisible(false);
+      setTimeout(() => {
+        setPhIndex((i) => (i + 1) % animatedPlaceholders.length);
+        setPhVisible(true);
+      }, 250);
+    }, 2600);
+    return () => clearInterval(interval);
+  }, [animatedPlaceholders]);
 
   const selected = options.find((o) => o.id === value);
 
