@@ -38,50 +38,42 @@ export default function Header() {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Observa el buscador grande del hero (Home.jsx le pone id="hero-search-bar")
-  // para saber cuándo sale de la pantalla. rootMargin negativo arriba compensa
-  // el alto del header sticky, para que el compacto aparezca justo cuando el
-  // grande queda tapado por él, no antes.
+  // Calcula si el buscador grande del hero (Home.jsx le pone
+  // id="hero-search-bar") sigue tapando al compacto, revisándolo en cada
+  // scroll/resize con getBoundingClientRect (más confiable que un
+  // IntersectionObserver cuando el nodo puede tardar en existir: Home.jsx
+  // muestra un loader mientras carga sus datos, así que al montar el header
+  // el nodo a veces todavía no está — un MutationObserver lo detecta en
+  // cuanto aparece y se recalcula de inmediato).
   useEffect(() => {
     if (!isHome) {
       setShowCompactSearch(true);
       return;
     }
-    setShowCompactSearch(false);
 
-    let intersectionObserver = null;
-    const attach = (target) => {
-      intersectionObserver = new IntersectionObserver(
-        ([entry]) => setShowCompactSearch(!entry.isIntersecting),
-        { rootMargin: "-96px 0px 0px 0px" }
-      );
-      intersectionObserver.observe(target);
+    const checkScroll = () => {
+      const target = document.getElementById("hero-search-bar");
+      if (!target) {
+        setShowCompactSearch(false);
+        return;
+      }
+      const headerH = headerRef.current?.offsetHeight || 96;
+      const rect = target.getBoundingClientRect();
+      // Aparece solo cuando el buscador grande ya quedó arriba del header
+      // (su borde inferior sube por encima del alto real del header).
+      setShowCompactSearch(rect.bottom < headerH);
     };
 
-    const existing = document.getElementById("hero-search-bar");
-    if (existing) {
-      attach(existing);
-      return () => intersectionObserver?.disconnect();
-    }
-
-    // Home.jsx muestra un loader mientras carga sus datos, así que el nodo
-    // del buscador grande todavía no existe cuando este efecto corre al
-    // montar el header (antes esto hacía que se mostrara el compacto de
-    // inmediato, por error). Se observa el DOM hasta que el buscador grande
-    // aparezca (cuando el Home termina de cargar) y recién ahí se conecta
-    // el IntersectionObserver de scroll.
-    const mutationObserver = new MutationObserver(() => {
-      const target = document.getElementById("hero-search-bar");
-      if (target) {
-        mutationObserver.disconnect();
-        attach(target);
-      }
-    });
+    checkScroll();
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    const mutationObserver = new MutationObserver(checkScroll);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
 
     return () => {
+      window.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
       mutationObserver.disconnect();
-      intersectionObserver?.disconnect();
     };
   }, [isHome, location.pathname]);
 
