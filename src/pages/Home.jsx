@@ -109,7 +109,6 @@ export default function Home() {
     return map;
   }, [specialties]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
-  const [totalSpecialists, setTotalSpecialists] = useState(0);
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
   const [heroZone, setHeroZone] = useState("");
