@@ -51,8 +51,8 @@ export default function SearchableSelect({
       setTimeout(() => {
         setPhIndex((i) => (i + 1) % animatedPlaceholders.length);
         setPhVisible(true);
-      }, 250);
-    }, 2600);
+      }, 300);
+    }, 4200);
     return () => clearInterval(interval);
   }, [animatedPlaceholders]);
 
@@ -129,7 +129,7 @@ export default function SearchableSelect({
               aria-hidden="true"
               className="absolute inset-0 flex items-center truncate text-muted-foreground pointer-events-none"
             >
-              {placeholderPrefix && <span className="flex-shrink-0">{placeholderPrefix}</span>}
+              {placeholderPrefix && <span className="flex-shrink-0 mr-1">{placeholderPrefix}</span>}
               <span
                 className={cn(
                   "truncate transition-opacity duration-300",
