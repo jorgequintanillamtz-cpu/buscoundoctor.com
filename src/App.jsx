@@ -13,6 +13,7 @@ import SpecialistList from './pages/SpecialistList';
 import SpecialistProfile from './pages/SpecialistProfile';
 import SpecialtyPage from './pages/SpecialtyPage';
 import SpecialtyZonePage from './pages/SpecialtyZonePage';
+import SubspecialtyPage from './pages/SubspecialtyPage';
 import ConditionsPage from './pages/ConditionsPage';
 import ConditionDetailPage from './pages/ConditionDetailPage';
 import BlogList from './pages/BlogList';
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
         <Route path="/:professionSlug/:citySlug" element={<SpecialtyPage />} />
         <Route path="/:professionSlug/:citySlug/:zonaSlug" element={<SpecialtyZonePage />} />
+        <Route path="/subespecialidad/:slug/:citySlug" element={<SubspecialtyPage />} />
         {/* URLs viejas (especialidad en vez de profesión): se redirigen por si
             quedan enlaces guardados o compartidos con el patrón anterior. */}
         <Route path="/especialidad/:slug" element={<LegacySpecialtyRedirect />} />
