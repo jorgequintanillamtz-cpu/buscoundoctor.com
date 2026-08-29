@@ -325,7 +325,15 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-4 text-center">
             {TRUST_STRIP.map((item) => (
               <div key={item.key} className="flex sm:flex-col items-center sm:items-center justify-center gap-3 sm:gap-1.5">
-                <item.icon className={`w-5 h-5 flex-shrink-0 ${item.key === "cedula" ? "text-emerald-500" : "text-brand-blue"}`} />
+                {item.key === "resenas" ? (
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                ) : (
+                  <item.icon className={`w-5 h-5 flex-shrink-0 ${item.key === "cedula" ? "text-emerald-500" : "text-brand-blue"}`} />
+                )}
                 <div className="text-left sm:text-center">
                   <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy leading-tight">{item.headline}</p>
                   <p className="text-muted-foreground text-xs sm:text-sm">{item.caption}</p>
