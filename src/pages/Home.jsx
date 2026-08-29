@@ -361,6 +361,27 @@ export default function Home() {
 
       </section>
 
+      {/* Franja de confianza: mismo formato que la barra de datos (+36M
+          visitas, +390K profesionales...) que Doctoralia pone justo debajo
+          de su hero — headline en negritas + texto de apoyo, en 3 columnas.
+          Usamos nuestras 3 promesas reales en vez de métricas de tráfico que
+          no tenemos. */}
+      <section className="bg-white border-b border-border/50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-9 sm:py-11">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-4 text-center">
+            {TRUST_STRIP.map((item) => (
+              <div key={item.key} className="flex sm:flex-col items-center sm:items-center justify-center gap-3 sm:gap-1.5">
+                <item.icon className={`w-5 h-5 flex-shrink-0 ${item.key === "cedula" ? "text-emerald-500" : "text-brand-blue"}`} />
+                <div className="text-left sm:text-center">
+                  <p className="font-heading font-extrabold text-lg sm:text-xl text-brand-navy leading-tight">{item.headline}</p>
+                  <p className="text-muted-foreground text-xs sm:text-sm">{item.caption}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Specialties: las 8 más buscadas */}
       <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-10">
