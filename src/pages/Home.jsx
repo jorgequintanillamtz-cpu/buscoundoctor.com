@@ -53,6 +53,12 @@ function HeroPeopleIllustration({ className = "" }) {
 // (+36M visitas, +390K profesionales...) que Doctoralia pone debajo de su
 // hero. Nosotros no tenemos esas métricas de tráfico, así que en vez de
 // inventar números usamos nuestras 3 promesas reales en ese mismo formato.
+// Esqueleto/mockup de la sección "Explora por especialidad": todavía no hay
+// doctores reales registrados en estas 5 especialidades, así que cada
+// slider se llena con tarjetas placeholder ("Doctor 1", "Doctor 2"...).
+// Reemplazar por datos reales de Specialist en cuanto haya doctores.
+const SPECIALTY_SLIDER_PLACEHOLDERS = ["Dentista", "Ginecólogo", "Pediatra", "Dermatólogo", "Nutriólogo"];
+
 const TRUST_STRIP = [
   { icon: Users, headline: "Perfiles verificados", caption: "de especialistas certificados", key: "perfiles" },
   { icon: Star, headline: "Reseñas reales", caption: "de pacientes que ya agendaron", key: "resenas" },
