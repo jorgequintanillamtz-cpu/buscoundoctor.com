@@ -13,11 +13,11 @@ const POPULAR_SPECIALTY_ORDER = [
 // Proporción y ancho objetivo (en px) al que se recorta/redimensiona cada
 // imagen de tarjeta destacada subida, para que todas midan exactamente lo
 // mismo sin importar la foto original (rectangular, no cuadrada, porque las
-// tarjetas del Home son horizontales tipo 4:3).
-const HOME_CARD_RATIO = 4 / 3;
+// tarjetas del Home son horizontales tipo 3:2).
+const HOME_CARD_RATIO = 3 / 2;
 const HOME_CARD_WIDTH = 800;
 
-// Recorta cualquier imagen al centro en la proporción 4:3, la redimensiona a
+// Recorta cualquier imagen al centro en la proporción 3:2, la redimensiona a
 // un ancho fijo y la convierte a WebP — así no depende de que el admin suba
 // ya una imagen con la proporción o el formato correcto, la app lo hace sola.
 function cropToRatioWebp(file, ratio = HOME_CARD_RATIO, targetWidth = HOME_CARD_WIDTH, quality = 0.9) {
@@ -362,7 +362,7 @@ export default function AdminSiteImages() {
           <div className="flex-1 min-w-0">
             <h2 className="font-heading font-semibold text-foreground">Tarjetas destacadas de especialidades (inicio)</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Son las 5 tarjetas grandes (Dentista, Ginecólogo, Pediatra, Dermatólogo, Psicólogo) que se ven en "Especialidades" en la página de inicio. Sube una ilustración horizontal para cada una; se recorta automáticamente a proporción 4:3 y se convierte a WebP. Mientras no subas imagen, se muestra un círculo de color con ícono.
+              Son las 5 tarjetas grandes (Dentista, Ginecólogo, Pediatra, Dermatólogo, Psicólogo) que se ven en "Especialidades" en la página de inicio. Sube una ilustración horizontal para cada una; se recorta automáticamente a proporción 3:2 y se convierte a WebP. Mientras no subas imagen, se muestra un círculo de color con ícono.
             </p>
           </div>
         </div>
@@ -372,7 +372,7 @@ export default function AdminSiteImages() {
             const isUploading = uploadingHomeCardFor === s.id;
             return (
               <div key={s.id} className="flex flex-col gap-2">
-                <div className="w-full aspect-[4/3] rounded-xl border border-border/50 bg-muted/40 overflow-hidden flex items-center justify-center">
+                <div className="w-full aspect-[3/2] rounded-xl border border-border/50 bg-muted/40 overflow-hidden flex items-center justify-center">
                   {s.home_card_image_url ? (
                     <img src={s.home_card_image_url} alt="" className="w-full h-full object-cover" />
                   ) : (
