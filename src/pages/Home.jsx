@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, Smile, Heart, Baby, Sparkles, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
-import SpecialtyCard from "../components/SpecialtyCard";
 import BlogCard from "../components/BlogCard";
 import { resolveCitySlug } from "@/lib/citySlug";
 
