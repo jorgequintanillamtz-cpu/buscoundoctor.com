@@ -294,6 +294,7 @@ export default function Home() {
                   value={heroSpecialty}
                   onChange={setHeroSpecialty}
                   placeholder="¿Qué especialidad o enfermedad buscas?"
+                  animatedPlaceholders={HERO_SPECIALTY_PLACEHOLDERS}
                   icon={Stethoscope}
                   hint="Especialidad"
                   triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
