@@ -29,6 +29,9 @@ export default function SearchableSelect({
   // mientras el campo esté vacío; si no se pasa, el campo se comporta igual
   // que siempre (placeholder fijo).
   animatedPlaceholders = null,
+  // Texto fijo que va antes de la parte animada (ej. "Busca: ") y que NO
+  // rota junto con animatedPlaceholders.
+  placeholderPrefix = "",
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
