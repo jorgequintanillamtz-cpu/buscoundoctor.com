@@ -169,13 +169,11 @@ export default function Home() {
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     const picked = searchOptions.find((o) => o.id === heroSpecialty);
     if (picked?.type === "subspecialty") {
-      // Sin página SEO dedicada por diseño: se manda al directorio general
-      // filtrado por subspecialties_relation, mismo patrón que condition
-      // (ver Header.jsx).
-      const params = new URLSearchParams();
-      params.set("subspecialty", picked.ref.slug);
-      if (heroZone) params.set("zone", heroZone);
-      navigate(`/especialistas?${params.toString()}`);
+      // Página SEO dedicada (/subespecialidad/:slug/:citySlug), mismo patrón
+      // que specialty: arranca noindex y se indexa sola en cuanto haya
+      // doctores reales (ver SubspecialtyPage.jsx).
+      const citySlug = resolveCitySlug(zones, heroZone);
+      navigate(`/subespecialidad/${picked.ref.slug}/${citySlug}`);
       return;
     }
     if (picked?.type === "condition") {
