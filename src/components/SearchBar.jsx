@@ -48,15 +48,11 @@ export default function SearchBar({ className = "" }) {
   const handleBuscar = () => {
     if (!canBuscar) return;
     if (picked?.type === "subspecialty") {
-      // Sin página SEO dedicada por diseño (ver AdminSubespecialidades.jsx):
-      // se manda al directorio general filtrado por subspecialties_relation,
-      // así que solo aparecen los doctores que explícitamente la marcaron
-      // como certificada en su panel, sin mezclarse con el resto de su
-      // especialidad base.
-      const params = new URLSearchParams();
-      params.set("subspecialty", picked.ref.slug);
-      if (zone?.name) params.set("zone", zone.name);
-      navigate(`/especialistas?${params.toString()}`);
+      // Página SEO dedicada (/subespecialidad/:slug/:citySlug), mismo patrón
+      // que specialty: arranca noindex y se indexa sola en cuanto haya
+      // doctores reales (ver SubspecialtyPage.jsx).
+      const citySlug = resolveCitySlug(zones, zone?.name);
+      navigate(`/subespecialidad/${picked.ref.slug}/${citySlug}`);
       return;
     }
     if (picked?.type === "condition") {
