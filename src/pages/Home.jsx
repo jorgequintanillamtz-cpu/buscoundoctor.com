@@ -194,24 +194,6 @@ export default function Home() {
     metaDesc.setAttribute('content', "Encuentra especialistas verificados en Monterrey y San Pedro Garza García. Busca por especialidad y zona, compara perfiles con cédula profesional verificada y contacta directo.");
   }, []);
 
-  useEffect(() => {
-    const faqLd = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": HOME_FAQS.map((f) => ({
-        "@type": "Question",
-        "name": f.question,
-        "acceptedAnswer": { "@type": "Answer", "text": f.answer },
-      })),
-    };
-    const faqScript = document.createElement("script");
-    faqScript.type = "application/ld+json";
-    faqScript.id = "home-jsonld-faq";
-    faqScript.text = JSON.stringify(faqLd);
-    document.head.appendChild(faqScript);
-    return () => { faqScript.remove(); };
-  }, []);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
