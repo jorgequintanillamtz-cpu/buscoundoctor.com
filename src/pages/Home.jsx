@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
