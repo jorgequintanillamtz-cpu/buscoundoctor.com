@@ -119,12 +119,11 @@ export default function Header() {
     e?.preventDefault?.();
     const picked = searchOptions.find((o) => o.id === searchPick);
     if (picked?.type === "subspecialty") {
-      // Sin página SEO dedicada por diseño: se manda al directorio general
-      // filtrado por subspecialties_relation, mismo patrón que condition.
-      const params = new URLSearchParams();
-      params.set("subspecialty", picked.ref.slug);
-      if (searchZone) params.set("zone", searchZone);
-      navigate(`/especialistas?${params.toString()}`);
+      // Página SEO dedicada (/subespecialidad/:slug/:citySlug), mismo patrón
+      // que specialty: arranca noindex y se indexa sola en cuanto haya
+      // doctores reales (ver SubspecialtyPage.jsx).
+      const citySlug = resolveCitySlug(zones, searchZone);
+      navigate(`/subespecialidad/${picked.ref.slug}/${citySlug}`);
       return;
     }
     if (picked?.type === "condition") {
