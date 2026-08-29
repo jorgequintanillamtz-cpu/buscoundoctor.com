@@ -110,16 +110,29 @@ export default function SearchableSelect({
   return (
     <div ref={wrapperRef} className="relative">
       <div className={cn("flex items-center gap-1", triggerClassName)}>
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
-          onFocus={openList}
-          onClick={openList}
-          placeholder={placeholder}
-          className="w-full min-w-0 bg-transparent outline-none placeholder:text-muted-foreground truncate"
-        />
+        <div className="relative flex-1 min-w-0">
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
+            onFocus={openList}
+            onClick={openList}
+            placeholder={animatedPlaceholders ? "" : placeholder}
+            className="w-full min-w-0 bg-transparent outline-none placeholder:text-muted-foreground truncate relative"
+          />
+          {animatedPlaceholders && !query && (
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute inset-0 flex items-center truncate text-muted-foreground pointer-events-none transition-opacity duration-300",
+                phVisible ? "opacity-100" : "opacity-0"
+              )}
+            >
+              {animatedPlaceholders[phIndex]}
+            </span>
+          )}
+        </div>
         <button
           type="button"
           tabIndex={-1}
