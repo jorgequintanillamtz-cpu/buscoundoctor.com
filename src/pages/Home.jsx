@@ -111,14 +111,14 @@ const FEATURED_HOME_CATEGORIES = [
 // cambiando solo, mostrando distintas opciones que se pueden buscar). El
 // campo de ciudad se queda estático a propósito, sin esta animación.
 const HERO_SPECIALTY_PLACEHOLDERS = [
-  "Busca: Dentista",
-  "Busca: Ginecólogo",
-  "Busca: Dolor de cabeza",
-  "Busca: Pediatra",
-  "Busca: Ansiedad",
-  "Busca: Dermatólogo",
-  "Busca: Chequeo general",
-  "Busca: Psicólogo",
+  "Dentista",
+  "Ginecólogo",
+  "Dolor de cabeza",
+  "Pediatra",
+  "Ansiedad",
+  "Dermatólogo",
+  "Chequeo general",
+  "Psicólogo",
 ];
 
 const slugify = (s) => (s || "")
