@@ -503,30 +503,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Explora por especialidad: un slider a todo el ancho de la página (no
-          limitado al max-w-7xl del resto del contenido) con 10 doctores por
-          especialidad. Esqueleto/mockup — todavía no hay doctores reales
-          registrados en estas 5 especialidades, así que se usan tarjetas
-          placeholder ("Doctor 1", "Doctor 2"...) con ciudad/años/precio de
-          relleno y sin link a ningún perfil. Reemplazar por datos reales de
-          Specialist filtrados por especialidad en cuanto haya doctores
-          dados de alta. */}
+      {/* Explora por especialidad: un slider horizontal con 10 doctores por
+          especialidad, respetando el ancho normal de la página (max-w-7xl,
+          igual que el resto del contenido). Esqueleto/mockup — todavía no
+          hay doctores reales registrados en estas 5 especialidades, así que
+          se usan tarjetas placeholder ("Doctor 1", "Doctor 2"...) con
+          ciudad/años/precio de relleno y sin link a ningún perfil.
+          Reemplazar por datos reales de Specialist filtrados por
+          especialidad en cuanto haya doctores dados de alta. */}
       <section className="bg-white pt-10 pb-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-9">
-          <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Explora por especialidad</p>
-          <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Encuentra especialistas cerca de ti</h2>
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-9">
+            <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Explora por especialidad</p>
+            <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Encuentra especialistas cerca de ti</h2>
+          </div>
 
-        {SPECIALTY_SLIDER_PLACEHOLDERS.map((spec) => (
-          <div key={spec} className="mb-10 last:mb-0">
-            <h3 className="max-w-7xl mx-auto px-4 sm:px-6 font-heading font-bold text-base sm:text-lg text-brand-navy mb-4">{spec}</h3>
-            {/* Fuera del max-w-7xl a propósito: el slider ocupa todo el ancho
-                de la página, no solo el ancho del contenido central. */}
-            <div
-              className="w-full overflow-x-auto pb-2 px-4 sm:px-6 snap-x snap-mandatory scroll-smooth"
-              style={{ scrollbarWidth: 'none' }}
-            >
-              <div className="flex gap-4">
+          {SPECIALTY_SLIDER_PLACEHOLDERS.map((spec) => (
+            <div key={spec} className="mb-10 last:mb-0">
+              <h3 className="font-heading font-bold text-base sm:text-lg text-brand-navy mb-4">{spec}</h3>
+              <div
+                className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory scroll-smooth"
+                style={{ scrollbarWidth: 'none' }}
+              >
                 {Array.from({ length: 10 }, (_, idx) => idx + 1).map((n) => {
                   const info = PLACEHOLDER_DOCTOR_INFO[(n - 1) % PLACEHOLDER_DOCTOR_INFO.length];
                   return (
@@ -557,8 +555,8 @@ export default function Home() {
                 })}
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
 
       {/* "¡Es gratis!": versión móvil, movida aquí (debajo de Especialistas
