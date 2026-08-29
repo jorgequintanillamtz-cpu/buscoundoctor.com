@@ -168,6 +168,16 @@ export default function Home() {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     const picked = searchOptions.find((o) => o.id === heroSpecialty);
+    if (picked?.type === "subspecialty") {
+      // Sin página SEO dedicada por diseño: se manda al directorio general
+      // filtrado por subspecialties_relation, mismo patrón que condition
+      // (ver Header.jsx).
+      const params = new URLSearchParams();
+      params.set("subspecialty", picked.ref.slug);
+      if (heroZone) params.set("zone", heroZone);
+      navigate(`/especialistas?${params.toString()}`);
+      return;
+    }
     if (picked?.type === "condition") {
       // Antes esto resolvía a "la" especialidad que clasifica la enfermedad
       // en el catálogo (ej. Acupuntura para "Ansiedad y estrés") y navegaba a
