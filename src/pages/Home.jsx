@@ -661,6 +661,11 @@ export default function Home() {
                       <div className="flex-1 min-w-0 p-4">
                         <h4 className="font-heading font-bold text-sm text-foreground leading-tight">Doctor {n}</h4>
                         <p className="text-brand-blue text-xs font-medium mt-0.5">{spec}</p>
+                        <div className="flex items-center gap-0.5 mt-1.5">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          ))}
+                        </div>
                         <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
                           <p className="flex items-center gap-1.5">
                             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
