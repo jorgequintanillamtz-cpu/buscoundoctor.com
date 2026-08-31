@@ -7,6 +7,7 @@ import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import BlogCard from "../components/BlogCard";
 import { resolveCitySlug } from "@/lib/citySlug";
+import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
 
 // Ilustración decorativa de fondo del hero: una fila de siluetas de personas
 // (pacientes y médicos, estos últimos marcados con un pequeño gafete/estetoscopio)
@@ -105,21 +106,6 @@ const FEATURED_HOME_CATEGORIES = [
   { name: "Pediatría" },
   { name: "Dermatología" },
   { name: "Psicología" },
-];
-
-// Textos de ejemplo que rotan dentro del campo de especialidad/enfermedad
-// del buscador grande del hero (efecto tipo bestdubai.com: el placeholder va
-// cambiando solo, mostrando distintas opciones que se pueden buscar). El
-// campo de ciudad se queda estático a propósito, sin esta animación.
-const HERO_SPECIALTY_PLACEHOLDERS = [
-  "Dentista",
-  "Ginecólogo",
-  "Dolor de cabeza",
-  "Pediatra",
-  "Ansiedad",
-  "Dermatólogo",
-  "Chequeo general",
-  "Psicólogo",
 ];
 
 const slugify = (s) => (s || "")
