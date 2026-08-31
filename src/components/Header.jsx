@@ -197,39 +197,41 @@ export default function Header() {
               perder de vista el buscador grande del hero; en el resto de
               páginas siempre está visible. */}
           {showCompactSearch && (
-            <div className="hidden lg:flex items-center bg-white rounded-full shadow-sm border border-border/50 flex-1 max-w-xl overflow-hidden">
-              <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
-                <SearchableSelect
-                  options={searchOptions}
-                  value={searchPick}
-                  onChange={setSearchPick}
-                  placeholder="Especialidad o enfermedad"
-                  icon={Stethoscope}
-                  triggerClassName={triggerClass}
-                />
+            <div className="siri-glow-border relative hidden lg:block rounded-full flex-1 max-w-xl">
+              <div className="relative z-10 flex items-center bg-white rounded-full shadow-sm overflow-hidden">
+                <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
+                  <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
+                  <SearchableSelect
+                    options={searchOptions}
+                    value={searchPick}
+                    onChange={setSearchPick}
+                    placeholder="Especialidad o enfermedad"
+                    icon={Stethoscope}
+                    triggerClassName={triggerClass}
+                  />
+                </div>
+                <div className="w-px h-8 bg-border flex-shrink-0" />
+                <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
+                  <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Ciudad</label>
+                  <SearchableSelect
+                    options={zoneOptions}
+                    value={searchZone}
+                    onChange={setSearchZone}
+                    placeholder="Monterrey y San Pedro"
+                    icon={MapPin}
+                    hint="Ciudad"
+                    triggerClassName={triggerClass}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={submitSearch}
+                  aria-label="Buscar especialista"
+                  className="flex-shrink-0 w-10 h-10 mr-1.5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
               </div>
-              <div className="w-px h-8 bg-border flex-shrink-0" />
-              <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Ciudad</label>
-                <SearchableSelect
-                  options={zoneOptions}
-                  value={searchZone}
-                  onChange={setSearchZone}
-                  placeholder="Monterrey y San Pedro"
-                  icon={MapPin}
-                  hint="Ciudad"
-                  triggerClassName={triggerClass}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={submitSearch}
-                aria-label="Buscar especialista"
-                className="flex-shrink-0 w-10 h-10 mr-1.5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors"
-              >
-                <Search className="w-4 h-4" />
-              </button>
             </div>
           )}
 
@@ -270,26 +272,30 @@ export default function Header() {
             buscador grande del hero). */}
         {showCompactSearch && (
           <div className="lg:hidden flex items-center gap-2">
-            <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
-              <SearchableSelect
-                options={searchOptions}
-                value={searchPick}
-                onChange={setSearchPick}
-                placeholder="¿Qué buscas?"
-                icon={Stethoscope}
-                triggerClassName={triggerClass}
-              />
+            <div className="siri-glow-border relative flex-1 min-w-0 rounded-full">
+              <div className="relative z-10 bg-white rounded-full shadow-sm px-3 py-1">
+                <SearchableSelect
+                  options={searchOptions}
+                  value={searchPick}
+                  onChange={setSearchPick}
+                  placeholder="¿Qué buscas?"
+                  icon={Stethoscope}
+                  triggerClassName={triggerClass}
+                />
+              </div>
             </div>
-            <div className="flex-1 min-w-0 bg-white rounded-full shadow-sm border border-border/50 px-3 py-1">
-              <SearchableSelect
-                options={zoneOptions}
-                value={searchZone}
-                onChange={setSearchZone}
-                placeholder="Ciudad"
-                icon={MapPin}
-                hint="Ciudad"
-                triggerClassName={triggerClass}
-              />
+            <div className="siri-glow-border relative flex-1 min-w-0 rounded-full">
+              <div className="relative z-10 bg-white rounded-full shadow-sm px-3 py-1">
+                <SearchableSelect
+                  options={zoneOptions}
+                  value={searchZone}
+                  onChange={setSearchZone}
+                  placeholder="Ciudad"
+                  icon={MapPin}
+                  hint="Ciudad"
+                  triggerClassName={triggerClass}
+                />
+              </div>
             </div>
             <button
               type="button"
