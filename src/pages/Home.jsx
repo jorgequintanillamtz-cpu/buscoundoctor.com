@@ -310,8 +310,8 @@ export default function Home() {
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <div className="max-w-3xl mx-auto">
-            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4">
-              Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span> y San Pedro
+            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4 sm:whitespace-nowrap">
+              Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span>
             </h1>
             <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-7 sm:mb-9 max-w-xl mx-auto">
               <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
