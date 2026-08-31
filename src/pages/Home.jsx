@@ -315,7 +315,7 @@ export default function Home() {
             </h1>
             <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-7 sm:mb-9 max-w-xl mx-auto">
               <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
-              Describe qué te pasa o a quién buscas: te ayudamos a encontrar y agendar con el especialista correcto.
+              Te ayudamos a encontrar y agendar con el especialista correcto.
             </p>
           </div>
 
