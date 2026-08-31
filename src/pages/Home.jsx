@@ -108,6 +108,55 @@ const FEATURED_HOME_CATEGORIES = [
   { name: "Psicología" },
 ];
 
+// Una combinación distinta de "burbujas" decorativas por tarjeta (mismo
+// orden que FEATURED_HOME_CATEGORIES), para que las 5 no se vean todas
+// idénticas -- cada una varía en esquina, tamaño y forma (orgánica/círculo).
+const CATEGORY_BLOB_VARIANTS = [
+  // Dentista
+  [
+    { top: "-1.25rem", right: "-1.5rem", size: "5rem", shape: "organic" },
+    { bottom: "-1.75rem", left: "-1.75rem", size: "6rem", shape: "circle" },
+  ],
+  // Ginecología
+  [
+    { top: "-1.5rem", left: "-1.25rem", size: "4.5rem", shape: "circle" },
+    { bottom: "-2rem", right: "-1.5rem", size: "6.5rem", shape: "organic" },
+  ],
+  // Pediatría
+  [
+    { bottom: "-2.25rem", right: "-2rem", size: "7.5rem", shape: "organic" },
+    { top: "-0.75rem", left: "-0.75rem", size: "3rem", shape: "circle" },
+  ],
+  // Dermatología
+  [
+    { top: "-1.75rem", left: "-2rem", size: "5.5rem", shape: "organic" },
+    { top: "-1rem", right: "-1.75rem", size: "4rem", shape: "circle" },
+  ],
+  // Psicología
+  [
+    { bottom: "-1.5rem", left: "-1.5rem", size: "5rem", shape: "circle" },
+    { top: "-2rem", right: "-2rem", size: "6rem", shape: "organic" },
+  ],
+];
+
+function CategoryBlobs({ variant }) {
+  return variant.map((b, i) => (
+    <div
+      key={i}
+      className={`absolute ${b.shape === "circle" ? "bg-white/10 rounded-full" : "bg-brand-blue/25"}`}
+      style={{
+        top: b.top,
+        right: b.right,
+        bottom: b.bottom,
+        left: b.left,
+        width: b.size,
+        height: b.size,
+        ...(b.shape === "organic" ? { borderRadius: "58% 42% 65% 35% / 55% 45% 55% 45%" } : {}),
+      }}
+    />
+  ));
+}
+
 const slugify = (s) => (s || "")
   .toLowerCase()
   .normalize("NFD")
@@ -421,7 +470,7 @@ export default function Home() {
           className="sm:hidden flex gap-3 overflow-x-auto pb-2 pl-4 snap-x snap-mandatory scroll-smooth"
           style={{ scrollbarWidth: 'none' }}
         >
-          {FEATURED_HOME_CATEGORIES.map((cat) => {
+          {FEATURED_HOME_CATEGORIES.map((cat, idx) => {
             const s = specialties.find((x) => x.name === cat.name);
             if (!s) return null;
             return (
@@ -438,13 +487,7 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden">
-                    {/* Blobs decorativos, mismo estilo orgánico que el fondo del hero,
-                        para que el azul sólido no se vea tan plano. */}
-                    <div
-                      className="absolute -top-5 -right-6 w-20 h-20 bg-brand-blue/25"
-                      style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
-                    />
-                    <div className="absolute -bottom-7 -left-7 w-24 h-24 bg-white/10 rounded-full" />
+                    <CategoryBlobs variant={CATEGORY_BLOB_VARIANTS[idx % CATEGORY_BLOB_VARIANTS.length]} />
                     <span className="relative font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                   </div>
                 )}
@@ -456,7 +499,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-0 pb-10">
           {/* Desktop: fila de 5 */}
           <div className="hidden sm:grid grid-cols-5 gap-4">
-            {FEATURED_HOME_CATEGORIES.map((cat) => {
+            {FEATURED_HOME_CATEGORIES.map((cat, idx) => {
               const s = specialties.find((x) => x.name === cat.name);
               if (!s) return null;
               return (
@@ -477,13 +520,7 @@ export default function Home() {
                     </>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden transition-transform duration-300 group-hover:scale-105">
-                      {/* Blobs decorativos, mismo estilo orgánico que el fondo del hero,
-                          para que el azul sólido no se vea tan plano. */}
-                      <div
-                        className="absolute -top-6 -right-8 w-28 h-28 bg-brand-blue/25"
-                        style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
-                      />
-                      <div className="absolute -bottom-9 -left-9 w-32 h-32 bg-white/10 rounded-full" />
+                      <CategoryBlobs variant={CATEGORY_BLOB_VARIANTS[idx % CATEGORY_BLOB_VARIANTS.length]} />
                       <span className="relative font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                     </div>
                   )}
