@@ -130,10 +130,10 @@ function CardDoctorIllustration({ flip = false }) {
       className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-[90%] ${flip ? "scale-x-[-1]" : ""}`}
       aria-hidden="true"
     >
-      <path d="M20,220 L20,120 Q20,78 62,78 L138,78 Q180,78 180,120 L180,220 Z" fill="#FFFFFF" opacity="0.16" />
-      <circle cx="100" cy="50" r="44" fill="#FFFFFF" opacity="0.16" />
-      <rect x="74" y="92" width="52" height="110" rx="12" fill="#FFFFFF" opacity="0.1" />
-      <circle cx="100" cy="108" r="11" fill="#FFFFFF" opacity="0.26" />
+      <path d="M20,220 L20,120 Q20,78 62,78 L138,78 Q180,78 180,120 L180,220 Z" fill="#FFFFFF" opacity="0.09" />
+      <circle cx="100" cy="50" r="44" fill="#FFFFFF" opacity="0.09" />
+      <rect x="74" y="92" width="52" height="110" rx="12" fill="#FFFFFF" opacity="0.06" />
+      <circle cx="100" cy="108" r="11" fill="#FFFFFF" opacity="0.14" />
     </svg>
   );
 }
