@@ -290,7 +290,7 @@ export default function Home() {
           ilustración de personas (médicos y pacientes) decora el fondo. El
           azul cubre casi toda la pantalla (min-h) y termina en corte recto,
           sin curva ondulada. */}
-      <section className="relative bg-brand-navy overflow-hidden min-h-[85vh] sm:min-h-[90vh] flex flex-col justify-center py-16 sm:py-20">
+      <section className="relative bg-brand-navy overflow-hidden min-h-[100dvh] sm:min-h-[90vh] flex flex-col justify-center py-20 sm:py-20">
         {/* Decorative organic blobs (full-bleed, clipped to section) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
@@ -310,10 +310,10 @@ export default function Home() {
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4 sm:whitespace-nowrap">
+            <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-4 sm:mb-4 sm:whitespace-nowrap">
               Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span>
             </h1>
-            <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-7 sm:mb-9 max-w-xl mx-auto">
+            <p className="flex items-center justify-center gap-2 text-white/80 text-sm sm:text-base leading-relaxed mb-8 sm:mb-9 max-w-xl mx-auto">
               <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
               Te ayudamos a encontrar y agendar con el especialista correcto.
             </p>
@@ -370,7 +370,7 @@ export default function Home() {
 
           {/* Pills de especialidades populares: flotando debajo del buscador,
               sin tarjeta que las contenga, como en la referencia. */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-5 sm:mt-6">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-7 sm:mt-6">
             {sortByPopularity(specialties).slice(0, 8).map((s) => (
               <Link
                 key={s.id}
