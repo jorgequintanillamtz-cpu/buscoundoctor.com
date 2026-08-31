@@ -126,8 +126,8 @@ function CardDoctorIllustration({ flip = false }) {
   return (
     <svg
       viewBox="0 0 200 220"
-      preserveAspectRatio="xMidYMax slice"
-      className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[64%] h-[88%] ${flip ? "scale-x-[-1]" : ""}`}
+      preserveAspectRatio="xMidYMax meet"
+      className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-[90%] ${flip ? "scale-x-[-1]" : ""}`}
       aria-hidden="true"
     >
       <path d="M20,220 L20,120 Q20,78 62,78 L138,78 Q180,78 180,120 L180,220 Z" fill="#FFFFFF" opacity="0.16" />
