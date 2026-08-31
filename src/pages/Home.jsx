@@ -447,7 +447,7 @@ export default function Home() {
                     <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
                   </>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-brand-blue px-3">
+                  <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3">
                     <span className="font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                   </div>
                 )}
@@ -479,7 +479,7 @@ export default function Home() {
                       <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
                     </>
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-brand-blue px-3 transition-transform duration-300 group-hover:scale-105">
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 transition-transform duration-300 group-hover:scale-105">
                       <span className="font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                     </div>
                   )}
