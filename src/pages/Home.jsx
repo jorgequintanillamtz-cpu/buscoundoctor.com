@@ -310,7 +310,10 @@ export default function Home() {
               mostrar el buscador compacto del header solo cuando este sale
               de la vista. */}
           <div id="hero-search-bar" className="max-w-4xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 bg-white rounded-2xl sm:rounded-full shadow-2xl sm:p-1.5 overflow-hidden">
+            {/* Aro de luz animado alrededor del buscador, estilo el efecto de
+                Siri/Apple Intelligence (ver .siri-glow-border en index.css). */}
+            <div className="siri-glow-border relative rounded-2xl sm:rounded-full">
+            <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-0 bg-white rounded-2xl sm:rounded-full shadow-2xl sm:p-1.5 overflow-hidden">
               <div className="flex flex-col justify-center text-left px-6 py-3 sm:py-1.5 flex-1 min-w-0">
                 <SearchableSelect
                   options={searchOptions}
@@ -345,6 +348,7 @@ export default function Home() {
                 <Search className="w-5 h-5" />
                 <span className="sm:hidden">Buscar</span>
               </button>
+            </div>
             </div>
           </div>
 
