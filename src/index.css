@@ -89,16 +89,12 @@
   }
 }
 
-/* Efecto "Siri glow": borde animado con gradiente de colores en movimiento,
-   estilo el nuevo indicador de Apple Intelligence al activar Siri (el aro de
-   luz que recorre el borde de la pantalla). Se usa alrededor del buscador
-   principal del hero (ver id="hero-search-bar" en Home.jsx). El elemento que
-   lleva esta clase necesita position:relative (o isolate) y el mismo
-   border-radius que el buscador de adentro para que el aro calce bien. */
-@keyframes siri-glow-spin {
-  to { transform: rotate(360deg); }
-}
-
+/* Efecto "Siri glow": línea delgada con degradado de colores estático,
+   estilo el nuevo indicador de Apple Intelligence al activar Siri (sin el
+   giro/animación -- a pedido explícito, queda fijo). Se usa alrededor del
+   buscador principal del hero (ver id="hero-search-bar" en Home.jsx). El
+   elemento que lleva esta clase necesita position:relative (o isolate) y el
+   mismo border-radius que el buscador de adentro para que el aro calce bien. */
 .siri-glow-border {
   isolation: isolate;
 }
@@ -110,5 +106,4 @@
   z-index: 0;
   border-radius: inherit;
   background: conic-gradient(from 0deg, #34d3ff, #5b7cfa, #a86bff, #ff5fa8, #ff9f5a, #ffe169, #34d3ff);
-  animation: siri-glow-spin 5s linear infinite;
 }
