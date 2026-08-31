@@ -468,10 +468,12 @@ export default function Home() {
                 className="relative flex-shrink-0 w-[47vw] max-w-[230px] aspect-[3/2] snap-start rounded-2xl overflow-hidden"
               >
                 {s.home_card_image_url ? (
+                  // Foto con fondo azul marino ya incluido (misma proporción 3:2
+                  // que la tarjeta): se muestra completa y el nombre va arriba,
+                  // en el espacio azul que deja la composición de la foto.
                   <>
                     <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
-                    <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
+                    <span className="absolute top-3 inset-x-0 text-center font-heading font-extrabold text-xl text-white">{s.display_name || s.name}</span>
                   </>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden">
@@ -497,14 +499,14 @@ export default function Home() {
                   className="group relative aspect-[3/2] rounded-2xl overflow-hidden"
                 >
                   {s.home_card_image_url ? (
+                    // Mismo tratamiento que la versión móvil (ver comentario arriba).
                     <>
                       <img
                         src={s.home_card_image_url}
                         alt=""
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
-                      <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
+                      <span className="absolute top-4 inset-x-0 text-center font-heading font-extrabold text-2xl text-white">{s.display_name || s.name}</span>
                     </>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden transition-transform duration-300 group-hover:scale-105">
