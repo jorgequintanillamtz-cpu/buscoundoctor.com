@@ -447,8 +447,15 @@ export default function Home() {
                     <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
                   </>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3">
-                    <span className="font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
+                  <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden">
+                    {/* Blobs decorativos, mismo estilo orgánico que el fondo del hero,
+                        para que el azul sólido no se vea tan plano. */}
+                    <div
+                      className="absolute -top-5 -right-6 w-20 h-20 bg-brand-blue/25"
+                      style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
+                    />
+                    <div className="absolute -bottom-7 -left-7 w-24 h-24 bg-white/10 rounded-full" />
+                    <span className="relative font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                   </div>
                 )}
               </Link>
@@ -479,8 +486,15 @@ export default function Home() {
                       <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
                     </>
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 transition-transform duration-300 group-hover:scale-105">
-                      <span className="font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                      {/* Blobs decorativos, mismo estilo orgánico que el fondo del hero,
+                          para que el azul sólido no se vea tan plano. */}
+                      <div
+                        className="absolute -top-6 -right-8 w-28 h-28 bg-brand-blue/25"
+                        style={{ borderRadius: '58% 42% 65% 35% / 55% 45% 55% 45%' }}
+                      />
+                      <div className="absolute -bottom-9 -left-9 w-32 h-32 bg-white/10 rounded-full" />
+                      <span className="relative font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                     </div>
                   )}
                 </Link>
