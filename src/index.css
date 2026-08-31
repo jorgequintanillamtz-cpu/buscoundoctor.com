@@ -103,24 +103,12 @@
   isolation: isolate;
 }
 
-.siri-glow-border::before,
-.siri-glow-border::after {
+.siri-glow-border::before {
   content: "";
   position: absolute;
+  inset: -2px;
+  z-index: 0;
   border-radius: inherit;
   background: conic-gradient(from 0deg, #34d3ff, #5b7cfa, #a86bff, #ff5fa8, #ff9f5a, #ffe169, #34d3ff);
   animation: siri-glow-spin 5s linear infinite;
-}
-
-.siri-glow-border::before {
-  inset: -7px;
-  z-index: 0;
-  filter: blur(4px);
-}
-
-.siri-glow-border::after {
-  inset: -22px;
-  z-index: -1;
-  filter: blur(28px);
-  opacity: 0.8;
 }
