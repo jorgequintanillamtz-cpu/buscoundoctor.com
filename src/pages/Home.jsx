@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, Smile, Heart, Baby, Sparkles, Brain } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
@@ -96,14 +96,15 @@ function sortByPopularity(list) {
 
 // Las 5 categorías destacadas de la página de inicio (estilo tarjeta grande
 // con ilustración + nombre encima, al estilo "Explore" de apps de directorio
-// tipo Dubai). Icóno/color de respaldo mientras no se suba una imagen real
-// via /admin/imagenes-del-sitio (campo home_card_image_url de Specialty).
+// tipo Dubai). Mientras no se suba una imagen real via /admin/imagenes-del-sitio
+// (campo home_card_image_url de Specialty), la tarjeta es un rectángulo azul
+// sólido con el nombre centrado en grande -- sin ícono ni color por categoría.
 const FEATURED_HOME_CATEGORIES = [
-  { name: "Dentista", icon: Smile, bg: "#DBEAFE", fg: "#2563EB" },
-  { name: "Ginecología", icon: Heart, bg: "#FCE7F3", fg: "#DB2777" },
-  { name: "Pediatría", icon: Baby, bg: "#FEF3C7", fg: "#D97706" },
-  { name: "Dermatología", icon: Sparkles, bg: "#D1FAE5", fg: "#059669" },
-  { name: "Psicología", icon: Brain, bg: "#EDE9FE", fg: "#7C3AED" },
+  { name: "Dentista" },
+  { name: "Ginecología" },
+  { name: "Pediatría" },
+  { name: "Dermatología" },
+  { name: "Psicología" },
 ];
 
 // Textos de ejemplo que rotan dentro del campo de especialidad/enfermedad
@@ -440,14 +441,16 @@ export default function Home() {
                 className="relative flex-shrink-0 w-[47vw] max-w-[230px] aspect-[3/2] snap-start rounded-2xl overflow-hidden"
               >
                 {s.home_card_image_url ? (
-                  <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <>
+                    <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
+                    <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
+                  </>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: cat.bg }}>
-                    <cat.icon className="w-9 h-9" style={{ color: cat.fg }} />
+                  <div className="absolute inset-0 flex items-center justify-center bg-brand-blue px-3">
+                    <span className="font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
-                <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
               </Link>
             );
           })}
@@ -466,18 +469,20 @@ export default function Home() {
                   className="group relative aspect-[3/2] rounded-2xl overflow-hidden"
                 >
                   {s.home_card_image_url ? (
-                    <img
-                      src={s.home_card_image_url}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    <>
+                      <img
+                        src={s.home_card_image_url}
+                        alt=""
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
+                      <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
+                    </>
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: cat.bg }}>
-                      <cat.icon className="w-10 h-10" style={{ color: cat.fg }} />
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-blue px-3 transition-transform duration-300 group-hover:scale-105">
+                      <span className="font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
-                  <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
                 </Link>
               );
             })}
