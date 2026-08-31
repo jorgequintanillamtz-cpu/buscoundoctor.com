@@ -6,6 +6,7 @@ import SearchableSelect from "@/components/SearchableSelect";
 import Logo from "@/components/Logo";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import { resolveCitySlug } from "@/lib/citySlug";
+import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
 
 const triggerClass =
   "h-auto text-sm font-medium text-foreground bg-transparent";
@@ -206,6 +207,8 @@ export default function Header() {
                     value={searchPick}
                     onChange={setSearchPick}
                     placeholder="Especialidad o enfermedad"
+                    animatedPlaceholders={HERO_SPECIALTY_PLACEHOLDERS}
+                    placeholderPrefix="Busca:"
                     icon={Stethoscope}
                     triggerClassName={triggerClass}
                   />
@@ -279,6 +282,8 @@ export default function Header() {
                   value={searchPick}
                   onChange={setSearchPick}
                   placeholder="¿Qué buscas?"
+                  animatedPlaceholders={HERO_SPECIALTY_PLACEHOLDERS}
+                  placeholderPrefix="Busca:"
                   icon={Stethoscope}
                   triggerClassName={triggerClass}
                 />
