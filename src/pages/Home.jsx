@@ -468,11 +468,18 @@ export default function Home() {
                 className="relative flex-shrink-0 w-[47vw] max-w-[230px] aspect-[3/2] snap-start rounded-2xl overflow-hidden"
               >
                 {s.home_card_image_url ? (
-                  <>
-                    <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
-                    <span className="absolute bottom-3 left-3.5 font-heading font-extrabold text-base text-white drop-shadow">{s.display_name || s.name}</span>
-                  </>
+                  // Foto de doctor en PNG con fondo transparente (recortada, sin
+                  // fondo): se acomoda igual que la silueta ilustrada -- pegada
+                  // abajo, el nombre arriba -- para que la tarjeta se vea igual
+                  // de consistente en cuanto se suban las 5 fotos reales.
+                  <div className="absolute inset-0 flex items-start justify-center bg-brand-navy pt-3 px-3 overflow-hidden">
+                    <img
+                      src={s.home_card_image_url}
+                      alt=""
+                      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[64%] h-[88%] object-contain object-bottom"
+                    />
+                    <span className="relative font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
+                  </div>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden">
                     <CardDoctorIllustration {...CATEGORY_ILLUSTRATION_VARIANTS[idx % CATEGORY_ILLUSTRATION_VARIANTS.length]} />
@@ -497,15 +504,17 @@ export default function Home() {
                   className="group relative aspect-[3/2] rounded-2xl overflow-hidden"
                 >
                   {s.home_card_image_url ? (
-                    <>
+                    // Mismo tratamiento que la silueta ilustrada (ver comentario
+                    // en la versión móvil arriba): foto recortada en PNG
+                    // transparente, pegada abajo, nombre arriba.
+                    <div className="absolute inset-0 flex items-start justify-center bg-brand-navy pt-4 px-3 overflow-hidden transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={s.home_card_image_url}
                         alt=""
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60%] h-[90%] object-contain object-bottom"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
-                      <span className="absolute bottom-4 left-4 font-heading font-extrabold text-lg text-white drop-shadow">{s.display_name || s.name}</span>
-                    </>
+                      <span className="relative font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
+                    </div>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden transition-transform duration-300 group-hover:scale-105">
                       <CardDoctorIllustration {...CATEGORY_ILLUSTRATION_VARIANTS[idx % CATEGORY_ILLUSTRATION_VARIANTS.length]} />
