@@ -108,53 +108,34 @@ const FEATURED_HOME_CATEGORIES = [
   { name: "Psicología" },
 ];
 
-// Una combinación distinta de "burbujas" decorativas por tarjeta (mismo
-// orden que FEATURED_HOME_CATEGORIES), para que las 5 no se vean todas
-// idénticas -- cada una varía en esquina, tamaño y forma (orgánica/círculo).
-const CATEGORY_BLOB_VARIANTS = [
-  // Dentista
-  [
-    { top: "-1.25rem", right: "-1.5rem", size: "5rem", shape: "organic" },
-    { bottom: "-1.75rem", left: "-1.75rem", size: "6rem", shape: "circle" },
-  ],
-  // Ginecología
-  [
-    { top: "-1.5rem", left: "-1.25rem", size: "4.5rem", shape: "circle" },
-    { bottom: "-2rem", right: "-1.5rem", size: "6.5rem", shape: "organic" },
-  ],
-  // Pediatría
-  [
-    { bottom: "-2.25rem", right: "-2rem", size: "7.5rem", shape: "organic" },
-    { top: "-0.75rem", left: "-0.75rem", size: "3rem", shape: "circle" },
-  ],
-  // Dermatología
-  [
-    { top: "-1.75rem", left: "-2rem", size: "5.5rem", shape: "organic" },
-    { top: "-1rem", right: "-1.75rem", size: "4rem", shape: "circle" },
-  ],
-  // Psicología
-  [
-    { bottom: "-1.5rem", left: "-1.5rem", size: "5rem", shape: "circle" },
-    { top: "-2rem", right: "-2rem", size: "6rem", shape: "organic" },
-  ],
+// Una silueta de doctor por tarjeta (mismo estilo -- blanco translucido,
+// cuerpo + cabeza + bata + gafete -- que HeroPeopleIllustration en el hero,
+// aquí un solo personaje más grande como decoración de cada tarjeta de
+// especialidad, en vez de las burbujas anteriores). El lado y el volteo
+// alternan por tarjeta (mismo orden que FEATURED_HOME_CATEGORIES) para que
+// las 5 no se vean idénticas.
+const CATEGORY_ILLUSTRATION_VARIANTS = [
+  { side: "right", flip: false }, // Dentista
+  { side: "left", flip: true },   // Ginecología
+  { side: "right", flip: false }, // Pediatría
+  { side: "left", flip: true },   // Dermatología
+  { side: "right", flip: false }, // Psicología
 ];
 
-function CategoryBlobs({ variant }) {
-  return variant.map((b, i) => (
-    <div
-      key={i}
-      className={`absolute ${b.shape === "circle" ? "bg-white/10 rounded-full" : "bg-brand-blue/25"}`}
-      style={{
-        top: b.top,
-        right: b.right,
-        bottom: b.bottom,
-        left: b.left,
-        width: b.size,
-        height: b.size,
-        ...(b.shape === "organic" ? { borderRadius: "58% 42% 65% 35% / 55% 45% 55% 45%" } : {}),
-      }}
-    />
-  ));
+function CardDoctorIllustration({ side = "right", flip = false }) {
+  return (
+    <svg
+      viewBox="0 0 200 220"
+      preserveAspectRatio="xMidYMax slice"
+      className={`absolute bottom-0 ${side === "right" ? "right-0" : "left-0"} w-[58%] h-[85%] ${flip ? "scale-x-[-1]" : ""}`}
+      aria-hidden="true"
+    >
+      <path d="M20,220 L20,120 Q20,78 62,78 L138,78 Q180,78 180,120 L180,220 Z" fill="#FFFFFF" opacity="0.16" />
+      <circle cx="100" cy="50" r="44" fill="#FFFFFF" opacity="0.16" />
+      <rect x="74" y="92" width="52" height="110" rx="12" fill="#FFFFFF" opacity="0.1" />
+      <circle cx="100" cy="108" r="11" fill="#FFFFFF" opacity="0.26" />
+    </svg>
+  );
 }
 
 const slugify = (s) => (s || "")
@@ -487,7 +468,7 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden">
-                    <CategoryBlobs variant={CATEGORY_BLOB_VARIANTS[idx % CATEGORY_BLOB_VARIANTS.length]} />
+                    <CardDoctorIllustration {...CATEGORY_ILLUSTRATION_VARIANTS[idx % CATEGORY_ILLUSTRATION_VARIANTS.length]} />
                     <span className="relative font-heading font-extrabold text-xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                   </div>
                 )}
@@ -520,7 +501,7 @@ export default function Home() {
                     </>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-brand-navy px-3 overflow-hidden transition-transform duration-300 group-hover:scale-105">
-                      <CategoryBlobs variant={CATEGORY_BLOB_VARIANTS[idx % CATEGORY_BLOB_VARIANTS.length]} />
+                      <CardDoctorIllustration {...CATEGORY_ILLUSTRATION_VARIANTS[idx % CATEGORY_ILLUSTRATION_VARIANTS.length]} />
                       <span className="relative font-heading font-extrabold text-2xl text-white text-center leading-tight">{s.display_name || s.name}</span>
                     </div>
                   )}
