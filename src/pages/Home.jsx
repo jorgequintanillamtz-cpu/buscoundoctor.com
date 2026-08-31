@@ -309,7 +309,7 @@ export default function Home() {
         <HeroPeopleIllustration className="hidden sm:block absolute bottom-0 left-0 w-full h-40 md:h-56 pointer-events-none select-none" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <h1 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight text-white mb-3 sm:mb-4 sm:whitespace-nowrap">
               Encuentra a tu especialista en <span className="border-b-4 border-brand-blue">Monterrey</span>
             </h1>
@@ -340,7 +340,7 @@ export default function Home() {
                   placeholderPrefix="Busca:"
                   icon={Stethoscope}
                   hint="Especialidad"
-                  triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
+                  triggerClassName="h-auto text-sm sm:text-base font-medium text-foreground bg-transparent"
                 />
               </div>
               <div className="hidden sm:block w-px h-8 bg-border" />
@@ -352,7 +352,7 @@ export default function Home() {
                   placeholder="Monterrey y San Pedro"
                   icon={MapPin}
                   hint="Ciudad"
-                  triggerClassName="h-auto text-base font-medium text-foreground bg-transparent"
+                  triggerClassName="h-auto text-sm sm:text-base font-medium text-foreground bg-transparent"
                 />
               </div>
               <button
@@ -375,14 +375,14 @@ export default function Home() {
               <Link
                 key={s.id}
                 to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
-                className="text-xs sm:text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors rounded-full px-3 py-1.5"
+                className="text-sm sm:text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors rounded-full px-3 py-1.5"
               >
                 {s.display_name || s.name}
               </Link>
             ))}
             <Link
               to="/especialistas"
-              className="text-xs sm:text-sm font-medium text-brand-navy bg-white hover:bg-white/90 transition-colors rounded-full px-3 py-1.5"
+              className="text-sm sm:text-base font-medium text-brand-navy bg-white hover:bg-white/90 transition-colors rounded-full px-3 py-1.5"
             >
               Ver más
             </Link>
