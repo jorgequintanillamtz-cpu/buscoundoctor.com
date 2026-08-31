@@ -111,23 +111,23 @@ const FEATURED_HOME_CATEGORIES = [
 // Una silueta de doctor por tarjeta (mismo estilo -- blanco translucido,
 // cuerpo + cabeza + bata + gafete -- que HeroPeopleIllustration en el hero,
 // aquí un solo personaje más grande como decoración de cada tarjeta de
-// especialidad, en vez de las burbujas anteriores). El lado y el volteo
-// alternan por tarjeta (mismo orden que FEATURED_HOME_CATEGORIES) para que
-// las 5 no se vean idénticas.
+// especialidad, en vez de las burbujas anteriores). Centrada abajo en las 5;
+// solo el volteo alterna por tarjeta (mismo orden que FEATURED_HOME_CATEGORIES)
+// para que no se vean idénticas.
 const CATEGORY_ILLUSTRATION_VARIANTS = [
-  { side: "right", flip: false }, // Dentista
-  { side: "left", flip: true },   // Ginecología
-  { side: "right", flip: false }, // Pediatría
-  { side: "left", flip: true },   // Dermatología
-  { side: "right", flip: false }, // Psicología
+  { flip: false }, // Dentista
+  { flip: true },  // Ginecología
+  { flip: false }, // Pediatría
+  { flip: true },  // Dermatología
+  { flip: false }, // Psicología
 ];
 
-function CardDoctorIllustration({ side = "right", flip = false }) {
+function CardDoctorIllustration({ flip = false }) {
   return (
     <svg
       viewBox="0 0 200 220"
       preserveAspectRatio="xMidYMax slice"
-      className={`absolute bottom-0 ${side === "right" ? "right-0" : "left-0"} w-[58%] h-[85%] ${flip ? "scale-x-[-1]" : ""}`}
+      className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-[64%] h-[88%] ${flip ? "scale-x-[-1]" : ""}`}
       aria-hidden="true"
     >
       <path d="M20,220 L20,120 Q20,78 62,78 L138,78 Q180,78 180,120 L180,220 Z" fill="#FFFFFF" opacity="0.16" />
