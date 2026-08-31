@@ -113,14 +113,14 @@
 }
 
 .siri-glow-border::before {
-  inset: -3px;
+  inset: -7px;
   z-index: 0;
-  filter: blur(1.5px);
+  filter: blur(4px);
 }
 
 .siri-glow-border::after {
-  inset: -12px;
+  inset: -22px;
   z-index: -1;
-  filter: blur(20px);
-  opacity: 0.55;
+  filter: blur(28px);
+  opacity: 0.8;
 }
