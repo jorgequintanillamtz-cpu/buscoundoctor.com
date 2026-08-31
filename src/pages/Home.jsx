@@ -390,11 +390,14 @@ export default function Home() {
 
         </div>
 
-        {/* Letras chicas ancladas hasta abajo de la sección (fuera del bloque
-            centrado con el resto del hero), mismo espíritu que el aviso legal
-            de la referencia (no diagnosticamos, aceptas nuestros términos),
-            redactado con texto propio. */}
-        <p className="absolute bottom-4 sm:bottom-6 inset-x-0 z-10 px-4 sm:px-6 text-center text-white/60 text-[11px] sm:text-xs leading-relaxed">
+        {/* Letras chicas: en móvil quedan en flujo normal debajo de las
+            pills (con su propio margen), para que la sección crezca lo que
+            necesite y no se amontonen contra el fondo fijo del hero. En
+            escritorio, que sí tiene de sobra alto (min-h-[90vh]), se anclan
+            aparte hasta abajo de la sección. Mismo espíritu que el aviso
+            legal de la referencia (no diagnosticamos, aceptas nuestros
+            términos), redactado con texto propio. */}
+        <p className="mt-8 sm:mt-0 sm:absolute sm:bottom-6 sm:inset-x-0 z-10 px-4 sm:px-6 text-center text-white/60 text-[11px] sm:text-xs leading-relaxed">
           <span className="max-w-xl mx-auto block">
             Te ayudamos a encontrar y contactar especialistas: no ofrecemos diagnósticos ni sustituimos una consulta médica.
             {" "}Al usar BuscoUnDoctor aceptas nuestros{" "}
