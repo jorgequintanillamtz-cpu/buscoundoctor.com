@@ -52,18 +52,18 @@ export default function StorefrontPublic() {
 
   if (state === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Stethoscope className="w-10 h-10 text-blue-500 animate-bounce" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#2D7D72" }}>
+        <Stethoscope className="w-10 h-10 text-white animate-bounce" />
       </div>
     );
   }
 
   if (state === "not-found") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6 text-center">
-        <Frown className="w-12 h-12 text-gray-300 mb-3" />
-        <h1 className="font-heading font-bold text-xl text-gray-700">Esta página no está disponible</h1>
-        <p className="text-sm text-gray-400 mt-1">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: "#2D7D72" }}>
+        <Frown className="w-12 h-12 text-white/40 mb-3" />
+        <h1 className="font-heading font-bold text-xl text-white">Esta página no está disponible</h1>
+        <p className="text-sm text-white/60 mt-1">
           El link que abriste no existe o la página fue desactivada.
         </p>
       </div>

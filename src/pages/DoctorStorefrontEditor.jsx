@@ -263,7 +263,7 @@ export default function DoctorStorefrontEditor() {
               <Sparkles className="w-3.5 h-3.5" />
               Vista previa
             </p>
-            <div className="rounded-[2rem] border-8 border-gray-800 overflow-hidden shadow-2xl bg-white">
+            <div className="rounded-[2rem] border-8 border-gray-800 overflow-hidden shadow-2xl">
               <div className="h-[600px] overflow-y-auto">
                 <StorefrontView
                   storefront={storefront}
@@ -273,6 +273,7 @@ export default function DoctorStorefrontEditor() {
                   locations={locations}
                   timeline={timeline}
                   faqs={faqs}
+                  embedded
                 />
               </div>
             </div>
@@ -285,7 +286,7 @@ export default function DoctorStorefrontEditor() {
             <Sparkles className="w-3.5 h-3.5" />
             Vista previa
           </p>
-          <div className="rounded-2xl border-4 border-gray-800 overflow-hidden shadow-xl bg-white">
+          <div className="rounded-2xl border-4 border-gray-800 overflow-hidden shadow-xl">
             <div className="h-[500px] overflow-y-auto">
               <StorefrontView
                 storefront={storefront}
@@ -295,6 +296,7 @@ export default function DoctorStorefrontEditor() {
                 locations={locations}
                 timeline={timeline}
                 faqs={faqs}
+                embedded
               />
             </div>
           </div>
