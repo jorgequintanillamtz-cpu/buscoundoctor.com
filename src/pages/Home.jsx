@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, UserPlus, Crown, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
@@ -68,6 +68,37 @@ const PLACEHOLDER_DOCTOR_INFO = [
   { city: "Monterrey", years: 5, price: 550 },
   { city: "San Pedro Garza García", years: 15, price: 900 },
   { city: "Monterrey", years: 10, price: 700 },
+];
+
+// "Únete a BuscoUnDoctor": banner de reclutamiento de médicos, mismo
+// formato que el típico banner "Únete a Rappi" (título + grid de tarjetas
+// con imagen/ícono, texto y botón) pero con un solo público real (médicos,
+// via /registro-medico) mostrado desde 3 ángulos distintos en vez de 3
+// audiencias como restaurantes/comercios/repartidores. Sin fotos de stock:
+// usamos el mismo círculo con ícono sobre fondo navy que ya usa la sección
+// "Cada médico, verificado a mano" más abajo.
+const JOIN_CARDS = [
+  {
+    title: "Regístrate gratis",
+    description: "Crea tu perfil profesional en minutos y empieza a recibir pacientes en Monterrey y San Pedro.",
+    cta: "Crear mi perfil",
+    to: "/registro-medico",
+    icon: UserPlus,
+  },
+  {
+    title: "Hazte Premium",
+    description: "Destaca tu perfil, aparece primero en las búsquedas y accede a beneficios exclusivos.",
+    cta: "Ver planes",
+    to: "/planes",
+    icon: Crown,
+  },
+  {
+    title: "¿Tienes dudas?",
+    description: "Conoce cómo funciona BuscoUnDoctor y todo lo que necesitas para unirte como especialista.",
+    cta: "Conocer más",
+    to: "/para-medicos",
+    icon: HelpCircle,
+  },
 ];
 
 const TRUST_STRIP = [
