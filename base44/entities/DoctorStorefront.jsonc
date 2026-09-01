@@ -1,0 +1,79 @@
+{
+  "name": "DoctorStorefront",
+  "type": "object",
+  "properties": {
+    "doctor_id": {
+      "type": "string",
+      "title": "Doctor (ref Specialist)",
+      "description": "ID del registro de Specialist al que pertenece este storefront."
+    },
+    "slug": {
+      "type": "string",
+      "title": "Slug p\u00fablico",
+      "description": "Identificador \u00fanico para la URL /dr/:slug."
+    },
+    "whatsapp_phone": {
+      "type": "string",
+      "title": "Tel\u00e9fono WhatsApp",
+      "description": "Tel\u00e9fono para el bot\u00f3n de agendar cita."
+    },
+    "whatsapp_message": {
+      "type": "string",
+      "title": "Mensaje prellenado",
+      "description": "Mensaje opcional para el link de WhatsApp. Si queda vac\u00edo se usa un default con el nombre del doctor."
+    },
+    "headline": {
+      "type": "string",
+      "title": "Encabezado",
+      "description": "Tagline corto bajo el nombre (ej. 'Cardi\u00f3logo \u00b7 15 a\u00f1os de experiencia')."
+    },
+    "template_id": {
+      "type": "number",
+      "title": "Template",
+      "default": 1
+    },
+    "color_theme": {
+      "type": "string",
+      "title": "Tema de color",
+      "default": "blue"
+    },
+    "status": {
+      "type": "string",
+      "title": "Estado",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "doctor_id",
+    "slug"
+  ],
+  "uniqueFields": [
+    "slug",
+    "doctor_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.status": "active"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

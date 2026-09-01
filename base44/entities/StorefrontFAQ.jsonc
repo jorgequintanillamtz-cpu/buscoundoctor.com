@@ -1,0 +1,40 @@
+{
+  "name": "StorefrontFAQ",
+  "type": "object",
+  "properties": {
+    "storefront_id": {
+      "type": "string",
+      "title": "Storefront (ref)",
+      "description": "ID del registro de DoctorStorefront."
+    },
+    "question": {
+      "type": "string",
+      "title": "Pregunta"
+    },
+    "answer": {
+      "type": "string",
+      "title": "Respuesta"
+    },
+    "position": {
+      "type": "number",
+      "title": "Posici\u00f3n",
+      "default": 0
+    }
+  },
+  "required": [
+    "storefront_id",
+    "question",
+    "answer"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

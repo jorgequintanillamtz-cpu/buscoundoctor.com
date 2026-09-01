@@ -50,6 +50,8 @@ import PricingPage from './pages/PricingPage';
 import AdminPlanes from './pages/admin/AdminPlanes';
 import LandingMedicos from './pages/LandingMedicos';
 import DoctoresRegistro from './pages/DoctoresRegistro';
+import StorefrontPublic from './pages/StorefrontPublic';
+import DoctorStorefrontEditor from './pages/DoctorStorefrontEditor';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
@@ -124,6 +126,16 @@ const AuthenticatedApp = () => {
           contenido. Shell propio, sin Header/Footer del sitio, igual que
           /para-medicos. */}
       <Route path="/doctores-registro" element={<DoctoresRegistro />} />
+
+      {/* Storefront público del doctor: mini página web personal, sin branding
+          de BuscoUnDoctor, que el doctor comparte desde sus redes. Vive fuera
+          del Layout (sin Header/Footer) a propósito. */}
+      <Route path="/dr/:slug" element={<StorefrontPublic />} />
+
+      {/* Editor del storefront (lado del doctor): separado del panel de
+          administración del directorio. Maneja su propia auth como el
+          DoctorPanel. */}
+      <Route path="/panel-medico/storefront" element={<DoctorStorefrontEditor />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>

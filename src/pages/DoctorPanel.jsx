@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -265,6 +265,13 @@ export default function DoctorPanel() {
           ))}
         </nav>
 
+        <div className="px-3 pb-2">
+          <Link to="/panel-medico/storefront" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+            <Globe className="w-4 h-4 flex-shrink-0" />
+            Mi página pública
+          </Link>
+        </div>
+
         <div className="p-3 border-t border-white/10">
           <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
             <LogOut className="w-4 h-4" />
@@ -285,6 +292,10 @@ export default function DoctorPanel() {
             <div className="w-10" />
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+            <Link to="/panel-medico/storefront" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
+              <Globe className="w-3.5 h-3.5" />
+              Mi página
+            </Link>
             {SECTIONS.map((s) => {
               const locked = s.requiresSaved && !isEditing;
               return (

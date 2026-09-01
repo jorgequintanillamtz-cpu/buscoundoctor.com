@@ -1,0 +1,40 @@
+{
+  "name": "StorefrontTimelineEntry",
+  "type": "object",
+  "properties": {
+    "storefront_id": {
+      "type": "string",
+      "title": "Storefront (ref)",
+      "description": "ID del registro de DoctorStorefront."
+    },
+    "year": {
+      "type": "string",
+      "title": "A\u00f1o",
+      "description": "A\u00f1o o rango de a\u00f1os (ej. '2015' o '2015-2017')."
+    },
+    "description": {
+      "type": "string",
+      "title": "Descripci\u00f3n"
+    },
+    "position": {
+      "type": "number",
+      "title": "Posici\u00f3n",
+      "default": 0
+    }
+  },
+  "required": [
+    "storefront_id",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

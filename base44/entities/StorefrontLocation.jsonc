@@ -1,0 +1,52 @@
+{
+  "name": "StorefrontLocation",
+  "type": "object",
+  "properties": {
+    "storefront_id": {
+      "type": "string",
+      "title": "Storefront (ref)",
+      "description": "ID del registro de DoctorStorefront."
+    },
+    "place_name": {
+      "type": "string",
+      "title": "Nombre del lugar",
+      "description": "Hospital o consultorio."
+    },
+    "address": {
+      "type": "string",
+      "title": "Direcci\u00f3n"
+    },
+    "latitude": {
+      "type": "number",
+      "title": "Latitud"
+    },
+    "longitude": {
+      "type": "number",
+      "title": "Longitud"
+    },
+    "maps_url": {
+      "type": "string",
+      "title": "Enlace de Google Maps",
+      "description": "Enlace para compartir de Google Maps (opcional, se usa para extraer coordenadas)."
+    },
+    "position": {
+      "type": "number",
+      "title": "Posici\u00f3n",
+      "default": 0
+    }
+  },
+  "required": [
+    "storefront_id"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
