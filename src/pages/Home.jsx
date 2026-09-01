@@ -723,6 +723,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Únete a BuscoUnDoctor: banner de reclutamiento de médicos, justo
+          arriba del blog. Ver comentario de JOIN_CARDS más arriba. */}
+      <section className="bg-white pt-10 pb-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-9">
+            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
+              Únete a <span className="text-brand-blue">BuscoUnDoctor</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {JOIN_CARDS.map((card) => (
+              <Link
+                key={card.title}
+                to={card.to}
+                className="group flex flex-col rounded-2xl border border-border/50 bg-card overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <div className="h-40 sm:h-44 flex items-center justify-center bg-brand-navy flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-white/10 border-2 border-brand-bluePale flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                    <card.icon className="w-8 h-8 text-brand-bluePale" strokeWidth={1.75} />
+                  </div>
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <h3 className="font-heading font-bold text-lg text-foreground">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-2 flex-1">{card.description}</p>
+                  <span className="inline-flex items-center gap-1.5 mt-4 bg-brand-bluePale group-hover:bg-brand-blue/20 text-brand-navy font-semibold text-sm rounded-full px-4 py-2 transition-colors w-fit">
+                    {card.cta}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Blog: última sección antes del footer, slider deslizable con todos los artículos */}
       {posts.length > 0 &&
       <section style={{ background: 'linear-gradient(to bottom, white 0%, #EAF2FF 12%, #EAF2FF 88%, white 100%)' }}>
