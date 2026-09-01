@@ -543,35 +543,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Por qué BuscoUnDoctor: es gratis, dos columnas — pacientes a la
-          izquierda, registro de doctor a la derecha. Solo la imagen, sin
-          texto encima ni tarjeta de texto debajo (a pedido explícito). La
-          columna de doctores es un link completo a /registro-medico ya que
-          perdimos el botón de texto. Solo desktop aquí — en móvil esta
-          sección va más abajo (después de Especialistas destacados). */}
-      <section className="hidden sm:block bg-brand-blueLight/60">
-        <div className="max-w-5xl mx-auto px-6 py-14">
-          <div className="grid sm:grid-cols-2 gap-8">
-            {familyPhotoUrl && (
-              <img
-                src={familyPhotoUrl}
-                alt="Agendar en BuscoUnDoctor es gratis para pacientes"
-                className="w-full h-auto rounded-3xl shadow-sm"
-              />
-            )}
-            {doctorPhotoUrl && (
-              <Link to="/registro-medico">
-                <img
-                  src={doctorPhotoUrl}
-                  alt="Regístrate como doctor en BuscoUnDoctor"
-                  className="w-full h-auto rounded-3xl shadow-sm"
-                />
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* Explora por especialidad: un slider horizontal con 10 doctores por
           especialidad, respetando el ancho normal de la página (max-w-7xl,
           igual que el resto del contenido). Esqueleto/mockup — todavía no
@@ -656,6 +627,35 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Por qué BuscoUnDoctor: es gratis, dos columnas — pacientes a la
+          izquierda, registro de doctor a la derecha. Solo la imagen, sin
+          texto encima ni tarjeta de texto debajo (a pedido explícito). La
+          columna de doctores es un link completo a /registro-medico ya que
+          perdimos el botón de texto. Solo desktop aquí — en móvil esta
+          sección va más abajo (después de Especialistas destacados). */}
+      <section className="hidden sm:block bg-brand-blueLight/60">
+        <div className="max-w-5xl mx-auto px-6 py-14">
+          <div className="grid sm:grid-cols-2 gap-8">
+            {familyPhotoUrl && (
+              <img
+                src={familyPhotoUrl}
+                alt="Agendar en BuscoUnDoctor es gratis para pacientes"
+                className="w-full h-auto rounded-3xl shadow-sm"
+              />
+            )}
+            {doctorPhotoUrl && (
+              <Link to="/registro-medico">
+                <img
+                  src={doctorPhotoUrl}
+                  alt="Regístrate como doctor en BuscoUnDoctor"
+                  className="w-full h-auto rounded-3xl shadow-sm"
+                />
+              </Link>
+            )}
+          </div>
         </div>
       </section>
 
