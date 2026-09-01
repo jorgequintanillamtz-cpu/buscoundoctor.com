@@ -152,7 +152,6 @@ export default function Home() {
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
   const [subspecialties, setSubspecialties] = useState([]);
-  const [featured, setFeatured] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
   // Especialidades, subespecialidades y enfermedades combinadas en un solo
@@ -163,13 +162,6 @@ export default function Home() {
   // "cond:...") pese al nombre, para no tocar el resto de las referencias a
   // esa variable.
   const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
-  // Nombre "como lo busca el paciente" por especialidad (ej. "Ginecólogo"),
-  // para las tarjetas de doctores destacados más abajo.
-  const specialtyDisplayMap = useMemo(() => {
-    const map = {};
-    specialties.forEach((s) => { map[s.name] = s.display_name || s.name; });
-    return map;
-  }, [specialties]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
@@ -235,9 +227,8 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, specialists, blogPosts, zoneList, siteSettings, conditionList, subspecialtyList] = await Promise.all([
+      const [specs, blogPosts, zoneList, siteSettings, conditionList, subspecialtyList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
-      base44.entities.Specialist.filter({ featured: true, active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
       base44.entities.SiteSettings.list().catch(() => []),
@@ -250,7 +241,6 @@ export default function Home() {
       setSpecialties(specs);
       setConditions(conditionList);
       setSubspecialties(subspecialtyList);
-      setFeatured(specialists);
       setPosts(blogPosts);
       setZones(zoneList);
       setFamilyPhotoUrl(siteSettings[0]?.family_photo_url || "");
