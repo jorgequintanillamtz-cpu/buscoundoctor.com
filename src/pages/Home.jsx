@@ -468,10 +468,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Móvil: bleed a la derecha, fuera del max-w-7xl a propósito */}
+        {/* Móvil: bleed a la derecha, fuera del max-w-7xl a propósito. El
+            padding izquierdo va como scroll-padding (además de padding
+            normal) porque, sin él, Chrome hace scroll-snap automático al
+            cargar la página y "se come" el padding-left -- la primera
+            tarjeta terminaba pegada al borde en vez de dejar el espacio. */}
         <div
           className="sm:hidden flex gap-3 overflow-x-auto pb-2 pl-4 snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: 'none' }}
+          style={{ scrollbarWidth: 'none', scrollPaddingLeft: '1rem' }}
         >
           {FEATURED_HOME_CATEGORIES.map((cat, idx) => {
             const s = specialties.find((x) => x.name === cat.name);
