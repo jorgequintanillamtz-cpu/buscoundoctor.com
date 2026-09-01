@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  Plus, Pencil, Trash2, Star, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock,
+  Plus, Pencil, Trash2, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock,
   Stethoscope, Crown, Search, ArrowUpDown, CheckSquare, Square, Calendar, Loader2, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
