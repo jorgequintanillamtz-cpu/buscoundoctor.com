@@ -100,24 +100,6 @@ export default function AdminDoctores() {
     }
   };
 
-  const toggleFeatured = async (id, nombre, current) => {
-    const next = !current;
-    setDoctors(prev => prev.map(d => d.id === id ? { ...d, featured: next } : d));
-    try {
-      await base44.entities.Specialist.update(id, { featured: next });
-      toast.success(next ? `${nombre} ahora aparece en la página principal` : `${nombre} ya no aparece en la página principal`);
-      logActivity({
-        type: next ? "destacado_activado" : "destacado_desactivado",
-        description: next ? `${nombre} se marcó como destacado` : `${nombre} se quitó de destacados`,
-        specialistId: id,
-        specialistName: nombre,
-      });
-    } catch (e) {
-      setDoctors(prev => prev.map(d => d.id === id ? { ...d, featured: current } : d));
-      toast.error("No se pudo actualizar: " + e.message);
-    }
-  };
-
   // Plan Premium/Gratis: el cobro se maneja manualmente fuera del sistema
   // (transferencia, efectivo, etc.), aquí solo se refleja el resultado para
   // que el sitio sepa a quién destacar y para llevar control interno. El
@@ -275,7 +257,6 @@ export default function AdminDoctores() {
     }
   };
 
-  const featuredCount = useMemo(() => doctors.filter(d => d.featured).length, [doctors]);
   const premiumCount = useMemo(() => doctors.filter(d => d.plan_slug === "premium").length, [doctors]);
 
   const togglePendingSelected = (id) => {
@@ -357,13 +338,6 @@ export default function AdminDoctores() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 bg-amber-500 rounded-xl px-4 py-2.5 w-fit">
-          <Star className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" />
-          <p className="text-sm text-white">
-            <span className="font-semibold">{featuredCount}</span> destacado{featuredCount !== 1 ? "s" : ""} para la página principal
-            {featuredCount > 6 && <span className="text-white/80"> — solo se muestran los primeros 6</span>}
-          </p>
-        </div>
         <div className="flex items-center gap-2 bg-purple-500 rounded-xl px-4 py-2.5 w-fit">
           <Crown className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" />
           <p className="text-sm text-white">
@@ -494,19 +468,6 @@ export default function AdminDoctores() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => toggleFeatured(doc.id, doc.full_name, !!doc.featured)}
-                        title={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
-                        aria-label={doc.featured ? "Quitar de la página principal" : "Mostrar en la página principal"}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors flex-shrink-0 ${
-                          doc.featured
-                            ? "bg-amber-100 border-amber-200 text-amber-500 hover:bg-amber-200"
-                            : "bg-transparent border-border text-muted-foreground hover:border-amber-300 hover:text-amber-400"
-                        }`}
-                      >
-                        <Star className="w-4 h-4" fill={doc.featured ? "currentColor" : "none"} />
-                      </button>
                       <button
                         type="button"
                         onClick={() => togglePremium(doc)}
