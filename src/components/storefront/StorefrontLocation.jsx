@@ -1,7 +1,8 @@
 import React from "react";
 import { MapPin } from "lucide-react";
+import { CREAM } from "@/lib/storefrontThemes";
 
-export default function StorefrontLocation({ items }) {
+export default function StorefrontLocation({ items, theme }) {
   const loc = items[0];
   if (!loc) return null;
   const hasCoords = loc.latitude != null && loc.longitude != null;
@@ -10,17 +11,20 @@ export default function StorefrontLocation({ items }) {
     : null;
 
   return (
-    <section>
-      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-gray-900 mb-3">
-        <MapPin className="w-5 h-5 text-blue-600" />
-        Dónde encontrarlo
+    <section id="ubicacion" className="scroll-mt-4">
+      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
+        <MapPin className="w-5 h-5" style={{ color: CREAM }} />
+        Dónde encontrarme
       </h2>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+      >
         {loc.place_name && (
-          <p className="font-semibold text-gray-900 px-4 pt-4 text-sm">{loc.place_name}</p>
+          <p className="font-semibold text-white px-4 pt-4 text-sm">{loc.place_name}</p>
         )}
         {loc.address && (
-          <p className="text-gray-600 text-sm px-4 pb-3 pt-1">{loc.address}</p>
+          <p className="text-white/70 text-sm px-4 pb-3 pt-1">{loc.address}</p>
         )}
         {mapSrc && (
           <iframe
