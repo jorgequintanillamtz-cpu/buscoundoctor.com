@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, UserPlus, Crown, HelpCircle } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
@@ -70,34 +70,28 @@ const PLACEHOLDER_DOCTOR_INFO = [
   { city: "Monterrey", years: 10, price: 700 },
 ];
 
-// "Únete a BuscoUnDoctor": banner de reclutamiento de médicos, mismo
-// formato que el típico banner "Únete a Rappi" (título + grid de tarjetas
-// con imagen/ícono, texto y botón) pero con un solo público real (médicos,
-// via /registro-medico) mostrado desde 3 ángulos distintos en vez de 3
-// audiencias como restaurantes/comercios/repartidores. Sin fotos de stock:
-// usamos el mismo círculo con ícono sobre fondo navy que ya usa la sección
-// "Cada médico, verificado a mano" más abajo.
-const JOIN_CARDS = [
+// "Únete a BuscoUnDoctor": banner de reclutamiento de médicos como 3 pasos
+// del proceso (registro -> validación de cédula -> nuevos pacientes), con
+// un solo botón de llamada a la acción al final en vez de una tarjeta con
+// link por cada paso.
+const JOIN_STEPS = [
   {
-    title: "Regístrate gratis",
-    description: "Crea tu perfil profesional en minutos y empieza a recibir pacientes en Monterrey y San Pedro.",
-    cta: "Crear mi perfil",
-    to: "/registro-medico",
+    number: "1",
+    title: "Regístrate",
+    description: "Crea tu perfil profesional en minutos con tus datos, especialidad y consultorio.",
     icon: UserPlus,
   },
   {
-    title: "Hazte Premium",
-    description: "Destaca tu perfil, aparece primero en las búsquedas y accede a beneficios exclusivos.",
-    cta: "Ver planes",
-    to: "/planes",
-    icon: Crown,
+    number: "2",
+    title: "Validamos tu información",
+    description: "Revisamos tu cédula profesional a mano para que tu perfil quede verificado.",
+    icon: ShieldCheck,
   },
   {
-    title: "¿Tienes dudas?",
-    description: "Conoce cómo funciona BuscoUnDoctor y todo lo que necesitas para unirte como especialista.",
-    cta: "Conocer más",
-    to: "/para-medicos",
-    icon: HelpCircle,
+    number: "3",
+    title: "Obtén nuevos pacientes",
+    description: "Tu perfil aparece en el directorio y empiezas a recibir solicitudes de citas.",
+    icon: Users,
   },
 ];
 
@@ -724,36 +718,38 @@ export default function Home() {
       </section>
 
       {/* Únete a BuscoUnDoctor: banner de reclutamiento de médicos, justo
-          arriba del blog. Ver comentario de JOIN_CARDS más arriba. */}
+          arriba del blog, mostrado como 3 pasos (registro, validación,
+          nuevos pacientes) con un solo botón de acción al final. Ver
+          comentario de JOIN_STEPS más arriba. */}
       <section className="bg-white pt-10 pb-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-9">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-10">
             <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-foreground">
               Únete a <span className="text-brand-blue">BuscoUnDoctor</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {JOIN_CARDS.map((card) => (
-              <Link
-                key={card.title}
-                to={card.to}
-                className="group flex flex-col rounded-2xl border border-border/50 bg-card overflow-hidden hover:shadow-md transition-shadow"
-              >
-                <div className="h-40 sm:h-44 flex items-center justify-center bg-brand-navy flex-shrink-0">
-                  <div className="w-16 h-16 rounded-full bg-white/10 border-2 border-brand-bluePale flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                    <card.icon className="w-8 h-8 text-brand-bluePale" strokeWidth={1.75} />
-                  </div>
-                </div>
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="font-heading font-bold text-lg text-foreground">{card.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-2 flex-1">{card.description}</p>
-                  <span className="inline-flex items-center gap-1.5 mt-4 bg-brand-bluePale group-hover:bg-brand-blue/20 text-brand-navy font-semibold text-sm rounded-full px-4 py-2 transition-colors w-fit">
-                    {card.cta}
-                    <ArrowRight className="w-3.5 h-3.5" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-6">
+            {JOIN_STEPS.map((step) => (
+              <div key={step.number} className="flex flex-col items-center text-center">
+                <div className="relative w-16 h-16 rounded-full bg-brand-navy flex items-center justify-center mb-4">
+                  <step.icon className="w-7 h-7 text-brand-bluePale" strokeWidth={1.75} />
+                  <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-brand-blue text-white text-xs font-bold flex items-center justify-center border-2 border-white">
+                    {step.number}
                   </span>
                 </div>
-              </Link>
+                <h3 className="font-heading font-bold text-lg text-foreground">{step.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2 max-w-xs">{step.description}</p>
+              </div>
             ))}
+          </div>
+          <div className="flex justify-center mt-10">
+            <Link
+              to="/registro-medico"
+              className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-sm px-6 py-3 rounded-full shadow-sm transition-colors"
+            >
+              Regístrate gratis
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
