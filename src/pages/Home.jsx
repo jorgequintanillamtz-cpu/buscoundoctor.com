@@ -673,9 +673,12 @@ export default function Home() {
           destacados). Solo las imágenes, sin texto encima ni tarjeta de
           texto debajo (a pedido explícito). Oculta en desktop, que ya tiene
           su propio bloque de dos columnas más arriba. Mismo espaciado
-          vertical (pt-10 pb-10) que el resto de las secciones del home, y
-          más separación entre las dos fotos (space-y-5). */}
-      <div className="sm:hidden px-4 pt-10 pb-10 space-y-5">
+          vertical (pt-10 pb-10) que el resto de las secciones del home.
+          space-y-5 (20px) se veía casi pegado porque ambas fotos tienen
+          fondos muy claros que se confunden con el fondo blanco de la
+          página -- se sube a space-y-10 (40px) para que el corte entre una
+          y otra sea evidente a simple vista. */}
+      <div className="sm:hidden px-4 pt-10 pb-10 space-y-10">
         {familyPhotoUrl && (
           <img
             src={familyPhotoUrl}
