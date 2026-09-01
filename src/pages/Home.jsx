@@ -468,13 +468,18 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Móvil: bleed a la derecha, fuera del max-w-7xl a propósito. El
-            padding izquierdo va como scroll-padding (además de padding
-            normal) porque, sin él, Chrome hace scroll-snap automático al
-            cargar la página y "se come" el padding-left -- la primera
-            tarjeta terminaba pegada al borde en vez de dejar el espacio. */}
+        {/* Slider horizontal: se usa en móvil Y en tablet/iPad (hasta antes
+            de lg, 1024px). Con solo 5 tarjetas, un grid de 5 columnas fijo
+            (grid-cols-5) no tiene suficiente ancho por tarjeta en ese rango
+            y el nombre de la especialidad se corta contra el borde (ej.
+            "Ginecólog[o]", "Dermatólog[o]" en iPad) -- por eso el corte se
+            movió de sm (640px) a lg (1024px). El padding izquierdo va como
+            scroll-padding (además de padding normal) porque, sin él, Chrome
+            hace scroll-snap automático al cargar la página y "se come" el
+            padding-left -- la primera tarjeta terminaba pegada al borde en
+            vez de dejar el espacio. */}
         <div
-          className="sm:hidden flex gap-3 overflow-x-auto pb-2 pl-4 snap-x snap-mandatory scroll-smooth"
+          className="lg:hidden flex gap-3 overflow-x-auto pb-2 pl-4 snap-x snap-mandatory scroll-smooth"
           style={{ scrollbarWidth: 'none', scrollPaddingLeft: '1rem' }}
         >
           {FEATURED_HOME_CATEGORIES.map((cat, idx) => {
@@ -505,9 +510,10 @@ export default function Home() {
           })}
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-0 pb-10">
-          {/* Desktop: fila de 5 */}
-          <div className="hidden sm:grid grid-cols-5 gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 lg:pt-0 pb-10">
+          {/* Desktop (lg+, 1024px): fila de 5. Ver comentario arriba del
+              slider sobre por qué el corte no puede ser antes (sm). */}
+          <div className="hidden lg:grid grid-cols-5 gap-4">
             {FEATURED_HOME_CATEGORIES.map((cat, idx) => {
               const s = specialties.find((x) => x.name === cat.name);
               if (!s) return null;
