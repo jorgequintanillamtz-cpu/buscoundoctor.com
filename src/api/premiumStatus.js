@@ -1,7 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { differenceInCalendarDays } from "date-fns";
 
-const DEFAULT_RATE = 999;
+const DEFAULT_RATE = 1999;
 const DEFAULT_BILLING_DAY = 1;
 
 // Los datos de Premium (plan, fecha de activación, monto, día de cobro,
