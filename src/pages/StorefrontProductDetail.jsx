@@ -50,8 +50,9 @@ export default function StorefrontProductDetail() {
           product_id: productId,
         });
         if (cancelled) return;
-        if (res && res.product) {
-          setProduct(res.product);
+        const productData = res?.data?.product || res?.product;
+        if (productData) {
+          setProduct(productData);
         } else {
           setNotFound(true);
         }
