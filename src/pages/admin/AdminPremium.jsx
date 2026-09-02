@@ -26,7 +26,7 @@ const METHOD_LABELS = {
   otro: "Otro",
 };
 
-const DEFAULT_RATE = 999;
+const DEFAULT_RATE = 1999;
 const DEFAULT_BILLING_DAY = 1;
 
 const EMPTY_PAYMENT = { specialist_id: "", amount: String(DEFAULT_RATE), payment_date: new Date().toISOString().slice(0, 10), period_label: "", method: "transferencia", notes: "" };
