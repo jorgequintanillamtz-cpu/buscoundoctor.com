@@ -168,7 +168,7 @@ export default function DoctoresRegistro() {
               </h1>
               <ul className="mt-6 space-y-2.5 inline-block text-left">
                 {[
-                  { icon: Crown, text: "1 año gratis de Premium (ahorras $11,988 MXN) siendo Miembro Fundador" },
+                  { icon: Crown, text: "1 año gratis de Premium (ahorras $23,988 MXN) siendo Miembro Fundador" },
                   { icon: Users, text: "Oferta exclusiva para los primeros 10 doctores de cada especialidad" },
                 ].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-base text-foreground font-medium">
