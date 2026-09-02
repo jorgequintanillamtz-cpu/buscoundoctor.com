@@ -58,6 +58,14 @@ export function setOpenGraph({ title, description, image, imageAlt, url }) {
 
 const SITE_ORIGIN = "https://buscoundoctor.com";
 
+// Arma la URL absoluta y "limpia" (sin query ni hash) de una ruta. La usan
+// tanto setCanonical como cualquier página que necesite pasarle una url
+// explícita a setOpenGraph (og:url) sin repetir el dominio a mano.
+export function buildAbsoluteUrl(pathname) {
+  const clean = (pathname || "/").split("?")[0].split("#")[0];
+  return clean === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}`;
+}
+
 // Actualiza (o crea) el <link rel="canonical"> del documento. index.html trae
 // uno fijo apuntando a "/" como valor por defecto estático; esta función toma
 // el control de ese mismo tag en cuanto React monta, y lo actualiza en cada
@@ -68,8 +76,7 @@ const SITE_ORIGIN = "https://buscoundoctor.com";
 // propio canonical tras cargar el post) pueden llamarla de nuevo después
 // con una ruta explícita, y esa llamada posterior gana.
 export function setCanonical(pathname) {
-  const clean = (pathname || "/").split("?")[0].split("#")[0];
-  const href = clean === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}`;
+  const href = buildAbsoluteUrl(pathname);
   let el = document.head.querySelector('link[rel="canonical"]');
   if (!el) {
     el = document.createElement("link");
