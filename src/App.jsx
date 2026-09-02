@@ -52,6 +52,7 @@ import LandingMedicos from './pages/LandingMedicos';
 import DoctoresRegistro from './pages/DoctoresRegistro';
 import StorefrontPublic from './pages/StorefrontPublic';
 import DoctorStorefrontEditor from './pages/DoctorStorefrontEditor';
+import DoctorProducts from './pages/DoctorProducts';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
@@ -136,6 +137,7 @@ const AuthenticatedApp = () => {
           administración del directorio. Maneja su propia auth como el
           DoctorPanel. */}
       <Route path="/panel-medico/storefront" element={<DoctorStorefrontEditor />} />
+      <Route path="/panel-medico/productos" element={<DoctorProducts />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>

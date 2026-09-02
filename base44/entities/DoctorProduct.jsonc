@@ -1,0 +1,64 @@
+{
+  "name": "DoctorProduct",
+  "type": "object",
+  "properties": {
+    "doctor_id": {
+      "type": "string",
+      "title": "Doctor (ref Specialist)",
+      "description": "ID del registro de Specialist al que pertenece este producto digital."
+    },
+    "title": {
+      "type": "string",
+      "title": "T\u00edtulo"
+    },
+    "description": {
+      "type": "string",
+      "title": "Descripci\u00f3n"
+    },
+    "price": {
+      "type": "number",
+      "title": "Precio (MXN)",
+      "minimum": 0
+    },
+    "cover_image": {
+      "type": "string",
+      "title": "Imagen de portada (URL)",
+      "description": "Imagen opcional para la tarjeta del producto."
+    },
+    "file_url": {
+      "type": "string",
+      "title": "Archivo PDF (URL)",
+      "description": "URL del PDF subido. NOTA FASE 4 (checkout): este campo NO debe exponerse como link p\u00fablico permanente \u2014 se servir\u00e1 v\u00eda URL firmada temporal."
+    },
+    "status": {
+      "type": "string",
+      "title": "Estatus",
+      "enum": [
+        "draft",
+        "active",
+        "inactive"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "doctor_id",
+    "title",
+    "file_url",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
