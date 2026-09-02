@@ -18,7 +18,7 @@ import ReviewsSection from "../components/profile/ReviewsSection";
 import FaqSection from "../components/profile/FaqSection";
 import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
-import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
+import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -166,9 +166,19 @@ export default function SpecialistProfile() {
 
         const zoneLabel = specialist.zone || specialist.location || "Monterrey";
         const pageTitle = `${specialist.full_name} — ${specialtyDisplayName} en ${zoneLabel} | BuscoUnDoctor`;
-        const pageDescription = specialist.description
-          ? specialist.description.slice(0, 160)
-          : `Especialista en ${specialtyDisplayName} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
+
+        // Descripción para redes/WhatsApp: cuando hay reseñas reales se antepone
+        // el rating (la señal que más empuja el clic en una tarjeta compartida),
+        // seguido de la propia descripción del doctor o, si no escribió una, un
+        // fallback genérico. Se recorta a 160 caracteres en total (límite usual
+        // de las tarjetas de WhatsApp/Facebook antes de truncar con "...").
+        const ratingPrefix = reviewsForSchema.length > 0 && specialist.rating
+          ? `⭐ ${Number(specialist.rating).toFixed(1)} (${reviewsForSchema.length} reseña${reviewsForSchema.length !== 1 ? "s" : ""}) · `
+          : "";
+        const baseDescription = specialist.description
+          || `Especialista en ${specialtyDisplayName} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
+        const pageDescription = `${ratingPrefix}${baseDescription}`.slice(0, 160);
+        const pageUrl = buildAbsoluteUrl(`/especialista/${specialist.slug}`);
 
         // Cada perfil necesita su propio <title> y meta description únicos — sin
         // esto, Google ve todos los perfiles con el mismo título genérico del
@@ -183,6 +193,8 @@ export default function SpecialistProfile() {
           title: pageTitle,
           description: pageDescription,
           image: specialist.profile_photo || SITE_OG.image,
+          imageAlt: `Foto de perfil de ${specialist.full_name}, ${specialtyDisplayName}`,
+          url: pageUrl,
         });
       }
       setLoading(false);
