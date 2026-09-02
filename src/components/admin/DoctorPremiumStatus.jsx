@@ -111,7 +111,7 @@ export default function DoctorPremiumStatus({ specialistId, specialistName }) {
                   ? `Eres Premium desde el ${fmtDate(status.premium_activated_at)}.`
                   : "Eres Premium."}
                 {!isTrial && status?.billing_day && (
-                  <> Se cobra el día {status.billing_day} de cada mes · {fmtMoney(status.monthly_amount || 999)} MXN.</>
+                  <> Se cobra el día {status.billing_day} de cada mes · {fmtMoney(status.monthly_amount || 1999)} MXN.</>
                 )}
               </p>
             </div>
