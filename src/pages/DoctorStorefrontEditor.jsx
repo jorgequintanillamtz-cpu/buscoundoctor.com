@@ -17,7 +17,9 @@ import SimpleListEditor from "@/components/storefront/editor/SimpleListEditor";
 import TimelineEditor from "@/components/storefront/editor/TimelineEditor";
 import FaqEditor from "@/components/storefront/editor/FaqEditor";
 import LocationEditor from "@/components/storefront/editor/LocationEditor";
+import SectionOrderEditor from "@/components/storefront/editor/SectionOrderEditor";
 import { generateUniqueSlug, byPosition } from "@/lib/storefrontUtils";
+import { DEFAULT_SECTION_ORDER } from "@/lib/storefrontSections";
 
 export default function DoctorStorefrontEditor() {
   const [status, setStatus] = useState("loading"); // loading | no-profile | no-storefront | ready
@@ -28,6 +30,7 @@ export default function DoctorStorefrontEditor() {
   const [locations, setLocations] = useState([]);
   const [timeline, setTimeline] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [products, setProducts] = useState([]);
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -52,8 +55,8 @@ export default function DoctorStorefrontEditor() {
       if (!active) return;
       if (sf.length > 0) {
         const s = sf[0];
-        setStorefront(s);
-        await loadChildren(s.id);
+        setStorefront({ ...s, section_order: s.section_order && s.section_order.length ? s.section_order : [...DEFAULT_SECTION_ORDER] });
+        await loadChildren(s.id, sp.id);
         setStatus("ready");
       } else {
         setStatus("no-storefront");
@@ -62,19 +65,23 @@ export default function DoctorStorefrontEditor() {
     return () => { active = false; };
   }, []);
 
-  const loadChildren = async (sfId) => {
-    const [c, i, l, t, f] = await Promise.all([
+  const loadChildren = async (sfId, specialistId) => {
+    const [c, i, l, t, f, p] = await Promise.all([
       base44.entities.StorefrontCondition.filter({ storefront_id: sfId }).catch(() => []),
       base44.entities.StorefrontInsurance.filter({ storefront_id: sfId }).catch(() => []),
       base44.entities.StorefrontLocation.filter({ storefront_id: sfId }).catch(() => []),
       base44.entities.StorefrontTimelineEntry.filter({ storefront_id: sfId }).catch(() => []),
       base44.entities.StorefrontFAQ.filter({ storefront_id: sfId }).catch(() => []),
+      specialistId
+        ? base44.entities.DoctorProduct.filter({ doctor_id: specialistId, status: "active" }).catch(() => [])
+        : Promise.resolve([]),
     ]);
     setConditions(c.sort(byPosition));
     setInsurances(i.sort(byPosition));
     setLocations(l.sort(byPosition));
     setTimeline(t.sort(byPosition));
     setFaqs(f.sort(byPosition));
+    setProducts(p);
   };
 
   const createStorefront = async () => {
@@ -110,6 +117,7 @@ export default function DoctorStorefrontEditor() {
         whatsapp_message: values.whatsapp_message,
         headline: values.headline,
         status: values.status,
+        section_order: values.section_order || [...DEFAULT_SECTION_ORDER],
       });
       setStorefront(updated);
       toast.success("Cambios guardados");
@@ -130,12 +138,13 @@ export default function DoctorStorefrontEditor() {
             whatsapp_message: storefront.whatsapp_message,
             headline: storefront.headline,
             status: storefront.status,
+            section_order: storefront.section_order || [...DEFAULT_SECTION_ORDER],
           });
         } catch {}
       })();
     }, 1200);
     return () => clearTimeout(t);
-  }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.status]);
+    }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.status, storefront?.section_order]);
 
   const shell = (content) => (
     <div className="min-h-screen bg-background">
@@ -209,6 +218,13 @@ export default function DoctorStorefrontEditor() {
             />
           </div>
 
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
+            <SectionOrderEditor
+              order={storefront.section_order || []}
+              onChange={(next) => updateStorefront({ section_order: next })}
+            />
+          </div>
+
           <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-6">
             <SimpleListEditor
               storefrontId={storefront.id}
@@ -273,6 +289,7 @@ export default function DoctorStorefrontEditor() {
                   locations={locations}
                   timeline={timeline}
                   faqs={faqs}
+                  products={products}
                   embedded
                 />
               </div>
@@ -296,8 +313,9 @@ export default function DoctorStorefrontEditor() {
                 locations={locations}
                 timeline={timeline}
                 faqs={faqs}
+                products={products}
                 embedded
-              />
+                />
             </div>
           </div>
         </div>

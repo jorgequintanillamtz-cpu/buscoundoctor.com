@@ -37,6 +37,22 @@
       "title": "Tema de color",
       "default": "blue"
     },
+    "section_order": {
+      "type": "array",
+      "title": "Orden de secciones",
+      "description": "Orden de las secciones reordenables del storefront (excluye el hero, que siempre va primero). IDs v\u00e1lidos: conditions, insurances, location, timeline, faq, products.",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "conditions",
+        "insurances",
+        "location",
+        "timeline",
+        "faq",
+        "products"
+      ]
+    },
     "status": {
       "type": "string",
       "title": "Estado",

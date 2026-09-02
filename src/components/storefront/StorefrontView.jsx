@@ -5,8 +5,10 @@ import StorefrontInsurances from "./StorefrontInsurances";
 import StorefrontLocation from "./StorefrontLocation";
 import StorefrontTimeline from "./StorefrontTimeline";
 import StorefrontFAQ from "./StorefrontFAQ";
+import StorefrontProducts from "./StorefrontProducts";
 import { buildWhatsAppLink } from "@/lib/storefrontUtils";
 import { getStorefrontTheme, CREAM, INK, WA_GREEN } from "@/lib/storefrontThemes";
+import { resolveSections } from "@/lib/storefrontSections";
 
 /**
  * Compone todas las secciones del storefront.
@@ -14,6 +16,10 @@ import { getStorefrontTheme, CREAM, INK, WA_GREEN } from "@/lib/storefrontThemes
  * (en ese caso se pasa `embedded` para que el botón flotante y el menú no se
  * escapen del contenedor del preview).
  * Sin branding de BuscoUnDoctor: es la página personal del doctor.
+ *
+ * El hero (foto + nombre + botón de agendar cita) SIEMPRE va primero y no es
+ * reordenable. Las demás secciones se renderizan en el orden de
+ * `storefront.section_order`, omitiendo las que no tengan contenido.
  */
 export default function StorefrontView({
   storefront,
@@ -23,6 +29,7 @@ export default function StorefrontView({
   locations = [],
   timeline = [],
   faqs = [],
+  products = [],
   embedded = false,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,13 +44,52 @@ export default function StorefrontView({
     doctorName
   );
 
-  const sections = [
-    { id: "detalle", label: "Especialidades" },
-    insurances.length > 0 && { id: "seguros", label: "Seguros" },
-    locations.length > 0 && { id: "ubicacion", label: "Ubicación" },
-    timeline.length > 0 && { id: "trayectoria", label: "Trayectoria" },
-    faqs.length > 0 && { id: "preguntas", label: "Preguntas frecuentes" },
-  ].filter(Boolean);
+  const data = { conditions, insurances, locations, timeline, faqs, products };
+  const resolved = resolveSections(storefront?.section_order, data);
+
+  // Menú lateral: todas las secciones con contenido EXCEPTO productos.
+  const menuSections = resolved.filter((s) => s.id !== "products");
+
+  const renderSection = (s) => {
+    switch (s.id) {
+      case "conditions":
+        return (
+          <section id="detalle" className="scroll-mt-4">
+            <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
+              <Stethoscope className="w-5 h-5" style={{ color: CREAM }} />
+              Qué atiende
+            </h2>
+            <ul className="space-y-2">
+              {conditions.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center gap-2.5 rounded-xl px-4 py-2.5"
+                  style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+                >
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: CREAM }}
+                  />
+                  <span className="text-white/90 text-sm">{c.text}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      case "insurances":
+        return <StorefrontInsurances items={insurances} theme={theme} />;
+      case "location":
+        return <StorefrontLocation items={locations} theme={theme} />;
+      case "timeline":
+        return <StorefrontTimeline items={timeline} theme={theme} />;
+      case "faq":
+        return <StorefrontFAQ items={faqs} theme={theme} />;
+      case "products":
+        return <StorefrontProducts items={products} theme={theme} />;
+      default:
+        return null;
+    }
+  };
 
   const fab = (
     <a
@@ -116,10 +162,10 @@ export default function StorefrontView({
               </button>
             </div>
             <nav className="space-y-1">
-              {sections.map((s) => (
+              {menuSections.map((s) => (
                 <a
                   key={s.id}
-                  href={`#${s.id}`}
+                  href={`#${s.anchor}`}
                   onClick={() => setMenuOpen(false)}
                   className="block px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-black/5"
                   style={{ color: INK }}
@@ -132,7 +178,7 @@ export default function StorefrontView({
         </div>
       )}
 
-      {/* Hero */}
+      {/* Hero (fijo, siempre primero) */}
       <StorefrontHero
         name={doctorName}
         photo={photo}
@@ -144,12 +190,11 @@ export default function StorefrontView({
         theme={theme}
       />
 
-      {/* Secciones inferiores */}
-      <main id="detalle" className="max-w-md w-full mx-auto px-5 pb-10 space-y-8 scroll-mt-4">
-        {insurances.length > 0 && <StorefrontInsurances items={insurances} theme={theme} />}
-        {locations.length > 0 && <StorefrontLocation items={locations} theme={theme} />}
-        {timeline.length > 0 && <StorefrontTimeline items={timeline} theme={theme} />}
-        {faqs.length > 0 && <StorefrontFAQ items={faqs} theme={theme} />}
+      {/* Secciones inferiores en el orden configurado */}
+      <main className="max-w-md w-full mx-auto px-5 pb-10 space-y-8">
+        {resolved.map((s) => (
+          <React.Fragment key={s.id}>{renderSection(s)}</React.Fragment>
+        ))}
       </main>
 
       {/* Pill de dominio */}

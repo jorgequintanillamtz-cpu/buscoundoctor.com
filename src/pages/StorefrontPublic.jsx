@@ -22,14 +22,18 @@ export default function StorefrontPublic() {
         }
         const storefront = sf[0];
         const specialist = await base44.entities.Specialist.get(storefront.doctor_id).catch(() => null);
-        const [conditions, insurances, locations, timeline, faqs] = await Promise.all([
+        const [conditions, insurances, locations, timeline, faqs, productsRes] = await Promise.all([
           base44.entities.StorefrontCondition.filter({ storefront_id: storefront.id }).catch(() => []),
           base44.entities.StorefrontInsurance.filter({ storefront_id: storefront.id }).catch(() => []),
           base44.entities.StorefrontLocation.filter({ storefront_id: storefront.id }).catch(() => []),
           base44.entities.StorefrontTimelineEntry.filter({ storefront_id: storefront.id }).catch(() => []),
           base44.entities.StorefrontFAQ.filter({ storefront_id: storefront.id }).catch(() => []),
+          base44.functions
+            .invoke("getPublicDoctorProducts", { doctor_id: storefront.doctor_id })
+            .catch(() => ({ data: { products: [] } })),
         ]);
         if (!active) return;
+        const products = productsRes?.data?.products || [];
         setData({
           storefront,
           specialist,
@@ -38,6 +42,7 @@ export default function StorefrontPublic() {
           locations: locations.sort(byPosition),
           timeline: timeline.sort(byPosition),
           faqs: faqs.sort(byPosition),
+          products,
         });
         if (specialist?.full_name) {
           document.title = specialist.full_name;
