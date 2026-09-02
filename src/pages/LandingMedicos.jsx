@@ -247,7 +247,7 @@ export default function LandingMedicos() {
                   referencia a su contenido, en verde. */}
               <ul className="mt-6 space-y-2.5 inline-block text-left">
                 {[
-                  { icon: Crown, text: "1 año gratis de Premium (ahorras $11,988 MXN) siendo Miembro Fundador" },
+                  { icon: Crown, text: "1 año gratis de Premium (ahorras $23,988 MXN) siendo Miembro Fundador" },
                 ].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 text-base text-foreground font-medium">
                     <span className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -428,10 +428,10 @@ export default function LandingMedicos() {
                   Oferta de lanzamiento
                 </span>
                 <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
-                  Sé Miembro Fundador y ahorra <span className="text-brand-blue">$11,988 MXN</span>
+                  Sé Miembro Fundador y ahorra <span className="text-brand-blue">$23,988 MXN</span>
                 </h2>
                 <p className="text-muted-foreground mb-3">
-                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $999 MXN/mes) — sin tarjeta, sin compromiso.
+                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $1,999 MXN/mes) — sin tarjeta, sin compromiso.
                 </p>
                 <p className="text-sm font-semibold text-brand-blue mb-5">
                   Cupo limitado: solo los primeros 5 médicos por especialidad pueden ser Miembros Fundadores.
@@ -460,7 +460,7 @@ export default function LandingMedicos() {
                 {[
                   { icon: ShieldCheck, text: "Perfil verificado en el directorio, gratis" },
                   { icon: Crown, text: "1 año gratis de Premium por ser Miembro Fundador" },
-                  { icon: Tag, text: "Ahorras $11,988 MXN al año" },
+                  { icon: Tag, text: "Ahorras $23,988 MXN al año" },
                   { icon: BadgeCheck, text: "Prioridad en las listas de búsqueda" },
                   { icon: MessageCircle, text: "Contacto directo por WhatsApp, sin intermediarios" },
                 ].map(({ icon: Icon, text }) => (
