@@ -32,13 +32,28 @@ export function applyDefaultOG() {
   upsertMeta("name", "twitter:card", SITE_OG.twitterCard);
 }
 
-// Override specific OG tags from a page (title/description/image).
-// og:type and twitter:card are left at the site defaults; Twitter falls back
-// to the og:* tags for title/description/image, so the card stays coherent.
-export function setOpenGraph({ title, description, image }) {
-  if (title !== undefined) upsertMeta("property", "og:title", title);
-  if (description !== undefined) upsertMeta("property", "og:description", description);
-  if (image !== undefined) upsertMeta("property", "og:image", image);
+// Override specific OG tags from a page (title/description/image/url).
+// og:type y twitter:card se quedan en los valores del sitio. Twitter/X lee
+// primero sus propias etiquetas twitter:title/description/image si existen
+// (no cae a las og:* automáticamente en todos los casos), así que aquí se
+// escriben ambos juegos con el mismo contenido para que la tarjeta se vea
+// igual en Facebook, WhatsApp, LinkedIn y X. og:image:alt ayuda a lectores
+// de pantalla y a algunos crawlers que lo usan como texto de respaldo.
+export function setOpenGraph({ title, description, image, imageAlt, url }) {
+  if (title !== undefined) {
+    upsertMeta("property", "og:title", title);
+    upsertMeta("name", "twitter:title", title);
+  }
+  if (description !== undefined) {
+    upsertMeta("property", "og:description", description);
+    upsertMeta("name", "twitter:description", description);
+  }
+  if (image !== undefined) {
+    upsertMeta("property", "og:image", image);
+    upsertMeta("name", "twitter:image", image);
+  }
+  if (imageAlt !== undefined) upsertMeta("property", "og:image:alt", imageAlt);
+  if (url !== undefined) upsertMeta("property", "og:url", url);
 }
 
 const SITE_ORIGIN = "https://buscoundoctor.com";
