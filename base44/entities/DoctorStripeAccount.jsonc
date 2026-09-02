@@ -1,0 +1,56 @@
+{
+  "name": "DoctorStripeAccount",
+  "type": "object",
+  "properties": {
+    "doctor_id": {
+      "type": "string",
+      "title": "Doctor (ref Specialist)",
+      "description": "ID del registro de Specialist al que pertenece esta cuenta de Stripe."
+    },
+    "stripe_account_id": {
+      "type": "string",
+      "title": "Stripe Account ID",
+      "description": "Identificador de la cuenta Connect Express en Stripe (acct_...)."
+    },
+    "onboarding_status": {
+      "type": "string",
+      "title": "Estado de onboarding",
+      "enum": [
+        "pending",
+        "complete",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "pending = onboarding iniciado pero no completado; complete = Stripe valid\u00f3 la cuenta; rejected = Stripe rechaz\u00f3 la cuenta."
+    },
+    "connected_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Fecha de conexi\u00f3n",
+      "description": "Fecha en la que se cre\u00f3/conect\u00f3 la cuenta de Stripe."
+    }
+  },
+  "required": [
+    "doctor_id",
+    "stripe_account_id",
+    "onboarding_status"
+  ],
+  "uniqueFields": [
+    "doctor_id",
+    "stripe_account_id"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

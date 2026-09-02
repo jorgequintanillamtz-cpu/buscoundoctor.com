@@ -54,6 +54,7 @@ import StorefrontPublic from './pages/StorefrontPublic';
 import StorefrontProductDetail from './pages/StorefrontProductDetail';
 import DoctorStorefrontEditor from './pages/DoctorStorefrontEditor';
 import DoctorProducts from './pages/DoctorProducts';
+import DoctorPayments from './pages/DoctorPayments';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
@@ -140,6 +141,7 @@ const AuthenticatedApp = () => {
           DoctorPanel. */}
       <Route path="/panel-medico/storefront" element={<DoctorStorefrontEditor />} />
       <Route path="/panel-medico/productos" element={<DoctorProducts />} />
+      <Route path="/panel-medico/pagos" element={<DoctorPayments />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>
