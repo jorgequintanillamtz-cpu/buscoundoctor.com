@@ -4,10 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, Loader2, Upload, FileText, X } from "lucide-react";
+import {
+  Save, Loader2, Upload, FileText, X, ArrowUp, ArrowDown, Star,
+} from "lucide-react";
 
 const MAX_PDF_MB = 20;
 const MAX_PDF_BYTES = MAX_PDF_MB * 1024 * 1024;
+const MAX_IMAGES = 6;
 
 function isPdf(file) {
   return (
@@ -21,19 +24,22 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [coverImage, setCoverImage] = useState("");
+  const [images, setImages] = useState([]); // array de URLs
   const [fileUrl, setFileUrl] = useState("");
   const [status, setStatus] = useState("draft");
   const [saving, setSaving] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
 
   useEffect(() => {
     if (product) {
       setTitle(product.title || "");
       setDescription(product.description || "");
       setPrice(product.price != null ? String(product.price) : "");
-      setCoverImage(product.cover_image || "");
+      // Migración: si tiene cover_image legacy y no images, úsalo como primera
+      const imgs = Array.isArray(product.images) ? product.images : [];
+      const cover = product.cover_image || "";
+      setImages(imgs.length ? imgs : cover ? [cover] : []);
       setFileUrl(product.file_url || "");
       setStatus(product.status || "draft");
     }
@@ -59,15 +65,33 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
     setUploadingPdf(false);
   };
 
-  const uploadCover = async (file) => {
-    setUploadingCover(true);
+  const addImage = async (file) => {
+    if (images.length >= MAX_IMAGES) {
+      toast.error(`Máximo ${MAX_IMAGES} imágenes.`);
+      return;
+    }
+    setUploadingImg(true);
     try {
       const res = await base44.integrations.Core.UploadFile({ file });
-      setCoverImage(res.file_url);
+      setImages((prev) => [...prev, res.file_url]);
     } catch (e) {
       toast.error("Error al subir la imagen: " + e.message);
     }
-    setUploadingCover(false);
+    setUploadingImg(false);
+  };
+
+  const removeImage = (idx) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const moveImage = (idx, dir) => {
+    setImages((prev) => {
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
   };
 
   const submit = async (e) => {
@@ -82,12 +106,14 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
     }
     setSaving(true);
     try {
+      const cover = images.length ? images[0] : null;
       const payload = {
         doctor_id: doctorId,
         title: title.trim(),
         description: description.trim(),
         price: price === "" ? null : Number(price),
-        cover_image: coverImage || null,
+        cover_image: cover, // se mantiene sincronizado con images[0]
+        images,
         file_url: fileUrl,
         status,
       };
@@ -150,23 +176,77 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
         </div>
       </div>
 
+      {/* Imágenes múltiples */}
       <div>
-        <Label className="text-xs">Imagen de portada (opcional)</Label>
+        <Label className="text-xs">
+          Imágenes del producto (máx {MAX_IMAGES}) — la primera es la portada
+        </Label>
         <div className="mt-1 flex items-center gap-3">
           <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border cursor-pointer text-xs font-medium text-muted-foreground hover:bg-accent">
-            {uploadingCover ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            {uploadingImg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             Subir imagen
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadCover(e.target.files[0])} />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && addImage(e.target.files[0])}
+            />
           </label>
-          {coverImage && (
-            <div className="relative">
-              <img src={coverImage} alt="portada" className="w-14 h-14 rounded-lg object-cover" />
-              <button type="button" onClick={() => setCoverImage("")} className="absolute -top-1.5 -right-1.5 bg-destructive text-white rounded-full p-0.5">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
+          <span className="text-[11px] text-muted-foreground">
+            La primera imagen se usa como portada en la tarjeta del storefront.
+          </span>
         </div>
+
+        {images.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {images.map((img, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-3 rounded-lg border border-border/60 p-2"
+              >
+                <img src={img} alt="" className="w-12 h-12 rounded-md object-cover flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  {idx === 0 ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                      Portada
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Imagen {idx + 1}</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveImage(idx, -1)}
+                    disabled={idx === 0}
+                    className="p-1 rounded hover:bg-accent disabled:opacity-30"
+                    aria-label="Subir"
+                  >
+                    <ArrowUp className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveImage(idx, 1)}
+                    disabled={idx === images.length - 1}
+                    className="p-1 rounded hover:bg-accent disabled:opacity-30"
+                    aria-label="Bajar"
+                  >
+                    <ArrowDown className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="p-1 rounded bg-destructive text-white"
+                    aria-label="Quitar"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
@@ -190,7 +270,7 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
       </div>
 
       <div className="flex gap-2 pt-1">
-        <Button type="submit" disabled={saving || uploadingPdf || uploadingCover} className="rounded-xl">
+        <Button type="submit" disabled={saving || uploadingPdf || uploadingImg} className="rounded-xl">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {isEdit ? "Guardar cambios" : "Crear producto"}
         </Button>

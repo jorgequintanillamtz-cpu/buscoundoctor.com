@@ -22,8 +22,17 @@
     },
     "cover_image": {
       "type": "string",
-      "title": "Imagen de portada (URL)",
-      "description": "Imagen opcional para la tarjeta del producto."
+      "title": "Imagen de portada (URL, legado)",
+      "description": "Campo legado. Se mantiene por compatibilidad. La portada real ahora es el primer elemento de 'images'. Si 'images' est\u00e1 vac\u00edo, se usa este campo como fallback."
+    },
+    "images": {
+      "type": "array",
+      "title": "Im\u00e1genes del producto",
+      "description": "Lista de URLs de im\u00e1genes del producto. El primer elemento es la portada/cover que se muestra en la tarjeta del storefront.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
     },
     "file_url": {
       "type": "string",

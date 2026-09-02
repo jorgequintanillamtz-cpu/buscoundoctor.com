@@ -51,6 +51,7 @@ import AdminPlanes from './pages/admin/AdminPlanes';
 import LandingMedicos from './pages/LandingMedicos';
 import DoctoresRegistro from './pages/DoctoresRegistro';
 import StorefrontPublic from './pages/StorefrontPublic';
+import StorefrontProductDetail from './pages/StorefrontProductDetail';
 import DoctorStorefrontEditor from './pages/DoctorStorefrontEditor';
 import DoctorProducts from './pages/DoctorProducts';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
@@ -132,6 +133,7 @@ const AuthenticatedApp = () => {
           de BuscoUnDoctor, que el doctor comparte desde sus redes. Vive fuera
           del Layout (sin Header/Footer) a propósito. */}
       <Route path="/dr/:slug" element={<StorefrontPublic />} />
+      <Route path="/dr/:slug/producto/:productId" element={<StorefrontProductDetail />} />
 
       {/* Editor del storefront (lado del doctor): separado del panel de
           administración del directorio. Maneja su propia auth como el

@@ -85,7 +85,7 @@ export default function StorefrontView({
       case "faq":
         return <StorefrontFAQ items={faqs} theme={theme} />;
       case "products":
-        return <StorefrontProducts items={products} theme={theme} />;
+        return <StorefrontProducts items={products} theme={theme} storefrontSlug={storefront?.slug} />;
       default:
         return null;
     }

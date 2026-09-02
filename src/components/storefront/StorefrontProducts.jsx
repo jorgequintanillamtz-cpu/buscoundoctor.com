@@ -1,17 +1,15 @@
 import React from "react";
-import { BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BookOpen, ChevronRight } from "lucide-react";
 import { CREAM, INK } from "@/lib/storefrontThemes";
 
 /**
  * Sección pública de productos digitales del doctor.
- * Muestra TODOS los productos activos (sin tope) con tarjeta (cover/ícono,
- * título, precio) y un botón "Disponible pronto" que NO cobra ni redirige
- * (aún no existe checkout — Fase 4).
- *
- * El botón está aislado vía `onProductAction` para que, cuando exista el
- * checkout, solo se cambie esa acción sin rediseñar la sección.
+ * Cada tarjeta es clickeable y lleva a la página de detalle
+ * /dr/:slug/producto/:productId. Se mantiene el pill "Disponible pronto"
+ * como indicador visual (sin cobro aún — Fase 5).
  */
-export default function StorefrontProducts({ items, theme, onProductAction }) {
+export default function StorefrontProducts({ items, theme, storefrontSlug }) {
   return (
     <section id="productos" className="scroll-mt-4">
       <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
@@ -24,7 +22,7 @@ export default function StorefrontProducts({ items, theme, onProductAction }) {
             key={p.id}
             product={p}
             theme={theme}
-            onProductAction={onProductAction}
+            storefrontSlug={storefrontSlug}
           />
         ))}
       </div>
@@ -32,23 +30,25 @@ export default function StorefrontProducts({ items, theme, onProductAction }) {
   );
 }
 
-function ProductCard({ product, theme, onProductAction }) {
+function ProductCard({ product, theme, storefrontSlug }) {
   const hasPrice = typeof product.price === "number" && product.price >= 0;
+  const cover =
+    Array.isArray(product.images) && product.images.length
+      ? product.images[0]
+      : product.cover_image || "";
+  const detailUrl = `/dr/${storefrontSlug}/producto/${product.id}`;
   return (
-    <div
-      className="rounded-2xl p-4 flex gap-3 items-center"
+    <Link
+      to={detailUrl}
+      className="block rounded-2xl p-4 flex gap-3 items-center active:scale-[0.99] transition-transform"
       style={{ background: theme.card, border: `1px solid ${theme.border}` }}
     >
       <div
         className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center"
         style={{ background: theme.deep }}
       >
-        {product.cover_image ? (
-          <img
-            src={product.cover_image}
-            alt={product.title}
-            className="w-full h-full object-cover"
-          />
+        {cover ? (
+          <img src={cover} alt={product.title} className="w-full h-full object-cover" />
         ) : (
           <BookOpen className="w-6 h-6 text-white/70" />
         )}
@@ -68,15 +68,18 @@ function ProductCard({ product, theme, onProductAction }) {
           </p>
         )}
       </div>
-      <button
-        type="button"
-        disabled
-        onClick={() => onProductAction && onProductAction(product)}
-        className="flex-shrink-0 text-xs font-semibold px-3 py-2 rounded-xl opacity-90 cursor-not-allowed"
-        style={{ background: CREAM, color: INK }}
-      >
-        Disponible pronto
-      </button>
-    </div>
+      <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <span
+          className="text-[10px] font-semibold px-2.5 py-1 rounded-full opacity-90"
+          style={{ background: CREAM, color: INK }}
+        >
+          Disponible pronto
+        </span>
+        <span className="flex items-center text-white/50 text-xs font-medium">
+          Ver más
+          <ChevronRight className="w-3.5 h-3.5" />
+        </span>
+      </div>
+    </Link>
   );
 }
