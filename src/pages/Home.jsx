@@ -573,6 +573,24 @@ export default function Home() {
           <div className="text-center mb-9">
             <p className="text-xs sm:text-sm font-semibold text-brand-blue uppercase tracking-widest mb-1.5">Explora por especialidad</p>
             <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy">Encuentra especialistas cerca de ti</h2>
+            {/* Countdown: como todavía son tarjetas placeholder ("Doctor 1",
+                "Doctor 2"...), este aviso deja claro que el directorio real
+                de especialistas llega pronto, en vez de que se vea como que
+                el sitio ya debería tener doctores y no los tiene. */}
+            {!countdown.done && (
+              <div className="mt-4 flex flex-col items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue text-[11px] font-bold tracking-wide uppercase px-3 py-1.5 rounded-full">
+                  <Sparkles className="w-3 h-3" />
+                  Muy pronto: especialistas reales el {launchDateLabel}
+                </span>
+                <div className="flex items-center gap-2">
+                  <CountdownBox value={countdown.days} label="Días" compact />
+                  <CountdownBox value={countdown.hours} label="Horas" compact />
+                  <CountdownBox value={countdown.minutes} label="Min" compact />
+                  <CountdownBox value={countdown.seconds} label="Seg" compact />
+                </div>
+              </div>
+            )}
           </div>
 
           {SPECIALTY_SLIDER_PLACEHOLDERS.map((spec) => (
