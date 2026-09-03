@@ -201,11 +201,7 @@ function PatientEmailsPanel() {
   }
 
   return (
-    <div className="max-w-6xl">
-      <div className="flex items-center gap-3 mb-1">
-        <Mail className="w-6 h-6 text-primary" />
-        <h1 className="font-heading font-bold text-2xl text-foreground">Correos de pacientes</h1>
-      </div>
+    <div>
       <p className="text-sm text-muted-foreground mb-6">
         Cada solicitud de cita que dejó un correo: nombre, edad, especialidad y ciudad que buscaba. El sexo lo llenas tú manualmente aquí — nadie más lo edita. Útil para campañas segmentadas o seguimiento por tu cuenta.
       </p>
@@ -346,6 +342,180 @@ function PatientEmailsPanel() {
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-muted-foreground text-xs whitespace-nowrap">{fmtDate(r.created_date)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filtered.length} pageSize={30} />
+    </div>
+  );
+}
+
+// Bitácora de todos los correos que envía la plataforma sola (avisos a
+// doctores, aviso de registro nuevo al admin, formulario de contacto), leídos
+// de la entidad EmailLog. Cada renglón se escribe desde src/api/emailLog.js
+// (frontend) o directo desde createDoctorProfile (backend) justo después de
+// cada intento real de envío, haya salido bien o mal.
+function SentEmailsPanel() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  useEffect(() => {
+    base44.entities.EmailLog.list("-created_date", 2000).then((data) => {
+      setLogs(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const typesPresent = useMemo(() => {
+    const set = new Set(logs.map((l) => l.type).filter(Boolean));
+    return Array.from(set);
+  }, [logs]);
+
+  const failedCount = useMemo(() => logs.filter((l) => l.status === "failed").length, [logs]);
+
+  const filtered = useMemo(() => {
+    let list = logs;
+    if (typeFilter) list = list.filter((l) => l.type === typeFilter);
+    if (statusFilter) list = list.filter((l) => l.status === statusFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (l) =>
+          (l.to || "").toLowerCase().includes(q) ||
+          (l.subject || "").toLowerCase().includes(q) ||
+          (l.specialist_name || "").toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [logs, typeFilter, statusFilter, search]);
+
+  const { pageItems: pagedLogs, page, setPage, totalPages } = usePaginatedList(filtered, {
+    pageSize: 30,
+    resetKey: `${typeFilter}|${statusFilter}|${search}`,
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p className="text-sm text-muted-foreground mb-6">
+        Cada correo que la plataforma manda sola: a doctores (bienvenida, aprobaciones, solicitudes de cita), a ti (aviso de registro nuevo) y desde el formulario de contacto. Fecha, hora, destinatario y el tema por el que se mandó.
+      </p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+        <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <Send className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-heading font-bold text-foreground">{logs.length}</p>
+            <p className="text-xs text-muted-foreground">Correos registrados</p>
+          </div>
+        </div>
+        <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-green-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-heading font-bold text-foreground">{logs.length - failedCount}</p>
+            <p className="text-xs text-muted-foreground">Enviados con éxito</p>
+          </div>
+        </div>
+        <div className="bg-card border border-border/50 rounded-2xl p-4 flex items-center gap-3 col-span-2 sm:col-span-1">
+          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+            <XCircle className="w-5 h-5 text-red-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-heading font-bold text-foreground">{failedCount}</p>
+            <p className="text-xs text-muted-foreground">Fallidos</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-card border border-border/50 rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-muted/50 rounded-xl px-3 py-2">
+          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por destinatario, tema o doctor..."
+            className="bg-transparent text-sm outline-none flex-1"
+          />
+        </div>
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="">Todos los tipos</option>
+          {typesPresent.map((t) => <option key={t} value={t}>{EMAIL_TYPE_LABELS[t] || t}</option>)}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="">Todos los estados</option>
+          <option value="sent">Enviado</option>
+          <option value="failed">Fallido</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
+        {filtered.length === 0 ? (
+          <div className="text-center py-20">
+            <Send className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">
+              {logs.length === 0 ? "Todavía no hay correos registrados" : "Sin resultados para los filtros aplicados"}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/30 border-b border-border/50">
+                <tr>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Fecha y hora</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Destinatario</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tema</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Tipo</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/30">
+                {pagedLogs.map((l) => (
+                  <tr key={l.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="px-5 py-3.5 text-muted-foreground text-xs whitespace-nowrap">{fmtDateTime(l.created_date)}</td>
+                    <td className="px-4 py-3.5 text-foreground whitespace-nowrap">{l.to}</td>
+                    <td className="px-4 py-3.5 text-foreground">{l.subject}</td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {EMAIL_TYPE_LABELS[l.type] || l.type}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {l.status === "failed" ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600"><XCircle className="w-3.5 h-3.5" /> Fallido</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600"><CheckCircle2 className="w-3.5 h-3.5" /> Enviado</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
