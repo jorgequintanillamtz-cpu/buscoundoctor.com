@@ -14,7 +14,9 @@ export default function SimilarSpecialists({ specialistId, specialty, zone }) {
     let active = true;
     (async () => {
       try {
-        const all = await base44.entities.Specialist.filter({ active: true });
+        // publication_status: "published" evita perfiles en borrador/revisión
+        // (incluyendo perfiles de ejemplo internos) en "Especialistas similares".
+        const all = await base44.entities.Specialist.filter({ active: true, publication_status: "published" });
         if (!active) return;
         // Bug real: antes el filtro era "misma especialidad O misma zona", y
         // como casi todos los doctores están en la misma zona (Monterrey),
