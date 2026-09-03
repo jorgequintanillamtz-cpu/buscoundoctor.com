@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { logEmail } from "@/api/emailLog";
 import {
   SITE_URL,
   renderEmail,
@@ -47,14 +48,20 @@ async function resolveDoctorEmail(doc) {
 // Devuelve true/false para que quien llama (ej. un botón "reenviar aviso" en
 // el admin) pueda avisar honestamente si en verdad se mandó el correo, en
 // vez de asumir éxito solo porque la llamada no lanzó una excepción.
-async function sendNotification(doc, subject, html) {
+//
+// "type" identifica la razón del envío (bienvenida, aprobación, etc.) para
+// que la bitácora EmailLog / vista "Correos enviados" del admin lo pueda
+// mostrar y filtrar. Se registra tanto si el correo sale bien como si falla.
+async function sendNotification(doc, subject, html, type) {
   const email = await resolveDoctorEmail(doc);
   if (!email) return false;
   try {
     await base44.integrations.Core.SendEmail({ to: email, subject, body: html, from_name: SITE_NAME });
+    logEmail({ to: email, subject, type, specialistId: doc?.id, specialistName: doc?.full_name, status: "sent" });
     return true;
   } catch (e) {
     console.error("No se pudo enviar el aviso por correo al doctor:", e);
+    logEmail({ to: email, subject, type, specialistId: doc?.id, specialistName: doc?.full_name, status: "failed", error: e?.message || e });
     return false;
   }
 }
