@@ -199,6 +199,11 @@ export default function Home() {
   // Un ref por especialidad para los sliders de "Explora por especialidad"
   // (cada uno se desplaza de forma independiente con sus propias flechitas).
   const specialtySliderRefs = useRef({});
+  // Countdown de lanzamiento (mismo que /para-medicos y las páginas de
+  // especialidad/enfermedad sin doctores todavía) para la sección de
+  // "Explora por especialidad", que hoy solo tiene tarjetas placeholder.
+  const countdown = useCountdown(LAUNCH_DATE);
+  const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
   const submitHeroSearch = () => {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
