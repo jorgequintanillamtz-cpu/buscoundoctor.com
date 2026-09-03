@@ -67,7 +67,7 @@ async function notifyAdminNewRegistration(base44, specialist) {
   `;
 
   try {
-    await base44.asServiceRole.integrations.Core.SendEmail({ to: ADMIN_EMAIL, subject, body: html, from_name: SITE_NAME });
+    await base44.integrations.Core.SendEmail({ to: ADMIN_EMAIL, subject, body: html, from_name: SITE_NAME });
     await base44.asServiceRole.entities.EmailLog.create({ to: ADMIN_EMAIL, subject, type: 'nuevo_registro_doctor_admin', specialist_id: specialist.id, specialist_name: specialist.full_name, status: 'sent' });
   } catch (e) {
     try {
