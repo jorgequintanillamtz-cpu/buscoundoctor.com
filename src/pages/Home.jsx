@@ -672,6 +672,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Por qué BuscoUnDoctor: es gratis, dos columnas — pacientes a la
           izquierda, registro de doctor a la derecha. Solo la imagen, sin
