@@ -53,15 +53,18 @@ export default async function(req: Request): Promise<Response> {
             merchant: {
               capabilities: {
                 card_payments: { requested: true },
-                transfers: { requested: true },
               },
             },
           },
           defaults: {
             currency: "mxn",
             responsibilities: {
-              fees_collector: "platform",
-              losses_collector: "platform",
+              // "stripe" = Stripe cobra las comisiones de pago directamente al
+              // doctor (cuenta conectada), no a la plataforma. El doctor paga
+              // las fees de Stripe con sus ventas.
+              fees_collector: "stripe",
+              // "stripe" = Stripe responde por los saldos negativos del doctor.
+              losses_collector: "stripe",
             },
           },
         }),

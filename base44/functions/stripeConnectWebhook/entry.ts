@@ -104,14 +104,17 @@ async function updateStatusFromV2Account(base44: any, acct: any): Promise<void> 
   if (!records || records.length === 0) return;
 
   const rec = records[0];
+  // En v2, el merchant config expone card_payments y stripe_balance.payouts
+  // (NO transfers — ese era v1). El onboarding está completo cuando ambos
+  // están activos.
   const caps = acct.configuration?.merchant?.capabilities || {};
-  const transfersStatus = caps.transfers?.status;
   const cardPaymentsStatus = caps.card_payments?.status;
+  const payoutsStatus = caps.stripe_balance?.payouts?.status;
 
   let nextStatus = "pending";
-  if (transfersStatus === "active" && cardPaymentsStatus === "active") {
+  if (cardPaymentsStatus === "active" && payoutsStatus === "active") {
     nextStatus = "complete";
-  } else if (transfersStatus === "disabled" && cardPaymentsStatus === "disabled") {
+  } else if (cardPaymentsStatus === "disabled" && payoutsStatus === "disabled") {
     nextStatus = "rejected";
   }
 
