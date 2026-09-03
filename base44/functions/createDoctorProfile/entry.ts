@@ -140,13 +140,16 @@ Deno.serve(async (req) => {
     if (body.draft_id) {
       try {
         await base44.asServiceRole.entities.Specialist.update(body.draft_id, payload);
-        return Response.json({ specialist: { id: body.draft_id, ...payload } });
+        const full = await base44.asServiceRole.entities.Specialist.get(body.draft_id).catch(() => ({ id: body.draft_id, ...payload }));
+        notifyAdminNewRegistration(base44, full).catch(() => {});
+        return Response.json({ specialist: full });
       } catch {
         // El borrador ya no existe o no es válido: sigue al flujo normal de creación.
       }
     }
 
     const created = await base44.asServiceRole.entities.Specialist.create(payload);
+    notifyAdminNewRegistration(base44, created).catch(() => {});
 
     return Response.json({ specialist: created });
   } catch (error) {
