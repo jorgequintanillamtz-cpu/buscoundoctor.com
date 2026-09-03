@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { getStripe, stripeV2, STRIPE_WEBHOOK_SECRET } from "../../shared/stripeClient.ts";
+import { fulfillSale } from "../../shared/productSaleFulfill.ts";
 
 /**
  * Webhook público de Stripe Connect.
@@ -57,6 +58,14 @@ export default async function(req: Request): Promise<Response> {
           `/v2/core/accounts/${acctId}?include=configuration.merchant,requirements`
         );
         await updateStatusFromV2Account(base44, acct);
+      }
+    } else if (type === "checkout.session.completed") {
+      // Fase 5: pago de un producto digital confirmado. Marcar la venta como
+      // pagada, generar link de descarga temporal y enviar email (best-effort).
+      const session = event.data?.object;
+      const saleId = session?.metadata?.sale_id;
+      if (saleId) {
+        await fulfillSale(base44, saleId);
       }
     }
 

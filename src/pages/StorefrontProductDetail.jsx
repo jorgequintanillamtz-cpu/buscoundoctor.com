@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, BookOpen, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
 import { getStorefrontTheme, CREAM, INK } from "@/lib/storefrontThemes";
+import ProductPurchaseBlock from "@/components/storefront/ProductPurchaseBlock";
 
 /**
  * Página de detalle pública de un producto digital del storefront.
@@ -192,26 +193,8 @@ export default function StorefrontProductDetail() {
           )}
         </div>
 
-        {/* 3. Bloque de pago placeholder (Fase 5 insertará checkout aquí) */}
-        <div
-          className="rounded-2xl p-5 text-center"
-          style={{ background: theme.card, border: `1px solid ${theme.border}` }}
-        >
-          <div
-            className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-            style={{ background: theme.deep }}
-          >
-            <Lock className="w-5 h-5 text-white/80" />
-          </div>
-          <p className="font-heading font-semibold text-white text-sm mb-1">
-            Disponible pronto
-          </p>
-          <p className="text-white/60 text-xs">
-            Próximamente podrás comprar y descargar esta guía aquí mismo.
-          </p>
-          {/* Espacio reservado — la Fase 5 insertará el componente de pago aquí */}
-          <div className="mt-4 h-11 rounded-xl border-2 border-dashed border-white/15" />
-        </div>
+        {/* 3. Checkout (Fase 5) */}
+        <ProductPurchaseBlock product={product} slug={slug} theme={theme} />
 
         {/* 4. Botón volver al storefront */}
         <Link
