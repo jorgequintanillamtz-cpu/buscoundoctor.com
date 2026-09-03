@@ -45,6 +45,12 @@ export default async function(req: Request): Promise<Response> {
         body: JSON.stringify({
           contact_email: user.email || specialist.email || undefined,
           display_name: specialist.full_name || undefined,
+          // "none" = el doctor no tiene acceso al dashboard de Stripe; solo
+          // pasa por el flujo de onboarding (Account Link). Equivalente al
+          // comportamiento Express de v1, pero sin dashboard (usar "express"
+          // en v2 exigiría fees/losses_collector = "application", lo que
+          // haría que la plataforma pague las fees, no el doctor).
+          dashboard: "none",
           identity: {
             country: "mx",
             entity_type: "individual",
