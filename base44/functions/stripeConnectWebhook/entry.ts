@@ -1,15 +1,24 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { getStripe, STRIPE_WEBHOOK_SECRET } from "../../shared/stripeClient.ts";
+import { getStripe, stripeV2, STRIPE_WEBHOOK_SECRET } from "../../shared/stripeClient.ts";
 
 /**
  * Webhook público de Stripe Connect.
  * Endpoint: /functions/stripeConnectWebhook
- * Evento suscrito: account.updated
+ *
+ * Eventos que maneja:
+ *  - v2: "v2.core.account[configuration.merchant].capability_status_updated"
+ *        (evento thin v2 — se recupera la cuenta vía API para leer el status)
+ *  - v2: "v2.core.account.updated" (fallback general v2)
+ *  - v1: "account.updated" (snapshot v1 — las cuentas v2 también lo emiten
+ *        al cambiar la configuración merchant; se mantiene como fallback)
  *
  * Sin auth de usuario — se valida la firma del webhook con STRIPE_WEBHOOK_SECRET.
  * Las actualizaciones de la entidad se hacen con asServiceRole (bypass de RLS)
  * porque el webhook no tiene un usuario asociado.
  */
+const V2_MERCHANT_CAP = "v2.core.account[configuration.merchant].capability_status_updated";
+const V2_ACCOUNT_UPDATED = "v2.core.account.updated";
+
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -21,6 +30,7 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: "Falta firma o webhook secret" }, { status: 400 });
     }
 
+    // La verificación de firma es la misma para eventos v1 y v2 (HMAC del payload).
     const stripe = getStripe();
     let event;
     try {
@@ -29,29 +39,24 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: "Firma inválida: " + err.message }, { status: 400 });
     }
 
-    if (event.type === "account.updated") {
-      const acct = event.data.object;
-      const transfersActive = acct.capabilities?.transfers === "active";
-      const cardPaymentsActive = acct.capabilities?.card_payments === "active";
-      const detailsSubmitted = acct.details_submitted === true;
+    const type = event.type;
 
-      // Buscar el registro local por stripe_account_id (asServiceRole: bypass RLS)
-      const records = await base44.asServiceRole.entities.DoctorStripeAccount.filter({
-        stripe_account_id: acct.id,
-      });
-
-      if (records && records.length > 0) {
-        const rec = records[0];
-        let nextStatus = "pending";
-        if (detailsSubmitted && transfersActive && cardPaymentsActive) {
-          nextStatus = "complete";
-        } else if (acct.charges_enabled === false && detailsSubmitted === false) {
-          // Stripe puede reportar rechazo si la cuenta no cumple requisitos
-          nextStatus = "rejected";
-        }
-        await base44.asServiceRole.entities.DoctorStripeAccount.update(rec.id, {
-          onboarding_status: nextStatus,
-        });
+    if (type === "account.updated") {
+      // Evento v1 (snapshot). Las cuentas v2 también lo emiten al actualizar
+      // la configuración merchant, así que sirve como fallback universal.
+      const acct = event.data?.object;
+      if (acct?.id) {
+        await updateStatusFromV1Account(base44, acct);
+      }
+    } else if (type === V2_MERCHANT_CAP || type === V2_ACCOUNT_UPDATED) {
+      // Evento v2 (thin): no trae el snapshot de la cuenta. Hay que recuperarla
+      // vía API para leer el status actual de las capabilities merchant.
+      const acctId = event.related_object?.id || event.data?.object?.id;
+      if (acctId) {
+        const acct = await stripeV2(
+          `/v2/core/accounts/${acctId}?include=configuration.merchant,requirements`
+        );
+        await updateStatusFromV2Account(base44, acct);
       }
     }
 
@@ -59,4 +64,58 @@ export default async function(req: Request): Promise<Response> {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
+}
+
+/**
+ * Procesa un Account v1 (snapshot completo en data.object).
+ * Usa capabilities.transfers / card_payments y details_submitted.
+ */
+async function updateStatusFromV1Account(base44: any, acct: any): Promise<void> {
+  const records = await base44.asServiceRole.entities.DoctorStripeAccount.filter({
+    stripe_account_id: acct.id,
+  });
+  if (!records || records.length === 0) return;
+
+  const rec = records[0];
+  const transfersActive = acct.capabilities?.transfers === "active";
+  const cardPaymentsActive = acct.capabilities?.card_payments === "active";
+  const detailsSubmitted = acct.details_submitted === true;
+
+  let nextStatus = "pending";
+  if (detailsSubmitted && transfersActive && cardPaymentsActive) {
+    nextStatus = "complete";
+  } else if (acct.charges_enabled === false && detailsSubmitted === false) {
+    nextStatus = "rejected";
+  }
+
+  await base44.asServiceRole.entities.DoctorStripeAccount.update(rec.id, {
+    onboarding_status: nextStatus,
+  });
+}
+
+/**
+ * Procesa un Account v2 recuperado vía /v2/core/accounts.
+ * Lee configuration.merchant.capabilities.{transfers,card_payments}.status.
+ */
+async function updateStatusFromV2Account(base44: any, acct: any): Promise<void> {
+  const records = await base44.asServiceRole.entities.DoctorStripeAccount.filter({
+    stripe_account_id: acct.id,
+  });
+  if (!records || records.length === 0) return;
+
+  const rec = records[0];
+  const caps = acct.configuration?.merchant?.capabilities || {};
+  const transfersStatus = caps.transfers?.status;
+  const cardPaymentsStatus = caps.card_payments?.status;
+
+  let nextStatus = "pending";
+  if (transfersStatus === "active" && cardPaymentsStatus === "active") {
+    nextStatus = "complete";
+  } else if (transfersStatus === "disabled" && cardPaymentsStatus === "disabled") {
+    nextStatus = "rejected";
+  }
+
+  await base44.asServiceRole.entities.DoctorStripeAccount.update(rec.id, {
+    onboarding_status: nextStatus,
+  });
 }

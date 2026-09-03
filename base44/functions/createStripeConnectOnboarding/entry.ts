@@ -1,19 +1,23 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
-import { getStripe } from "../../shared/stripeClient.ts";
+import { stripeV2 } from "../../shared/stripeClient.ts";
 
 // Dominio custom del app — se usa para las URLs de regreso de Stripe.
 const APP_BASE = "https://www.buscoundoctor.com";
 
 /**
- * Crea (o reusa) la cuenta Stripe Connect Express del doctor y genera un
- * Account Link de onboarding. El doctor es redirigido al `url` devuelto.
+ * Crea (o reusa) la cuenta Stripe Connect del doctor usando la API v2
+ * (/v2/core/accounts con configuración merchant) y genera un Account
+ * Link v2 de onboarding. El doctor es redirigido al `url` devuelto.
+ *
+ * Nota: la API v1 (stripe.accounts.create) ya no se permite en cuentas
+ * nuevas de Stripe — exige /v2/core/accounts.
  *
  * Flujo:
  *  1. Auth: el doctor debe estar logueado.
  *  2. Resolver su Specialist por owner_user_id.
  *  3. Buscar un DoctorStripeAccount existente (RLS: created_by_id == user.id).
- *  4. Si no existe, crear la cuenta Express en Stripe + el registro local.
- *  5. Crear un Account Link (account_onboarding) y devolver la URL.
+ *  4. Si no existe, crear la cuenta v2 (merchant) en Stripe + el registro local.
+ *  5. Crear un Account Link v2 (account_onboarding, config merchant) y devolver la URL.
  */
 export default async function(req: Request): Promise<Response> {
   try {
@@ -28,43 +32,63 @@ export default async function(req: Request): Promise<Response> {
     const specialist = own[0];
     const doctorId = specialist.id;
 
-    const stripe = getStripe();
-
     // Buscar cuenta existente (user-scoped: RLS read = created_by_id == user.id)
     let account;
     const existing = await base44.entities.DoctorStripeAccount.filter({ doctor_id: doctorId });
     if (existing && existing.length > 0) {
       account = existing[0];
     } else {
-      // Crear cuenta Express en Stripe
-      const stripeAccount = await stripe.accounts.create({
-        type: "express",
-        country: "MX",
-        email: user.email || specialist.email || undefined,
-        capabilities: {
-          transfers: { requested: true },
-          card_payments: { requested: true },
-        },
-        metadata: {
-          doctor_id: doctorId,
-          user_id: user.id,
-          platform: "buscoundoctor",
-        },
+      // Crear cuenta v2 con configuración merchant (card_payments + transfers).
+      // El onboarding de Stripe completa los datos bancarios y legales.
+      const created = await stripeV2("/v2/core/accounts", {
+        method: "POST",
+        body: JSON.stringify({
+          contact_email: user.email || specialist.email || undefined,
+          display_name: specialist.full_name || undefined,
+          identity: {
+            country: "mx",
+            entity_type: "individual",
+          },
+          configuration: {
+            merchant: {
+              capabilities: {
+                card_payments: { requested: true },
+                transfers: { requested: true },
+              },
+            },
+          },
+          defaults: {
+            currency: "mxn",
+            responsibilities: {
+              fees_collector: "platform",
+              losses_collector: "platform",
+            },
+          },
+        }),
       });
+
       account = await base44.entities.DoctorStripeAccount.create({
         doctor_id: doctorId,
-        stripe_account_id: stripeAccount.id,
+        stripe_account_id: created.id,
         onboarding_status: "pending",
         connected_at: new Date().toISOString(),
       });
     }
 
-    // Generar Account Link de onboarding
-    const accountLink = await stripe.accountLinks.create({
-      account: account.stripe_account_id,
-      refresh_url: `${APP_BASE}/panel-medico/pagos?status=refresh`,
-      return_url: `${APP_BASE}/panel-medico/pagos?status=return`,
-      type: "account_onboarding",
+    // Generar Account Link v2 de onboarding (configuración merchant).
+    const accountLink = await stripeV2("/v2/core/account_links", {
+      method: "POST",
+      body: JSON.stringify({
+        account: account.stripe_account_id,
+        use_case: {
+          type: "account_onboarding",
+          account_onboarding: {
+            configurations: ["merchant"],
+            return_url: `${APP_BASE}/panel-medico/pagos?status=return`,
+            refresh_url: `${APP_BASE}/panel-medico/pagos?status=refresh`,
+          },
+        },
+      }),
     });
 
     return Response.json({
