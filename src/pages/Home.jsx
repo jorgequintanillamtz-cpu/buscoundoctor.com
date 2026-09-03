@@ -417,6 +417,28 @@ export default function Home() {
             </Link>
           </div>
 
+          {/* Countdown de lanzamiento en el hero: refuerza que la página
+              está a punto de arrancar de lleno (el directorio real de
+              especialistas llega el 15 de octubre). Píldora en blanco
+              translucido (mismo estilo que las pills de especialidades de
+              arriba) para que se lea bien sobre el fondo navy, en vez de la
+              versión bg-brand-bluePale que se usa en secciones con fondo
+              claro. */}
+          {!countdown.done && (
+            <div className="flex flex-col items-center gap-3 mt-8 sm:mt-7">
+              <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 text-white text-[11px] font-bold tracking-wide uppercase px-3 py-1.5 rounded-full">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                Lanzamos el {launchDateLabel}
+              </span>
+              <div className="flex items-center gap-2">
+                <CountdownBox value={countdown.days} label="Días" compact />
+                <CountdownBox value={countdown.hours} label="Horas" compact />
+                <CountdownBox value={countdown.minutes} label="Min" compact />
+                <CountdownBox value={countdown.seconds} label="Seg" compact />
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Letras chicas: en móvil quedan en flujo normal debajo de las
