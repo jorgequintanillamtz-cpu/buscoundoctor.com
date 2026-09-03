@@ -1,0 +1,58 @@
+{
+  "name": "EmailLog",
+  "type": "object",
+  "description": "Bit\u00e1cora de cada correo autom\u00e1tico que env\u00eda la plataforma (avisos a doctores, aviso de registro nuevo al admin, formulario de contacto). Se escribe justo despu\u00e9s de cada intento de env\u00edo, haya tenido \u00e9xito o no.",
+  "properties": {
+    "to": {
+      "type": "string",
+      "title": "Destinatario"
+    },
+    "subject": {
+      "type": "string",
+      "title": "Asunto del correo"
+    },
+    "type": {
+      "type": "string",
+      "title": "Tipo de correo",
+      "enum": [
+        "bienvenida_doctor",
+        "perfil_aprobado",
+        "perfil_rechazado",
+        "documento_aprobado",
+        "documento_rechazado",
+        "articulo_aprobado",
+        "articulo_rechazado",
+        "nueva_solicitud_cita",
+        "contacto_publico",
+        "nuevo_registro_doctor_admin",
+        "prueba"
+      ]
+    },
+    "specialist_id": {
+      "type": "string",
+      "title": "Doctor relacionado (ID)"
+    },
+    "specialist_name": {
+      "type": "string",
+      "title": "Nombre del doctor relacionado"
+    },
+    "status": {
+      "type": "string",
+      "title": "Estado del env\u00edo",
+      "enum": [
+        "sent",
+        "failed"
+      ],
+      "default": "sent"
+    },
+    "error_message": {
+      "type": "string",
+      "title": "Mensaje de error (si fall\u00f3)"
+    }
+  },
+  "required": [
+    "to",
+    "subject",
+    "type"
+  ]
+}
