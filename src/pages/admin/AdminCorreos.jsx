@@ -66,6 +66,39 @@ function downloadCsv(filename, rows) {
 // para armar campañas dirigidas junto con la edad, la ciudad y la
 // especialidad que cada quien buscaba.
 export default function AdminCorreos() {
+  const [view, setView] = useState("pacientes"); // pacientes | enviados
+
+  return (
+    <div className="max-w-6xl">
+      <div className="flex items-center gap-3 mb-1">
+        <Mail className="w-6 h-6 text-primary" />
+        <h1 className="font-heading font-bold text-2xl text-foreground">Correos</h1>
+      </div>
+      <div className="flex gap-2 mb-6">
+        <button
+          type="button"
+          onClick={() => setView("pacientes")}
+          className={`text-sm font-medium rounded-xl px-3.5 py-1.5 transition-colors ${view === "pacientes" ? "bg-brand-navy text-white" : "bg-muted/60 text-muted-foreground hover:bg-muted"}`}
+        >
+          Correos de pacientes
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("enviados")}
+          className={`text-sm font-medium rounded-xl px-3.5 py-1.5 transition-colors ${view === "enviados" ? "bg-brand-navy text-white" : "bg-muted/60 text-muted-foreground hover:bg-muted"}`}
+        >
+          Correos enviados
+        </button>
+      </div>
+      {view === "pacientes" ? <PatientEmailsPanel /> : <SentEmailsPanel />}
+    </div>
+  );
+}
+
+// Base de datos de pacientes para publicidad segmentada / seguimiento (vista
+// original de esta página, ahora como un tab entre otros). Una fila por cada
+// solicitud de cita que sí trajo correo.
+function PatientEmailsPanel() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
