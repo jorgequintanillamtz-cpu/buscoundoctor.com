@@ -148,7 +148,7 @@ export function notifyWelcome(doc) {
     ctaLabel: "Completar mi perfil",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Bienvenido a ${SITE_NAME} — completa tu perfil`, html);
+  return sendNotification(doc, `Bienvenido a ${SITE_NAME} — completa tu perfil`, html, "bienvenida_doctor");
 }
 
 export function notifyProfileApproved(doc) {
@@ -170,7 +170,7 @@ export function notifyProfileApproved(doc) {
     ctaLabel: "Ir a mi panel",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Tu perfil en ${SITE_NAME} ya está publicado`, html);
+  return sendNotification(doc, `Tu perfil en ${SITE_NAME} ya está publicado`, html, "perfil_aprobado");
 }
 
 export function notifyProfileRejected(doc, reason) {
@@ -188,7 +188,7 @@ export function notifyProfileRejected(doc, reason) {
     ctaLabel: "Corregir mi perfil",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Tu perfil en ${SITE_NAME} necesita algunos cambios`, html);
+  return sendNotification(doc, `Tu perfil en ${SITE_NAME} necesita algunos cambios`, html, "perfil_rechazado");
 }
 
 export function notifyDocumentApproved(doc, docTypeLabel) {
@@ -205,7 +205,7 @@ export function notifyDocumentApproved(doc, docTypeLabel) {
     ctaLabel: "Ver mis documentos",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Tu documento fue aprobado en ${SITE_NAME}`, html);
+  return sendNotification(doc, `Tu documento fue aprobado en ${SITE_NAME}`, html, "documento_aprobado");
 }
 
 export function notifyDocumentRejected(doc, docTypeLabel, reason) {
@@ -224,7 +224,7 @@ export function notifyDocumentRejected(doc, docTypeLabel, reason) {
     ctaLabel: "Subir de nuevo",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Tu documento necesita revisarse de nuevo — ${SITE_NAME}`, html);
+  return sendNotification(doc, `Tu documento necesita revisarse de nuevo — ${SITE_NAME}`, html, "documento_rechazado");
 }
 
 export function notifyBlogApproved(doc, postTitle, postSlug) {
@@ -245,7 +245,7 @@ export function notifyBlogApproved(doc, postTitle, postSlug) {
     ctaLabel: "Ir a mi panel",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Tu artículo ya está publicado en el blog de ${SITE_NAME}`, html);
+  return sendNotification(doc, `Tu artículo ya está publicado en el blog de ${SITE_NAME}`, html, "articulo_aprobado");
 }
 
 export function notifyBlogRejected(doc, postTitle, reason) {
@@ -264,7 +264,7 @@ export function notifyBlogRejected(doc, postTitle, reason) {
     ctaLabel: "Corregir artículo",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Tu artículo necesita cambios — Blog de ${SITE_NAME}`, html);
+  return sendNotification(doc, `Tu artículo necesita cambios — Blog de ${SITE_NAME}`, html, "articulo_rechazado");
 }
 
 export function notifyNewAppointmentRequest(doc, request) {
@@ -292,7 +292,7 @@ export function notifyNewAppointmentRequest(doc, request) {
     ctaLabel: "Ver mis solicitudes",
     ctaUrl: PANEL_URL,
   });
-  return sendNotification(doc, `Nueva solicitud de cita — ${SITE_NAME}`, html);
+  return sendNotification(doc, `Nueva solicitud de cita — ${SITE_NAME}`, html, "nueva_solicitud_cita");
 }
 
 // El doctor que envía un artículo desde su panel no siempre tiene su email
