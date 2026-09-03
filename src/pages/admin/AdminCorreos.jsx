@@ -2,10 +2,31 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import {
-  Mail, Search, Download, Copy, Stethoscope, Users, MapPin, Heart,
+  Mail, Search, Download, Copy, Stethoscope, Users, MapPin, Heart, Send, CheckCircle2, XCircle,
 } from "lucide-react";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+
+// Etiquetas en español para cada "type" de EmailLog — se usan tanto en la
+// tabla de "Correos enviados" como en su filtro por tipo.
+const EMAIL_TYPE_LABELS = {
+  bienvenida_doctor: "Bienvenida a doctor",
+  perfil_aprobado: "Perfil aprobado",
+  perfil_rechazado: "Perfil rechazado",
+  documento_aprobado: "Documento aprobado",
+  documento_rechazado: "Documento rechazado",
+  articulo_aprobado: "Artículo aprobado",
+  articulo_rechazado: "Artículo rechazado",
+  nueva_solicitud_cita: "Nueva solicitud de cita",
+  contacto_publico: "Formulario de contacto",
+  nuevo_registro_doctor_admin: "Aviso: nuevo registro de doctor",
+  prueba: "Prueba",
+};
+
+function fmtDateTime(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("es-MX", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
 
 function fmtDate(d) {
   if (!d) return "—";
