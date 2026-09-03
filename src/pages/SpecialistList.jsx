@@ -43,7 +43,9 @@ export default function SpecialistList() {
   useEffect(() => {
     async function load() {
       const [specs, specList, zoneList, insList] = await Promise.all([
-        base44.entities.Specialist.filter({ active: true }),
+        // publication_status: "published" evita que perfiles en borrador/revisión
+        // (incluyendo perfiles de ejemplo internos) aparezcan en el directorio público.
+        base44.entities.Specialist.filter({ active: true, publication_status: "published" }),
         base44.entities.Specialty.filter({ active: true }),
         base44.entities.Zone.filter({ active: true }),
         base44.entities.Insurer.filter({ is_active: true }),
