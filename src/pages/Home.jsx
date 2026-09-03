@@ -61,6 +61,13 @@ function HeroPeopleIllustration({ className = "" }) {
 // Reemplazar por datos reales de Specialist en cuanto haya doctores.
 const SPECIALTY_SLIDER_PLACEHOLDERS = ["Dentista", "Dermatólogo"];
 
+// Apagador de la sección "Explora por especialidad" completa: Jorge pidió
+// ocultarla porque las tarjetas placeholder ("Doctor 1", sin foto ni datos
+// reales) se ven como perfiles vacíos/rotos. Se deja el bloque completo en
+// el código (incluido el countdown) para volver a prenderlo con solo poner
+// esta constante en true en cuanto haya doctores reales que mostrar.
+const SHOW_SPECIALTY_PLACEHOLDER_SECTION = false;
+
 // Datos de relleno (ciudad, años de experiencia, precio de primera consulta)
 // para las tarjetas placeholder de arriba — se repiten en ciclo para las 10
 // tarjetas de cada slider, solo para dar una idea realista del formato.
