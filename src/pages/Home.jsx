@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, UserPlus } from "lucide-react";
+import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, ChevronLeft, ChevronRight, CheckCircle, UserPlus, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import BlogCard from "../components/BlogCard";
 import { resolveCitySlug } from "@/lib/citySlug";
 import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
+import CountdownBox from "@/components/CountdownBox";
+import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 
 // Ilustración decorativa de fondo del hero: una fila de siluetas de personas
 // (pacientes y médicos, estos últimos marcados con un pequeño gafete/estetoscopio)
