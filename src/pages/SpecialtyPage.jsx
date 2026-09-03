@@ -48,7 +48,9 @@ export default function SpecialtyPage() {
     (async () => {
       const [specList, allSpecs, zoneList] = await Promise.all([
         base44.entities.Specialty.filter({ profession_slug: professionSlug }),
-        base44.entities.Specialist.filter({ active: true }),
+        // publication_status: "published" evita perfiles en borrador/revisión
+        // (incluyendo perfiles de ejemplo internos) en el listado público.
+        base44.entities.Specialist.filter({ active: true, publication_status: "published" }),
         base44.entities.Zone.filter({ active: true }),
       ]);
       if (!active) return;
