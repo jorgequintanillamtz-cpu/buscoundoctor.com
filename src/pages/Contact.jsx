@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Mail, MapPin, Clock, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
+import { logEmail } from "@/api/emailLog";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
