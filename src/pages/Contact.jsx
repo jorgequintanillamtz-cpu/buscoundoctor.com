@@ -87,12 +87,20 @@ export default function Contact() {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
     setSending(true);
-    await base44.integrations.Core.SendEmail({
-      to: "contacto@buscoundoctor.com",
-      subject: `Mensaje de contacto de ${form.name}`,
-      body: `Nombre: ${form.name}\nEmail: ${form.email}\n\nMensaje:\n${form.message}`,
-    });
-    setSent(true);
+    const to = "contacto@buscoundoctor.com";
+    const subject = `Mensaje de contacto de ${form.name}`;
+    try {
+      await base44.integrations.Core.SendEmail({
+        to,
+        subject,
+        body: `Nombre: ${form.name}\nEmail: ${form.email}\n\nMensaje:\n${form.message}`,
+      });
+      logEmail({ to, subject, type: "contacto_publico", status: "sent" });
+      setSent(true);
+    } catch (err) {
+      logEmail({ to, subject, type: "contacto_publico", status: "failed", error: err?.message || err });
+      toast.error("No se pudo enviar tu mensaje. Intenta de nuevo.");
+    }
     setSending(false);
   };
 
