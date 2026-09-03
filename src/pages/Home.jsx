@@ -575,6 +575,7 @@ export default function Home() {
           ciudad/años/precio de relleno y sin link a ningún perfil.
           Reemplazar por datos reales de Specialist filtrados por
           especialidad en cuanto haya doctores dados de alta. */}
+      {SHOW_SPECIALTY_PLACEHOLDER_SECTION && (
       <section className="bg-white pt-10 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-9">
