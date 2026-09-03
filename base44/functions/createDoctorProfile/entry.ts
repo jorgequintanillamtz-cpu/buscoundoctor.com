@@ -141,7 +141,9 @@ Deno.serve(async (req) => {
       try {
         await base44.asServiceRole.entities.Specialist.update(body.draft_id, payload);
         const full = await base44.asServiceRole.entities.Specialist.get(body.draft_id).catch(() => ({ id: body.draft_id, ...payload }));
-        notifyAdminNewRegistration(base44, full).catch(() => {});
+        // Se espera a que termine (best effort, nunca lanza) para que el aviso
+        // no se pierda si el runtime corta las promesas pendientes al responder.
+        await notifyAdminNewRegistration(base44, full);
         return Response.json({ specialist: full });
       } catch {
         // El borrador ya no existe o no es válido: sigue al flujo normal de creación.
@@ -149,7 +151,7 @@ Deno.serve(async (req) => {
     }
 
     const created = await base44.asServiceRole.entities.Specialist.create(payload);
-    notifyAdminNewRegistration(base44, created).catch(() => {});
+    await notifyAdminNewRegistration(base44, created);
 
     return Response.json({ specialist: created });
   } catch (error) {
