@@ -23,14 +23,17 @@ const EMAIL_TYPE_LABELS = {
   prueba: "Prueba",
 };
 
+// timeZone fijo a Ciudad de México: sin esto, el navegador de quien mire la
+// página usa su propia zona horaria local, y la hora mostrada cambiaría
+// según quién la esté viendo en vez de ser siempre la hora de México.
 function fmtDateTime(d) {
   if (!d) return "—";
-  return new Date(d).toLocaleString("es-MX", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(d).toLocaleString("es-MX", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" });
 }
 
 function fmtDate(d) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Mexico_City" });
 }
 
 const SEXO_LABELS = { masculino: "Masculino", femenino: "Femenino" };
