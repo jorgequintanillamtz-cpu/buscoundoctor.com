@@ -84,7 +84,9 @@ export default function BlogPostPage() {
         canonicalEl.setAttribute('href', `https://buscoundoctor.com/blog/${p.slug}`);
         
         if (p.featured_specialists?.length > 0) {
-          const all = await base44.entities.Specialist.filter({ active: true });
+          // publication_status: "published" evita perfiles en borrador/revisión
+          // (incluyendo perfiles de ejemplo internos) en las recomendaciones del blog.
+          const all = await base44.entities.Specialist.filter({ active: true, publication_status: "published" });
           setSpecialists(all.filter(s => p.featured_specialists.includes(s.slug)));
         }
 
