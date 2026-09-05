@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu, Globe, Package, CreditCard } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu, Globe, Package, CreditCard, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -278,6 +278,10 @@ export default function DoctorPanel() {
             <CreditCard className="w-4 h-4 flex-shrink-0" />
             Configuración de pagos
           </Link>
+          <Link to="/panel-medico/resumen" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+            <ClipboardList className="w-4 h-4 flex-shrink-0" />
+            Resumen de consulta
+          </Link>
         </div>
 
         <div className="p-3 border-t border-white/10">
@@ -311,6 +315,10 @@ export default function DoctorPanel() {
             <Link to="/panel-medico/pagos" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
               <CreditCard className="w-3.5 h-3.5" />
               Pagos
+            </Link>
+            <Link to="/panel-medico/resumen" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
+              <ClipboardList className="w-3.5 h-3.5" />
+              Resumen
             </Link>
             {SECTIONS.map((s) => {
               const locked = s.requiresSaved && !isEditing;

@@ -1,0 +1,44 @@
+{
+  "name": "ConsultSummary",
+  "type": "object",
+  "properties": {
+    "doctor_id": {
+      "type": "string",
+      "title": "Doctor (ref Specialist)",
+      "description": "ID del registro de Specialist al que pertenece este resumen de consulta."
+    },
+    "patient_name": {
+      "type": "string",
+      "title": "Nombre del paciente (opcional)",
+      "description": "Campo opcional para referencia interna del doctor. No se muestra en la p\u00e1gina p\u00fablica."
+    },
+    "patient_phone": {
+      "type": "string",
+      "title": "Tel\u00e9fono del paciente",
+      "description": "Tel\u00e9fono en formato internacional (ej. 521234567890). Se usa solo para generar el link de WhatsApp. No se muestra en la p\u00e1gina p\u00fablica."
+    },
+    "summary_text": {
+      "type": "string",
+      "title": "Resumen / Receta"
+    }
+  },
+  "required": [
+    "doctor_id",
+    "patient_phone",
+    "summary_text"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

@@ -56,6 +56,8 @@ import StorefrontProductDetail from './pages/StorefrontProductDetail';
 import DoctorStorefrontEditor from './pages/DoctorStorefrontEditor';
 import DoctorProducts from './pages/DoctorProducts';
 import DoctorPayments from './pages/DoctorPayments';
+import DoctorConsultSummaries from './pages/DoctorConsultSummaries';
+import ConsultSummaryPublic from './pages/ConsultSummaryPublic';
 import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
 import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
@@ -136,6 +138,7 @@ const AuthenticatedApp = () => {
           del Layout (sin Header/Footer) a propósito. */}
       <Route path="/dr/:slug" element={<StorefrontPublic />} />
       <Route path="/dr/:slug/producto/:productId" element={<StorefrontProductDetail />} />
+      <Route path="/resumen/:id" element={<ConsultSummaryPublic />} />
 
       {/* Editor del storefront (lado del doctor): separado del panel de
           administración del directorio. Maneja su propia auth como el
@@ -143,6 +146,7 @@ const AuthenticatedApp = () => {
       <Route path="/panel-medico/storefront" element={<DoctorStorefrontEditor />} />
       <Route path="/panel-medico/productos" element={<DoctorProducts />} />
       <Route path="/panel-medico/pagos" element={<DoctorPayments />} />
+      <Route path="/panel-medico/resumen" element={<DoctorConsultSummaries />} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>

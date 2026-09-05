@@ -1,0 +1,40 @@
+{
+  "name": "ConsultReview",
+  "type": "object",
+  "properties": {
+    "consult_summary_id": {
+      "type": "string",
+      "title": "Resumen de consulta (ref)",
+      "description": "ID del registro de ConsultSummary al que pertenece esta rese\u00f1a."
+    },
+    "doctor_id": {
+      "type": "string",
+      "title": "Doctor (ref Specialist)",
+      "description": "ID del Specialist propietario del resumen. Desnormalizado para que el doctor pueda gestionar (update/delete) sus rese\u00f1as. Lo setea createConsultReview desde el ConsultSummary."
+    },
+    "rating": {
+      "type": "number",
+      "title": "Calificaci\u00f3n",
+      "minimum": 1,
+      "maximum": 5,
+      "multipleOf": 1,
+      "description": "Calificaci\u00f3n de 1 a 5 estrellas."
+    }
+  },
+  "required": [
+    "consult_summary_id",
+    "doctor_id",
+    "rating"
+  ],
+  "rls": {
+    "create": {
+      "data.doctor_id": "{{user.id}}"
+    },
+    "update": {
+      "data.doctor_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.doctor_id": "{{user.id}}"
+    }
+  }
+}
