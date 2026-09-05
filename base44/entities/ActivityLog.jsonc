@@ -25,7 +25,9 @@
         "documento_aprobado",
         "documento_rechazado",
         "resena_aprobada",
-        "resena_eliminada"
+        "resena_eliminada",
+        "blog_aprobado",
+        "blog_rechazado"
       ]
     },
     "description": {
