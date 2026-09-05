@@ -2,10 +2,20 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const ADMIN_EMAIL = 'jorgequintanillamtz@gmail.com';
 const SITE_NAME = 'BuscoUnDoctor';
+const SITE_URL = 'https://buscoundoctor.com';
+// Misma plantilla de marca que usa src/api/emailTemplate.js (renderEmail)
+// para el resto de los correos automáticos — se reescribe aquí en vez de
+// importarla porque este backend function corre en su propio runtime Deno,
+// aislado del bundle de frontend, y no puede importar archivos de src/.
 const NAVY = '#0B1E4D';
 const BORDER = '#E4E7EC';
 const INK = '#101828';
 const INK_MUTED = '#475467';
+const INK_FAINT = '#667085';
+const PAGE_BG = '#F4F6F8';
+// PNG (no webp): Outlook de escritorio y algunos proxies de imagen de Gmail
+// no soportan bien el canal alfa de webp y el logo se ve con fondo sólido.
+const LOGO_URL = 'https://base44.app/api/apps/69daf616236dcba44672309d/files/mp/public/69daf616236dcba44672309d/493678fd4_buscoundoctor-logo.png';
 
 function esc(value) {
   return String(value == null ? '' : value).replace(/[&<>"']/g, (c) => {
@@ -14,13 +24,16 @@ function esc(value) {
   });
 }
 
-// Una fila de la tabla de datos del correo de aviso al admin. Se omite
-// silenciosamente si el valor viene vacío (el doctor pudo no haber llegado
-// a ese paso del wizard todavía cuando esto se dispara).
+// Una fila "Etiqueta: valor" de la tarjeta de detalles (mismo patrón visual
+// que detailRow() en emailTemplate.js). Se omite silenciosamente si el
+// valor viene vacío (el doctor pudo no haber llegado a ese paso del wizard
+// todavía cuando esto se dispara).
 function row(label, value) {
   if (!value) return '';
-  return '<tr><td style="padding:8px 12px;border-bottom:1px solid ' + BORDER + ';color:' + INK_MUTED + ';font-size:13px;white-space:nowrap;">' + esc(label) + '</td>'
-    + '<td style="padding:8px 12px;border-bottom:1px solid ' + BORDER + ';color:' + INK + ';font-size:13px;font-weight:500;">' + esc(value) + '</td></tr>';
+  return '<tr>'
+    + '<td style="padding:9px 0;font-size:13px;color:' + INK_FAINT + ';width:140px;vertical-align:top;border-bottom:1px solid ' + BORDER + ';">' + esc(label) + '</td>'
+    + '<td style="padding:9px 0;font-size:14px;color:' + INK + ';font-weight:600;vertical-align:top;border-bottom:1px solid ' + BORDER + ';">' + esc(value) + '</td>'
+    + '</tr>';
 }
 
 // Correo al admin (Jorge) cada vez que un doctor completa su registro, con
@@ -53,18 +66,58 @@ async function notifyAdminNewRegistration(base44, specialist) {
   ].join('');
 
   const subject = `Nuevo registro de doctor — ${specialist.full_name}`;
-  const html = `
-    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;">
-      <div style="background:${NAVY};padding:20px 24px;border-radius:12px 12px 0 0;">
-        <p style="color:#fff;font-size:15px;font-weight:600;margin:0;">${SITE_NAME} — Nuevo registro de doctor</p>
-      </div>
-      <div style="border:1px solid ${BORDER};border-top:none;border-radius:0 0 12px 12px;padding:20px 24px;">
-        <p style="color:${INK};font-size:14px;margin:0 0 14px;">Un doctor acaba de completar su registro. Esto fue lo que dio de alta:</p>
-        <table style="width:100%;border-collapse:collapse;">${rows}</table>
-        <p style="margin:18px 0 0;"><a href="https://buscoundoctor.com/admin/doctores" style="color:#2F6FED;text-decoration:none;font-size:13px;font-weight:600;">Revisar en el admin &rarr;</a></p>
-      </div>
-    </div>
-  `;
+  const adminUrl = `${SITE_URL}/admin/doctores`;
+  const html = `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${esc(subject)}</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:${PAGE_BG};">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">Un doctor acaba de completar su registro en ${SITE_NAME}.</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${PAGE_BG};padding:40px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${BORDER};border-radius:8px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;">
+            <tr>
+              <td style="background-color:${NAVY};padding:24px 40px;text-align:center;">
+                <img src="${LOGO_URL}" alt="${SITE_NAME}" height="39" style="height:39px;width:auto;display:inline-block;border:0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:36px 40px 4px;">
+                <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#2F6FED;">Nuevo registro</p>
+                <h1 style="margin:0;font-size:19px;line-height:1.4;color:${INK};font-weight:700;">Un doctor acaba de registrarse</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 40px 0;font-size:14.5px;line-height:1.65;color:${INK_MUTED};">
+                <p style="margin:0 0 4px;">Esto fue lo que dio de alta en el wizard de registro:</p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border-top:1px solid ${BORDER};">${rows}</table>
+                <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 4px;">
+                  <tr>
+                    <td style="border-radius:6px;background:${NAVY};">
+                      <a href="${adminUrl}" style="display:inline-block;padding:11px 22px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Revisar en el admin</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:36px 40px 32px;">
+                <div style="border-top:1px solid ${BORDER};padding-top:16px;font-size:12px;line-height:1.7;color:#98A2B3;">
+                  Este es un correo automático de ${SITE_NAME} — no es necesario responderlo.<br/>
+                  <a href="${SITE_URL}" style="color:#98A2B3;text-decoration:underline;">buscoundoctor.com</a> · Monterrey, Nuevo León
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 
   try {
     await base44.integrations.Core.SendEmail({ to: ADMIN_EMAIL, subject, body: html, from_name: SITE_NAME });
