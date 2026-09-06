@@ -1,5 +1,4 @@
 import React from "react";
-import { FileText } from "lucide-react";
 
 /**
  * Diseño "receta escrita a mano" para el resumen de consulta.
@@ -12,25 +11,31 @@ import { FileText } from "lucide-react";
  * Se renderiza sobre el fondo teal de la página — la hoja crema resalta
  * como una receta física sobre un escritorio.
  */
-export default function HandwrittenSummary({ summaryText, doctorName }) {
+export default function HandwrittenSummary({ summaryText, doctorName, doctorPhoto }) {
   return (
     <div
       className="rounded-lg p-6 sm:p-8"
       style={{
-        background: "#FBF8F1",
+        background: "#FFFFFF",
         boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06)",
-        border: "1px solid #E8E0D0",
+        border: "1px solid #DCE9FF",
       }}
     >
       {/* Membrete */}
       <div
-        className="flex items-center gap-2 pb-3 mb-4"
-        style={{ borderBottom: "1px solid #D4C9B0" }}
+        className="flex items-center gap-3 pb-3 mb-4"
+        style={{ borderBottom: "1px solid #DCE9FF" }}
       >
-        <FileText className="w-4 h-4" style={{ color: "#6B5D4A" }} />
+        {doctorPhoto && (
+          <img
+            src={doctorPhoto}
+            alt={doctorName}
+            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          />
+        )}
         <span
           className="text-sm font-semibold"
-          style={{ color: "#6B5D4A" }}
+          style={{ color: "#0B1E4D" }}
         >
           {doctorName || "Resumen de consulta"}
         </span>
@@ -42,7 +47,7 @@ export default function HandwrittenSummary({ summaryText, doctorName }) {
         style={{
           fontFamily: "'Kalam', cursive",
           fontSize: "18px",
-          color: "#3A2E1F",
+          color: "#0B1E4D",
           lineHeight: "1.8",
         }}
       >

@@ -65,7 +65,7 @@ export default function ConsultSummaryPublic() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#2D7D72" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0B1E4D" }}>
         <Loader2 className="w-8 h-8 animate-spin text-white" />
       </div>
     );
@@ -75,7 +75,7 @@ export default function ConsultSummaryPublic() {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center"
-        style={{ background: "#2D7D72" }}
+        style={{ background: "#0B1E4D" }}
       >
         <p className="text-white font-heading font-bold text-lg">Resumen no encontrado</p>
         <p className="text-white/60 text-sm">El link puede haber expirado o ser incorrecto.</p>
@@ -83,7 +83,7 @@ export default function ConsultSummaryPublic() {
     );
   }
 
-  const theme = getStorefrontTheme("teal");
+  const theme = getStorefrontTheme("navy");
   // Solo se muestran productos si hay storefront_slug Y productos activos
   const showProducts = data.storefront_slug && products.length > 0;
 
@@ -110,7 +110,7 @@ export default function ConsultSummaryPublic() {
         <section>
           <h2 className="font-heading font-bold text-lg text-white mb-3">Tu resumen</h2>
           {data.summary_theme === "handwritten" ? (
-            <HandwrittenSummary summaryText={data.summary_text} doctorName={data.doctor_name} />
+            <HandwrittenSummary summaryText={data.summary_text} doctorName={data.doctor_name} doctorPhoto={data.doctor_photo} />
           ) : (
             <div
               className="rounded-2xl p-4"

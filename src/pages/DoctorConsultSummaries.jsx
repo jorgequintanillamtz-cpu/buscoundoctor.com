@@ -239,7 +239,7 @@ export default function DoctorConsultSummaries() {
                 prefTheme === "default" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
               }`}
             >
-              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#2D7D72" }}>
+              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#0B1E4D" }}>
                 <div className="space-y-1.5">
                   <div className="h-1.5 w-3/4 rounded-full bg-white/70" />
                   <div className="h-1.5 w-full rounded-full bg-white/40" />
@@ -258,11 +258,11 @@ export default function DoctorConsultSummaries() {
                 prefTheme === "handwritten" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
               }`}
             >
-              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#FBF8F1", border: "1px solid #E8E0D0" }}>
+              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#FFFFFF", border: "1px solid #DCE9FF" }}>
                 <div className="space-y-1.5">
-                  <div className="h-1.5 w-3/4 rounded-full" style={{ background: "#6B5D4A" }} />
-                  <div className="h-2 w-full rounded-full" style={{ background: "#3A2E1F", opacity: 0.4 }} />
-                  <div className="h-2 w-5/6 rounded-full" style={{ background: "#3A2E1F", opacity: 0.4 }} />
+                  <div className="h-1.5 w-3/4 rounded-full" style={{ background: "#0B1E4D" }} />
+                  <div className="h-2 w-full rounded-full" style={{ background: "#0B1E4D", opacity: 0.4 }} />
+                  <div className="h-2 w-5/6 rounded-full" style={{ background: "#0B1E4D", opacity: 0.4 }} />
                 </div>
               </div>
               <p className="text-xs font-semibold text-foreground">Escrita a mano</p>

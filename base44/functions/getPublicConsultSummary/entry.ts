@@ -39,9 +39,11 @@ export default async function(req: Request): Promise<Response> {
 
     // Resolver el Specialist para el nombre del doctor
     let doctorName = "";
+    let doctorPhoto = "";
     try {
       const specialist = await base44.asServiceRole.entities.Specialist.get(summary.doctor_id);
       doctorName = specialist?.full_name || "";
+      doctorPhoto = specialist?.profile_photo || "";
     } catch {
       // Si no se encuentra, continuamos sin nombre
     }
@@ -61,7 +63,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // Resolver la preferencia de diseño del resumen
-    let summaryTheme = "default";
+    let summaryTheme = "handwritten";
     try {
       const prefs = await base44.asServiceRole.entities.DoctorConsultPreferences.filter({
         doctor_id: summary.doctor_id,
@@ -76,6 +78,7 @@ export default async function(req: Request): Promise<Response> {
     return Response.json({
       summary_text: summary.summary_text || "",
       doctor_name: doctorName,
+      doctor_photo: doctorPhoto,
       doctor_id: summary.doctor_id,
       storefront_slug: storefrontSlug,
       summary_theme: summaryTheme,
