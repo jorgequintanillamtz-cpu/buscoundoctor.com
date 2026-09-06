@@ -25,6 +25,7 @@ export default function ConsultSummaryPublic() {
   const [notFound, setNotFound] = useState(false);
   const [data, setData] = useState(null);
   const [products, setProducts] = useState([]);
+  const [animationComplete, setAnimationComplete] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +63,12 @@ export default function ConsultSummaryPublic() {
     })();
     return () => { cancelled = true; };
   }, [id]);
+
+  useEffect(() => {
+    if (data?.summary_theme === "default") {
+      setAnimationComplete(true);
+    }
+  }, [data?.summary_theme]);
 
   if (loading) {
     return (
@@ -127,6 +134,7 @@ export default function ConsultSummaryPublic() {
               doctorPhoto={data.doctor_photo}
               font={data.summary_theme === "handwritten_caveat" ? "caveat" : "kalam"}
               signatureStrokes={data.signature_strokes}
+              onAnimationComplete={() => setAnimationComplete(true)}
             >
               <PublicReviewBlock consultSummaryId={id} variant="light" />
             </HandwrittenSummary>
@@ -144,7 +152,7 @@ export default function ConsultSummaryPublic() {
         )}
 
         {/* 3. Productos (solo si storefront_slug Y productos activos) */}
-        {showProducts && (
+        {showProducts && animationComplete && (
           <section>
             <StorefrontProducts
               items={products}

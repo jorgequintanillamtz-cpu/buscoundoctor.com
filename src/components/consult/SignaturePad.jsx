@@ -17,6 +17,7 @@ export default function SignaturePad({ onSave, initialStrokes }) {
   const isDrawingRef = useRef(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [saving, setSaving] = useState(false);
+  const allStrokesRef = useRef([]);
 
   const W = 320;
   const H = 160;
@@ -26,6 +27,7 @@ export default function SignaturePad({ onSave, initialStrokes }) {
       try {
         const parsed = JSON.parse(initialStrokes);
         if (Array.isArray(parsed)) {
+          allStrokesRef.current = parsed;
           setStrokes(parsed);
           drawAll(parsed);
         }
@@ -88,14 +90,15 @@ export default function SignaturePad({ onSave, initialStrokes }) {
     if (!isDrawingRef.current) return;
     isDrawingRef.current = false;
     if (currentStrokeRef.current.length > 1) {
-      const completedStroke = currentStrokeRef.current;
-      setStrokes((prev) => [...prev, completedStroke]);
+      allStrokesRef.current = [...allStrokesRef.current, currentStrokeRef.current];
+      setStrokes(allStrokesRef.current);
       setHasChanges(true);
     }
     currentStrokeRef.current = [];
   };
 
   const handleClear = () => {
+    allStrokesRef.current = [];
     setStrokes([]);
     setHasChanges(true);
     const ctx = canvasRef.current.getContext("2d");
@@ -105,7 +108,7 @@ export default function SignaturePad({ onSave, initialStrokes }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(strokes);
+      await onSave(allStrokesRef.current);
       setHasChanges(false);
     } finally {
       setSaving(false);

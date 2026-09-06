@@ -4,13 +4,19 @@ import React, { useRef, useEffect, useState } from "react";
  * Reproduce la firma del doctor como animación (se dibuja progresivamente).
  *
  * - Recibe los trazos en JSON (mismo formato que guarda SignaturePad).
- * - Anima punto por punto con requestAnimationFrame, ~3s en total.
+ * - Anima punto por punto con requestAnimationFrame, ~1.5s en total.
  * - Respeta prefers-reduced-motion: dibuja todo de inmediato.
  * - Se ejecuta una sola vez al montarse.
+ * - Llama onComplete cuando termina la animación.
  */
-export default function SignaturePlayback({ strokesJson, width = 180, height = 90 }) {
+export default function SignaturePlayback({ strokesJson, width = 180, height = 90, onComplete }) {
   const canvasRef = useRef(null);
   const [parsedStrokes, setParsedStrokes] = useState([]);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     if (!strokesJson) {
@@ -53,10 +59,11 @@ export default function SignaturePlayback({ strokesJson, width = 180, height = 9
         }
         ctx.stroke();
       });
+      onCompleteRef.current?.();
       return;
     }
 
-    // Calcular velocidad: ~3s de animación sin importar el tamaño
+    // Calcular velocidad: ~1.5s de animación sin importar el tamaño
     const totalSegments = parsedStrokes.reduce(
       (sum, s) => sum + Math.max(0, s.length - 1),
       0
@@ -94,6 +101,8 @@ export default function SignaturePlayback({ strokesJson, width = 180, height = 9
       }
       if (strokeIdx < parsedStrokes.length) {
         requestAnimationFrame(animate);
+      } else {
+        onCompleteRef.current?.();
       }
     };
 

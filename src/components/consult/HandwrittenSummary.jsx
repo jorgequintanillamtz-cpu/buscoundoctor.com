@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SignaturePlayback from "./SignaturePlayback";
 
 /**
@@ -10,7 +10,8 @@ import SignaturePlayback from "./SignaturePlayback";
  * - Efecto máquina de escribir: el texto se revela progresivamente al cargar,
  *   con un cursor tipo punta de pluma. Respeta prefers-reduced-motion.
  * - La firma del doctor se anima al final del resumen (esquina inferior derecha).
- * - La sección de calificación aparece solo después de terminar de escribir.
+ * - La sección de calificación aparece solo después de que termina la firma.
+ * - Llama onAnimationComplete cuando toda la animación termina (texto + firma).
  */
 export default function HandwrittenSummary({
   summaryText,
@@ -18,14 +19,23 @@ export default function HandwrittenSummary({
   doctorPhoto,
   font = "kalam",
   signatureStrokes,
+  onAnimationComplete,
   children,
 }) {
   const fontFamily = font === "caveat" ? "'Caveat', cursive" : "'Kalam', cursive";
   const fontSize = font === "caveat" ? "22px" : "18px";
 
   // --- Efecto máquina de escribir ---
+  // isTyping empieza en true para evitar que onAnimationComplete dispare
+  // antes de que comience la animación.
   const [displayedText, setDisplayedText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(true);
+  const [signatureDone, setSignatureDone] = useState(!signatureStrokes);
+
+  const onAnimationCompleteRef = useRef(onAnimationComplete);
+  useEffect(() => {
+    onAnimationCompleteRef.current = onAnimationComplete;
+  }, [onAnimationComplete]);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -50,6 +60,17 @@ export default function HandwrittenSummary({
     }, speed);
     return () => clearInterval(interval);
   }, [summaryText]);
+
+  // Dispara onAnimationComplete cuando texto Y firma terminaron
+  useEffect(() => {
+    if (!isTyping && signatureDone) {
+      onAnimationCompleteRef.current?.();
+    }
+  }, [isTyping, signatureDone]);
+
+  const handleSignatureComplete = () => {
+    setSignatureDone(true);
+  };
 
   return (
     <div
@@ -111,12 +132,17 @@ export default function HandwrittenSummary({
       {/* Firma del doctor (esquina inferior derecha, después de escribir) */}
       {signatureStrokes && !isTyping && (
         <div className="flex justify-end mt-4">
-          <SignaturePlayback strokesJson={signatureStrokes} width={180} height={90} />
+          <SignaturePlayback
+            strokesJson={signatureStrokes}
+            width={180}
+            height={90}
+            onComplete={handleSignatureComplete}
+          />
         </div>
       )}
 
-      {/* Reseña — solo aparece después de que termina de escribir */}
-      {children && !isTyping && (
+      {/* Reseña — solo aparece después de que termina la firma */}
+      {children && !isTyping && signatureDone && (
         <div className="mt-5 pt-4" style={{ borderTop: "1px solid #DCE9FF" }}>
           {children}
         </div>
