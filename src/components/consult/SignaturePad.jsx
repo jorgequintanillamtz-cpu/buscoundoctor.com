@@ -88,7 +88,8 @@ export default function SignaturePad({ onSave, initialStrokes }) {
     if (!isDrawingRef.current) return;
     isDrawingRef.current = false;
     if (currentStrokeRef.current.length > 1) {
-      setStrokes((prev) => [...prev, currentStrokeRef.current]);
+      const completedStroke = currentStrokeRef.current;
+      setStrokes((prev) => [...prev, completedStroke]);
       setHasChanges(true);
     }
     currentStrokeRef.current = [];
