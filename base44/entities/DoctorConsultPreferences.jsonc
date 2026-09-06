@@ -12,10 +12,11 @@
       "title": "Dise\u00f1o del resumen",
       "enum": [
         "default",
-        "handwritten"
+        "handwritten_kalam",
+        "handwritten_caveat"
       ],
-      "default": "handwritten",
-      "description": "default = dise\u00f1o cl\u00e1sico (fondo azul marino, tarjeta semitransparente). handwritten = dise\u00f1o de receta escrita a mano (fondo blanco, fuente manuscrita, texto azul marino)."
+      "default": "handwritten_caveat",
+      "description": "default = dise\u00f1o cl\u00e1sico (fondo azul marino, tarjeta semitransparente, sin fuente manuscrita). handwritten_kalam = receta escrita a mano con fuente Kalam (mano imprenta). handwritten_caveat = receta escrita a mano con fuente Caveat (cursiva)."
     }
   },
   "required": [

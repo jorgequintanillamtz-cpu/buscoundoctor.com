@@ -63,7 +63,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // Resolver la preferencia de diseño del resumen
-    let summaryTheme = "handwritten";
+    let summaryTheme = "handwritten_caveat";
     try {
       const prefs = await base44.asServiceRole.entities.DoctorConsultPreferences.filter({
         doctor_id: summary.doctor_id,

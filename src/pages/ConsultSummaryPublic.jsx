@@ -109,9 +109,7 @@ export default function ConsultSummaryPublic() {
         {/* 1. Summary text */}
         <section>
           <h2 className="font-heading font-bold text-lg text-white mb-3">Tu resumen</h2>
-          {data.summary_theme === "handwritten" ? (
-            <HandwrittenSummary summaryText={data.summary_text} doctorName={data.doctor_name} doctorPhoto={data.doctor_photo} />
-          ) : (
+          {data.summary_theme === "default" ? (
             <div
               className="rounded-2xl p-4"
               style={{ background: theme.card, border: `1px solid ${theme.border}` }}
@@ -120,6 +118,13 @@ export default function ConsultSummaryPublic() {
                 {data.summary_text}
               </p>
             </div>
+          ) : (
+            <HandwrittenSummary
+              summaryText={data.summary_text}
+              doctorName={data.doctor_name}
+              doctorPhoto={data.doctor_photo}
+              font={data.summary_theme === "handwritten_caveat" ? "caveat" : "kalam"}
+            />
           )}
         </section>
 

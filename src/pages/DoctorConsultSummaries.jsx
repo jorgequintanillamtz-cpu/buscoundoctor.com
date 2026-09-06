@@ -42,7 +42,7 @@ export default function DoctorConsultSummaries() {
   const [copiedId, setCopiedId] = useState(null);
 
   // Preference state
-  const [prefTheme, setPrefTheme] = useState("default");
+  const [prefTheme, setPrefTheme] = useState("handwritten_caveat");
   const [prefId, setPrefId] = useState(null);
   const [prefSaving, setPrefSaving] = useState(false);
 
@@ -88,7 +88,7 @@ export default function DoctorConsultSummaries() {
       });
       if (prefs && prefs.length > 0) {
         setPrefId(prefs[0].id);
-        setPrefTheme(prefs[0].summary_theme || "default");
+        setPrefTheme(prefs[0].summary_theme || "handwritten_caveat");
       }
     } catch {
       // Sin preferencia, usar default
@@ -229,7 +229,7 @@ export default function DoctorConsultSummaries() {
             <h3 className="font-heading font-semibold text-sm text-foreground">Diseño del resumen</h3>
           </div>
           <p className="text-xs text-muted-foreground mb-4">Elige cómo se ve la página que recibe tu paciente.</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Clásico */}
             <button
               type="button"
@@ -239,7 +239,7 @@ export default function DoctorConsultSummaries() {
                 prefTheme === "default" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
               }`}
             >
-              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#0B1E4D" }}>
+              <div className="rounded-lg p-2.5 mb-2 h-16 flex flex-col justify-center" style={{ background: "#0B1E4D" }}>
                 <div className="space-y-1.5">
                   <div className="h-1.5 w-3/4 rounded-full bg-white/70" />
                   <div className="h-1.5 w-full rounded-full bg-white/40" />
@@ -247,26 +247,37 @@ export default function DoctorConsultSummaries() {
                 </div>
               </div>
               <p className="text-xs font-semibold text-foreground">Clásico</p>
-              <p className="text-[11px] text-muted-foreground">Fondo teal, texto limpio</p>
+              <p className="text-[11px] text-muted-foreground">Sin estilo de mano</p>
             </button>
-            {/* Escrita a mano */}
+            {/* Kalam */}
             <button
               type="button"
-              onClick={() => handleThemeChange("handwritten")}
+              onClick={() => handleThemeChange("handwritten_kalam")}
               disabled={prefSaving}
               className={`rounded-xl border-2 p-3 text-left transition-colors disabled:opacity-60 ${
-                prefTheme === "handwritten" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+                prefTheme === "handwritten_kalam" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
               }`}
             >
-              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#FFFFFF", border: "1px solid #DCE9FF" }}>
-                <div className="space-y-1.5">
-                  <div className="h-1.5 w-3/4 rounded-full" style={{ background: "#0B1E4D" }} />
-                  <div className="h-2 w-full rounded-full" style={{ background: "#0B1E4D", opacity: 0.4 }} />
-                  <div className="h-2 w-5/6 rounded-full" style={{ background: "#0B1E4D", opacity: 0.4 }} />
-                </div>
+              <div className="rounded-lg p-2.5 mb-2 h-16 flex flex-col justify-center" style={{ background: "#FFFFFF", border: "1px solid #DCE9FF" }}>
+                <p style={{ fontFamily: "'Kalam', cursive", fontSize: "13px", color: "#0B1E4D", lineHeight: "1.3" }}>Receta médica</p>
               </div>
-              <p className="text-xs font-semibold text-foreground">Escrita a mano</p>
-              <p className="text-[11px] text-muted-foreground">Papel, fuente manuscrita</p>
+              <p className="text-xs font-semibold text-foreground">Kalam</p>
+              <p className="text-[11px] text-muted-foreground">Mano imprenta</p>
+            </button>
+            {/* Caveat */}
+            <button
+              type="button"
+              onClick={() => handleThemeChange("handwritten_caveat")}
+              disabled={prefSaving}
+              className={`rounded-xl border-2 p-3 text-left transition-colors disabled:opacity-60 ${
+                prefTheme === "handwritten_caveat" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+              }`}
+            >
+              <div className="rounded-lg p-2.5 mb-2 h-16 flex flex-col justify-center" style={{ background: "#FFFFFF", border: "1px solid #DCE9FF" }}>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: "15px", color: "#0B1E4D", lineHeight: "1.3" }}>Receta médica</p>
+              </div>
+              <p className="text-xs font-semibold text-foreground">Caveat</p>
+              <p className="text-[11px] text-muted-foreground">Cursiva de mano</p>
             </button>
           </div>
           {prefSaving && (
