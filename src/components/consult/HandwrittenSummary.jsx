@@ -11,9 +11,9 @@ import React from "react";
  * Se renderiza sobre el fondo teal de la página — la hoja crema resalta
  * como una receta física sobre un escritorio.
  */
-export default function HandwrittenSummary({ summaryText, doctorName, doctorPhoto, font = "kalam" }) {
+export default function HandwrittenSummary({ summaryText, doctorName, doctorPhoto, font = "kalam", children }) {
   const fontFamily = font === "caveat" ? "'Caveat', cursive" : "'Kalam', cursive";
-  const fontSize = font === "caveat" ? "20px" : "18px";
+  const fontSize = font === "caveat" ? "22px" : "20px";
   return (
     <div
       className="rounded-lg p-6 sm:p-8"
@@ -43,6 +43,11 @@ export default function HandwrittenSummary({ summaryText, doctorName, doctorPhot
         </span>
       </div>
 
+      {/* Título */}
+      <p className="font-heading font-bold text-base mb-3" style={{ color: "#0B1E4D" }}>
+        Tu resumen
+      </p>
+
       {/* Texto manuscrito */}
       <p
         className="whitespace-pre-line"
@@ -55,6 +60,13 @@ export default function HandwrittenSummary({ summaryText, doctorName, doctorPhot
       >
         {summaryText}
       </p>
+
+      {/* Reseña */}
+      {children && (
+        <div className="mt-5 pt-4" style={{ borderTop: "1px solid #DCE9FF" }}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }

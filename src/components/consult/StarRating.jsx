@@ -6,7 +6,7 @@ import { Star } from "lucide-react";
  * - Modo input (readOnly=false): el usuario tappea una estrella → onChange(n).
  * - Modo display (readOnly=true): muestra el valor sin interacción.
  */
-export default function StarRating({ value = 0, onChange, size = 28, readOnly = false }) {
+export default function StarRating({ value = 0, onChange, size = 28, readOnly = false, variant = "dark" }) {
   const [hover, setHover] = useState(0);
   const display = hover || value;
 
@@ -25,7 +25,7 @@ export default function StarRating({ value = 0, onChange, size = 28, readOnly = 
         >
           <Star
             style={{ width: size, height: size }}
-            className={star <= display ? "fill-amber-400 text-amber-400" : "text-white/30"}
+            className={star <= display ? "fill-amber-400 text-amber-400" : variant === "light" ? "text-[#0B1E4D]/20" : "text-white/30"}
           />
         </button>
       ))}

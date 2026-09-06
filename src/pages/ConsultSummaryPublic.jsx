@@ -106,9 +106,11 @@ export default function ConsultSummaryPublic() {
       </header>
 
       <main className="max-w-md w-full mx-auto px-5 py-6 space-y-6 flex-1">
-        {/* 1. Summary text */}
+        {/* 1. Summary text + reseña (integrada en tarjetas manuscritas) */}
         <section>
-          <h2 className="font-heading font-bold text-lg text-white mb-3">Tu resumen</h2>
+          {data.summary_theme === "default" && (
+            <h2 className="font-heading font-bold text-lg text-white mb-3">Tu resumen</h2>
+          )}
           {data.summary_theme === "default" ? (
             <div
               className="rounded-2xl p-4"
@@ -124,17 +126,21 @@ export default function ConsultSummaryPublic() {
               doctorName={data.doctor_name}
               doctorPhoto={data.doctor_photo}
               font={data.summary_theme === "handwritten_caveat" ? "caveat" : "kalam"}
-            />
+            >
+              <PublicReviewBlock consultSummaryId={id} variant="light" />
+            </HandwrittenSummary>
           )}
         </section>
 
-        {/* 2. Review block */}
-        <section
-          className="rounded-2xl p-4"
-          style={{ background: theme.card, border: `1px solid ${theme.border}` }}
-        >
-          <PublicReviewBlock consultSummaryId={id} />
-        </section>
+        {/* 2. Review block (solo tema clásico) */}
+        {data.summary_theme === "default" && (
+          <section
+            className="rounded-2xl p-4"
+            style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+          >
+            <PublicReviewBlock consultSummaryId={id} />
+          </section>
+        )}
 
         {/* 3. Productos (solo si storefront_slug Y productos activos) */}
         {showProducts && (

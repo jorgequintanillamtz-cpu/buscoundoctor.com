@@ -11,12 +11,20 @@ import StarRating from "./StarRating";
  * - Al calificar → llama a createConsultReview (una reseña por resumen).
  * - Sin login: el read es público (ConsultReview sin RLS read), el create
  *   va vía función backend con asServiceRole.
+ *
+ * variant: "dark" (fondo oscuro, texto blanco) | "light" (fondo blanco, texto navy)
  */
-export default function PublicReviewBlock({ consultSummaryId }) {
+export default function PublicReviewBlock({ consultSummaryId, variant = "dark" }) {
   const [existingReview, setExistingReview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const isLight = variant === "light";
+  const textClass = isLight ? "text-[#0B1E4D]" : "text-white/80";
+  const spinnerClass = isLight ? "text-[#0B1E4D]/40" : "text-white/50";
+  const checkColor = isLight ? "#059669" : "#F8F7F0";
+  const errorClass = isLight ? "text-red-600" : "text-red-300";
 
   useEffect(() => {
     let cancelled = false;
@@ -76,7 +84,7 @@ export default function PublicReviewBlock({ consultSummaryId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-4">
-        <Loader2 className="w-5 h-5 animate-spin text-white/50" />
+        <Loader2 className={"w-5 h-5 animate-spin " + spinnerClass} />
       </div>
     );
   }
@@ -84,10 +92,10 @@ export default function PublicReviewBlock({ consultSummaryId }) {
   if (existingReview) {
     return (
       <div className="text-center py-2">
-        <CheckCircle2 className="w-6 h-6 mx-auto mb-2" style={{ color: "#F8F7F0" }} />
-        <p className="text-white/80 text-sm font-medium mb-2">¡Gracias por tu calificación!</p>
+        <CheckCircle2 className="w-6 h-6 mx-auto mb-2" style={{ color: checkColor }} />
+        <p className={"text-sm font-medium mb-2 " + textClass}>¡Gracias por tu calificación!</p>
         <div className="flex justify-center">
-          <StarRating value={existingReview.rating || 0} readOnly size={24} />
+          <StarRating value={existingReview.rating || 0} readOnly size={24} variant={variant} />
         </div>
       </div>
     );
@@ -95,17 +103,17 @@ export default function PublicReviewBlock({ consultSummaryId }) {
 
   return (
     <div className="text-center py-2">
-      <p className="text-white/80 text-sm font-medium mb-3">¿Cómo calificarías tu consulta?</p>
+      <p className={"text-sm font-medium mb-3 " + textClass}>¿Cómo calificarías tu consulta?</p>
       {submitting ? (
         <div className="flex items-center justify-center">
-          <Loader2 className="w-5 h-5 animate-spin text-white/50" />
+          <Loader2 className={"w-5 h-5 animate-spin " + spinnerClass} />
         </div>
       ) : (
         <div className="flex justify-center">
-          <StarRating onChange={handleSubmit} size={32} />
+          <StarRating onChange={handleSubmit} size={32} variant={variant} />
         </div>
       )}
-      {error && <p className="text-red-300 text-xs mt-2">{error}</p>}
+      {error && <p className={"text-xs mt-2 " + errorClass}>{error}</p>}
     </div>
   );
 }
