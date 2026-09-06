@@ -14,8 +14,8 @@
         "default",
         "handwritten"
       ],
-      "default": "default",
-      "description": "default = dise\u00f1o cl\u00e1sico (Fase 6, fondo teal). handwritten = dise\u00f1o de receta escrita a mano (fondo papel, fuente manuscrita)."
+      "default": "handwritten",
+      "description": "default = dise\u00f1o cl\u00e1sico (fondo azul marino, tarjeta semitransparente). handwritten = dise\u00f1o de receta escrita a mano (fondo blanco, fuente manuscrita, texto azul marino)."
     }
   },
   "required": [
