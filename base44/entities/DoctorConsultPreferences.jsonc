@@ -1,0 +1,39 @@
+{
+  "name": "DoctorConsultPreferences",
+  "type": "object",
+  "properties": {
+    "doctor_id": {
+      "type": "string",
+      "title": "Doctor (ref Specialist)",
+      "description": "ID del registro de Specialist al que pertenecen estas preferencias."
+    },
+    "summary_theme": {
+      "type": "string",
+      "title": "Dise\u00f1o del resumen",
+      "enum": [
+        "default",
+        "handwritten"
+      ],
+      "default": "default",
+      "description": "default = dise\u00f1o cl\u00e1sico (Fase 6, fondo teal). handwritten = dise\u00f1o de receta escrita a mano (fondo papel, fuente manuscrita)."
+    }
+  },
+  "required": [
+    "doctor_id",
+    "summary_theme"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

@@ -11,6 +11,7 @@ import {
   Check,
   FileText,
   Send,
+  Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,11 @@ export default function DoctorConsultSummaries() {
   const [lastCreated, setLastCreated] = useState(null); // { id, phone, link }
   const [copiedId, setCopiedId] = useState(null);
 
+  // Preference state
+  const [prefTheme, setPrefTheme] = useState("default");
+  const [prefId, setPrefId] = useState(null);
+  const [prefSaving, setPrefSaving] = useState(false);
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -58,6 +64,7 @@ export default function DoctorConsultSummaries() {
       setSpecialistId(own[0].id);
       setStatus("ready");
       loadSummaries();
+      loadPreferences(own[0].id);
     })();
     return () => { active = false; };
   }, []);
@@ -71,6 +78,46 @@ export default function DoctorConsultSummaries() {
       // RLS ya filtra por created_by_id
     } finally {
       setLoadingSummaries(false);
+    }
+  };
+
+  const loadPreferences = async (specId) => {
+    try {
+      const prefs = await base44.entities.DoctorConsultPreferences.filter({
+        doctor_id: specId,
+      });
+      if (prefs && prefs.length > 0) {
+        setPrefId(prefs[0].id);
+        setPrefTheme(prefs[0].summary_theme || "default");
+      }
+    } catch {
+      // Sin preferencia, usar default
+    }
+  };
+
+  const handleThemeChange = async (newTheme) => {
+    if (prefSaving || newTheme === prefTheme) return;
+    const prevTheme = prefTheme;
+    setPrefTheme(newTheme);
+    setPrefSaving(true);
+    try {
+      if (prefId) {
+        await base44.entities.DoctorConsultPreferences.update(prefId, {
+          summary_theme: newTheme,
+        });
+      } else {
+        const created = await base44.entities.DoctorConsultPreferences.create({
+          doctor_id: specialistId,
+          summary_theme: newTheme,
+        });
+        if (created?.id) setPrefId(created.id);
+      }
+      toast.success("Diseño actualizado");
+    } catch (err) {
+      setPrefTheme(prevTheme);
+      toast.error("Error al guardar: " + err.message);
+    } finally {
+      setPrefSaving(false);
     }
   };
 
@@ -173,6 +220,61 @@ export default function DoctorConsultSummaries() {
             <h1 className="font-heading font-bold text-xl text-foreground">Resumen de consulta</h1>
             <p className="text-sm text-muted-foreground">Crea un resumen y envíaselo a tu paciente por WhatsApp.</p>
           </div>
+        </div>
+
+        {/* Preferencias de diseño */}
+        <div className="bg-card rounded-2xl border border-border p-5 mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Palette className="w-4 h-4 text-primary" />
+            <h3 className="font-heading font-semibold text-sm text-foreground">Diseño del resumen</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">Elige cómo se ve la página que recibe tu paciente.</p>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Clásico */}
+            <button
+              type="button"
+              onClick={() => handleThemeChange("default")}
+              disabled={prefSaving}
+              className={`rounded-xl border-2 p-3 text-left transition-colors disabled:opacity-60 ${
+                prefTheme === "default" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+              }`}
+            >
+              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#2D7D72" }}>
+                <div className="space-y-1.5">
+                  <div className="h-1.5 w-3/4 rounded-full bg-white/70" />
+                  <div className="h-1.5 w-full rounded-full bg-white/40" />
+                  <div className="h-1.5 w-5/6 rounded-full bg-white/40" />
+                </div>
+              </div>
+              <p className="text-xs font-semibold text-foreground">Clásico</p>
+              <p className="text-[11px] text-muted-foreground">Fondo teal, texto limpio</p>
+            </button>
+            {/* Escrita a mano */}
+            <button
+              type="button"
+              onClick={() => handleThemeChange("handwritten")}
+              disabled={prefSaving}
+              className={`rounded-xl border-2 p-3 text-left transition-colors disabled:opacity-60 ${
+                prefTheme === "handwritten" ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+              }`}
+            >
+              <div className="rounded-lg p-2.5 mb-2" style={{ background: "#FBF8F1", border: "1px solid #E8E0D0" }}>
+                <div className="space-y-1.5">
+                  <div className="h-1.5 w-3/4 rounded-full" style={{ background: "#6B5D4A" }} />
+                  <div className="h-2 w-full rounded-full" style={{ background: "#3A2E1F", opacity: 0.4 }} />
+                  <div className="h-2 w-5/6 rounded-full" style={{ background: "#3A2E1F", opacity: 0.4 }} />
+                </div>
+              </div>
+              <p className="text-xs font-semibold text-foreground">Escrita a mano</p>
+              <p className="text-[11px] text-muted-foreground">Papel, fuente manuscrita</p>
+            </button>
+          </div>
+          {prefSaving && (
+            <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Guardando…
+            </p>
+          )}
         </div>
 
         {/* Formulario */}

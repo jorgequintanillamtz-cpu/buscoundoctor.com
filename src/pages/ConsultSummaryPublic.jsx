@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Loader2, FileText } from "lucide-react";
 import { getStorefrontTheme, CREAM, INK } from "@/lib/storefrontThemes";
 import PublicReviewBlock from "@/components/consult/PublicReviewBlock";
+import HandwrittenSummary from "@/components/consult/HandwrittenSummary";
 import StorefrontProducts from "@/components/storefront/StorefrontProducts";
 
 /**
@@ -108,14 +109,18 @@ export default function ConsultSummaryPublic() {
         {/* 1. Summary text */}
         <section>
           <h2 className="font-heading font-bold text-lg text-white mb-3">Tu resumen</h2>
-          <div
-            className="rounded-2xl p-4"
-            style={{ background: theme.card, border: `1px solid ${theme.border}` }}
-          >
-            <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">
-              {data.summary_text}
-            </p>
-          </div>
+          {data.summary_theme === "handwritten" ? (
+            <HandwrittenSummary summaryText={data.summary_text} doctorName={data.doctor_name} />
+          ) : (
+            <div
+              className="rounded-2xl p-4"
+              style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+            >
+              <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">
+                {data.summary_text}
+              </p>
+            </div>
+          )}
         </section>
 
         {/* 2. Review block */}

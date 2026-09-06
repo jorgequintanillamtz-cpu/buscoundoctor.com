@@ -60,11 +60,25 @@ export default async function(req: Request): Promise<Response> {
       // Sin storefront
     }
 
+    // Resolver la preferencia de diseño del resumen
+    let summaryTheme = "default";
+    try {
+      const prefs = await base44.asServiceRole.entities.DoctorConsultPreferences.filter({
+        doctor_id: summary.doctor_id,
+      });
+      if (prefs && prefs.length > 0 && prefs[0].summary_theme) {
+        summaryTheme = prefs[0].summary_theme;
+      }
+    } catch {
+      // Sin preferencia, usar default
+    }
+
     return Response.json({
       summary_text: summary.summary_text || "",
       doctor_name: doctorName,
       doctor_id: summary.doctor_id,
       storefront_slug: storefrontSlug,
+      summary_theme: summaryTheme,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
