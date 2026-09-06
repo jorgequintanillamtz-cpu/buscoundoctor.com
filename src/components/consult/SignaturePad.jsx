@@ -105,10 +105,47 @@ export default function SignaturePad({ onSave, initialStrokes }) {
     ctx.clearRect(0, 0, W, H);
   };
 
+  // Reduce el tamaño del JSON de trazos antes de guardar:
+  // - Redondea coordenadas a 3 decimales
+  // - Elimina puntos demasiado cercanos al anterior (redundantes)
+  const simplifyStrokes = (strokes) => {
+    const threshold = 0.008;
+    return strokes.map((stroke) => {
+      if (stroke.length < 3) {
+        return stroke.map((p) => ({
+          x: Math.round(p.x * 1000) / 1000,
+          y: Math.round(p.y * 1000) / 1000,
+        }));
+      }
+      const result = [{
+        x: Math.round(stroke[0].x * 1000) / 1000,
+        y: Math.round(stroke[0].y * 1000) / 1000,
+      }];
+      for (let i = 1; i < stroke.length - 1; i++) {
+        const prev = result[result.length - 1];
+        const curr = stroke[i];
+        const dx = curr.x - prev.x;
+        const dy = curr.y - prev.y;
+        if (Math.sqrt(dx * dx + dy * dy) >= threshold) {
+          result.push({
+            x: Math.round(curr.x * 1000) / 1000,
+            y: Math.round(curr.y * 1000) / 1000,
+          });
+        }
+      }
+      const last = stroke[stroke.length - 1];
+      result.push({
+        x: Math.round(last.x * 1000) / 1000,
+        y: Math.round(last.y * 1000) / 1000,
+      });
+      return result;
+    });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(allStrokesRef.current);
+      await onSave(simplifyStrokes(allStrokesRef.current));
       setHasChanges(false);
     } finally {
       setSaving(false);
