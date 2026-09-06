@@ -64,12 +64,14 @@ export default async function(req: Request): Promise<Response> {
 
     // Resolver la preferencia de diseño del resumen
     let summaryTheme = "handwritten_caveat";
+    let signatureStrokes = "";
     try {
       const prefs = await base44.asServiceRole.entities.DoctorConsultPreferences.filter({
         doctor_id: summary.doctor_id,
       });
       if (prefs && prefs.length > 0 && prefs[0].summary_theme) {
         summaryTheme = prefs[0].summary_theme;
+        signatureStrokes = prefs[0].signature_strokes || "";
       }
     } catch {
       // Sin preferencia, usar default
@@ -82,6 +84,7 @@ export default async function(req: Request): Promise<Response> {
       doctor_id: summary.doctor_id,
       storefront_slug: storefrontSlug,
       summary_theme: summaryTheme,
+      signature_strokes: signatureStrokes,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

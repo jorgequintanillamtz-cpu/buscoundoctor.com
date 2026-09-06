@@ -126,6 +126,7 @@ export default function ConsultSummaryPublic() {
               doctorName={data.doctor_name}
               doctorPhoto={data.doctor_photo}
               font={data.summary_theme === "handwritten_caveat" ? "caveat" : "kalam"}
+              signatureStrokes={data.signature_strokes}
             >
               <PublicReviewBlock consultSummaryId={id} variant="light" />
             </HandwrittenSummary>

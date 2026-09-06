@@ -17,6 +17,11 @@
       ],
       "default": "handwritten_caveat",
       "description": "default = dise\u00f1o cl\u00e1sico (fondo azul marino, tarjeta semitransparente, sin fuente manuscrita). handwritten_kalam = receta escrita a mano con fuente Kalam (mano imprenta). handwritten_caveat = receta escrita a mano con fuente Caveat (cursiva)."
+    },
+    "signature_strokes": {
+      "type": "string",
+      "title": "Firma del doctor (trazos JSON)",
+      "description": "Trazos de la firma en formato JSON: array de strokes, cada stroke es un array de puntos {x, y} normalizados 0-1. Se anima en la p\u00e1gina p\u00fablica del resumen como si se estuviera escribiendo."
     }
   },
   "required": [

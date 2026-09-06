@@ -12,11 +12,13 @@ import {
   FileText,
   Send,
   Palette,
+  PenTool,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import SignaturePad from "@/components/consult/SignaturePad";
 
 /**
  * Página del panel del doctor para crear y enviar resúmenes de consulta.
@@ -45,6 +47,7 @@ export default function DoctorConsultSummaries() {
   const [prefTheme, setPrefTheme] = useState("handwritten_caveat");
   const [prefId, setPrefId] = useState(null);
   const [prefSaving, setPrefSaving] = useState(false);
+  const [signatureStrokes, setSignatureStrokes] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -89,6 +92,7 @@ export default function DoctorConsultSummaries() {
       if (prefs && prefs.length > 0) {
         setPrefId(prefs[0].id);
         setPrefTheme(prefs[0].summary_theme || "handwritten_caveat");
+        setSignatureStrokes(prefs[0].signature_strokes || "");
       }
     } catch {
       // Sin preferencia, usar default
@@ -118,6 +122,28 @@ export default function DoctorConsultSummaries() {
       toast.error("Error al guardar: " + err.message);
     } finally {
       setPrefSaving(false);
+    }
+  };
+
+  const handleSaveSignature = async (newStrokes) => {
+    const strokesJson = newStrokes.length > 0 ? JSON.stringify(newStrokes) : "";
+    try {
+      if (prefId) {
+        await base44.entities.DoctorConsultPreferences.update(prefId, {
+          signature_strokes: strokesJson,
+        });
+      } else {
+        const created = await base44.entities.DoctorConsultPreferences.create({
+          doctor_id: specialistId,
+          summary_theme: prefTheme,
+          signature_strokes: strokesJson,
+        });
+        if (created?.id) setPrefId(created.id);
+      }
+      setSignatureStrokes(strokesJson);
+      toast.success("Firma guardada");
+    } catch (err) {
+      toast.error("Error al guardar: " + err.message);
     }
   };
 
@@ -286,6 +312,16 @@ export default function DoctorConsultSummaries() {
               Guardando…
             </p>
           )}
+        </div>
+
+        {/* Firma del doctor */}
+        <div className="bg-card rounded-2xl border border-border p-5 mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <PenTool className="w-4 h-4 text-primary" />
+            <h3 className="font-heading font-semibold text-sm text-foreground">Tu firma</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">Dibuja tu firma una vez. Se animará al final del resumen de tus pacientes como si la estuvieras escribiendo.</p>
+          <SignaturePad onSave={handleSaveSignature} initialStrokes={signatureStrokes} />
         </div>
 
         {/* Formulario */}

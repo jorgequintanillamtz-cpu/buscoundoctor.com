@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import SignaturePlayback from "./SignaturePlayback";
 
 /**
  * Diseño "receta escrita a mano" para el resumen de consulta.
@@ -8,9 +9,17 @@ import React, { useState, useEffect } from "react";
  * - Texto del resumen en fuente manuscrita (Kalam o Caveat según pref).
  * - Efecto máquina de escribir: el texto se revela progresivamente al cargar,
  *   con un cursor tipo punta de pluma. Respeta prefers-reduced-motion.
- * - Solo el resumen lleva este estilo; la reseña y productos se quedan normales.
+ * - La firma del doctor se anima al final del resumen (esquina inferior derecha).
+ * - La sección de calificación aparece solo después de terminar de escribir.
  */
-export default function HandwrittenSummary({ summaryText, doctorName, doctorPhoto, font = "kalam", children }) {
+export default function HandwrittenSummary({
+  summaryText,
+  doctorName,
+  doctorPhoto,
+  font = "kalam",
+  signatureStrokes,
+  children,
+}) {
   const fontFamily = font === "caveat" ? "'Caveat', cursive" : "'Kalam', cursive";
   const fontSize = font === "caveat" ? "22px" : "18px";
 
@@ -19,7 +28,6 @@ export default function HandwrittenSummary({ summaryText, doctorName, doctorPhot
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    // Respeta prefers-reduced-motion: muestra todo de inmediato
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) {
       setDisplayedText(summaryText);
@@ -30,7 +38,7 @@ export default function HandwrittenSummary({ summaryText, doctorName, doctorPhot
     setDisplayedText("");
     setIsTyping(true);
     let index = 0;
-    const speed = 35; // ms por carácter
+    const speed = 35;
     const interval = setInterval(() => {
       if (index < summaryText.length) {
         setDisplayedText(summaryText.slice(0, index + 1));
@@ -100,8 +108,15 @@ export default function HandwrittenSummary({ summaryText, doctorName, doctorPhot
         )}
       </p>
 
-      {/* Reseña */}
-      {children && (
+      {/* Firma del doctor (esquina inferior derecha, después de escribir) */}
+      {signatureStrokes && !isTyping && (
+        <div className="flex justify-end mt-4">
+          <SignaturePlayback strokesJson={signatureStrokes} width={180} height={90} />
+        </div>
+      )}
+
+      {/* Reseña — solo aparece después de que termina de escribir */}
+      {children && !isTyping && (
         <div className="mt-5 pt-4" style={{ borderTop: "1px solid #DCE9FF" }}>
           {children}
         </div>
