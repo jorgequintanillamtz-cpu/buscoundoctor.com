@@ -134,8 +134,8 @@ export default function HandwrittenSummary({
         <div className="flex justify-end mt-4">
           <SignaturePlayback
             strokesJson={signatureStrokes}
-            width={180}
-            height={90}
+            width={144}
+            height={72}
             onComplete={handleSignatureComplete}
           />
         </div>

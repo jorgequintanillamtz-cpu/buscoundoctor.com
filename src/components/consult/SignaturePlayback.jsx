@@ -68,7 +68,7 @@ export default function SignaturePlayback({ strokesJson, width = 180, height = 9
       (sum, s) => sum + Math.max(0, s.length - 1),
       0
     );
-    const segmentsPerFrame = Math.max(1, Math.ceil(totalSegments / 90));
+    const segmentsPerFrame = Math.max(1, Math.ceil(totalSegments / 144));
 
     let strokeIdx = 0;
     let pointIdx = 1;
