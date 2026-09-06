@@ -95,7 +95,7 @@ export default function PublicReviewBlock({ consultSummaryId, variant = "dark" }
         <CheckCircle2 className="w-6 h-6 mx-auto mb-2" style={{ color: checkColor }} />
         <p className={"text-sm font-medium mb-2 " + textClass}>¡Gracias por tu calificación!</p>
         <div className="flex justify-center">
-          <StarRating value={existingReview.rating || 0} readOnly size={24} variant={variant} />
+          <StarRating value={existingReview.rating || 0} readOnly size={19} variant={variant} />
         </div>
       </div>
     );
@@ -110,7 +110,7 @@ export default function PublicReviewBlock({ consultSummaryId, variant = "dark" }
         </div>
       ) : (
         <div className="flex justify-center">
-          <StarRating onChange={handleSubmit} size={32} variant={variant} />
+          <StarRating onChange={handleSubmit} size={26} variant={variant} />
         </div>
       )}
       {error && <p className={"text-xs mt-2 " + errorClass}>{error}</p>}
