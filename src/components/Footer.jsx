@@ -16,7 +16,7 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center mb-4">
               <img
-                src="https://media.base44.com/images/public/69daf616236dcba44672309d/9f4cfcd01_buscoundoctor.webp"
+                src="https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/logo-buscoundoctor.webp"
                 alt="BuscoUnDoctor"
                 className="h-[42px] w-auto"
               />

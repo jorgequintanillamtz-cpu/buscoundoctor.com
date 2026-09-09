@@ -1,6 +1,7 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap } from "lucide-react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
+import { base44 } from "@/api/base44Client";
 
 // Agrupado por secciones (en vez de una lista plana de 13 links) para que
 // el menú se pueda escanear de un vistazo: Resumen primero; luego
@@ -88,12 +89,15 @@ export default function AdminLayout() {
 
 function AdminLayoutContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { pendingCounts } = useAdminBadges();
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path;
     return location.pathname.startsWith(item.path);
   };
+
+  const handleLogout = () => base44.auth.logout(false).then(() => navigate("/"));
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,6 +136,16 @@ function AdminLayoutContent() {
               </div>
             ))}
           </nav>
+          <div className="p-3 border-t border-border/50">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Cerrar sesión
+            </button>
+          </div>
         </aside>
 
         <div className="flex-1 min-h-screen">
@@ -142,6 +156,14 @@ function AdminLayoutContent() {
                 Sitio
               </Link>
               <h2 className="font-heading font-bold text-foreground">Admin</h2>
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Cerrar sesión"
+                className="flex items-center gap-1.5 text-xs text-muted-foreground"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
             <div className="flex gap-1 overflow-x-auto pb-1 -mx-1 px-1">
               {adminNavItems.map((item) => (

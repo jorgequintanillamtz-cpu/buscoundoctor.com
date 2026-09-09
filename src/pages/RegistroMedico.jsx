@@ -31,6 +31,17 @@ function GoogleIcon(props) {
   );
 }
 
+function MicrosoftIcon(props) {
+  return (
+    <svg viewBox="0 0 21 21" width="18" height="18" {...props}>
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+    </svg>
+  );
+}
+
 const STEP_KEYS = ["datos", "ubicacion", "fotos", "cuenta"];
 
 const EMPTY_DATA = EMPTY_REGISTRO_DATA;
@@ -222,9 +233,9 @@ export default function RegistroMedico() {
     setStepIndex((i) => Math.max(i - 1, 0));
   };
 
-  const continueWithGoogle = () => {
+  const continueWithProvider = (provider) => {
     localStorage.setItem(PENDING_KEY, JSON.stringify({ ...data, draft_id: draftId || undefined }));
-    base44.auth.loginWithProvider("google", window.location.href);
+    base44.auth.loginWithProvider(provider, window.location.href);
   };
 
   const submitEmailForm = async (e) => {
@@ -335,9 +346,13 @@ export default function RegistroMedico() {
 
             {stepKey === "cuenta" && (
               <StepShell title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
-                <Button type="button" onClick={continueWithGoogle} variant="outline" className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2 border-border">
+                <Button type="button" onClick={() => continueWithProvider("google")} variant="outline" className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2 border-border">
                   <GoogleIcon />
                   Continuar con Google
+                </Button>
+                <Button type="button" onClick={() => continueWithProvider("microsoft")} variant="outline" className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2 border-border">
+                  <MicrosoftIcon />
+                  Continuar con Microsoft
                 </Button>
                 <div className="sm:col-span-2 flex items-center gap-3 py-1">
                   <div className="h-px bg-border flex-1" />

@@ -32,7 +32,7 @@ function setCanonicalLink(href) {
 
 // Imagen que se muestra en la vista previa cuando se comparte el enlace por
 // WhatsApp u otras redes (Open Graph) -- misma imagen que usa /para-medicos.
-const HERO_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
+const HERO_IMAGE = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/hero-para-medicos.png";
 
 // Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar
 // cómo se ve un perfil; el perfil completo es ficticio. Misma foto que usa

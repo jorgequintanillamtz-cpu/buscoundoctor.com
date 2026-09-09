@@ -63,7 +63,7 @@ export default function AdminCatalogos() {
     if (!file) return;
     setUploadingLogo(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "site-assets" });
       setInsurerForm((prev) => ({ ...prev, logo_url: file_url }));
     } catch (err) {
       toast.error("Error al subir el logo: " + err.message);

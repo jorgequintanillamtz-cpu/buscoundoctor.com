@@ -90,7 +90,7 @@ export default function BlogEditorMain({ form, update }) {
     setUploadingFeatured(true);
     try {
       const optimized = await fileToWebP(file);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized, bucket: "blog-images" });
       update("image", file_url);
       if (!form.image_alt) update("image_alt", form.title || "imagen destacada");
       toast.success("Imagen destacada cargada");
@@ -109,7 +109,7 @@ export default function BlogEditorMain({ form, update }) {
     setUploadingInline(true);
     try {
       const optimized = await fileToWebP(file);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: optimized, bucket: "blog-images" });
       const suggestedAlt = window.prompt("Describe brevemente esta imagen (alt text para SEO y accesibilidad):", file.name.split(".")[0]) || file.name.split(".")[0];
       const el = contentRef.current;
       const s = el ? el.selectionStart : (form.content || "").length;

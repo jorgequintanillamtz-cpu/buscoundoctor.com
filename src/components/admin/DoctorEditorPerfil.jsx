@@ -114,7 +114,7 @@ export default function DoctorEditorPerfil({ form, update }) {
     if (!file) return;
     setUploadingVideo(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "specialist-videos" });
       update("video_url", file_url);
       toast.success("Video cargado");
     } catch { toast.error("Error al subir video"); }

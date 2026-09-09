@@ -1,6 +1,6 @@
 // Open Graph / Twitter card helpers for client-side meta tag management.
 
-const DEFAULT_OG_IMAGE = "https://media.base44.com/images/public/69daf616236dcba44672309d/cc72aad07_generated_image.png";
+const DEFAULT_OG_IMAGE = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/hero-para-medicos.png";
 
 // Generic site-level fallback values (applied by the global Layout).
 export const SITE_OG = {

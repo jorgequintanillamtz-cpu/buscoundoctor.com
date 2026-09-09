@@ -36,9 +36,10 @@ function DocTypeCard({ type, doc, isAdmin, user, specialist, onUploaded, onRevie
     if (!file) { toast.error("Selecciona un archivo primero"); return; }
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const specialistId = doc?.specialist_id || onUploaded.specialistId;
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "specialist-documents", folder: specialistId });
       await base44.entities.SpecialistDocument.create({
-        specialist_id: doc?.specialist_id || onUploaded.specialistId,
+        specialist_id: specialistId,
         owner_user_id: specialist?.owner_user_id || null,
         document_type: type.value,
         file_url,

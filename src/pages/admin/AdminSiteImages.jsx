@@ -105,7 +105,7 @@ export default function AdminSiteImages() {
     if (!file) return;
     setUploadingHero(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "site-assets" });
       await saveSettings({ hero_image_url: file_url });
     } catch { toast.error("Error al subir la imagen"); }
     setUploadingHero(false);
@@ -117,7 +117,7 @@ export default function AdminSiteImages() {
     if (!file) return;
     setUploadingOg(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "site-assets" });
       await saveSettings({ og_image_url: file_url });
     } catch { toast.error("Error al subir la imagen"); }
     setUploadingOg(false);
@@ -129,7 +129,7 @@ export default function AdminSiteImages() {
     if (!file) return;
     setUploadingFamily(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "site-assets" });
       await saveSettings({ family_photo_url: file_url });
     } catch { toast.error("Error al subir la imagen"); }
     setUploadingFamily(false);
@@ -141,7 +141,7 @@ export default function AdminSiteImages() {
     if (!file) return;
     setUploadingDoctor(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file, bucket: "site-assets" });
       await saveSettings({ doctor_photo_url: file_url });
     } catch { toast.error("Error al subir la imagen"); }
     setUploadingDoctor(false);
@@ -154,7 +154,7 @@ export default function AdminSiteImages() {
     setUploadingHomeCardFor(specialty.id);
     try {
       const cropped = await cropToRatioWebp(file);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: cropped });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: cropped, bucket: "site-assets" });
       setSpecialties((prev) => prev.map((s) => (s.id === specialty.id ? { ...s, home_card_image_url: file_url } : s)));
       await base44.entities.Specialty.update(specialty.id, { home_card_image_url: file_url });
       toast.success(`Imagen de "${specialty.name}" actualizada`);

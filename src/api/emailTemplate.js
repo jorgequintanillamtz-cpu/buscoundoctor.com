@@ -27,7 +27,7 @@ export const SITE_URL = "https://buscoundoctor.com";
 // alfa, y el logo terminaba viéndose con un fondo sólido en vez de
 // transparente. PNG tiene soporte universal de transparencia en correo.
 export const LOGO_URL =
-  "https://base44.app/api/apps/69daf616236dcba44672309d/files/mp/public/69daf616236dcba44672309d/493678fd4_buscoundoctor-logo.png";
+  "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/email-logo.png";
 
 const INK = "#101828";
 const INK_MUTED = "#475467";
@@ -101,13 +101,14 @@ export function infoBox(label, text, tone = "red") {
 // Iconos generados para cada paso del correo de bienvenida (planos, en los
 // colores de marca, subidos al storage de la plataforma). Viven aquí para
 // que doctorNotify.js solo tenga que referenciarlos por nombre.
+const SITE_ASSETS_BASE = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets";
 export const STEP_ICONS = {
-  cedula: "https://media.base44.com/images/public/69daf616236dcba44672309d/0dc3ab7b1_generated_image.png",
-  biografia: "https://media.base44.com/images/public/69daf616236dcba44672309d/1ef57c620_generated_image.png",
-  zona: "https://media.base44.com/images/public/69daf616236dcba44672309d/7bf1e1f1b_generated_image.png",
-  formacion: "https://media.base44.com/images/public/69daf616236dcba44672309d/885688158_generated_image.png",
-  aseguradoras: "https://media.base44.com/images/public/69daf616236dcba44672309d/53f0eb4be_generated_image.png",
-  servicios: "https://media.base44.com/images/public/69daf616236dcba44672309d/59e74a669_generated_image.png",
+  cedula: `${SITE_ASSETS_BASE}/email-icon-cedula.png`,
+  biografia: `${SITE_ASSETS_BASE}/email-icon-biografia.png`,
+  zona: `${SITE_ASSETS_BASE}/email-icon-zona.png`,
+  formacion: `${SITE_ASSETS_BASE}/email-icon-formacion.png`,
+  aseguradoras: `${SITE_ASSETS_BASE}/email-icon-aseguradoras.png`,
+  servicios: `${SITE_ASSETS_BASE}/email-icon-servicios.png`,
 };
 
 // Un paso ilustrado (para el correo de bienvenida: "completa tu perfil paso
