@@ -59,7 +59,18 @@ function AlertKpiCard({ label, value, active }) {
 }
 
 const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
-const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—");
+// `payment_date` viene de una columna `date` de Postgres ("YYYY-MM-DD", sin
+// hora): `new Date("YYYY-MM-DD")` la interpreta como medianoche UTC, y en
+// zonas horarias detrás de UTC (como México) eso se muestra como el día
+// anterior. Si la fecha viene sin hora, se ancla a medianoche local en vez
+// de UTC. Los campos con hora/zona (timestamptz, como trial_ends_at) se
+// parsean normal, ya representan un instante absoluto real.
+const fmtDate = (d) => {
+  if (!d) return "—";
+  const isDateOnly = typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
+  const date = isDateOnly ? new Date(`${d}T00:00:00`) : new Date(d);
+  return date.toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
+};
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // Con pruebas de 1/3/12 meses, mostrar el conteo en días se ve raro para
@@ -313,7 +324,15 @@ export default function AdminPremium() {
             dueDate = new Date(now.getFullYear(), now.getMonth() - 1, billingDay);
           }
           const lastPayment = revenueByDoctor[doc.id]?.last || null;
-          const isUpToDate = !!(lastPayment && new Date(lastPayment) >= dueDate);
+          // `lastPayment` es "YYYY-MM-DD" (columna `date`, sin hora). Comparar
+          // como texto contra la fecha de corte (también reducida a
+          // "YYYY-MM-DD" desde sus propios getFullYear/getMonth/getDate, no
+          // re-parseada) evita el mismo desfase de zona horaria que `fmtDate`:
+          // `new Date("YYYY-MM-DD") >= dueDate` fallaba en México porque el
+          // string se interpreta como medianoche UTC, 6 horas antes de la
+          // medianoche local de `dueDate`.
+          const dueDateStr = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, "0")}-${String(dueDate.getDate()).padStart(2, "0")}`;
+          const isUpToDate = !!(lastPayment && lastPayment >= dueDateStr);
           const daysLate = isUpToDate ? 0 : Math.max(0, differenceInCalendarDays(now, dueDate));
 
           // Modo prueba: mientras dure, el doctor no cuenta en las métricas de

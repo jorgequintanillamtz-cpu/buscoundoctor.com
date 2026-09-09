@@ -80,7 +80,14 @@ export function computeLateDoctors(specialists, payments, now = new Date()) {
         dueDate = new Date(now.getFullYear(), now.getMonth() - 1, billingDay);
       }
       const lastPayment = lastPaymentByDoctor[doc.id] || null;
-      const isUpToDate = !!(lastPayment && new Date(lastPayment) >= dueDate);
+      // `lastPayment` es "YYYY-MM-DD" (columna `date`, sin hora); comparar
+      // como texto contra la fecha de corte reducida al mismo formato evita
+      // el desfase de zona horaria de `new Date("YYYY-MM-DD") >= dueDate`
+      // (el string se interpreta como medianoche UTC, no medianoche local —
+      // en México eso corría la fecha de corte un día, marcando pagos del
+      // mismo día como atrasados). Mismo fix que en AdminPremium.jsx.
+      const dueDateStr = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, "0")}-${String(dueDate.getDate()).padStart(2, "0")}`;
+      const isUpToDate = !!(lastPayment && lastPayment >= dueDateStr);
       const daysLate = isUpToDate ? 0 : Math.max(0, differenceInCalendarDays(now, dueDate));
       return { ...doc, rate: doc.monthly_amount || DEFAULT_RATE, isTrial, isUpToDate, daysLate };
     })
