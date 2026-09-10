@@ -222,7 +222,7 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
         />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Correo electrónico"
           value={form.buyer_email}
           onChange={(e) => setForm({ ...form, buyer_email: e.target.value })}
           className="w-full px-3 py-2.5 rounded-xl text-sm text-white placeholder-white/40 outline-none"

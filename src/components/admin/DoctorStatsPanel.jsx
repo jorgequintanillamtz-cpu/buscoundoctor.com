@@ -12,7 +12,7 @@ import {
 import { es } from "date-fns/locale";
 
 const SOURCE_PAGE_LABELS = {
-  home: "Home",
+  home: "Inicio",
   directorio: "Directorio (/especialistas)",
   especialidad: "Página de especialidad",
   especialidad_zona: "Especialidad + zona",

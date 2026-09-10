@@ -322,7 +322,7 @@ export default function DoctorEditorPerfil({ form, update }) {
             <Input value={form.whatsapp} onChange={e => update("whatsapp", e.target.value)} className="rounded-xl" placeholder="528112345678" />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1.5 block">Email</label>
+            <label className="text-sm font-medium mb-1.5 block">Correo electrónico</label>
             <Input type="email" value={form.email} onChange={e => update("email", e.target.value)} className="rounded-xl" placeholder="doctor@ejemplo.com" />
           </div>
           <div>
