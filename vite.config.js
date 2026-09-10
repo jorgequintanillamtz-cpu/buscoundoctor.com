@@ -16,5 +16,14 @@ export default defineConfig({
       visualEditAgent: true
     }),
     react(),
-  ]
+  ],
+  resolve: {
+    alias: {
+      // moment's bare import and its per-locale files resolve to different
+      // physical files (dist/moment.js vs moment.js), so esbuild treats them
+      // as separate module instances and moment.locale('es') never sticks.
+      // The "with-locales" build is the single file both paths should share.
+      moment: 'moment/min/moment-with-locales.js',
+    },
+  },
 });
