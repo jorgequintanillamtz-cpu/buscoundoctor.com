@@ -418,10 +418,26 @@ async function invokeLLM() {
   );
 }
 
-async function sendEmail() {
-  throw new Error(
-    'El envío de correo todavía no está disponible: falta configurar Resend (pendiente, ver plan Fase 5).'
-  );
+// El HTML del correo ya se construye en el cliente (doctorNotify.js /
+// emailTemplate.js, o Contact.jsx) reusando el mismo diseño de siempre —
+// aquí solo se entrega. El destinatario NUNCA se manda desde el cliente: la
+// función send_transactional_email lo resuelve ella misma a partir de
+// specialistId (o usa el correo fijo del admin para "contacto_publico"),
+// así esta ruta no se puede usar para mandar correo a una dirección
+// arbitraria. La llave de Resend vive solo en el servidor (Vault de
+// Supabase), nunca llega al navegador.
+async function sendEmail({ type, specialistId, subject, body }) {
+  const { data, error } = await supabase.rpc('send_transactional_email', {
+    p_type: type,
+    p_subject: subject,
+    p_html: body,
+    p_specialist_id: specialistId || null,
+  });
+  if (error) throw error;
+  if (!data?.success) {
+    throw new Error(data?.reason === 'rate_limited' ? 'Límite de envíos alcanzado' : (data?.reason || 'No se pudo enviar el correo'));
+  }
+  return data;
 }
 
 export const base44 = {

@@ -4,7 +4,7 @@ import { Mail, MapPin, Clock, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { logEmail } from "@/api/emailLog";
+import { renderEmail, detailTable, detailRow, esc, escMultiline } from "@/api/emailTemplate";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
@@ -89,18 +89,23 @@ export default function Contact() {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
     setSending(true);
-    const to = "contacto@buscoundoctor.com";
     const subject = `Mensaje de contacto de ${form.name}`;
+    const html = renderEmail({
+      preheader: `Nuevo mensaje de contacto de ${form.name}`,
+      badge: "Formulario de contacto",
+      title: "Nuevo mensaje de contacto",
+      bodyHtml: `
+        ${detailTable([
+          detailRow("Nombre", esc(form.name)),
+          detailRow("Correo", esc(form.email)),
+        ])}
+        <p style="margin:20px 0 0;font-size:14.5px;line-height:1.65;">${escMultiline(form.message)}</p>
+      `,
+    });
     try {
-      await base44.integrations.Core.SendEmail({
-        to,
-        subject,
-        body: `Nombre: ${form.name}\nEmail: ${form.email}\n\nMensaje:\n${form.message}`,
-      });
-      logEmail({ to, subject, type: "contacto_publico", status: "sent" });
+      await base44.integrations.Core.SendEmail({ type: "contacto_publico", subject, body: html });
       setSent(true);
     } catch (err) {
-      logEmail({ to, subject, type: "contacto_publico", status: "failed", error: err?.message || err });
       toast.error("No se pudo enviar tu mensaje. Intenta de nuevo.");
     }
     setSending(false);

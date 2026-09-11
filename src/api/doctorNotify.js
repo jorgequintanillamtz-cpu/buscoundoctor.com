@@ -1,5 +1,4 @@
 import { base44 } from "@/api/base44Client";
-import { logEmail } from "@/api/emailLog";
 import {
   SITE_URL,
   renderEmail,
@@ -26,42 +25,20 @@ import {
 const SITE_NAME = "BuscoUnDoctor";
 const PANEL_URL = `${SITE_URL}/panel-medico`;
 
-// Los avisos siempre deben ir al correo con el que el doctor se registró
-// e inició sesión (la cuenta User ligada vía owner_user_id) — es el único
-// que sabemos que existe y que el doctor de verdad revisa, porque Base44 lo
-// verifica al crear la cuenta. El campo "email" de Specialist es un dato de
-// contacto público opcional que el doctor puede dejar vacío, cambiar o
-// escribir mal, así que solo se usa como último recurso para perfiles sin
-// cuenta propia (ej. perfiles cargados y administrados solo por el admin).
-async function resolveDoctorEmail(doc) {
-  if (doc?.owner_user_id) {
-    try {
-      const owner = await base44.entities.User.get(doc.owner_user_id);
-      if (owner?.email) return owner.email;
-    } catch (e) {
-      console.error("No se pudo resolver el email de la cuenta del doctor:", e);
-    }
-  }
-  return doc?.email || null;
-}
-
 // Devuelve true/false para que quien llama (ej. un botón "reenviar aviso" en
 // el admin) pueda avisar honestamente si en verdad se mandó el correo, en
 // vez de asumir éxito solo porque la llamada no lanzó una excepción.
 //
-// "type" identifica la razón del envío (bienvenida, aprobación, etc.) para
-// que la bitácora EmailLog / vista "Correos enviados" del admin lo pueda
-// mostrar y filtrar. Se registra tanto si el correo sale bien como si falla.
+// El destinatario real y el registro en la bitácora los resuelve
+// send_transactional_email del lado del servidor (a partir de doc.id) — el
+// cliente nunca decide a qué correo se manda, solo arma el HTML.
 async function sendNotification(doc, subject, html, type) {
-  const email = await resolveDoctorEmail(doc);
-  if (!email) return false;
+  if (!doc?.id) return false;
   try {
-    await base44.integrations.Core.SendEmail({ to: email, subject, body: html, from_name: SITE_NAME });
-    logEmail({ to: email, subject, type, specialistId: doc?.id, specialistName: doc?.full_name, status: "sent" });
+    await base44.integrations.Core.SendEmail({ type, specialistId: doc.id, subject, body: html });
     return true;
   } catch (e) {
     console.error("No se pudo enviar el aviso por correo al doctor:", e);
-    logEmail({ to: email, subject, type, specialistId: doc?.id, specialistName: doc?.full_name, status: "failed", error: e?.message || e });
     return false;
   }
 }
