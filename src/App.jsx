@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -8,64 +9,84 @@ import { AuthProvider } from '@/lib/AuthContext';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
-import Home from './pages/Home';
-import SpecialistList from './pages/SpecialistList';
-import SpecialistProfile from './pages/SpecialistProfile';
-import SpecialtyPage from './pages/SpecialtyPage';
-import SpecialtyZonePage from './pages/SpecialtyZonePage';
-import SubspecialtyPage from './pages/SubspecialtyPage';
-import ConditionsPage from './pages/ConditionsPage';
-import ConditionDetailPage from './pages/ConditionDetailPage';
-import BlogList from './pages/BlogList';
-import BlogPostPage from './pages/BlogPostPage';
-import Dashboard from './pages/admin/Dashboard';
-import AdminInbox from './pages/admin/AdminInbox';
-import AdminVerificaciones from './pages/admin/AdminVerificaciones';
-import AdminSolicitudes from './pages/admin/AdminSolicitudes';
-import AdminCorreos from './pages/admin/AdminCorreos';
-import AdminCatalogos from './pages/admin/AdminCatalogos';
-import AdminEnfermedades from './pages/admin/AdminEnfermedades';
-import AdminSubespecialidades from './pages/admin/AdminSubespecialidades';
-import AdminPremium from './pages/admin/AdminPremium';
-import AdminSpecialties from './pages/admin/AdminSpecialties';
-import AdminZones from './pages/admin/AdminZones';
-import AdminSiteImages from './pages/admin/AdminSiteImages';
-import AdminBlog from './pages/admin/AdminBlog';
-import BlogEditor from './pages/admin/BlogEditor.jsx';
-import AdminReviews from './pages/admin/AdminReviews';
-import AdminDoctores from './pages/admin/AdminDoctores';
-import AdminHistorial from './pages/admin/AdminHistorial';
-import AdminVistaRegistro from './pages/admin/AdminVistaRegistro';
-import AdminDoctorEditor from './pages/admin/AdminDoctorEditor';
 import RequireAdmin from './components/RequireAdmin';
-import DoctorPanel from './pages/DoctorPanel';
-import AdminFaqs from './pages/admin/AdminFaqs';
-import AdminFaqEditor from './pages/admin/AdminFaqEditor';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import RegistroMedico from './pages/RegistroMedico';
-import PreguntasFrecuentes from './pages/PreguntasFrecuentes';
-import ChequeosMedicos from './pages/ChequeosMedicos';
-import PricingPage from './pages/PricingPage';
-import AdminPlanes from './pages/admin/AdminPlanes';
-import LandingMedicos from './pages/LandingMedicos';
-import DoctoresRegistro from './pages/DoctoresRegistro';
-import StorefrontPublic from './pages/StorefrontPublic';
-import StorefrontProductDetail from './pages/StorefrontProductDetail';
-import DoctorStorefrontEditor from './pages/DoctorStorefrontEditor';
-import DoctorProducts from './pages/DoctorProducts';
-import DoctorPayments from './pages/DoctorPayments';
-import DoctorConsultSummaries from './pages/DoctorConsultSummaries';
-import ConsultSummaryPublic from './pages/ConsultSummaryPublic';
-import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
-import CondicionesGenerales from './pages/CondicionesGenerales';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
 import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
-import IniciarSesion from './pages/IniciarSesion';
+import { Stethoscope } from 'lucide-react';
+
+// Cada página se carga en su propio bloque de código, bajo demanda, en vez de
+// venir toda junta en un solo archivo de ~700KB que cualquier visitante
+// descargaba completo aunque solo quisiera leer un artículo del blog. Esto
+// no cambia ningún comportamiento -- Route ya monta/desmonta estos
+// componentes igual que antes, solo que ahora el navegador pide el código de
+// cada uno la primera vez que se visita esa ruta.
+const Home = lazy(() => import('./pages/Home'));
+const SpecialistList = lazy(() => import('./pages/SpecialistList'));
+const SpecialistProfile = lazy(() => import('./pages/SpecialistProfile'));
+const SpecialtyPage = lazy(() => import('./pages/SpecialtyPage'));
+const SpecialtyZonePage = lazy(() => import('./pages/SpecialtyZonePage'));
+const SubspecialtyPage = lazy(() => import('./pages/SubspecialtyPage'));
+const ConditionsPage = lazy(() => import('./pages/ConditionsPage'));
+const ConditionDetailPage = lazy(() => import('./pages/ConditionDetailPage'));
+const BlogList = lazy(() => import('./pages/BlogList'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminInbox = lazy(() => import('./pages/admin/AdminInbox'));
+const AdminVerificaciones = lazy(() => import('./pages/admin/AdminVerificaciones'));
+const AdminSolicitudes = lazy(() => import('./pages/admin/AdminSolicitudes'));
+const AdminCorreos = lazy(() => import('./pages/admin/AdminCorreos'));
+const AdminCatalogos = lazy(() => import('./pages/admin/AdminCatalogos'));
+const AdminEnfermedades = lazy(() => import('./pages/admin/AdminEnfermedades'));
+const AdminSubespecialidades = lazy(() => import('./pages/admin/AdminSubespecialidades'));
+const AdminPremium = lazy(() => import('./pages/admin/AdminPremium'));
+const AdminSpecialties = lazy(() => import('./pages/admin/AdminSpecialties'));
+const AdminZones = lazy(() => import('./pages/admin/AdminZones'));
+const AdminSiteImages = lazy(() => import('./pages/admin/AdminSiteImages'));
+const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
+const BlogEditor = lazy(() => import('./pages/admin/BlogEditor.jsx'));
+const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
+const AdminDoctores = lazy(() => import('./pages/admin/AdminDoctores'));
+const AdminHistorial = lazy(() => import('./pages/admin/AdminHistorial'));
+const AdminVistaRegistro = lazy(() => import('./pages/admin/AdminVistaRegistro'));
+const AdminDoctorEditor = lazy(() => import('./pages/admin/AdminDoctorEditor'));
+const DoctorPanel = lazy(() => import('./pages/DoctorPanel'));
+const AdminFaqs = lazy(() => import('./pages/admin/AdminFaqs'));
+const AdminFaqEditor = lazy(() => import('./pages/admin/AdminFaqEditor'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const RegistroMedico = lazy(() => import('./pages/RegistroMedico'));
+const PreguntasFrecuentes = lazy(() => import('./pages/PreguntasFrecuentes'));
+const ChequeosMedicos = lazy(() => import('./pages/ChequeosMedicos'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
+const AdminPlanes = lazy(() => import('./pages/admin/AdminPlanes'));
+const LandingMedicos = lazy(() => import('./pages/LandingMedicos'));
+const DoctoresRegistro = lazy(() => import('./pages/DoctoresRegistro'));
+const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
+const StorefrontProductDetail = lazy(() => import('./pages/StorefrontProductDetail'));
+const DoctorStorefrontEditor = lazy(() => import('./pages/DoctorStorefrontEditor'));
+const DoctorProducts = lazy(() => import('./pages/DoctorProducts'));
+const DoctorPayments = lazy(() => import('./pages/DoctorPayments'));
+const DoctorConsultSummaries = lazy(() => import('./pages/DoctorConsultSummaries'));
+const ConsultSummaryPublic = lazy(() => import('./pages/ConsultSummaryPublic'));
+const AvisoDePrivacidad = lazy(() => import('./pages/AvisoDePrivacidad'));
+const CondicionesGenerales = lazy(() => import('./pages/CondicionesGenerales'));
+const IniciarSesion = lazy(() => import('./pages/IniciarSesion'));
+
+// Mismo ícono/estilo que ya se usaba como estado de carga en
+// LegacySpecialtyRedirect -- se ve igual de familiar durante la primera
+// carga de cualquier página, no un spinner genérico distinto.
+function RouteFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+    </div>
+  );
+}
 
 const AuthenticatedApp = () => {
   return (
-    <Routes>
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
@@ -158,7 +179,8 @@ const AuthenticatedApp = () => {
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 };
 
