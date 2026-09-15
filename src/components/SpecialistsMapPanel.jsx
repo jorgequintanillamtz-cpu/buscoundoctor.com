@@ -157,7 +157,7 @@ export default function SpecialistsMapPanel({ specialists }) {
       <div className="flex items-center gap-2.5 mb-1.5">
         <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
           {specialist.profile_photo ? (
-            <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" />
+            <img src={specialist.profile_photo} alt={specialist.full_name} loading="lazy" className="w-full h-full object-cover object-top" />
           ) : (
             <Initials specialist={specialist} className="text-[10px]" />
           )}
@@ -248,7 +248,7 @@ export default function SpecialistsMapPanel({ specialists }) {
                   }`}>
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0">
                     {specialist.profile_photo ? (
-                      <img src={specialist.profile_photo} alt={specialist.full_name} className="w-full h-full object-cover object-top" />
+                      <img src={specialist.profile_photo} alt={specialist.full_name} loading="lazy" className="w-full h-full object-cover object-top" />
                     ) : (
                       <Initials specialist={specialist} className="text-sm" />
                     )}

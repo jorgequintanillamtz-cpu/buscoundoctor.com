@@ -30,7 +30,7 @@ export default function SpecialistPosts({ specialistId }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {posts.map((p) => (
           <div key={p.id} className="border border-border/50 rounded-2xl overflow-hidden">
-            <img src={p.image_url} alt={p.caption} className="w-full h-44 object-cover" />
+            <img src={p.image_url} alt={p.caption} loading="lazy" className="w-full h-44 object-cover" />
             <div className="p-3">
               <p className="text-sm text-foreground leading-relaxed">{p.caption}</p>
               <p className="text-xs text-muted-foreground mt-1.5">

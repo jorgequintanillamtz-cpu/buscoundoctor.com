@@ -483,7 +483,7 @@ export default function SpecialistProfile() {
                   <div className="flex flex-wrap gap-2">
                     {resolvedInsurers.map((ins, i) => (
                       <span key={i} className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                        {ins.logo_url && <img src={ins.logo_url} alt={ins.name} className="w-4 h-4 object-contain" />}
+                        {ins.logo_url && <img src={ins.logo_url} alt={ins.name} loading="lazy" className="w-4 h-4 object-contain" />}
                         {ins.name}
                       </span>
                     ))}

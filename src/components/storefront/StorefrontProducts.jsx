@@ -48,7 +48,7 @@ function ProductCard({ product, theme, storefrontSlug }) {
         style={{ background: theme.deep }}
       >
         {cover ? (
-          <img src={cover} alt={product.title} className="w-full h-full object-cover" />
+          <img src={cover} alt={product.title} loading="lazy" className="w-full h-full object-cover" />
         ) : (
           <BookOpen className="w-6 h-6 text-white/70" />
         )}

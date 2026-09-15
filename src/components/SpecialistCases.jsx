@@ -32,11 +32,11 @@ export default function SpecialistCases({ specialistId }) {
           <div key={c.id} className="border border-border/50 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-2">
               <div className="relative">
-                <img src={c.before_photo} alt={`Antes — ${c.title}`} className="w-full h-32 sm:h-40 object-cover" />
+                <img src={c.before_photo} alt={`Antes — ${c.title}`} loading="lazy" className="w-full h-32 sm:h-40 object-cover" />
                 <span className="absolute bottom-1.5 left-1.5 text-[10px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded">Antes</span>
               </div>
               <div className="relative">
-                <img src={c.after_photo} alt={`Después — ${c.title}`} className="w-full h-32 sm:h-40 object-cover" />
+                <img src={c.after_photo} alt={`Después — ${c.title}`} loading="lazy" className="w-full h-32 sm:h-40 object-cover" />
                 <span className="absolute bottom-1.5 left-1.5 text-[10px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded">Después</span>
               </div>
             </div>

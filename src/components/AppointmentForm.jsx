@@ -93,7 +93,7 @@ Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${for
         {/* Foto de portada del médico */}
         <div className="relative w-full h-44 sm:h-52 rounded-t-3xl overflow-hidden flex-shrink-0">
           {specialist.profile_photo ? (
-            <img src={specialist.profile_photo} alt={`Foto de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
+            <img src={specialist.profile_photo} alt={`Foto de ${specialist.full_name}`} loading="lazy" className="w-full h-full object-cover object-top" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
               <span className="font-heading font-bold text-4xl text-primary/40">{initials}</span>

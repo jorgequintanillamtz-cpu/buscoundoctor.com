@@ -357,7 +357,7 @@ export default function BlogPostPage() {
                 : <pre className="bg-muted p-4 rounded-xl overflow-x-auto mb-4"><code className="font-mono text-sm">{children}</code></pre>,
               pre: ({children}) => <>{children}</>,
               a: ({href, children}) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline">{children}</a>,
-              img: ({src, alt}) => <img src={src} alt={alt || post.title} className="rounded-xl max-w-full my-4" />,
+              img: ({src, alt}) => <img src={src} alt={alt || post.title} loading="lazy" className="rounded-xl max-w-full my-4" />,
               hr: () => <hr className="border-0 border-t border-border my-8" />,
               strong: ({children}) => <strong className="font-bold">{children}</strong>,
               em: ({children}) => <em className="italic">{children}</em>,
@@ -369,7 +369,7 @@ export default function BlogPostPage() {
       {post.author && post.author_bio && (
         <div className="mt-10 flex items-start gap-4 bg-card border border-border/50 rounded-2xl p-5">
           {post.author_photo && (
-            <img src={post.author_photo} alt={post.author} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
+            <img src={post.author_photo} alt={post.author} loading="lazy" className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
           )}
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Sobre el autor</p>

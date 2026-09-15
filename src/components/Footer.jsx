@@ -18,6 +18,7 @@ export default function Footer() {
               <img
                 src="https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/logo-buscoundoctor.webp"
                 alt="BuscoUnDoctor"
+                loading="lazy"
                 className="h-[42px] w-auto"
               />
             </Link>

@@ -532,7 +532,7 @@ export default function Home() {
                   // que la tarjeta): se muestra completa y el nombre va arriba,
                   // en el espacio azul que deja la composición de la foto.
                   <>
-                    <img src={s.home_card_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <img src={s.home_card_image_url} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
                     <span className="absolute top-3 inset-x-0 text-center font-heading font-extrabold text-xl text-white">{s.display_name || s.name}</span>
                   </>
                 ) : (
@@ -565,6 +565,7 @@ export default function Home() {
                       <img
                         src={s.home_card_image_url}
                         alt=""
+                        loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <span className="absolute top-4 inset-x-0 text-center font-heading font-extrabold text-2xl text-white">{s.display_name || s.name}</span>
@@ -709,6 +710,7 @@ export default function Home() {
               <img
                 src={familyPhotoUrl}
                 alt="Agendar en BuscoUnDoctor es gratis para pacientes"
+                loading="lazy"
                 className="w-full h-auto rounded-3xl shadow-sm"
               />
             )}
@@ -717,6 +719,7 @@ export default function Home() {
                 <img
                   src={doctorPhotoUrl}
                   alt="Regístrate como doctor en BuscoUnDoctor"
+                  loading="lazy"
                   className="w-full h-auto rounded-3xl shadow-sm"
                 />
               </Link>
@@ -739,6 +742,7 @@ export default function Home() {
           <img
             src={familyPhotoUrl}
             alt="Agendar en BuscoUnDoctor es gratis para pacientes"
+            loading="lazy"
             className="w-full h-auto rounded-2xl"
           />
         )}
@@ -747,6 +751,7 @@ export default function Home() {
             <img
               src={doctorPhotoUrl}
               alt="Regístrate como doctor en BuscoUnDoctor"
+              loading="lazy"
               className="w-full h-auto rounded-2xl"
             />
           </Link>

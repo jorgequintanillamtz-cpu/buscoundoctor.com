@@ -421,7 +421,7 @@ export default function LandingMedicos() {
             <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-blue/10 rounded-full pointer-events-none" />
             <div className="relative grid md:grid-cols-[auto,1fr] gap-6 md:gap-8 items-center">
               <div className="flex justify-center md:justify-start">
-                <img src="/logo.webp" alt="" className="h-14 sm:h-16 w-auto object-contain flex-shrink-0" />
+                <img src="/logo.webp" alt="" loading="lazy" className="h-14 sm:h-16 w-auto object-contain flex-shrink-0" />
               </div>
               <div className="text-center md:text-left">
                 <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">

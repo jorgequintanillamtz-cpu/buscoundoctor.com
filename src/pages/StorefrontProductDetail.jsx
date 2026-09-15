@@ -161,7 +161,7 @@ export default function StorefrontProductDetail() {
                       opacity: i === activeImg ? 1 : 0.6,
                     }}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" loading="lazy" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
