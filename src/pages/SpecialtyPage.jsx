@@ -9,6 +9,7 @@ import { rankSpecialists } from "@/lib/specialistRanking";
 import { slugify } from "@/lib/citySlug";
 import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
+import SpecialtyInterestForm from "@/components/SpecialtyInterestForm";
 import CountdownBox from "@/components/CountdownBox";
 import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 import {
@@ -357,6 +358,16 @@ export default function SpecialtyPage() {
                   <CountdownBox value={countdown.seconds} label="Seg" compact />
                 </div>
               )}
+
+              <div className="pt-5 border-t border-border/50">
+                <p className="text-sm font-medium text-foreground mb-2">
+                  ¿Buscas {(specialty.display_name || specialty.name).toLowerCase()} en {cityName}?
+                </p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Déjanos tu correo y te avisamos en cuanto tengamos especialistas verificados disponibles aquí.
+                </p>
+                <SpecialtyInterestForm specialtyName={specialty.display_name || specialty.name} cityName={cityName} />
+              </div>
 
               <div className="pt-5 border-t border-border/50 flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
                 <UserPlus className="w-5 h-5 text-brand-blue flex-shrink-0 hidden sm:block" />
