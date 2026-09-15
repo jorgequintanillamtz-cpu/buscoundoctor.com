@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import Layout from './components/Layout';
@@ -12,6 +12,7 @@ import ScrollToTop from './components/ScrollToTop';
 import RequireAdmin from './components/RequireAdmin';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
 import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
+import DoctorSupportWhatsApp from './components/DoctorSupportWhatsApp';
 import { Stethoscope } from 'lucide-react';
 
 // Cada página se carga en su propio bloque de código, bajo demanda, en vez de
@@ -84,7 +85,15 @@ function RouteFallback() {
 }
 
 const AuthenticatedApp = () => {
+  const location = useLocation();
+  // Botón flotante de WhatsApp visible en todo el panel del doctor (incluye
+  // /panel-medico/storefront, /panel-medico/resumen, etc.) -- ver
+  // DoctorSupportWhatsApp.jsx. No aplica al panel de administración ni al
+  // sitio público, donde el contacto ya vive en la página de Contacto/Footer.
+  const isDoctorPanel = location.pathname.startsWith('/panel-medico');
   return (
+    <>
+    {isDoctorPanel && <DoctorSupportWhatsApp />}
     <Suspense fallback={<RouteFallback />}>
       <Routes>
       <Route element={<Layout />}>
@@ -181,6 +190,7 @@ const AuthenticatedApp = () => {
       <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>
+    </>
   );
 };
 
