@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight } from "lucide-react";
+import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight, Activity, Newspaper, HelpCircle, Info, Mail } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -330,17 +330,66 @@ export default function Header() {
             </button>
           </div>
           <nav className="flex flex-col px-4 sm:px-6 overflow-y-auto flex-1">
+            <p className="pt-5 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Navegación
+            </p>
+            <Link
+              to="/especialistas"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <Stethoscope className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Especialistas
+            </Link>
+            <Link
+              to="/enfermedades"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <Activity className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Enfermedades
+            </Link>
+            <Link
+              to="/blog"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <Newspaper className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Blog
+            </Link>
+            <Link
+              to="/preguntas-frecuentes"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <HelpCircle className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Preguntas frecuentes
+            </Link>
+            <Link
+              to="/nosotros"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <Info className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Nosotros
+            </Link>
+            <Link
+              to="/contacto"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <Mail className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Contacto
+            </Link>
+
+            <p className="pt-5 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Para médicos
+            </p>
             <Link
               to="/panel-medico"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 py-4 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
               <LogIn className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
               Iniciar sesión
             </Link>
             <Link
               to="/registro-medico"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-between py-4 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              className="flex items-center justify-between py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
               <span className="flex items-center gap-3">
                 <UserPlus className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
                 Crear cuenta nueva
