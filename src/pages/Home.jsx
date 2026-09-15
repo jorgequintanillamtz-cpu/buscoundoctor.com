@@ -403,15 +403,31 @@ export default function Home() {
           {/* Pills de especialidades populares: flotando debajo del buscador,
               sin tarjeta que las contenga, como en la referencia. */}
           <div className="flex flex-wrap items-center justify-center gap-2.5 mt-7 sm:mt-6">
-            {sortByPopularity(specialties).slice(0, 8).map((s) => (
-              <Link
-                key={s.id}
-                to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
-                className="text-sm sm:text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors rounded-full px-3 py-1.5"
-              >
-                {s.display_name || s.name}
-              </Link>
-            ))}
+            {specialties.length === 0 ? (
+              // Mientras no llegan las especialidades reales, se reserva el
+              // mismo espacio con pastillas mudas (mismo alto/padding que las
+              // reales) -- si esta fila arrancara vacía y de golpe aparecieran
+              // 8 pastillas, todo el bloque del Hero se recorre verticalmente
+              // (está centrado con flex) justo cuando el usuario ya lo está
+              // viendo -- eso es lo que Google mide como CLS.
+              Array.from({ length: 8 }).map((_, i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  className="inline-block h-[30px] sm:h-[34px] w-20 sm:w-24 rounded-full bg-white/10 border border-white/10"
+                />
+              ))
+            ) : (
+              sortByPopularity(specialties).slice(0, 8).map((s) => (
+                <Link
+                  key={s.id}
+                  to={`/${s.profession_slug}/${resolveCitySlug(zones)}`}
+                  className="text-sm sm:text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors rounded-full px-3 py-1.5"
+                >
+                  {s.display_name || s.name}
+                </Link>
+              ))
+            )}
             <Link
               to="/especialistas"
               className="text-sm sm:text-base font-medium text-brand-navy bg-white hover:bg-white/90 transition-colors rounded-full px-3 py-1.5"
