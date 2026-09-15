@@ -301,14 +301,17 @@ export default function Home() {
     metaDesc.setAttribute('content', "Encuentra especialistas verificados en Monterrey y San Pedro Garza García. Busca por especialidad y zona, compara perfiles con cédula profesional verificada y contacta directo.");
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
-      </div>);
-
-  }
-
+  // El Hero (justo abajo) se pinta siempre, sin esperar a que carguen
+  // specialties/zones/etc: al ocupar min-h-[100dvh] deja el resto del
+  // contenido (y el Footer, que vive fuera de esta página en Layout.jsx)
+  // fuera de la pantalla inicial desde el primer render. Si en cambio se
+  // esperaba a los datos con una pantalla de carga chica (como antes), el
+  // Footer aparecía visible unos instantes muy arriba y luego brincaba miles
+  // de píxeles hacia abajo en cuanto cargaba el resto -- ese brinco es
+  // justo lo que Google mide como CLS (Cumulative Layout Shift) y lo que
+  // bajaba la calificación de velocidad móvil. El resto de las secciones
+  // (debajo del Hero) si esperan a `loading` -- están fuera de pantalla al
+  // cargar, así que no hay brinco visible que penalice.
   return (
     <div>
       {/* Hero: rediseño estilo Doctoralia — el header comparte el mismo azul
@@ -459,6 +462,8 @@ export default function Home() {
         </p>
 
       </section>
+
+      {!loading && <>
 
       {/* Franja de confianza: mismo formato que la barra de datos (+36M
           visitas, +390K profesionales...) que Doctoralia pone justo debajo
@@ -873,6 +878,8 @@ export default function Home() {
         </div>
         </section>
       }
+
+      </>}
     </div>);
 
 }
