@@ -265,9 +265,11 @@ export default function ConditionDetailPage() {
       .filter((s) => s.items.length > 0);
   }, [condition]);
 
+  // min-h-[100dvh]: evita que el Footer se vea antes de tiempo y brinque al
+  // cargar el contenido real (mismo arreglo que Home.jsx/SpecialtyPage.jsx).
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[100dvh]">
         <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
