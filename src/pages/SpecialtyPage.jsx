@@ -173,9 +173,16 @@ export default function SpecialtyPage() {
   const activeFilters = [filterModality, filterPrice].filter(Boolean).length;
   const clearFilters = () => { setFilterModality(""); setFilterPrice(""); };
 
+  // min-h-[100dvh] (no un valor chico como 60vh) a propósito: mientras carga,
+  // esta pantalla debe ocupar por lo menos toda la altura visible, para que
+  // el Footer (que vive fuera de esta página, en Layout.jsx) nunca quede a
+  // la vista todavía. Si el loader fuera más corto que la pantalla, el
+  // Footer aparecería visible un instante arriba y luego brincaría muy abajo
+  // en cuanto cargara el contenido real -- eso es justo el "brinco" (CLS)
+  // que ya se corrigió con la misma idea en Home.jsx.
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[100dvh]">
         <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
