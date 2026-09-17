@@ -379,10 +379,14 @@ export default function RegistroMedico() {
               <Logo to="/" className="h-9 mx-auto mb-3" />
               <h1 className="font-heading font-bold text-xl text-foreground">Verifica tu correo</h1>
               <p className="text-sm text-muted-foreground">
-                Ingresa el código de 6 dígitos que enviamos a <span className="font-medium text-foreground">{emailForm.email}</span>
+                Ingresa el código de verificación que enviamos a <span className="font-medium text-foreground">{emailForm.email}</span>
               </p>
             </div>
-            <Input value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Código de verificación" className="rounded-xl text-center tracking-widest text-lg" maxLength={6} />
+            {/* Sin maxLength fijo: Supabase genera el código con la longitud
+                que tenga configurada (hoy 8 dígitos, no los 6 "de siempre"),
+                y cortar el valor capturado rompía la verificación porque el
+                código que el usuario veía nunca coincidía con el real. */}
+            <Input value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Código de verificación" className="rounded-xl text-center tracking-widest text-lg" />
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}
             <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -400,14 +404,31 @@ export default function RegistroMedico() {
             <p className="text-sm text-muted-foreground">
               Tu perfil ya tiene tu información básica y va a pasar a revisión. Esto apenas empieza.
             </p>
-            <div className="bg-accent/40 border border-accent rounded-2xl p-4 text-left flex gap-3">
-              <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-foreground">
-                Aún puedes dar de alta muchas cosas más: formación académica, documentos y cédula, más servicios y precios, idiomas, aseguradoras que aceptas, y hasta publicaciones y casos de éxito. Entre más completo esté tu perfil, más confianza le genera a tus pacientes — y mejor te posiciona Google. Revisa tu “Score de SEO” en el panel para ver exactamente qué te falta.
+            <div className="bg-accent/40 border border-accent rounded-2xl p-4 text-left">
+              <p className="text-sm font-medium text-foreground flex items-center gap-2 mb-2.5">
+                <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
+                Esto apenas empieza — aún te falta subir:
+              </p>
+              <ul className="text-sm text-foreground space-y-1.5 mb-3">
+                {[
+                  "Formación académica",
+                  "Documentos y cédula profesional",
+                  "Más servicios y precios",
+                  "Idiomas y aseguradoras que aceptas",
+                  "Publicaciones y casos de éxito",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground">
+                Entre más completo esté tu perfil, más confianza le genera a tus pacientes y mejor te posiciona Google. Revisa tu "Score de SEO" en el panel para ver exactamente qué te falta.
               </p>
             </div>
             <Button onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl">
-              Ir a mi panel
+              Terminar mi perfil
             </Button>
           </div>
         )}
