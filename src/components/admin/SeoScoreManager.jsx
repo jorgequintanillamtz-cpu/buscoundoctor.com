@@ -87,23 +87,25 @@ export default function SeoScoreManager({ seoScore = 0, checklist, onNavigate })
         {CHECKLIST_ITEMS.map((item) => {
           const done = !!checklist?.[item.key];
           return (
-            <div key={item.key} className="flex items-start gap-4 p-5">
-              <div className="flex-shrink-0 mt-0.5">
-                {done ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                ) : (
-                  <Circle className="w-5 h-5 text-muted-foreground/40" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-semibold ${done ? "text-foreground" : "text-foreground"}`}>{item.label}</p>
-                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.hint}</p>
+            <div key={item.key} className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-5">
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className="flex-shrink-0 mt-0.5">
+                  {done ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-muted-foreground/40" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-semibold ${done ? "text-foreground" : "text-foreground"}`}>{item.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.hint}</p>
+                </div>
               </div>
               {!done && (
                 <button
                   type="button"
                   onClick={() => onNavigate?.(item.target)}
-                  className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline whitespace-nowrap mt-0.5"
+                  className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline whitespace-nowrap ml-9 sm:ml-0 sm:mt-0.5"
                 >
                   {item.cta}
                   <ArrowRight className="w-3.5 h-3.5" />

@@ -187,7 +187,7 @@ export default function DoctorPanel() {
           </button>
         </div>
       </aside>
-      <div className="flex-1 min-h-screen">
+      <div className="flex-1 min-w-0 min-h-screen">
         <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
             <ArrowLeft className="w-4 h-4" />
@@ -323,7 +323,7 @@ export default function DoctorPanel() {
         </div>
       </aside>
 
-      <div className="flex-1 min-h-screen">
+      <div className="flex-1 min-w-0 min-h-screen">
         {/* Barra superior en móvil: título + navegación en píldoras horizontales */}
         <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3">
           <div className="flex items-center justify-between mb-3">
