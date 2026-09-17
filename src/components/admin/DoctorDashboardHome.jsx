@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, BarChart3, ExternalLink, Stethoscope } from "lucide-react";
+import { TrendingUp, BarChart3, ExternalLink, Stethoscope, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -31,7 +31,7 @@ function KpiCard({ value, label, sub }) {
   );
 }
 
-export default function DoctorDashboardHome({ specialist, isOwnProfile = true }) {
+export default function DoctorDashboardHome({ specialist, isOwnProfile = true, onNavigate }) {
   const specialistId = specialist?.id;
   const [range, setRange] = useState("30d"); // "7d" | "30d" | "12m"
 
@@ -146,6 +146,30 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true })
           )}
         </div>
       </div>
+
+      {/* Aviso de perfil incompleto: lo primero que ve un médico nuevo aquí
+          eran puros ceros (todavía sin visitas ni clicks reales), sin ninguna
+          pista de qué hacer -- aunque el correo de bienvenida ya le había
+          dicho "revisa tu Score de SEO en el panel". Ese score vivía solo en
+          la pestaña "seo", que nadie visita sin que se lo señalen. */}
+      {isOwnProfile && (specialist?.seo_score ?? 0) < 100 && (
+        <div className="bg-brand-navy rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0" />
+              <p className="text-sm font-heading font-semibold text-white">Tu perfil está {specialist?.seo_score || 0}% completo</p>
+            </div>
+            <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden mb-2">
+              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${specialist?.seo_score || 0}%` }} />
+            </div>
+            <p className="text-xs text-white/70">Entre más completo esté, más confianza le genera a tus pacientes y mejor te posiciona Google.</p>
+          </div>
+          <Button onClick={() => onNavigate?.("seo")} className="rounded-xl gap-1.5 bg-white text-brand-navy hover:bg-white/90 flex-shrink-0 w-full sm:w-auto">
+            Completar mi perfil
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">

@@ -22,6 +22,7 @@ import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import SeoScoreManager from "@/components/admin/SeoScoreManager";
+import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
@@ -73,6 +74,7 @@ export default function DoctorPanel() {
   const [lastSaved, setLastSaved] = useState(null);
   const [section, setSection] = useState("resumen");
   const [seoChecklist, setSeoChecklist] = useState(null);
+  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
   const recalcScoreShared = useRecalculateScore(setForm);
 
   const recalculateScore = async (idOverride) => {
@@ -113,6 +115,7 @@ export default function DoctorPanel() {
         gallery: specialist.gallery || [],
       });
       setStatus("ready");
+      if (!specialist.has_seen_welcome_tour) setShowWelcomeTour(true);
       // Calcula el score/checklist de SEO desde el primer momento, no solo tras guardar.
       recalculateScore(specialist.id);
     })();
@@ -140,6 +143,24 @@ export default function DoctorPanel() {
       toast.error("Error al guardar: " + e.message);
     }
     setSaving(false);
+  };
+
+  // Se guarda directo en la base de datos para que quede marcado de
+  // inmediato, sin depender de que el doctor llegue a guardar cambios en
+  // algún otro momento -- pero TAMBIÉN hay que actualizar el form local
+  // (update), porque el autoguardado de useAutoSaveSpecialist manda el
+  // form COMPLETO cada 30s (buildData hace spread de todos los campos) --
+  // si no se actualiza aquí, ese autoguardado reescribe el campo de vuelta
+  // a `false` en cuanto corre, y el popup vuelve a aparecer la próxima vez.
+  const finishWelcomeTour = async () => {
+    setShowWelcomeTour(false);
+    setSection("seo");
+    update("has_seen_welcome_tour", true);
+    try {
+      await base44.entities.Specialist.update(specialistId, { has_seen_welcome_tour: true });
+    } catch {
+      // Silencioso: en el peor caso vuelve a aparecer la próxima vez, no es grave.
+    }
   };
 
   // ---- Estados sin perfil listo: se muestran dentro del mismo shell oscuro ----
@@ -216,6 +237,8 @@ export default function DoctorPanel() {
   // ---- Panel listo: la barra lateral incluye TODA la navegación ----
   return (
     <div className="min-h-screen bg-background flex">
+      <WelcomeTourModal open={showWelcomeTour} onFinish={finishWelcomeTour} />
+
       <aside className="hidden lg:flex w-72 flex-col bg-brand-navy min-h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
           <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
@@ -375,7 +398,7 @@ export default function DoctorPanel() {
               </div>
             </div>
 
-            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} />}
+            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} />}
             {section === "seo" && <SeoScoreManager seoScore={form.seo_score || 0} checklist={seoChecklist} onNavigate={setSection} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
             {section === "plan" && <DoctorPremiumStatus specialistId={specialistId} specialistName={form.full_name} />}
