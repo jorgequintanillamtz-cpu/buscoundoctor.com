@@ -72,6 +72,7 @@ const ConsultSummaryPublic = lazy(() => import('./pages/ConsultSummaryPublic'));
 const AvisoDePrivacidad = lazy(() => import('./pages/AvisoDePrivacidad'));
 const CondicionesGenerales = lazy(() => import('./pages/CondicionesGenerales'));
 const IniciarSesion = lazy(() => import('./pages/IniciarSesion'));
+const OlvideContrasena = lazy(() => import('./pages/OlvideContrasena'));
 
 // Mismo ícono/estilo que ya se usaba como estado de carga en
 // LegacySpecialtyRedirect -- se ve igual de familiar durante la primera
@@ -117,6 +118,7 @@ const AuthenticatedApp = () => {
         <Route path="/contacto" element={<Contact />} />
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/iniciar-sesion" element={<IniciarSesion />} />
+        <Route path="/olvide-contrasena" element={<OlvideContrasena />} />
         <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
         <Route path="/chequeos-medicos" element={<ChequeosMedicos />} />
         <Route path="/planes" element={<PricingPage />} />

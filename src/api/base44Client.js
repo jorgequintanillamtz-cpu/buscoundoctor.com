@@ -322,6 +322,17 @@ async function verifyOtp({ email, otpCode }) {
   return data;
 }
 
+// Mismo mecanismo que verifyOtp, pero para el código de "recupera tu
+// contraseña" (type: 'recovery') -- un código independiente del de
+// registro, aunque comparten la misma idea: nada de enlaces de un solo uso,
+// que los escáneres de seguridad de Gmail/Outlook "gastan" solos antes de
+// que la persona le dé clic (ver requestPasswordReset).
+async function verifyPasswordResetOtp({ email, otpCode }) {
+  const { data, error } = await supabase.auth.verifyOtp({ email, token: otpCode, type: 'recovery' });
+  if (error) throw error;
+  return data;
+}
+
 async function loginViaEmailPassword(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
@@ -338,6 +349,22 @@ async function loginWithProvider(provider, returnUrl) {
   });
   if (error) throw error;
   return data;
+}
+
+// Manda el correo de "recupera tu contraseña" con un código de 6 dígitos
+// (igual que el registro) -- ver OlvideContrasena.jsx y
+// verifyPasswordResetOtp para por qué es un código y no un enlace.
+async function requestPasswordReset(email) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  if (error) throw error;
+}
+
+// Solo funciona justo después de verifyPasswordResetOtp, que deja una
+// sesión temporal activa -- no sirve para que un usuario ya logueado
+// cambie su contraseña desde otro lado del sitio.
+async function updatePassword(newPassword) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
 }
 
 async function updateMe(fields) {
@@ -453,6 +480,9 @@ export const base44 = {
     loginViaEmailPassword,
     loginWithProvider,
     updateMe,
+    requestPasswordReset,
+    verifyPasswordResetOtp,
+    updatePassword,
   },
   functions: { invoke },
   integrations: {

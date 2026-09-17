@@ -57,6 +57,7 @@ export default function IniciarSesion() {
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Iniciar sesión
             </Button>
+            <Link to="/olvide-contrasena" className="text-center text-xs text-primary hover:underline">¿Olvidaste tu contraseña?</Link>
           </form>
 
           <p className="sm:col-span-2 text-center text-xs text-muted-foreground">
