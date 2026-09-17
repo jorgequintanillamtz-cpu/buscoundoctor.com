@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu, Globe, Package, CreditCard, ClipboardList } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu, Globe, Package, CreditCard, ClipboardList, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -62,7 +62,6 @@ const SECTION_GROUPS = [
     { key: "blog", label: "Escribir blog", icon: PenLine, requiresSaved: true },
   ]},
 ];
-const SECTIONS = SECTION_GROUPS.flatMap((g) => g.items);
 
 export default function DoctorPanel() {
   const navigate = useNavigate();
@@ -75,6 +74,7 @@ export default function DoctorPanel() {
   const [section, setSection] = useState("resumen");
   const [seoChecklist, setSeoChecklist] = useState(null);
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const recalcScoreShared = useRecalculateScore(setForm);
 
   const recalculateScore = async (idOverride) => {
@@ -121,6 +121,11 @@ export default function DoctorPanel() {
     })();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileNavOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileNavOpen]);
 
   useAutoSaveSpecialist({
     enabled: status === "ready",
@@ -324,49 +329,120 @@ export default function DoctorPanel() {
       </aside>
 
       <div className="flex-1 min-w-0 min-h-screen">
-        {/* Barra superior en móvil: título + navegación en píldoras horizontales */}
-        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
-              <ArrowLeft className="w-4 h-4" />
-              Sitio
-            </Link>
-            <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
-            <div className="w-10" />
+        {/* Barra superior en móvil: título + botón de hamburguesa que despliega el mismo menú lateral que en escritorio */}
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
+            <ArrowLeft className="w-4 h-4" />
+            Sitio
+          </Link>
+          <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="Abrir menú"
+            className="w-10 h-10 -mr-2 flex items-center justify-center text-white/80 hover:text-white"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Menú lateral en móvil: mismas secciones que la barra lateral de escritorio */}
+        <div
+          className={`lg:hidden fixed inset-0 z-[60] bg-brand-navy flex flex-col transform transition-transform duration-300 ease-in-out will-change-transform ${
+            mobileNavOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+          }`}
+          aria-hidden={!mobileNavOpen}
+        >
+          <div className="p-5 border-b border-white/10 flex items-start justify-between flex-shrink-0">
+            <div>
+              <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4" onClick={() => setMobileNavOpen(false)}>
+                <ArrowLeft className="w-4 h-4" />
+                Volver al sitio
+              </Link>
+              <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
+              <p className="text-xs text-white/50 mt-1">Administra tu perfil en BuscoUnDoctor.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(false)}
+              aria-label="Cerrar menú"
+              className="p-2 -mt-2 -mr-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors flex-shrink-0"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
-            <Link to="/panel-medico/storefront" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
-              <Globe className="w-3.5 h-3.5" />
-              Mi página
+
+          <div className="px-5 pt-4 flex-shrink-0">
+            <div className="flex justify-between text-xs mb-1.5">
+              <span className="font-medium text-white/50">Completitud</span>
+              <span className={`font-semibold ${completitud >= 80 ? "text-emerald-400" : completitud >= 50 ? "text-amber-400" : "text-red-400"}`}>{completitud}%</span>
+            </div>
+            <div className="w-full bg-white/10 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all duration-500 ${completitud >= 80 ? "bg-emerald-400" : completitud >= 50 ? "bg-amber-400" : "bg-red-400"}`}
+                style={{ width: `${completitud}%` }}
+              />
+            </div>
+          </div>
+
+          <nav className="flex-1 p-3 overflow-y-auto">
+            {SECTION_GROUPS.map((g) => (
+              <div key={g.group} className="flex flex-col gap-0.5 mb-3">
+                <p className="text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 text-white/40">{g.group}</p>
+                {g.items.map((s) => {
+                  const locked = s.requiresSaved && !isEditing;
+                  return (
+                    <button
+                      key={s.key}
+                      type="button"
+                      disabled={locked}
+                      onClick={() => { setSection(s.key); setMobileNavOpen(false); }}
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
+                        section === s.key
+                          ? "bg-brand-blue text-white"
+                          : locked
+                          ? "text-white/25 cursor-not-allowed"
+                          : "text-white/70 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <s.icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1">{s.label}</span>
+                      {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+
+          <div className="px-3 pb-2 space-y-0.5 flex-shrink-0">
+            <Link to="/panel-medico/storefront" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+              <Globe className="w-4 h-4 flex-shrink-0" />
+              Mi página pública
             </Link>
-            <Link to="/panel-medico/productos" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
-              <Package className="w-3.5 h-3.5" />
-              Productos
+            <Link to="/panel-medico/productos" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+              <Package className="w-4 h-4 flex-shrink-0" />
+              Productos digitales
             </Link>
-            <Link to="/panel-medico/pagos" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
-              <CreditCard className="w-3.5 h-3.5" />
-              Pagos
+            <Link to="/panel-medico/pagos" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+              <CreditCard className="w-4 h-4 flex-shrink-0" />
+              Configuración de pagos
             </Link>
-            <Link to="/panel-medico/resumen" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-white/10 text-white/70 flex-shrink-0">
-              <ClipboardList className="w-3.5 h-3.5" />
-              Resumen
+            <Link to="/panel-medico/resumen" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+              <ClipboardList className="w-4 h-4 flex-shrink-0" />
+              Resumen de consulta
             </Link>
-            {SECTIONS.map((s) => {
-              const locked = s.requiresSaved && !isEditing;
-              return (
-                <button
-                  key={s.key}
-                  disabled={locked}
-                  onClick={() => setSection(s.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                    section === s.key ? "bg-brand-blue text-white" : "bg-white/10 text-white/70"
-                  }`}
-                >
-                  <s.icon className="w-3.5 h-3.5" />
-                  {s.label}
-                </button>
-              );
-            })}
+          </div>
+
+          <div className="p-3 border-t border-white/10 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => base44.auth.logout(false).then(() => navigate("/"))}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Salir del panel
+            </button>
           </div>
         </div>
 
