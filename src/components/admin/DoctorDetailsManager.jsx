@@ -13,12 +13,22 @@ const PAYMENT_METHODS = [
   { value: "efectivo", label: "Efectivo" },
 ];
 
+// Mismos valores y etiquetas que el filtro de precio en /especialistas y
+// /especialidad/:slug (SpecialistList.jsx, SpecialtyPage.jsx) -- si cambian
+// ahí, cambiar también aquí para que coincidan.
+const PRICE_RANGES = [
+  { value: "$", label: "$ Económico" },
+  { value: "$$", label: "$$ Moderado" },
+  { value: "$$$", label: "$$$ Alto" },
+  { value: "$$$$", label: "$$$$ Premium" },
+];
+
 export default function DoctorDetailsManager({ form, update, specialistId }) {
   return (
     <div className="space-y-5">
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
         <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Detalles de consulta</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="text-xs font-medium mb-1 block">Años de experiencia</label>
             <Input
@@ -39,6 +49,18 @@ export default function DoctorDetailsManager({ form, update, specialistId }) {
               className="w-full h-9 pl-3 pr-8 text-sm bg-background border border-input rounded-xl appearance-none focus:outline-none focus:ring-1 focus:ring-ring"
             >
               {MODALIDADES.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Rango de precio</label>
+            <select
+              value={form.price_range || "$$"}
+              onChange={(e) => update("price_range", e.target.value)}
+              className="w-full h-9 pl-3 pr-8 text-sm bg-background border border-input rounded-xl appearance-none focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              {PRICE_RANGES.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>

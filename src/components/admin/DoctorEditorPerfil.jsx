@@ -329,10 +329,6 @@ export default function DoctorEditorPerfil({ form, update }) {
             <label className="text-sm font-medium mb-1.5 block">Instagram</label>
             <Input value={form.instagram} onChange={e => update("instagram", e.target.value)} className="rounded-xl" placeholder="@usuario" />
           </div>
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">Horarios</label>
-            <Input value={form.schedule} onChange={e => update("schedule", e.target.value)} className="rounded-xl" placeholder="Lunes a Viernes: 9:00 - 18:00" />
-          </div>
         </div>
       </div>
 

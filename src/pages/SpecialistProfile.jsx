@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
 import { ChevronLeft, Star, Stethoscope } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import VerifiedSeal from "../components/profile/VerifiedSeal";
 import PublicOfficeList from "../components/PublicOfficeList";
 import EducationTimeline from "../components/EducationTimeline";
@@ -343,14 +345,31 @@ export default function SpecialistProfile() {
             </div>
 
             {specialist.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed mt-4">
-                {shownDescription}
+              <div className="text-sm text-muted-foreground leading-relaxed mt-4">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    ul: ({ children }) => <ul className="list-disc pl-5 mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-5 mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                    a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-brand-blue underline">{children}</a>,
+                    h1: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
+                    h2: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
+                    h3: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
+                    img: ({ src, alt }) => <img src={src} alt={alt || ""} loading="lazy" className="rounded-xl max-w-full my-2" />,
+                  }}
+                >
+                  {shownDescription}
+                </ReactMarkdown>
                 {isLongDescription && (
-                  <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium ml-1 hover:underline">
+                  <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium hover:underline">
                     {descExpanded ? "Leer menos" : "Leer más"}
                   </button>
                 )}
-              </p>
+              </div>
             )}
           </div>
 

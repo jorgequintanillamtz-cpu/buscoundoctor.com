@@ -58,7 +58,6 @@ export const EMPTY_SPECIALIST_FORM = {
   email: "",
   instagram: "",
   modality: "presencial",
-  schedule: "",
   services: [],
   insurers_relation: [],
   conditions_relation: [],
