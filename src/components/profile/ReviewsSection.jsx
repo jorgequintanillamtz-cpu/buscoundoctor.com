@@ -14,6 +14,15 @@ function StarDisplay({ rating, size = "w-4 h-4" }) {
   );
 }
 
+// Solo se muestran las categorías que al menos un paciente se tomó la
+// molestia de calificar -- son opcionales al dejar una reseña (ver
+// ReviewForm.jsx), así que reseñas antiguas o breves no las tienen.
+const CATEGORY_FIELDS = [
+  { field: "rating_punctuality", label: "Puntualidad" },
+  { field: "rating_treatment", label: "Trato" },
+  { field: "rating_facilities", label: "Instalaciones" },
+];
+
 // Sección de opiniones estilo Airbnb: promedio + distribución por estrellas +
 // comentarios + un filtro de orden real (recientes / mejor calificadas). El
 // sello "Cliente verificado" (verified_client) lo activa un admin manualmente
@@ -40,6 +49,17 @@ export default function ReviewsSection({ specialistId, specialist }) {
       const pct = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0;
       return { star, count, pct };
     })
+  ), [reviews]);
+
+  const categoryAverages = useMemo(() => (
+    CATEGORY_FIELDS
+      .map(({ field, label }) => {
+        const rated = reviews.filter((r) => r[field] != null);
+        if (rated.length === 0) return null;
+        const avgValue = rated.reduce((a, r) => a + r[field], 0) / rated.length;
+        return { field, label, avgValue, count: rated.length };
+      })
+      .filter(Boolean)
   ), [reviews]);
 
   const sortedReviews = useMemo(() => {
@@ -89,6 +109,18 @@ export default function ReviewsSection({ specialistId, specialist }) {
             </div>
           </div>
 
+          {categoryAverages.length > 0 && (
+            <div className="flex flex-wrap gap-x-6 gap-y-2 pb-6 mb-6 border-b border-border/50">
+              {categoryAverages.map(({ field, label, avgValue }) => (
+                <div key={field} className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                  <StarDisplay rating={Math.round(avgValue)} size="w-3.5 h-3.5" />
+                  <span className="text-xs font-semibold text-foreground">{avgValue.toFixed(1)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex items-center gap-2 mb-5 flex-wrap">
             <span className="text-xs text-muted-foreground mr-1">Ordenar por:</span>
             {[{ key: "recientes", label: "Más recientes" }, { key: "mejor", label: "Mejor calificadas" }].map((opt) => (
@@ -120,6 +152,9 @@ export default function ReviewsSection({ specialistId, specialist }) {
                 </div>
                 <StarDisplay rating={r.rating} size="w-4 h-4" />
                 <p className="text-base text-foreground/80 mt-2.5 leading-relaxed">{r.comment}</p>
+                {r.photo_url && (
+                  <img src={r.photo_url} alt={`Foto de la reseña de ${r.patient_name}`} loading="lazy" className="w-24 h-24 object-cover rounded-xl border border-border/50 mt-3" />
+                )}
                 {r.verified_client && r.treatment_performed && (
                   <p className="text-xs text-muted-foreground mt-2">Consulta: {r.treatment_performed}</p>
                 )}

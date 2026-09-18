@@ -12,6 +12,7 @@ import SpecialistHighlights from "../components/SpecialistHighlights";
 import SimilarSpecialists from "../components/SimilarSpecialists";
 import SpecialistCases from "../components/SpecialistCases";
 import SpecialistPosts from "../components/SpecialistPosts";
+import DoctorArticles from "../components/profile/DoctorArticles";
 import SpecialistServices from "../components/SpecialistServices";
 import ScrollSpyNav from "../components/profile/ScrollSpyNav";
 import { usePresentSectionIds } from "@/hooks/usePresentSectionIds";
@@ -20,6 +21,7 @@ import ReviewsSection from "../components/profile/ReviewsSection";
 import FaqSection from "../components/profile/FaqSection";
 import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
+import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
 
 function setMeta(name, content) {
@@ -27,6 +29,12 @@ function setMeta(name, content) {
   if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
   el.setAttribute("content", content);
 }
+
+const MODALITY_LABELS = {
+  presencial: "Atiende presencial",
+  online: "Atiende en línea",
+  ambas: "Presencial y en línea",
+};
 
 const NAV_SECTIONS = [
   { id: "informacion", label: "Información" },
@@ -263,10 +271,13 @@ export default function SpecialistProfile() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <Link to="/especialistas" className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground bg-card border border-border/50 hover:border-border rounded-full px-3 py-1.5 transition-all mb-4 w-fit">
-        <ChevronLeft className="w-3.5 h-3.5" />
-        Especialistas
-      </Link>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <Link to="/especialistas" className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground bg-card border border-border/50 hover:border-border rounded-full px-3 py-1.5 transition-all w-fit">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          Especialistas
+        </Link>
+        <ShareProfileButton specialist={specialist} className="!min-h-0 !py-1.5 !px-3 text-xs" />
+      </div>
 
       {specialist.license_verification_status === "verified" && specialist.license_verified_at && (
         <p className="text-xs text-muted-foreground mb-3">
@@ -300,6 +311,11 @@ export default function SpecialistProfile() {
               {specialtyDisplay || specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
             </p>
+            {MODALITY_LABELS[specialist.modality] && (
+              <span className="inline-block text-xs font-semibold text-brand-blue bg-brand-bluePale rounded-full px-2.5 py-1 mt-2">
+                {MODALITY_LABELS[specialist.modality]}
+              </span>
+            )}
             {primaryOffice?.address_line && (
               <p className="text-muted-foreground text-sm mt-1">
                 {primaryOffice.address_line}
@@ -545,6 +561,9 @@ export default function SpecialistProfile() {
           </div>
           <div className="order-13 lg:order-11">
             <SpecialistPosts specialistId={specialist.id} />
+          </div>
+          <div className="order-13 lg:order-11">
+            <DoctorArticles specialistId={specialist.id} />
           </div>
 
           {/* Especialistas similares: va DENTRO de la misma columna que el resto

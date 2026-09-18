@@ -17,6 +17,12 @@ function StarDisplay({ rating }) {
   );
 }
 
+const CATEGORY_FIELDS = [
+  { field: "rating_punctuality", label: "Puntualidad" },
+  { field: "rating_treatment", label: "Trato" },
+  { field: "rating_facilities", label: "Instalaciones" },
+];
+
 // A diferencia de antes, "rechazar" ya no borra la reseña: la marca como
 // rechazada con un motivo obligatorio y queda en su propia pestaña, igual
 // que el flujo de doctores/documentos/blog. Nada se elimina de forma
@@ -175,6 +181,16 @@ export default function AdminReviews() {
                   </div>
                   <StarDisplay rating={r.rating} />
                   <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{r.comment}</p>
+                  {r.photo_url && (
+                    <img src={r.photo_url} alt={`Foto de la reseña de ${r.patient_name}`} className="w-20 h-20 object-cover rounded-xl border border-border/50 mt-2" />
+                  )}
+                  {CATEGORY_FIELDS.some((c) => r[c.field] != null) && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+                      {CATEGORY_FIELDS.filter((c) => r[c.field] != null).map((c) => (
+                        <span key={c.field} className="text-xs text-muted-foreground">{c.label}: {r[c.field]}★</span>
+                      ))}
+                    </div>
+                  )}
                   {(r.consultation_date || r.treatment_performed) && (
                     <p className="text-xs text-muted-foreground mt-2">
                       {r.treatment_performed && <span>Consulta/tratamiento reportado: {r.treatment_performed}</span>}
