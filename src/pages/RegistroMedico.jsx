@@ -249,9 +249,13 @@ export default function RegistroMedico() {
     try {
       const slug = generateSlug(data.full_name) || "doctor";
       const webpFile = await fileToWebP(file, `${slug}-foto-perfil.webp`);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: webpFile });
+      // Este paso del wizard va ANTES de crear la cuenta (datos -> ubicacion
+      // -> fotos -> cuenta), así que todavía no hay sesión ni auth.uid().
+      // "pending-registro" es una carpeta fija habilitada para subir sin
+      // sesión -- ver migración allow_anon_photo_upload_during_registration.
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: webpFile, folder: "pending-registro" });
       update("profile_photo", file_url);
-    } catch { toast.error("Error al subir la foto"); }
+    } catch (err) { console.error(err); toast.error("Error al subir la foto"); }
     setUploadingPhoto(false);
   };
 
@@ -263,9 +267,9 @@ export default function RegistroMedico() {
       const slug = generateSlug(data.full_name) || "doctor";
       const startIndex = (data.gallery || []).length;
       const webpFiles = await Promise.all(files.map((f, i) => fileToWebP(f, `${slug}-foto-${startIndex + i + 1}.webp`)));
-      const urls = await Promise.all(webpFiles.map((f) => base44.integrations.Core.UploadFile({ file: f }).then((r) => r.file_url)));
+      const urls = await Promise.all(webpFiles.map((f) => base44.integrations.Core.UploadFile({ file: f, folder: "pending-registro" }).then((r) => r.file_url)));
       update("gallery", [...(data.gallery || []), ...urls]);
-    } catch { toast.error("Error al subir las fotos"); }
+    } catch (err) { console.error(err); toast.error("Error al subir las fotos"); }
     setUploadingGallery(false);
   };
 
