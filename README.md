@@ -1,42 +1,54 @@
-**Welcome to your Base44 project** 
+# BuscoUnDoctor.com
 
-**About**
+Directorio médico para Monterrey y San Pedro Garza García (Nuevo León, México). Conecta pacientes con especialistas verificados. Sitio en producción: https://buscoundoctor.com
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+> **Si trabajas con Claude:** lee primero [`CLAUDE.md`](./CLAUDE.md). Explica cómo está armado el proyecto, las reglas del negocio y las trampas conocidas.
 
-This project contains everything you need to run your app locally.
+## Stack
 
-**Edit the code in your local development environment**
+- **Frontend:** React + Vite + Tailwind + componentes tipo shadcn/ui
+- **Datos, usuarios y archivos:** Supabase (Postgres, Auth, Storage)
+- **Hosting:** Vercel (se publica solo al subir cambios a `main`)
+- **Correo:** Resend
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+## Correrlo en tu computadora
 
-**Prerequisites:** 
+Necesitas [Node.js](https://nodejs.org) instalado.
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+1. Clona el repositorio y entra a la carpeta:
 
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
+   ```bash
+   git clone https://github.com/jorgequintanillamtz-cpu/buscoundoctor.com.git
+   cd buscoundoctor.com
+   ```
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
-```
+2. Instala las dependencias:
 
-Run the app: `npm run dev`
+   ```bash
+   npm install
+   ```
 
-**Publish your changes**
+3. Crea un archivo `.env` en la raíz con estas dos variables (pídeselas al dueño del proyecto; el archivo no se sube a git):
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+   ```
+   VITE_SUPABASE_URL=...
+   VITE_SUPABASE_ANON_KEY=...
+   ```
 
-**Docs & Support**
+   Nunca uses ni compartas la *service role key* de Supabase: no se necesita en el frontend.
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+4. Arranca el sitio:
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+   ```bash
+   npm run dev
+   ```
 
-<!-- test commit: verificando push con Claude Code -->
+   Se abre en http://localhost:5173
 
+Otros comandos: `npm run build`, `npm run lint` y `npm run typecheck`. No hay pruebas automáticas; los cambios se verifican a mano en el navegador.
+
+## Cómo publicar cambios
+
+Cada cambio que llega a la rama `main` se publica solo en producción. Lo recomendado es trabajar en una rama propia y abrir un Pull Request para que lo revise el dueño antes de publicarse.
+
+**Importante:** la base de datos de Supabase es la de producción (no hay un entorno de pruebas aparte). Cualquier dato de prueba que crees debe borrarse al terminar. `CLAUDE.md` explica cómo hacerlo con seguridad.
