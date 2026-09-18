@@ -82,8 +82,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* "clip" y no "hidden": overflow-x:hidden obliga al navegador a tratar
+     overflow-y como "auto" también (así lo define CSS cuando un eje no es
+     "visible" y el otro sí) -- eso es justo lo que rompía el
+     position:sticky de "Agendar cita" en el perfil de médico, que dejaba
+     de pegarse y desaparecía a media página. "clip" logra el mismo
+     recorte horizontal sin arrastrar al eje vertical. */
   html, body {
-    @apply overflow-x-hidden;
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground font-body;
