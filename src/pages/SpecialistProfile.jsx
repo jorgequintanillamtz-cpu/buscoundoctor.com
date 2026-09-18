@@ -37,13 +37,13 @@ const MODALITY_LABELS = {
 };
 
 const NAV_SECTIONS = [
-  { id: "informacion", label: "Información" },
   { id: "especialidades", label: "Especialidades" },
-  { id: "experiencia", label: "Experiencia" },
-  { id: "tecnologia-tratamientos", label: "Tecnología y tratamientos" },
-  { id: "estudios", label: "Estudios" },
   { id: "hospitales", label: "Hospitales" },
   { id: "servicios", label: "Servicios" },
+  { id: "informacion", label: "Información" },
+  { id: "experiencia", label: "Experiencia" },
+  { id: "estudios", label: "Estudios" },
+  { id: "tecnologia-tratamientos", label: "Tecnología y tratamientos" },
   { id: "faq", label: "Preguntas frecuentes" },
   { id: "opiniones", label: "Opiniones" },
 ];
@@ -451,7 +451,7 @@ export default function SpecialistProfile() {
         ))}
       </nav>
 
-          <div id="informacion" className="order-2 lg:order-1 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+          <div id="informacion" className="order-6 lg:order-4 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
             <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
             {specialist.video_url && (
               <div className="mt-0 mb-5">
@@ -495,12 +495,12 @@ export default function SpecialistProfile() {
           </div>
 
           {/* ESPECIALIDADES */}
-          <div className="order-3 lg:order-2">
+          <div className="order-2 lg:order-1">
             <EspecialidadesSection specialist={specialist} />
           </div>
 
           {/* EXPERIENCIA */}
-          <div className="order-4 lg:order-3">
+          <div className="order-7 lg:order-5">
             <EducationTimeline
               specialistId={specialist.id}
               variant="experiencia"
@@ -510,22 +510,22 @@ export default function SpecialistProfile() {
           </div>
 
           {/* TECNOLOGÍA Y TRATAMIENTOS */}
-          <div className="order-5 lg:order-4">
+          <div className="order-9 lg:order-7">
             <SpecialistHighlights specialistId={specialist.id} />
           </div>
 
           {/* ESTUDIOS */}
-          <div className="order-6 lg:order-5">
+          <div className="order-8 lg:order-6">
             <EducationTimeline specialistId={specialist.id} variant="estudios" />
           </div>
 
           {/* HOSPITALES */}
-          <div className="order-7 lg:order-6">
+          <div className="order-3 lg:order-2">
             <PublicOfficeList specialistId={specialist.id} />
           </div>
 
           {/* SERVICIOS */}
-          <div className="order-8 lg:order-7">
+          <div className="order-4 lg:order-3">
             <SpecialistServices specialistId={specialist.id} />
           </div>
 
@@ -534,7 +534,7 @@ export default function SpecialistProfile() {
               que en móvil no se renderiza — así el contenido sigue presente
               e indexable en el HTML que ve el rastreador mobile-first. */}
           {showMobileExtras && (
-            <div className="order-9 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
+            <div className="order-5 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
               {resolvedInsurers.length > 0 && (
                 <div>
                   <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Acepta seguros</h3>
@@ -587,21 +587,23 @@ export default function SpecialistProfile() {
             <DoctorArticles specialistId={specialist.id} />
           </div>
 
+          {/* OPINIONES: a petición de Jorge, va cerca del final del perfil
+              (mismo criterio que Amazon con las reseñas de producto), pero
+              antes de "Especialistas similares" -- Jorge prefiere que el
+              paciente vea las opiniones de ESTE doctor antes de que se le
+              ofrezcan otros doctores para comparar. */}
+          <div className="order-14 lg:order-13">
+            <ReviewsSection specialistId={specialist.id} specialist={specialist} />
+          </div>
+
           {/* Especialistas similares: va DENTRO de la misma columna que el resto
               del contenido (no como hermano fuera del grid), para que el alto de
               esta columna — y por lo tanto el rango en el que el sticky de la
               derecha se mantiene pegado — incluya también esta sección. Un sticky
               solo puede quedarse fijo mientras su propio contenedor tenga alto de
               sobra; si esta sección quedaba fuera del grid, no contaba. */}
-          <div className="order-14 lg:order-13">
-            <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
-          </div>
-
-          {/* OPINIONES: a petición de Jorge, va hasta el final del perfil
-              (mismo criterio que Amazon con las reseñas de producto), en vez
-              de justo después del hero como antes. */}
           <div className="order-15 lg:order-14">
-            <ReviewsSection specialistId={specialist.id} specialist={specialist} />
+            <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
           </div>
       </div>
 
