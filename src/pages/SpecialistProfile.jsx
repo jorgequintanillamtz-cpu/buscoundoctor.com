@@ -44,8 +44,8 @@ const NAV_SECTIONS = [
   { id: "estudios", label: "Estudios" },
   { id: "hospitales", label: "Hospitales" },
   { id: "servicios", label: "Servicios" },
-  { id: "opiniones", label: "Opiniones" },
   { id: "faq", label: "Preguntas frecuentes" },
+  { id: "opiniones", label: "Opiniones" },
 ];
 
 // Array estáble (fuera del componente) para no invalidar el useEffect del
@@ -64,6 +64,11 @@ export default function SpecialistProfile() {
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
   const [services, setServices] = useState([]);
+  // Vista rápida en el hero: años de experiencia + primeras enfermedades que
+  // trata, para que se vean sin tener que bajar hasta "Especialidades". Es
+  // un resumen -- el detalle completo (con enlaces a /enfermedades) sigue
+  // viviendo en EspecialidadesSection más abajo.
+  const [topConditions, setTopConditions] = useState([]);
   // Nombre "como lo busca el paciente" (ej. "Ginecólogo") de la especialidad
   // del doctor, resuelto contra el banco de especialidades. Cae de regreso
   // al nombre formal (specialist.specialty) si no hay match.
@@ -121,6 +126,17 @@ export default function SpecialistProfile() {
         try {
           const svcList = await base44.entities.SpecialistService.filter({ specialist_id: specialist.id });
           setServices(svcList.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
+        } catch {}
+
+        try {
+          const curated = specialist.conditions_relation || [];
+          if (curated.length > 0) {
+            const all = await base44.entities.Condition.list("name", 2000);
+            setTopConditions(curated.map((id) => all.find((c) => c.id === id)).filter(Boolean).slice(0, 4));
+          } else if (specialist.specialty) {
+            const list = await base44.entities.Condition.filter({ specialty: specialist.specialty, active: true });
+            setTopConditions(list.slice(0, 4));
+          }
         } catch {}
 
         // JSON-LD Physician. El teléfono llevaba un bug: specialist.whatsapp
@@ -316,14 +332,28 @@ export default function SpecialistProfile() {
                 {MODALITY_LABELS[specialist.modality]}
               </span>
             )}
+            {(specialist.years_experience > 0 || topConditions.length > 0) && (
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
+                {specialist.years_experience > 0 && (
+                  <span className="inline-flex items-center text-xs font-semibold text-foreground bg-muted rounded-full px-3 py-1.5 whitespace-nowrap">
+                    {specialist.years_experience} años de experiencia
+                  </span>
+                )}
+                {topConditions.map((c) => (
+                  <span key={c.id} className="text-xs font-medium bg-accent text-accent-foreground rounded-full px-3 py-1.5">
+                    {c.name}
+                  </span>
+                ))}
+              </div>
+            )}
             {primaryOffice?.address_line && (
               <p className="text-muted-foreground text-sm mt-1">
                 {primaryOffice.address_line}
               </p>
             )}
 
-            <div className="mt-4 min-h-[92px] bg-card border border-border/50 rounded-2xl px-5 py-4 max-w-xl mx-auto lg:mx-0">
-              {allReviews.length > 0 ? (
+            {allReviews.length > 0 && (
+              <div className="mt-4 min-h-[92px] bg-card border border-border/50 rounded-2xl px-5 py-4 max-w-xl mx-auto lg:mx-0">
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col items-center flex-shrink-0 pr-4 border-r border-border/50">
                     <span className="font-heading font-extrabold text-3xl text-foreground leading-none">{avgRating.toFixed(2)}</span>
@@ -355,10 +385,8 @@ export default function SpecialistProfile() {
                     )}
                   </div>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Este especialista aún no tiene reseñas.</p>
-              )}
-            </div>
+              </div>
+            )}
 
             {specialist.description && (
               <div className="text-sm text-muted-foreground leading-relaxed mt-4">
@@ -411,7 +439,7 @@ export default function SpecialistProfile() {
       {/* Quick-nav horizontal (móvil): equivalente en espíritu a "tabs", pero
           como enlaces ancla que hacen scroll — así todo el contenido sigue
           siempre renderizado y visible para Google (no ocultamos paneles). */}
-      <nav className="order-2 lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
+      <nav className="order-1 lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
         {NAV_SECTIONS.filter((s) => presentSectionIds.has(s.id)).map((s) => (
           <a
             key={s.id}
@@ -423,14 +451,7 @@ export default function SpecialistProfile() {
         ))}
       </nav>
 
-      <div className="mt-6 order-1 lg:order-7">
-          {/* OPINIONES: en el DOM permanece en el orden lógico de escritorio,
-              pero en móvil se muestra primero (order-1) por conversión —
-              exactamente lo que pidió Jorge: hero → opiniones → resto. */}
-            <ReviewsSection specialistId={specialist.id} specialist={specialist} />
-      </div>
-
-          <div id="informacion" className="order-3 lg:order-1 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+          <div id="informacion" className="order-2 lg:order-1 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
             <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
             {specialist.video_url && (
               <div className="mt-0 mb-5">
@@ -474,12 +495,12 @@ export default function SpecialistProfile() {
           </div>
 
           {/* ESPECIALIDADES */}
-          <div className="order-4 lg:order-2">
+          <div className="order-3 lg:order-2">
             <EspecialidadesSection specialist={specialist} />
           </div>
 
           {/* EXPERIENCIA */}
-          <div className="order-5 lg:order-3">
+          <div className="order-4 lg:order-3">
             <EducationTimeline
               specialistId={specialist.id}
               variant="experiencia"
@@ -489,22 +510,22 @@ export default function SpecialistProfile() {
           </div>
 
           {/* TECNOLOGÍA Y TRATAMIENTOS */}
-          <div className="order-6 lg:order-4">
+          <div className="order-5 lg:order-4">
             <SpecialistHighlights specialistId={specialist.id} />
           </div>
 
           {/* ESTUDIOS */}
-          <div className="order-7 lg:order-5">
+          <div className="order-6 lg:order-5">
             <EducationTimeline specialistId={specialist.id} variant="estudios" />
           </div>
 
           {/* HOSPITALES */}
-          <div className="order-8 lg:order-6">
+          <div className="order-7 lg:order-6">
             <PublicOfficeList specialistId={specialist.id} />
           </div>
 
           {/* SERVICIOS */}
-          <div className="order-9 lg:order-7">
+          <div className="order-8 lg:order-7">
             <SpecialistServices specialistId={specialist.id} />
           </div>
 
@@ -513,7 +534,7 @@ export default function SpecialistProfile() {
               que en móvil no se renderiza — así el contenido sigue presente
               e indexable en el HTML que ve el rastreador mobile-first. */}
           {showMobileExtras && (
-            <div className="order-10 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
+            <div className="order-9 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
               {resolvedInsurers.length > 0 && (
                 <div>
                   <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Acepta seguros</h3>
@@ -551,18 +572,18 @@ export default function SpecialistProfile() {
           )}
 
           {/* FAQ */}
-          <div className="order-11 lg:order-9">
+          <div className="order-10 lg:order-9">
             <FaqSection specialist={specialist} />
           </div>
 
           {/* Contenido adicional existente (se conserva para no perder SEO/indexación previa) */}
-          <div className="order-12 lg:order-10">
+          <div className="order-11 lg:order-10">
             <SpecialistCases specialistId={specialist.id} />
           </div>
-          <div className="order-13 lg:order-11">
+          <div className="order-12 lg:order-11">
             <SpecialistPosts specialistId={specialist.id} />
           </div>
-          <div className="order-13 lg:order-11">
+          <div className="order-13 lg:order-12">
             <DoctorArticles specialistId={specialist.id} />
           </div>
 
@@ -572,8 +593,15 @@ export default function SpecialistProfile() {
               derecha se mantiene pegado — incluya también esta sección. Un sticky
               solo puede quedarse fijo mientras su propio contenedor tenga alto de
               sobra; si esta sección quedaba fuera del grid, no contaba. */}
-          <div className="order-14 lg:order-12">
+          <div className="order-14 lg:order-13">
             <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
+          </div>
+
+          {/* OPINIONES: a petición de Jorge, va hasta el final del perfil
+              (mismo criterio que Amazon con las reseñas de producto), en vez
+              de justo después del hero como antes. */}
+          <div className="order-15 lg:order-14">
+            <ReviewsSection specialistId={specialist.id} specialist={specialist} />
           </div>
       </div>
 

@@ -11,6 +11,14 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		// Tailwind solo trae order-1..order-12 por default. SpecialistProfile.jsx
+  		// reordena más de 12 secciones con flexbox (para que en móvil "Opiniones"
+  		// pueda ir hasta el final, como Amazon), así que hacen falta valores extra.
+  		order: {
+  			13: '13',
+  			14: '14',
+  			15: '15',
+  		},
   		fontFamily: {
   			heading: ['var(--font-heading)'],
   			body: ['var(--font-body)'],
