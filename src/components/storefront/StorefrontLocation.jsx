@@ -1,14 +1,17 @@
 import React from "react";
 import { MapPin } from "lucide-react";
 import { CREAM } from "@/lib/storefrontThemes";
+import { hasGoogleMaps, buildEmbedUrl } from "@/lib/googleMaps";
 
 export default function StorefrontLocation({ items, theme }) {
   const loc = items[0];
   if (!loc) return null;
   const hasCoords = loc.latitude != null && loc.longitude != null;
-  const mapSrc = hasCoords
-    ? `https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&z=15&output=embed`
-    : null;
+  const mapSrc = !hasCoords
+    ? null
+    : hasGoogleMaps
+      ? buildEmbedUrl(loc.latitude, loc.longitude, 15)
+      : `https://maps.google.com/maps?q=${loc.latitude},${loc.longitude}&z=15&output=embed`;
 
   return (
     <section id="ubicacion" className="scroll-mt-4">

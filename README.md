@@ -10,6 +10,7 @@ Directorio médico para Monterrey y San Pedro Garza García (Nuevo León, Méxic
 - **Datos, usuarios y archivos:** Supabase (Postgres, Auth, Storage)
 - **Hosting:** Vercel (se publica solo al subir cambios a `main`)
 - **Correo:** Resend
+- **Mapas:** Google Maps (mapa, autocompletado de direcciones y embed del perfil)
 
 ## Correrlo en tu computadora
 
@@ -33,6 +34,13 @@ Necesitas [Node.js](https://nodejs.org) instalado.
    ```
    VITE_SUPABASE_URL=...
    VITE_SUPABASE_ANON_KEY=...
+   ```
+
+   Opcional, para que funcionen los mapas y el autocompletado de direcciones (sin ellas el sitio funciona, pero sin mapa):
+
+   ```
+   VITE_GOOGLE_MAPS_API_KEY=...
+   VITE_GOOGLE_MAP_ID=...
    ```
 
    Nunca uses ni compartas la *service role key* de Supabase: no se necesita en el frontend.

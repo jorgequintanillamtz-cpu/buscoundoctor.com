@@ -21,6 +21,10 @@ export const EMPTY_REGISTRO_DATA = {
   address_int_number: "",
   address_floor: "",
   address_postal_code: "",
+  // Punto exacto elegido en el buscador de Google (vacío si se capturó a mano)
+  address_lat: null,
+  address_lng: null,
+  address_place_id: "",
   profile_photo: "",
   gallery: [],
 };

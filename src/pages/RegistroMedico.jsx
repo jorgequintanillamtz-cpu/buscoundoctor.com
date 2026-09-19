@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { generateSlug } from "@/api/specialistForm";
 import { fileToWebP } from "@/lib/fileToWebP";
 import { EMPTY_REGISTRO_DATA } from "@/lib/registroDefaults";
+import { buildPlaceMapsUrl } from "@/lib/googleMaps";
+import { resolveOfficeCoords } from "@/lib/officeGeo";
 import Logo from "@/components/Logo";
 import StepShell from "@/components/registro/StepShell";
 import StepDatos from "@/components/registro/StepDatos";
@@ -118,8 +120,49 @@ export default function RegistroMedico() {
   // Crea el perfil (Specialist) con toda la información recabada en el wizard
   // -o reclama el borrador que ya se había ido guardando paso a paso- y
   // marca el rol del usuario como "doctor".
+  // Crea el consultorio principal con la dirección del wizard, para que el
+  // médico aparezca en el mapa desde el primer día. Es best-effort: si falla,
+  // el registro sigue y el médico puede agregarlo desde su panel.
+  const createOfficeFromData = async (specialistId, finalData) => {
+    try {
+      const zones = await base44.entities.Zone.list().catch(() => []);
+      const zone = zones.find((z) => z.name === finalData.zone);
+      const line = [
+        [finalData.address_street, finalData.address_ext_number].filter(Boolean).join(" "),
+        finalData.address_int_number && `Int. ${finalData.address_int_number}`,
+        finalData.address_floor && `Piso ${finalData.address_floor}`,
+        finalData.address_neighborhood && `Col. ${finalData.address_neighborhood}`,
+        finalData.address_postal_code && `CP ${finalData.address_postal_code}`,
+      ].filter(Boolean).join(", ");
+      if (!line) return;
+
+      const office = {
+        specialist_id: specialistId,
+        zone_id: zone?.id || null,
+        address_line: line,
+        is_primary: true,
+      };
+      if (finalData.address_lat != null && finalData.address_lng != null) {
+        office.latitude = finalData.address_lat;
+        office.longitude = finalData.address_lng;
+        office.maps_url = buildPlaceMapsUrl({
+          latitude: finalData.address_lat,
+          longitude: finalData.address_lng,
+          place_id: finalData.address_place_id,
+        });
+      } else {
+        // Captura manual: se intenta ubicar la dirección al guardar.
+        const coords = await resolveOfficeCoords(office, { zoneName: zone?.name, city: zone?.city, state: zone?.state });
+        if (coords) { office.latitude = coords.latitude; office.longitude = coords.longitude; }
+      }
+      await base44.entities.Office.create(office);
+    } catch (err) {
+      console.warn("No se pudo crear el consultorio del registro:", err);
+    }
+  };
+
   const createProfileFromData = async (finalData) => {
-    await base44.functions.invoke("createDoctorProfile", {
+    const res = await base44.functions.invoke("createDoctorProfile", {
       full_name: `${finalData.title} ${finalData.full_name.trim()}`.trim(),
       specialty: finalData.specialty,
       subspecialty: finalData.subspecialty,
@@ -130,6 +173,10 @@ export default function RegistroMedico() {
       zone: finalData.zone,
       draft_id: finalData.draft_id || draftId || undefined,
     });
+    const created = res?.data;
+    if (created?.specialist?.id && !created.already_existed) {
+      await createOfficeFromData(created.specialist.id, finalData);
+    }
     try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
     localStorage.removeItem(DRAFT_ID_KEY);
   };

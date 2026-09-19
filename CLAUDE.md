@@ -45,7 +45,7 @@ El sitio se construyó primero en Base44, y ~240 archivos llaman al SDK con la s
 
 ### Variables de entorno
 
-`.env` (no se sube a git) necesita solo: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`. La anon key es pública por diseño. **Jamás** pongas la *service role key* en el repo ni en el frontend.
+`.env` (no se sube a git) necesita: `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (obligatorias), y opcionalmente `VITE_GOOGLE_MAPS_API_KEY` y `VITE_GOOGLE_MAP_ID` (mapas, ver sección 8b; sin ellas el sitio funciona pero sin mapa ni autocompletado). La anon key de Supabase es pública por diseño; la llave de Google también va en el navegador y se protege en Google Cloud con restricción de sitio (buscoundoctor.com, localhost) y de APIs, no ocultándola. Las mismas variables deben existir en Vercel. **Jamás** pongas la *service role key* en el repo ni en el frontend.
 
 Para correrlo: `npm install` y `npm run dev` (Vite, puerto 5173). También existe `npm run build`, `lint` y `typecheck`. **No hay suite de pruebas**: se verifica a mano en el navegador.
 
@@ -126,6 +126,17 @@ Reglas SEO que ya existen (no las rompas): `/especialistas` es `noindex` cuando 
 - El orden se logra con `order-N` / `lg:order-N` de flexbox, **no moviendo el JSX**. Por eso `get_page_text` (que lee el DOM) NO refleja el orden visual: para verificarlo, compara `getBoundingClientRect().top` de cada `id`. Tailwind trae `order-1..12`; `tailwind.config.js` lo extiende a 15. Si agregas una sección, renumera con cuidado.
 - La tarjeta "Agendar cita" es `position: sticky` en escritorio; en móvil hay una barra fija abajo (`MobileBookingBar`).
 - Reseñas con desglose y foto, botón Compartir, y artículos del médico ya existen.
+
+## 8b. Mapas y ubicación (Google Maps)
+
+- Todo el mapa usa **Google Maps** (`@vis.gl/react-google-maps`); Leaflet/CARTO ya no existen. Utilidades y configuración en `src/lib/googleMaps.js`.
+- **Autocompletado de direcciones** (`src/components/PlaceAutocomplete.jsx`, Places API New): se usa en el paso de ubicación del registro (`StepUbicacion.jsx`) y en `OfficeManager.jsx`. Al elegir una sugerencia guarda **latitud/longitud exactas**; sin llave de Google el componente no se muestra y la dirección se captura a mano.
+- **Registro:** al terminar (después del OTP) `RegistroMedico.jsx` crea el `office` principal del médico con esas coordenadas (`createOfficeFromData`, best-effort: si falla, el registro sigue).
+- **Mapa de búsqueda** (`SpecialistsMapPanel.jsx`): dibuja solo consultorios con `latitude/longitude` guardados; **ya no geocodifica en el navegador del visitante**. Sin llave no se muestra en producción.
+- **Perfil público** (`PublicOfficeList.jsx`): iframe oficial de la Maps Embed API (gratuita) en el punto exacto.
+- `src/lib/officeGeo.js` (Nominatim) queda solo como respaldo **al guardar** un consultorio capturado a mano; editar el texto de la dirección borra las coordenadas para que se recalculen.
+- APIs que deben estar habilitadas en Google Cloud: Maps JavaScript API, Places API (New), Maps Embed API. Conviene un tope de gasto (cuota diaria) en el proyecto.
+- Sin llave, `PublicOfficeList.jsx` y `storefront/StorefrontLocation.jsx` caen al embed no oficial de Google (`maps.google.com/maps?...&output=embed`).
 
 ## 9. Cómo probar sin ensuciar producción
 

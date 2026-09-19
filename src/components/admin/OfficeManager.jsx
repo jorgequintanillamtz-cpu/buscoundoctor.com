@@ -6,6 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { resolveOfficeCoords } from "@/lib/officeGeo";
+import PlaceAutocomplete from "@/components/PlaceAutocomplete";
+import { hasGoogleMaps, buildPlaceMapsUrl } from "@/lib/googleMaps";
+
+const normalize = (t) => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
 const DAYS = [
   { v: 0, label: "Domingo" },
@@ -56,6 +60,21 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
   const setH = (idx, field, val) =>
     setHours((prev) => prev.map((h, i) => (i === idx ? { ...h, [field]: val } : h)));
 
+  // Al elegir una sugerencia de Google se llenan dirección, ciudad, enlace y
+  // el punto exacto del mapa; todo sigue siendo editable.
+  const handlePlace = (place) => {
+    const zone = zones.find((z) => normalize(z.name) === normalize(place.locality));
+    const address = place.formatted_address.replace(/,\s*México$/, "");
+    setOffice((prev) => ({
+      ...prev,
+      address_line: address || prev.address_line,
+      zone_id: zone?.id || prev.zone_id,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      maps_url: buildPlaceMapsUrl(place),
+    }));
+  };
+
   const submit = () => {
     if (!office.zone_id) { toast.error("Selecciona una zona"); return; }
     if (!office.address_line.trim()) { toast.error("La dirección es obligatoria"); return; }
@@ -75,6 +94,17 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
           />
           <p className="text-[11px] text-muted-foreground mt-1">Este nombre es el que ven los pacientes en tu perfil (ej. en "Hospitales donde consulta"). Si lo dejas vacío, se muestra la dirección.</p>
         </div>
+        {hasGoogleMaps && (
+          <div className="sm:col-span-3">
+            <label className="text-xs font-medium mb-1 block">Busca la dirección en Google Maps</label>
+            <PlaceAutocomplete onSelect={handlePlace} placeholder="Ej: Av. Vasconcelos 150, San Pedro" />
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {office.latitude != null
+                ? "Ubicación confirmada en el mapa. Puedes ajustar los datos de abajo."
+                : "Elige la sugerencia para ubicarte con exactitud en el mapa; llenará la dirección por ti."}
+            </p>
+          </div>
+        )}
         <div>
           <label className="text-xs font-medium mb-1 block">Ciudad *</label>
           <select
@@ -92,7 +122,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
           <label className="text-xs font-medium mb-1 block">Dirección *</label>
           <Input
             value={office.address_line}
-            onChange={(e) => setOffice({ ...office, address_line: e.target.value })}
+            onChange={(e) => setOffice({ ...office, address_line: e.target.value, latitude: null, longitude: null })}
             className="rounded-xl text-sm"
             placeholder="Calle, número, colonia"
           />
@@ -114,7 +144,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
             className="rounded-xl text-sm"
             placeholder='Pega aquí el link para compartir de Google Maps de tu consultorio'
           />
-          <p className="text-[11px] text-muted-foreground mt-1">Búscate en Google Maps, presiona "Compartir" y pega el enlace aquí. Si lo dejas vacío, usaremos tu dirección de texto para mostrar el mapa.</p>
+          <p className="text-[11px] text-muted-foreground mt-1">Se llena solo al buscar tu dirección arriba. También puedes pegar aquí el enlace de "Compartir" de Google Maps.</p>
         </div>
         <label className="flex items-center gap-2 sm:col-span-2 text-sm cursor-pointer">
           <input

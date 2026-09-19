@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { MapPin, Clock, Star, Phone, ExternalLink } from "lucide-react";
+import { GOOGLE_MAPS_API_KEY, hasGoogleMaps, buildEmbedUrl, buildPlaceMapsUrl } from "@/lib/googleMaps";
 
 const DAYS = [
   { v: 0, label: "Domingo" },
@@ -13,6 +14,12 @@ const DAYS = [
 ];
 
 function buildMapEmbedUrl(office) {
+  // Con llave de Google: mapa oficial (Maps Embed API, gratuita) en el punto exacto.
+  if (hasGoogleMaps) {
+    if (office.latitude != null && office.longitude != null) return buildEmbedUrl(office.latitude, office.longitude);
+    const q = encodeURIComponent(`${office.address_line}, Monterrey, Nuevo León, México`);
+    return `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_API_KEY}&q=${q}&zoom=16&language=es`;
+  }
   if (office.maps_url) {
     const coordMatch = office.maps_url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (coordMatch) {
@@ -24,6 +31,7 @@ function buildMapEmbedUrl(office) {
 }
 
 function buildMapsLink(office) {
+  if (office.latitude != null && office.longitude != null && !office.maps_url) return buildPlaceMapsUrl(office);
   if (office.maps_url) return office.maps_url;
   const query = encodeURIComponent(`${office.name ? office.name + ", " : ""}${office.address_line}, Monterrey, Nuevo León, México`);
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
