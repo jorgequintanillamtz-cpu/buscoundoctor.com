@@ -113,6 +113,13 @@ Las migraciones **viven solo en Supabase**, no en este repo (no hay carpeta `sup
 - **Correos transaccionales** (bienvenida, perfil aprobado, nueva solicitud de cita, etc.): la RPC `send_transactional_email` valida el tipo contra una lista fija, resuelve el destinatario **dentro de Postgres** (nunca confía en el cliente), limita el ritmo, envía por **Resend** vía `pg_net` y registra en `email_log`. La llave de Resend vive en Supabase, no en el repo. Los avisos de contacto público e interés en especialidades llegan al correo del dueño.
 - **Edge Functions** desplegadas: `create-doctor-profile`, `serve-sitemap-xml`. `/sitemap.xml` se reescribe hacia esta última en `vercel.json`.
 
+## 7a. Tareas programadas
+
+- **Publicar posts programados:** `pg_cron` en Supabase, job `publish-scheduled-posts` (cada 15 min) llama a `public.publish_scheduled_posts()`. Ya no existe el flujo equivalente de Base44.
+- **Rutina diaria "BLOG POSTS"** (Claude, 9:10 a. m. hora de Monterrey): toma los 2 artículos más recientes de la carpeta de Google Drive "Blogs Doctores 2.0" y, si su slug no existe, los crea como **borrador** (`published = false`) en `blog_post` de Supabase. Jorge los revisa y publica desde el admin. No usa Base44. Se edita desde la app de Claude (Rutinas/Cowork) o con la herramienta `RemoteTrigger`.
+- **Rutina "Supabase keep-alive"** (cada 4 días): una lectura ligera a la API para que Supabase no pause el proyecto por inactividad.
+- La rutina "schema watchdog" de Base44 se apagó: ya no aplica.
+
 ## 7b. Rutas principales
 
 Públicas: `/`, `/especialistas`, `/especialista/:slug`, `/especialidad/:slug[/:zonaSlug]`, `/:professionSlug/:citySlug[/:zonaSlug]` (páginas SEO), `/enfermedades[/:slug[/:citySlug]]`, `/blog[/:slug]`, `/planes`, `/para-medicos`, `/chequeos-medicos`, `/nosotros`, `/contacto`, `/preguntas-frecuentes`, `/registro-medico`, `/iniciar-sesion`, `/olvide-contrasena`.
