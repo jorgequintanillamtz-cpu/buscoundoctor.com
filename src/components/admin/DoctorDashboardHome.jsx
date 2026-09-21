@@ -82,7 +82,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
         const imp = impressions.filter((i) => i.date && i.date.startsWith(monthKey)).reduce((s, i) => s + (i.count || 0), 0);
         const clk = clicks.filter((c) => c.created_date && isWithinInterval(parseISO(c.created_date), { start: mStart, end: mEnd })).length;
         const cta = contacts.filter((c) => c.date && c.date.startsWith(monthKey)).reduce((s, c) => s + (c.count || 0), 0);
-        return { label: format(month, "MMM yy", { locale: es }), Impresiones: imp, "Clicks al perfil": clk, "Citas agendadas": cta };
+        return { label: format(month, "MMM yy", { locale: es }), "Veces que te vieron": imp, "Visitas a tu perfil": clk, "Quieren agendar": cta };
       });
     }
     const daysBack = range === "7d" ? 6 : 29;
@@ -92,7 +92,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
       const imp = impressions.filter((i) => i.date === dayStr).reduce((s, i) => s + (i.count || 0), 0);
       const clk = clicks.filter((c) => c.created_date && format(parseISO(c.created_date), "yyyy-MM-dd") === dayStr).length;
       const cta = contacts.filter((c) => c.date === dayStr).reduce((s, c) => s + (c.count || 0), 0);
-      return { label: format(day, "d MMM", { locale: es }), Impresiones: imp, "Clicks al perfil": clk, "Citas agendadas": cta };
+      return { label: format(day, "d MMM", { locale: es }), "Veces que te vieron": imp, "Visitas a tu perfil": clk, "Quieren agendar": cta };
     });
   }, [range, impressions, clicks, contacts, now]);
 
@@ -125,7 +125,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
         <div>
           {isOwnProfile ? (
             <>
-              <h1 className="font-heading font-bold text-xl text-foreground">Hola, {specialist?.full_name?.split(" ")[0] || "doctor"} 👋</h1>
+              <h1 className="font-heading font-bold text-xl text-foreground">Hola, {specialist?.full_name?.replace(/^(dr\.?|dra\.?)\s+/i, "").split(" ")[0] || "doctor"} 👋</h1>
               <p className="text-sm text-muted-foreground mt-0.5">Así va tu perfil en BuscoUnDoctor</p>
             </>
           ) : (
@@ -147,25 +147,23 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
         </div>
       </div>
 
-      {/* Aviso de perfil incompleto: lo primero que ve un médico nuevo aquí
-          eran puros ceros (todavía sin visitas ni clicks reales), sin ninguna
-          pista de qué hacer -- aunque el correo de bienvenida ya le había
-          dicho "revisa tu Score de SEO en el panel". Ese score vivía solo en
-          la pestaña "seo", que nadie visita sin que se lo señalen. */}
-      {isOwnProfile && (specialist?.seo_score ?? 0) < 100 && (
+      {/* Aviso de perfil incompleto: un médico nuevo veía puros ceros sin
+          ninguna pista de qué hacer. Usa el mismo porcentaje que el menú
+          lateral y la pantalla "Llena tu perfil" (completeness_score). */}
+      {isOwnProfile && (specialist?.completeness_score ?? 0) < 100 && (
         <div className="bg-brand-navy rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0" />
-              <p className="text-sm font-heading font-semibold text-white">Tu perfil está {specialist?.seo_score || 0}% completo</p>
+              <p className="text-sm font-heading font-semibold text-white">Tu perfil está {specialist?.completeness_score || 0}% completo</p>
             </div>
             <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${specialist?.seo_score || 0}%` }} />
+              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${specialist?.completeness_score || 0}%` }} />
             </div>
-            <p className="text-xs text-white/70">Entre más completo esté, más confianza le genera a tus pacientes y mejor te posiciona Google.</p>
+            <p className="text-xs text-white/70">Un perfil completo les genera más confianza a tus pacientes y aparece mejor en el directorio.</p>
           </div>
-          <Button onClick={() => onNavigate?.("seo")} className="rounded-xl gap-1.5 bg-white text-brand-navy hover:bg-white/90 flex-shrink-0 w-full sm:w-auto">
-            Completar mi perfil
+          <Button onClick={() => onNavigate?.("completar")} className="rounded-xl gap-1.5 min-h-[44px] bg-white text-brand-navy hover:bg-white/90 flex-shrink-0 w-full sm:w-auto">
+            Llenar mi perfil
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
@@ -173,9 +171,9 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <KpiCard value={kpis.impressions30} label="Impresiones este mes" sub={isOwnProfile ? "Veces que tu perfil apareció" : "Veces que apareció en el directorio"} />
-        <KpiCard value={kpis.clicks30} label="Clicks este mes" sub={isOwnProfile ? "Le dieron clic a tu perfil" : "Clicks al perfil"} />
-        <KpiCard value={kpis.contacts30} label="Citas agendadas este mes" sub="Solicitudes de cita" />
+        <KpiCard value={kpis.impressions30} label="Veces que te vieron este mes" sub={isOwnProfile ? "Tu perfil apareció en el directorio" : "Veces que apareció en el directorio"} />
+        <KpiCard value={kpis.clicks30} label="Visitas a tu perfil este mes" sub={isOwnProfile ? "Pacientes que entraron a tu perfil" : "Visitas al perfil"} />
+        <KpiCard value={kpis.contacts30} label="Pacientes que quieren agendar" sub="Solicitudes de cita este mes" />
       </div>
 
       {/* Gráfica o estado vacío */}
@@ -228,15 +226,15 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: "1px solid hsl(var(--border))" }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Area type="monotone" dataKey="Impresiones" stroke="#2F6FED" fill="url(#homeImp)" strokeWidth={2} />
-                <Area type="monotone" dataKey="Clicks al perfil" stroke="#0B1E4D" fill="url(#homeClk)" strokeWidth={2} />
-                <Area type="monotone" dataKey="Citas agendadas" stroke="#10B981" fill="url(#homeCta)" strokeWidth={2} />
+                <Area type="monotone" dataKey="Veces que te vieron" stroke="#2F6FED" fill="url(#homeImp)" strokeWidth={2} />
+                <Area type="monotone" dataKey="Visitas a tu perfil" stroke="#0B1E4D" fill="url(#homeClk)" strokeWidth={2} />
+                <Area type="monotone" dataKey="Quieren agendar" stroke="#10B981" fill="url(#homeCta)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
             <p className="text-xs text-muted-foreground leading-relaxed mt-4 pt-4 border-t border-border/40">
-              <strong className="text-foreground">Impresiones</strong> = tu perfil apareció en el directorio.{" "}
-              <strong className="text-foreground">Clicks</strong> = un paciente entró a tu perfil.{" "}
-              <strong className="text-foreground">Citas agendadas</strong> = un paciente solicitó agendar contigo.
+              <strong className="text-foreground">Veces que te vieron</strong> = tu perfil apareció en el directorio.{" "}
+              <strong className="text-foreground">Visitas a tu perfil</strong> = un paciente entró a verlo.{" "}
+              <strong className="text-foreground">Quieren agendar</strong> = un paciente pidió una cita contigo.
             </p>
           </>
         )}
@@ -274,9 +272,9 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
 
         {/* De dónde vienen los clicks */}
         <div className="bg-card rounded-2xl border border-border/50 p-5">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">{isOwnProfile ? "De dónde vienen tus clicks (30 días)" : "De dónde vienen los clicks (30 días)"}</h2>
+          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">{isOwnProfile ? "Por dónde te encuentran (últimos 30 días)" : "Por dónde encuentran al médico (últimos 30 días)"}</h2>
           {clicksBySource.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">Aún no hay clicks este mes.</p>
+            <p className="text-sm text-muted-foreground py-6 text-center">Aún no hay visitas este mes.</p>
           ) : (
             <div className="space-y-3">
               {clicksBySource.map((s) => {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, PenLine, TrendingUp, Calendar, Star, Crown, ListChecks, Cpu, Globe, Package, CreditCard, ClipboardList, Menu, X } from "lucide-react";
+import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, Calendar, Star, ListChecks, Cpu, Globe, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -21,7 +21,7 @@ import DoctorPremiumStatus from "@/components/admin/DoctorPremiumStatus";
 import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
-import SeoScoreManager from "@/components/admin/SeoScoreManager";
+import ProfileChecklist from "@/components/admin/ProfileChecklist";
 import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 
@@ -31,36 +31,45 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackCon
 // para que un doctor nunca pueda tocar desde su propio panel los campos
 // que controla el admin (verificación, visibilidad, destacado).
 
-// Dos tipos de sección: las que solo INFORMAN al doctor (estadísticas,
-// solicitudes recibidas, reseñas de pacientes, estatus de su plan) van
-// primero en "Resumen y actividad"; el resto son secciones que el doctor
-// tiene que LLENAR con su propia información (datos de perfil, servicios,
-// documentos, contenido), agrupadas por tipo después.
+// Menú del panel. Se mantiene corto a propósito: el médico ve primero lo que
+// tiene que llenar ("Llena tu perfil") y sus solicitudes, y lo opcional va al
+// final. Cada sección con `requiresSaved` se bloquea solo mientras no haya
+// perfil guardado (hoy siempre hay, ver `isEditing`).
+//
+// Funciones ocultas por ahora (no están en el menú, pero su código sigue
+// aquí para reactivarlas): "Tu plan" (section "plan"), "Escribir blog"
+// (section "blog"), "Productos digitales" (/panel-medico/productos),
+// "Configuración de pagos" (/panel-medico/pagos) y "Resumen de consulta"
+// (/panel-medico/resumen). Para volver a mostrar una, agrégala aquí o a
+// SIDE_LINKS.
 const SECTION_GROUPS = [
-  { group: "Resumen y actividad", items: [
+  { group: "Mi actividad", items: [
     { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
-    { key: "seo", label: "Score SEO", icon: TrendingUp, requiresSaved: true },
+    { key: "completar", label: "Llena tu perfil", icon: Sparkles, requiresSaved: true },
     { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
     { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
-    { key: "plan", label: "Tu plan", icon: Crown, requiresSaved: true },
   ]},
   { group: "Mi perfil", items: [
-    { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
-    { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
+    { key: "perfil", label: "Mis datos y presentación", icon: User, requiresSaved: false },
+    { key: "formacion", label: "Mi formación", icon: GraduationCap, requiresSaved: true },
     { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
-    { key: "consultorios", label: "Zona de cobertura", icon: MapPin, requiresSaved: true },
+    { key: "consultorios", label: "Mis consultorios", icon: MapPin, requiresSaved: true },
     { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
-    { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
+    { key: "aseguradoras", label: "Seguros que acepto", icon: ShieldCheck, requiresSaved: false },
+    { key: "documentos", label: "Mi cédula y documentos", icon: FileText, requiresSaved: true },
+  ]},
+  { group: "Más sobre mí (opcional)", items: [
     { key: "enfermedades", label: "Enfermedades que trato", icon: ListChecks, requiresSaved: false },
     { key: "subespecialidades", label: "Subespecialidades", icon: GraduationCap, requiresSaved: false },
     { key: "tecnologia", label: "Tecnología y tratamientos", icon: Cpu, requiresSaved: true },
-    { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
-  ]},
-  { group: "Contenido", items: [
     { key: "casos", label: "Casos de éxito", icon: Sparkles, requiresSaved: true },
     { key: "publicaciones", label: "Publicaciones", icon: ImageIcon, requiresSaved: true },
-    { key: "blog", label: "Escribir blog", icon: PenLine, requiresSaved: true },
   ]},
+];
+
+// Enlaces que abren otra página, debajo del menú.
+const SIDE_LINKS = [
+  { to: "/panel-medico/storefront", label: "Mi página pública", icon: Globe },
 ];
 
 export default function DoctorPanel() {
@@ -72,7 +81,7 @@ export default function DoctorPanel() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [section, setSection] = useState("resumen");
-  const [seoChecklist, setSeoChecklist] = useState(null);
+  const [completenessChecklist, setCompletenessChecklist] = useState(null);
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const recalcScoreShared = useRecalculateScore(setForm);
@@ -81,7 +90,7 @@ export default function DoctorPanel() {
     const id = idOverride || specialistId;
     if (!id) return;
     const checklist = await recalcScoreShared(id);
-    if (checklist) setSeoChecklist(checklist);
+    if (checklist) setCompletenessChecklist(checklist);
   };
 
   useEffect(() => {
@@ -116,7 +125,7 @@ export default function DoctorPanel() {
       });
       setStatus("ready");
       if (!specialist.has_seen_welcome_tour) setShowWelcomeTour(true);
-      // Calcula el score/checklist de SEO desde el primer momento, no solo tras guardar.
+      // Calcula el porcentaje y la lista de "Llena tu perfil" desde el primer momento, no solo tras guardar.
       recalculateScore(specialist.id);
     })();
     return () => { active = false; };
@@ -157,9 +166,9 @@ export default function DoctorPanel() {
   // form COMPLETO cada 30s (buildData hace spread de todos los campos) --
   // si no se actualiza aquí, ese autoguardado reescribe el campo de vuelta
   // a `false` en cuanto corre, y el popup vuelve a aparecer la próxima vez.
-  const finishWelcomeTour = async () => {
+  const finishWelcomeTour = async (goToChecklist = true) => {
     setShowWelcomeTour(false);
-    setSection("seo");
+    if (goToChecklist) setSection("completar");
     update("has_seen_welcome_tour", true);
     try {
       await base44.entities.Specialist.update(specialistId, { has_seen_welcome_tour: true });
@@ -242,7 +251,7 @@ export default function DoctorPanel() {
   // ---- Panel listo: la barra lateral incluye TODA la navegación ----
   return (
     <div className="min-h-screen bg-background flex">
-      <WelcomeTourModal open={showWelcomeTour} onFinish={finishWelcomeTour} />
+      <WelcomeTourModal open={showWelcomeTour} name={form.full_name} onFinish={finishWelcomeTour} />
 
       <aside className="hidden lg:flex w-72 flex-col bg-brand-navy min-h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
@@ -255,7 +264,7 @@ export default function DoctorPanel() {
 
           <div className="mt-4">
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="font-medium text-white/50">Completitud</span>
+              <span className="font-medium text-white/50">Tu perfil está completo al</span>
               <span className={`font-semibold ${completitud >= 80 ? "text-emerald-400" : completitud >= 50 ? "text-amber-400" : "text-red-400"}`}>{completitud}%</span>
             </div>
             <div className="w-full bg-white/10 rounded-full h-1.5">
@@ -298,22 +307,12 @@ export default function DoctorPanel() {
         </nav>
 
         <div className="px-3 pb-2 space-y-0.5">
-          <Link to="/panel-medico/storefront" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-            <Globe className="w-4 h-4 flex-shrink-0" />
-            Mi página pública
-          </Link>
-          <Link to="/panel-medico/productos" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-            <Package className="w-4 h-4 flex-shrink-0" />
-            Productos digitales
-          </Link>
-          <Link to="/panel-medico/pagos" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-            <CreditCard className="w-4 h-4 flex-shrink-0" />
-            Configuración de pagos
-          </Link>
-          <Link to="/panel-medico/resumen" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-            <ClipboardList className="w-4 h-4 flex-shrink-0" />
-            Resumen de consulta
-          </Link>
+          {SIDE_LINKS.map((l) => (
+            <Link key={l.to} to={l.to} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+              <l.icon className="w-4 h-4 flex-shrink-0" />
+              {l.label}
+            </Link>
+          ))}
         </div>
 
         <div className="p-3 border-t border-white/10">
@@ -374,7 +373,7 @@ export default function DoctorPanel() {
 
           <div className="px-5 pt-4 flex-shrink-0">
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="font-medium text-white/50">Completitud</span>
+              <span className="font-medium text-white/50">Tu perfil está completo al</span>
               <span className={`font-semibold ${completitud >= 80 ? "text-emerald-400" : completitud >= 50 ? "text-amber-400" : "text-red-400"}`}>{completitud}%</span>
             </div>
             <div className="w-full bg-white/10 rounded-full h-1.5">
@@ -416,22 +415,12 @@ export default function DoctorPanel() {
           </nav>
 
           <div className="px-3 pb-2 space-y-0.5 flex-shrink-0">
-            <Link to="/panel-medico/storefront" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-              <Globe className="w-4 h-4 flex-shrink-0" />
-              Mi página pública
-            </Link>
-            <Link to="/panel-medico/productos" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-              <Package className="w-4 h-4 flex-shrink-0" />
-              Productos digitales
-            </Link>
-            <Link to="/panel-medico/pagos" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-              <CreditCard className="w-4 h-4 flex-shrink-0" />
-              Configuración de pagos
-            </Link>
-            <Link to="/panel-medico/resumen" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
-              <ClipboardList className="w-4 h-4 flex-shrink-0" />
-              Resumen de consulta
-            </Link>
+            {SIDE_LINKS.map((l) => (
+              <Link key={l.to} to={l.to} onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
+                <l.icon className="w-4 h-4 flex-shrink-0" />
+                {l.label}
+              </Link>
+            ))}
           </div>
 
           <div className="p-3 border-t border-white/10 flex-shrink-0">
@@ -475,8 +464,8 @@ export default function DoctorPanel() {
             </div>
 
             {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} />}
-            {section === "seo" && <SeoScoreManager seoScore={form.seo_score || 0} checklist={seoChecklist} onNavigate={setSection} />}
-            {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
+            {section === "completar" && <ProfileChecklist score={form.completeness_score || 0} checklist={completenessChecklist} onNavigate={setSection} />}
+            {section === "perfil" && <DoctorEditorPerfil form={form} update={update} simple />}
             {section === "plan" && <DoctorPremiumStatus specialistId={specialistId} specialistName={form.full_name} />}
             {section === "solicitudes" && <DoctorAppointmentRequests specialistId={specialistId} />}
             {section === "resenas" && <DoctorReviews specialistId={specialistId} />}

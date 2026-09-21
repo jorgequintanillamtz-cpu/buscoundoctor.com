@@ -145,7 +145,8 @@ export function useRecalculateScore(setForm) {
           seo_score: data.seo_score ?? prev.seo_score,
         }));
       }
-      return data.checklist || null;
+      // Los 9 puntos del porcentaje "perfil completo" (ver recalculate_specialist_score).
+      return data.completeness_checklist || null;
     } catch {
       return null;
     }

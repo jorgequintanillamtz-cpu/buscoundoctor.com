@@ -52,7 +52,10 @@ function MarkdownToolbar({ textareaRef, value, onChange, onInsertImage }) {
   );
 }
 
-export default function DoctorEditorPerfil({ form, update }) {
+// `simple` = vista del médico: oculta lo técnico (dirección web, certificaciones
+// en texto libre, barra de formato de la descripción). El admin sigue viendo
+// todo (`simple` apagado).
+export default function DoctorEditorPerfil({ form, update, simple = false }) {
   const fotoRef = useRef(null);
   const galeriaRef = useRef(null);
   const videoRef = useRef(null);
@@ -154,15 +157,17 @@ export default function DoctorEditorPerfil({ form, update }) {
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground border border-border/40 rounded-xl px-3 py-2 bg-muted/30">
-          <span className="flex-shrink-0">/especialista/</span>
-          <input
-            value={form.slug}
-            onChange={e => update("slug", e.target.value.replace(/[^a-z0-9-]/g, ""))}
-            className="flex-1 bg-transparent outline-none text-foreground min-w-0"
-            placeholder="slug-auto-generado"
-          />
-        </div>
+        {!simple && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground border border-border/40 rounded-xl px-3 py-2 bg-muted/30">
+            <span className="flex-shrink-0">/especialista/</span>
+            <input
+              value={form.slug}
+              onChange={e => update("slug", e.target.value.replace(/[^a-z0-9-]/g, ""))}
+              className="flex-1 bg-transparent outline-none text-foreground min-w-0"
+              placeholder="slug-auto-generado"
+            />
+          </div>
+        )}
 
         <div>
           <label className="text-sm font-medium mb-1.5 block">Cédula profesional *</label>
@@ -234,20 +239,44 @@ export default function DoctorEditorPerfil({ form, update }) {
               />
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Cédula / Certificaciones</label>
-              <Input
-                value={form.certifications}
-                onChange={e => update("certifications", e.target.value)}
-                className="rounded-xl font-mono"
-                placeholder="Cédula: 1234567 | Especialidad en ... - UDEM"
-              />
-            </div>
+            {!simple && (
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Cédula / Certificaciones</label>
+                <Input
+                  value={form.certifications}
+                  onChange={e => update("certifications", e.target.value)}
+                  className="rounded-xl font-mono"
+                  placeholder="Cédula: 1234567 | Especialidad en ... - UDEM"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Sección 2 – Editor de descripción */}
+      {/* Sección 2 – Presentación (vista del médico: texto simple, sin barra de formato) */}
+      {simple ? (
+        <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
+          <div>
+            <h2 className="font-heading font-semibold text-base text-foreground">Preséntate a tus pacientes</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Cuéntales quién eres, cómo trabajas y qué te distingue. Escríbelo con tus palabras, como si hablaras con un paciente.
+            </p>
+          </div>
+          <textarea
+            value={form.description || ""}
+            onChange={e => update("description", e.target.value)}
+            placeholder="Ej: Soy cardiólogo con 15 años de experiencia. Me gusta explicar con calma cada diagnóstico para que mis pacientes entiendan su tratamiento..."
+            className="w-full min-h-[220px] p-4 text-base leading-relaxed bg-white border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+          />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{words} {words === 1 ? "palabra" : "palabras"}</span>
+            <span className={`px-2 py-0.5 rounded-full font-medium ${words >= 50 ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+              {words >= 50 ? "Listo, con esto tu presentación cuenta como completa" : `Con ${50 - words} palabras más queda completa`}
+            </span>
+          </div>
+        </div>
+      ) : (
       <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Descripción profesional</h2>
@@ -299,6 +328,7 @@ export default function DoctorEditorPerfil({ form, update }) {
           </span>
         </div>
       </div>
+      )}
 
       {/* Sección 3 – Contacto */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">

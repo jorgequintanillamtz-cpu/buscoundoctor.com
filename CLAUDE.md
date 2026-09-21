@@ -134,6 +134,16 @@ Reglas SEO que ya existen (no las rompas): `/especialistas` es `noindex` cuando 
 - La tarjeta "Agendar cita" es `position: sticky` en escritorio; en móvil hay una barra fija abajo (`MobileBookingBar`).
 - Reseñas con desglose y foto, botón Compartir, y artículos del médico ya existen.
 
+## 8a. Panel del médico (`src/pages/DoctorPanel.jsx`)
+
+- Pensado para médicos **no técnicos**: sin jerga (nada de "SEO", "score", "clicks", "impresiones", "slug"). Usa palabras de médico ("Veces que te vieron", "Mis consultorios", "Llena tu perfil").
+- **Un solo porcentaje:** `completeness_score` ("Tu perfil está completo al X%"), calculado por la RPC `recalculate_specialist_score` con 9 puntos (nombre, número de cédula, presentación de 50+ palabras, especialidad, consultorio, documento de cédula, formación, idiomas, foto). La pantalla "Llena tu perfil" (`ProfileChecklist.jsx`) usa `completeness_checklist` de esa misma RPC. `seo_score` sigue calculándose en la base pero **ya no se muestra** en el panel.
+- La especialidad cuenta como capturada con el texto `specialty` (antes solo se miraba `specialty_id`, que nadie llena, y el porcentaje nunca llegaba a 100%).
+- **Funciones ocultas del menú por ahora** (el código sigue ahí para reactivarlas; ver el comentario sobre `SECTION_GROUPS`): "Tu plan", "Escribir blog", "Productos digitales", "Configuración de pagos" y "Resumen de consulta".
+- `DoctorEditorPerfil` recibe `simple` en el panel del médico (sin dirección web, sin certificaciones en texto libre, sin barra de formato); el admin lo ve completo.
+- La bienvenida es una sola pantalla (`WelcomeTourModal.jsx`).
+- Pendiente: el correo de bienvenida todavía dice "revisa tu Score de SEO" (vive en la RPC `send_transactional_email`); hay que cambiarlo a "llena tu perfil".
+
 ## 8b. Mapas y ubicación (Google Maps)
 
 - Todo el mapa usa **Google Maps** (`@vis.gl/react-google-maps`); Leaflet/CARTO ya no existen. Utilidades y configuración en `src/lib/googleMaps.js`.

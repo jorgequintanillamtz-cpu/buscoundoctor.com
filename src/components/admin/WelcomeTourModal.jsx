@@ -1,89 +1,49 @@
-import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  PartyPopper, Camera, GraduationCap, ShieldCheck, Tag, Globe, ArrowRight,
-} from "lucide-react";
+import { PartyPopper, Camera, ShieldCheck, MapPin, GraduationCap, ArrowRight } from "lucide-react";
 
-// Pantallas del recorrido de bienvenida: solo informan y emocionan, no
-// piden datos aquí mismo -- los formularios de verdad ya existen en sus
-// propias secciones del panel, y duplicarlos aquí sería mantener dos
-// veces la misma lógica. El botón final manda a "Score SEO", que ya tiene
-// el checklist real con enlaces a cada sección.
-const STEPS = [
-  {
-    icon: PartyPopper,
-    title: "¡Bienvenido a BuscoUnDoctor!",
-    body: "Tu perfil ya está creado y en revisión. Antes de que lleguen tus primeros pacientes, aquí tienes lo más importante que puedes agregar para que tu perfil brille -- vamos a verlo rápido.",
-  },
-  {
-    icon: Camera,
-    title: "Foto de perfil y galería",
-    body: "Los perfiles con foto generan mucha más confianza -- y más clics -- que los que no tienen. También puedes subir fotos de tu consultorio.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Formación académica",
-    body: "Dónde estudiaste, tu especialidad y tus certificaciones le muestran a tus pacientes que eres un profesional certificado.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Documentos y cédula profesional",
-    body: "Sube tu cédula para que aprobemos tu perfil y aparezca el sello de \"Verificado\" -- es lo que más confianza le da a un paciente nuevo.",
-  },
-  {
-    icon: Tag,
-    title: "Servicios y precios",
-    body: "Dile a tus pacientes qué tratamientos ofreces y cuánto cuesta tu primera consulta, así saben qué esperar antes de agendar.",
-  },
-  {
-    icon: Globe,
-    title: "Idiomas y aseguradoras",
-    body: "Si hablas otros idiomas o aceptas seguros médicos, dilo -- muchos pacientes filtran justo por eso.",
-  },
+// Una sola pantalla de bienvenida (antes eran 6 que no se podían cerrar).
+// Solo informa: los formularios de verdad viven en "Llena tu perfil", que es
+// a donde manda el botón principal.
+const TIPS = [
+  { icon: Camera, text: "Tu foto de perfil" },
+  { icon: ShieldCheck, text: "Tu cédula, para el sello \"Verificado\"" },
+  { icon: MapPin, text: "La dirección de tu consultorio" },
+  { icon: GraduationCap, text: "Tu formación y tus idiomas" },
 ];
 
-export default function WelcomeTourModal({ open, onFinish }) {
-  const [step, setStep] = useState(0);
-  const isLast = step === STEPS.length - 1;
-  const current = STEPS[step];
-  const Icon = current.icon;
-
+export default function WelcomeTourModal({ open, name, onFinish }) {
+  const firstName = (name || "").replace(/^(dr\.?|dra\.?)\s+/i, "").split(" ")[0];
   return (
-    <Dialog open={open}>
-      <DialogContent
-        className="max-w-md rounded-3xl [&>button]:hidden"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-      >
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onFinish(false); }}>
+      <DialogContent className="max-w-md rounded-3xl">
         <div className="flex flex-col items-center text-center pt-2">
           <div className="w-14 h-14 rounded-2xl bg-brand-bluePale flex items-center justify-center mb-4">
-            <Icon className="w-7 h-7 text-brand-blue" />
+            <PartyPopper className="w-7 h-7 text-brand-blue" />
           </div>
-          <h2 className="font-heading font-bold text-lg text-foreground mb-2">{current.title}</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-6">{current.body}</p>
+          <h2 className="font-heading font-bold text-lg text-foreground mb-2">
+            ¡Bienvenido a BuscoUnDoctor{firstName ? `, ${firstName}` : ""}!
+          </h2>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+            Tu perfil ya está creado y en revisión. Para que los pacientes confíen en ti, te pedimos completar estos pasos. Toma unos minutos:
+          </p>
 
-          <div className="flex items-center gap-1.5 mb-5">
-            {STEPS.map((_, i) => (
-              <span
-                key={i}
-                className={`h-1.5 rounded-full transition-all ${i === step ? "w-5 bg-brand-blue" : "w-1.5 bg-border"}`}
-              />
+          <ul className="w-full space-y-2 mb-6 text-left">
+            {TIPS.map((tip) => (
+              <li key={tip.text} className="flex items-center gap-3 rounded-xl bg-muted/50 px-4 py-3">
+                <tip.icon className="w-5 h-5 text-brand-blue flex-shrink-0" />
+                <span className="text-sm text-foreground">{tip.text}</span>
+              </li>
             ))}
-          </div>
+          </ul>
 
-          <div className="w-full flex items-center gap-2">
-            {!isLast && (
-              <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={onFinish}>
-                Saltar
-              </Button>
-            )}
-            <Button
-              className="flex-1 min-h-[44px] rounded-xl gap-1.5"
-              onClick={() => (isLast ? onFinish() : setStep((s) => s + 1))}
-            >
-              {isLast ? "Empezar a completar mi perfil" : "Siguiente"}
+          <div className="w-full flex flex-col gap-2">
+            <Button className="min-h-[48px] rounded-xl gap-1.5" onClick={() => onFinish(true)}>
+              Empezar a llenar mi perfil
               <ArrowRight className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" className="text-muted-foreground" onClick={() => onFinish(false)}>
+              Lo haré después
             </Button>
           </div>
         </div>
