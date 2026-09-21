@@ -465,7 +465,7 @@ export default function DoctorPanel() {
               </div>
             </div>
 
-            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} checklist={completenessChecklist} />}
+            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} checklist={completenessChecklist} onStatusChange={(fields) => Object.entries(fields).forEach(([k, v]) => update(k, v))} />}
             {section === "mi-perfil" && <ProfileHub checklist={completenessChecklist} onNavigate={setSection} />}
             {PROFILE_SUB_KEYS.includes(section) && !guided && (
               <button type="button" onClick={() => setSection("mi-perfil")} className="flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline mb-4 min-h-[44px]">

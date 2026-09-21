@@ -1,5 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
+import { isAwaitingReview } from "@/api/doctorReview";
+import { SHOW_PREMIUM } from "@/lib/featureFlags";
 
 // Cuenta lo que necesita atención del dueño en cada sección, para mostrar
 // el círculo rojo en el menú del admin. Mismos criterios que usa cada
@@ -21,9 +23,7 @@ export async function loadPendingCounts() {
   const activeSpecialists = specialists.filter((s) => !s.deleted_at);
   const specialistsById = Object.fromEntries(specialists.map((s) => [s.id, s]));
 
-  const pendingDoctors = activeSpecialists.filter(
-    (s) => s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id)
-  ).length;
+  const pendingDoctors = activeSpecialists.filter(isAwaitingReview).length;
 
   const pendingDocuments = docs.filter(
     (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at
@@ -33,7 +33,7 @@ export async function loadPendingCounts() {
     (p) => p.submitted_by_specialist_id && p.review_status === "pending_review" && !specialistsById[p.submitted_by_specialist_id]?.deleted_at
   ).length;
 
-  const lateDoctors = computeLateDoctors(mergePremiumStatus(activeSpecialists, premiumStatuses), payments).length;
+  const lateDoctors = SHOW_PREMIUM ? computeLateDoctors(mergePremiumStatus(activeSpecialists, premiumStatuses), payments).length : 0;
   const pendingConditionRequests = conditionRequests.length;
 
   return {

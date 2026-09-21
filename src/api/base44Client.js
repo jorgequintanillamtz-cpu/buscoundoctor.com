@@ -399,6 +399,7 @@ const FUNCTION_MAP = {
   createDoctorProfile: (payload) => supabase.rpc('create_doctor_profile', { p_payload: payload }),
   deleteDoctorProfile: ({ specialist_id }) => supabase.rpc('delete_doctor_profile', { p_specialist_id: specialist_id }),
   recalculateSpecialistScore: ({ specialist_id }) => supabase.rpc('recalculate_specialist_score', { p_specialist_id: specialist_id }),
+  resubmitForReview: () => supabase.rpc('resubmit_for_review'),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>
     supabase.rpc('create_consult_review', { p_consult_summary_id: consult_summary_id, p_rating: rating }),

@@ -27,6 +27,7 @@ const STATUS = {
   published: { label: "Publicado", cls: "bg-green-100 text-green-700" },
   suspended: { label: "En pausa", cls: "bg-amber-100 text-amber-700" },
   rejected: { label: "Con cambios pendientes", cls: "bg-red-100 text-red-700" },
+  rejected_resubmitted: { label: "Corrigió y espera revisión", cls: "bg-blue-100 text-blue-700" },
 };
 
 // Todo lo necesario para decidir sobre un doctor en una sola pantalla: su
@@ -77,7 +78,7 @@ export default function AdminDoctorReview() {
     );
   }
 
-  const status = STATUS[doc.publication_status] || STATUS.pending_review;
+  const status = (doc.publication_status === "rejected" && doc.resubmitted_at ? STATUS.rejected_resubmitted : STATUS[doc.publication_status]) || STATUS.pending_review;
   const visible = doc.publication_status === "published" && doc.active === true;
   const verified = doc.license_verification_status === "verified";
 

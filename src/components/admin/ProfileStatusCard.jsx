@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { CheckCircle2, Clock, AlertTriangle, PauseCircle, Eye, MessageCircle, ArrowRight, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -21,8 +23,9 @@ const TONES = {
 // perfil ya aparece en el directorio y qué sigue. Se calcula con lo que ya
 // existe: publication_status, active (interruptor del admin),
 // license_verification_status y el estado de los documentos.
-export default function ProfileStatusCard({ specialist, onNavigate }) {
+export default function ProfileStatusCard({ specialist, onNavigate, onStatusChange }) {
   const specialistId = specialist?.id;
+  const [sending, setSending] = useState(false);
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ["doctor-required-docs", specialistId],
     queryFn: () => base44.entities.SpecialistDocument.filter({ specialist_id: specialistId }),
@@ -34,9 +37,23 @@ export default function ProfileStatusCard({ specialist, onNavigate }) {
   const publication = specialist.publication_status || "pending_review";
   const visible = publication === "published" && specialist.active === true;
   const verified = specialist.license_verification_status === "verified";
-  const docFor = (type) => docs.find((d) => d.document_type === type);
+  // Si el doctor resube un documento, cuenta el más reciente de cada tipo (no el rechazado anterior).
+  const docFor = (type) =>
+    docs.filter((d) => d.document_type === type).sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
   const missing = REQUIRED_DOCS.filter((d) => !docFor(d.type)).map((d) => d.label);
-  const rejectedDoc = docs.find((d) => REQUIRED_DOCS.some((r) => r.type === d.document_type) && d.upload_status === "rejected");
+  const rejectedDoc = REQUIRED_DOCS.map((r) => docFor(r.type)).find((d) => d && d.upload_status === "rejected");
+
+  const resubmit = async () => {
+    setSending(true);
+    try {
+      await base44.functions.invoke("resubmitForReview");
+      onStatusChange?.({ resubmitted_at: new Date().toISOString() });
+      toast.success("Enviamos tus correcciones a revisión");
+    } catch (e) {
+      toast.error("No se pudo enviar: " + e.message);
+    }
+    setSending(false);
+  };
 
   let card;
   if (publication === "suspended" || (publication === "published" && !visible)) {
@@ -47,6 +64,12 @@ export default function ProfileStatusCard({ specialist, onNavigate }) {
       body: "Por ahora no aparece en el directorio. Escríbenos y lo resolvemos contigo.",
       help: true,
     };
+  } else if (publication === "rejected" && specialist.resubmitted_at) {
+    card = {
+      tone: "blue", icon: Clock,
+      title: "Recibimos tus correcciones",
+      body: "Nuestro equipo las está revisando. Normalmente tardamos menos de 24 horas y te avisaremos por correo.",
+    };
   } else if (publication === "rejected" || rejectedDoc) {
     card = {
       tone: "red", icon: AlertTriangle,
@@ -55,6 +78,7 @@ export default function ProfileStatusCard({ specialist, onNavigate }) {
         ? `Tuvimos un problema con uno de tus documentos: ${rejectedDoc.rejection_reason}. Súbelo de nuevo y lo revisamos.`
         : "Nuestro equipo encontró algo por corregir. Escríbenos y te ayudamos.",
       cta: rejectedDoc ? { label: "Revisar mis documentos", target: "documentos" } : null,
+      resubmit: publication === "rejected",
       help: true,
     };
   } else if (visible) {
@@ -98,11 +122,17 @@ export default function ProfileStatusCard({ specialist, onNavigate }) {
               : "Cédula pendiente de subir"}
           </div>
 
-          {(card.cta || card.link || card.help) && (
+          {(card.cta || card.link || card.help || card.resubmit) && (
             <div className="flex flex-wrap gap-2 mt-4">
               {card.cta && (
                 <Button className="rounded-xl gap-1.5 min-h-[44px]" onClick={() => onNavigate?.(card.cta.target)}>
                   {card.cta.label}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              )}
+              {card.resubmit && (
+                <Button variant={card.cta ? "outline" : "default"} className="rounded-xl gap-1.5 min-h-[44px]" disabled={sending} onClick={resubmit}>
+                  Ya corregí, enviar a revisión
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               )}

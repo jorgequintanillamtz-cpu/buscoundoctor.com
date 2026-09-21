@@ -34,7 +34,7 @@ function KpiCard({ value, label, sub }) {
   );
 }
 
-export default function DoctorDashboardHome({ specialist, isOwnProfile = true, onNavigate, checklist }) {
+export default function DoctorDashboardHome({ specialist, isOwnProfile = true, onNavigate, checklist, onStatusChange }) {
   const specialistId = specialist?.id;
   const [range, setRange] = useState("30d"); // "7d" | "30d" | "12m"
 
@@ -157,7 +157,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
       </div>
 
       {/* 1) ¿Ya aparezco en el sitio? Estado del perfil en palabras simples. */}
-      {isOwnProfile && <ProfileStatusCard specialist={specialist} onNavigate={onNavigate} />}
+      {isOwnProfile && <ProfileStatusCard specialist={specialist} onNavigate={onNavigate} onStatusChange={onStatusChange} />}
 
       {/* 2) Tus próximos pasos: los 3 más importantes que faltan, con su botón.
           Usa el mismo porcentaje (completeness_score) que el menú y "Llena tu perfil". */}

@@ -10,9 +10,21 @@ import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify
 // sin aparecer hasta que alguien encendía "Perfil activo" aparte). El correo de
 // "tu perfil ya está publicado" se manda una sola vez: solo si el perfil no
 // estaba ya visible.
+// ¿Este perfil espera que el administrador lo revise? Perfiles en revisión,
+// borradores con dueño, y perfiles a los que se les pidieron cambios y el doctor
+// ya los corrigió (resubmitted_at). Lo usan la Bandeja, la lista y los contadores.
+export function isAwaitingReview(s) {
+  if (!s || s.deleted_at) return false;
+  return (
+    s.publication_status === "pending_review" ||
+    (s.publication_status === "draft" && !!s.owner_user_id) ||
+    (s.publication_status === "rejected" && !!s.resubmitted_at)
+  );
+}
+
 export async function approveDoctor(doc) {
   const alreadyVisible = doc.publication_status === "published" && doc.active === true;
-  await base44.entities.Specialist.update(doc.id, { publication_status: "published", active: true });
+  await base44.entities.Specialist.update(doc.id, { publication_status: "published", active: true, resubmitted_at: null });
   logActivity({
     type: "doctor_aprobado",
     description: `Se aprobó y publicó el perfil de ${doc.full_name}`,
@@ -24,7 +36,7 @@ export async function approveDoctor(doc) {
 }
 
 export async function rejectDoctor(doc, reason) {
-  await base44.entities.Specialist.update(doc.id, { publication_status: "rejected" });
+  await base44.entities.Specialist.update(doc.id, { publication_status: "rejected", resubmitted_at: null });
   logActivity({
     type: "doctor_rechazado",
     description: `Se rechazó el perfil de ${doc.full_name}. Motivo: ${reason}`,
@@ -42,8 +54,8 @@ export async function rejectDoctor(doc, reason) {
 export async function setDoctorState(doc, next) {
   if (next === "published") return approveDoctor(doc);
   const fields = next === "paused"
-    ? { publication_status: "published", active: false }
-    : { publication_status: "pending_review", active: false };
+    ? { publication_status: "published", active: false, resubmitted_at: null }
+    : { publication_status: "pending_review", active: false, resubmitted_at: null };
   await base44.entities.Specialist.update(doc.id, fields);
   logActivity({
     type: "perfil_desactivado",

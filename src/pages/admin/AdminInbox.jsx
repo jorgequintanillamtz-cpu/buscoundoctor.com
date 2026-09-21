@@ -7,7 +7,8 @@ import {
   CheckCircle2, XCircle, Loader2, PartyPopper,
 } from "lucide-react";
 import { toast } from "sonner";
-import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
+import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
+import { SHOW_PREMIUM } from "@/lib/featureFlags";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
 import { useAdminBadges } from "@/components/adminBadges";
 import { PendingDocCard } from "@/pages/admin/AdminVerificaciones";
@@ -70,6 +71,9 @@ function PendingDoctorCard({ doc, onReviewed }) {
             {doc.full_name}
           </Link>
           <p className="text-xs text-muted-foreground truncate">{doc.specialty || "Sin especialidad"}</p>
+          {doc.publication_status === "rejected" && doc.resubmitted_at && (
+            <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-700">Corrigió lo que pediste y espera revisión</span>
+          )}
         </div>
       </div>
 
@@ -227,7 +231,7 @@ export default function AdminInbox() {
   // Los doctores en la papelera no aparecen en ninguna de las 4 colas: ya
   // no son relevantes operativamente hasta que se restauren.
   const pendingDoctors = useMemo(
-    () => specialists.filter((s) => !s.deleted_at && (s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id))),
+    () => specialists.filter(isAwaitingReview),
     [specialists]
   );
 
@@ -242,7 +246,7 @@ export default function AdminInbox() {
   );
 
   const lateDoctors = useMemo(
-    () => computeLateDoctors(mergePremiumStatus(specialists.filter((s) => !s.deleted_at), premiumStatuses), payments),
+    () => (SHOW_PREMIUM ? computeLateDoctors(mergePremiumStatus(specialists.filter((s) => !s.deleted_at), premiumStatuses), payments) : []),
     [specialists, premiumStatuses, payments]
   );
 
@@ -263,9 +267,8 @@ export default function AdminInbox() {
         <h1 className="font-heading font-bold text-2xl text-foreground">Bandeja de entrada</h1>
       </div>
       <p className="text-sm text-muted-foreground mb-6">
-        Las 5 colas de pendientes del panel, juntas en un solo lugar: doctores por aprobar, documentos por
-        verificar, artículos de blog por revisar, doctores Premium retrasados en su pago, y solicitudes de
-        enfermedades nuevas.
+        Lo que necesita tu atención, junto en un solo lugar: doctores por aprobar, documentos por
+        verificar, artículos de blog por revisar y solicitudes de enfermedades nuevas.
       </p>
 
       {totalPending === 0 ? (
@@ -299,11 +302,13 @@ export default function AdminInbox() {
             ))}
           </InboxSection>
 
-          <InboxSection icon={Crown} title="Premium retrasados en su pago" count={lateDoctors.length} emptyLabel="Nadie está retrasado.">
-            {lateDoctors.map((doc) => (
-              <LatePaymentCard key={doc.id} doc={doc} />
-            ))}
-          </InboxSection>
+          {SHOW_PREMIUM && (
+            <InboxSection icon={Crown} title="Premium retrasados en su pago" count={lateDoctors.length} emptyLabel="Nadie está retrasado.">
+              {lateDoctors.map((doc) => (
+                <LatePaymentCard key={doc.id} doc={doc} />
+              ))}
+            </InboxSection>
+          )}
 
           <InboxSection icon={ListChecks} title="Enfermedades solicitadas" count={conditionRequests.length} emptyLabel="No hay solicitudes de enfermedades nuevas.">
             {conditionRequests.map((req) => (

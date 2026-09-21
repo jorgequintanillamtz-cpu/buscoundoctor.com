@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
-import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
+import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
+import { SHOW_PREMIUM } from "@/lib/featureFlags";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
@@ -153,7 +154,7 @@ export default function AdminDoctores() {
   // Perfiles registrados vía /registro-medico: pendientes de revisión o borradores con dueño asignado
   // (se excluye lo que está en la papelera de las 3 pestañas operativas).
   const pendientes = useMemo(
-    () => doctors.filter(s => !s.deleted_at && (s.publication_status === "pending_review" || (s.publication_status === "draft" && s.owner_user_id))),
+    () => doctors.filter(isAwaitingReview),
     [doctors]
   );
 
@@ -324,14 +325,16 @@ export default function AdminDoctores() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-2 bg-purple-500 rounded-xl px-4 py-2.5 w-fit">
-          <Crown className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" />
-          <p className="text-sm text-white">
-            <span className="font-semibold">{premiumCount}</span> doctor{premiumCount !== 1 ? "es" : ""} en plan Premium
-          </p>
+      {SHOW_PREMIUM && (
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 bg-purple-500 rounded-xl px-4 py-2.5 w-fit">
+            <Crown className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" />
+            <p className="text-sm text-white">
+              <span className="font-semibold">{premiumCount}</span> doctor{premiumCount !== 1 ? "es" : ""} en plan Premium
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Pestañas */}
       <div className="flex items-center gap-1 mb-6 border-b border-border/50">
@@ -455,19 +458,21 @@ export default function AdminDoctores() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => togglePremium(doc)}
-                        title={doc.plan_slug === "premium" ? "Cambiar a plan Gratis" : "Marcar como Premium (cobro manual)"}
-                        className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 transition-colors flex-shrink-0 ${
-                          doc.plan_slug === "premium"
-                            ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                            : "bg-muted text-muted-foreground hover:bg-purple-50 hover:text-purple-600"
-                        }`}
-                      >
-                        <Crown className="w-3 h-3" fill={doc.plan_slug === "premium" ? "currentColor" : "none"} />
-                        {doc.plan_slug === "premium" ? "Premium" : "Gratis"}
-                      </button>
+                      {SHOW_PREMIUM && (
+                        <button
+                          type="button"
+                          onClick={() => togglePremium(doc)}
+                          title={doc.plan_slug === "premium" ? "Cambiar a plan Gratis" : "Marcar como Premium (cobro manual)"}
+                          className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 transition-colors flex-shrink-0 ${
+                            doc.plan_slug === "premium"
+                              ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
+                              : "bg-muted text-muted-foreground hover:bg-purple-50 hover:text-purple-600"
+                          }`}
+                        >
+                          <Crown className="w-3 h-3" fill={doc.plan_slug === "premium" ? "currentColor" : "none"} />
+                          {doc.plan_slug === "premium" ? "Premium" : "Gratis"}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => toggleActive(doc)}

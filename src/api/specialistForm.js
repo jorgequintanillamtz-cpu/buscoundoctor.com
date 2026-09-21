@@ -127,6 +127,9 @@ export function useSpecialistForm({ stripFields = [] } = {}) {
       slug: f.slug || generateSlug(f.full_name),
     };
     delete data._slugManual;
+    // La marca "corrigió y espera revisión" solo la escriben la función resubmit_for_review y
+    // las decisiones del admin; un guardado del formulario (autoguardado) nunca debe pisarla.
+    delete data.resubmitted_at;
     stripFields.forEach((field) => { delete data[field]; });
     return data;
   }, [stripFields]);

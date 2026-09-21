@@ -95,7 +95,7 @@ export default function DoctorEditorSidebar({ form, update, specialistId }) {
           <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 rounded-xl px-3 py-2.5">
             <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <div>
-              Este perfil tiene cambios pendientes que debe corregir el doctor.
+              {form.resubmitted_at ? "El doctor ya corrigió lo que pediste y espera tu revisión." : "Este perfil tiene cambios pendientes que debe corregir el doctor."}
               {specialistId && <> <Link to={`/admin/doctores/revisar/${specialistId}`} className="underline font-medium">Ver la revisión</Link>.</>}
             </div>
           </div>
