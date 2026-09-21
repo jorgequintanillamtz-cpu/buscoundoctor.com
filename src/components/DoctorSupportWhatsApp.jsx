@@ -4,9 +4,12 @@
 // directo al equipo sin tener que salir del panel a buscar la página de
 // Contacto. Mismo número real de WhatsApp que ya usa Contact.jsx.
 const WHATSAPP_NUMBER = "528117902740";
-const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  "Hola, tengo una duda sobre mi perfil en BuscoUnDoctor"
-)}`;
+// Enlace de WhatsApp al equipo con un mensaje prellenado (lo reutilizan los
+// avisos de ayuda del panel).
+export function supportWhatsAppLink(text = "Hola, tengo una duda sobre mi perfil en BuscoUnDoctor") {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+}
+const WHATSAPP_HREF = supportWhatsAppLink();
 
 export default function DoctorSupportWhatsApp() {
   return (

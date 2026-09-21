@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Home, Lock, ArrowLeft, LogOut, Sparkles, Image as ImageIcon, Calendar, Star, ListChecks, Cpu, Globe, Menu, X } from "lucide-react";
+import { Eye, Save, Clock, Stethoscope, FileText, Home, ArrowLeft, LogOut, Sparkles, Calendar, Star, Globe, Menu, X, MessageCircle, UserCog, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -22,6 +22,8 @@ import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import ProfileChecklist from "@/components/admin/ProfileChecklist";
+import ProfileHub, { PROFILE_SUB_KEYS } from "@/components/admin/ProfileHub";
+import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 
@@ -31,10 +33,10 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackCon
 // para que un doctor nunca pueda tocar desde su propio panel los campos
 // que controla el admin (verificación, visibilidad, destacado).
 
-// Menú del panel. Se mantiene corto a propósito: el médico ve primero lo que
-// tiene que llenar ("Llena tu perfil") y sus solicitudes, y lo opcional va al
-// final. Cada sección con `requiresSaved` se bloquea solo mientras no haya
-// perfil guardado (hoy siempre hay, ver `isEditing`).
+// Menú del panel: corto a propósito (7 opciones). Todo lo que el médico llena de
+// su perfil (datos, formación, idiomas, consultorios, servicios, seguros y lo
+// opcional) vive dentro de "Mi perfil" (ProfileHub); esas pantallas se abren
+// con su propia clave (ver PROFILE_SUB_KEYS) y "Mi perfil" queda resaltado.
 //
 // Funciones ocultas por ahora (no están en el menú, pero su código sigue
 // aquí para reactivarlas): "Tu plan" (section "plan"), "Escribir blog"
@@ -44,26 +46,14 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackCon
 // SIDE_LINKS.
 const SECTION_GROUPS = [
   { group: "Mi actividad", items: [
-    { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
-    { key: "completar", label: "Llena tu perfil", icon: Sparkles, requiresSaved: true },
-    { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar, requiresSaved: true },
-    { key: "resenas", label: "Reseñas", icon: Star, requiresSaved: true },
+    { key: "resumen", label: "Inicio", icon: Home },
+    { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar },
+    { key: "resenas", label: "Reseñas", icon: Star },
   ]},
   { group: "Mi perfil", items: [
-    { key: "perfil", label: "Mis datos y presentación", icon: User, requiresSaved: false },
-    { key: "formacion", label: "Mi formación", icon: GraduationCap, requiresSaved: true },
-    { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
-    { key: "consultorios", label: "Mis consultorios", icon: MapPin, requiresSaved: true },
-    { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
-    { key: "aseguradoras", label: "Seguros que acepto", icon: ShieldCheck, requiresSaved: false },
-    { key: "documentos", label: "Mi cédula y documentos", icon: FileText, requiresSaved: true },
-  ]},
-  { group: "Más sobre mí (opcional)", items: [
-    { key: "enfermedades", label: "Enfermedades que trato", icon: ListChecks, requiresSaved: false },
-    { key: "subespecialidades", label: "Subespecialidades", icon: GraduationCap, requiresSaved: false },
-    { key: "tecnologia", label: "Tecnología y tratamientos", icon: Cpu, requiresSaved: true },
-    { key: "casos", label: "Casos de éxito", icon: Sparkles, requiresSaved: true },
-    { key: "publicaciones", label: "Publicaciones", icon: ImageIcon, requiresSaved: true },
+    { key: "completar", label: "Llena tu perfil", icon: Sparkles },
+    { key: "mi-perfil", label: "Mi perfil", icon: UserCog },
+    { key: "documentos", label: "Mi cédula y documentos", icon: FileText },
   ]},
 ];
 
@@ -177,6 +167,27 @@ export default function DoctorPanel() {
     }
   };
 
+  // Menú (mismos elementos en escritorio y en el menú de celular).
+  const isActive = (key) => section === key || (key === "mi-perfil" && PROFILE_SUB_KEYS.includes(section));
+  const renderNavGroups = (afterPick) => SECTION_GROUPS.map((g) => (
+    <div key={g.group} className="flex flex-col gap-0.5 mb-3">
+      <p className="text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 text-white/40">{g.group}</p>
+      {g.items.map((s) => (
+        <button
+          key={s.key}
+          type="button"
+          onClick={() => { setSection(s.key); afterPick?.(); }}
+          className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
+            isActive(s.key) ? "bg-brand-blue text-white" : "text-white/70 hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <s.icon className="w-4 h-4 flex-shrink-0" />
+          <span className="flex-1">{s.label}</span>
+        </button>
+      ))}
+    </div>
+  ));
+
   // ---- Estados sin perfil listo: se muestran dentro del mismo shell oscuro ----
   const renderShell = (content) => (
     <div className="min-h-screen bg-background flex">
@@ -246,7 +257,6 @@ export default function DoctorPanel() {
   }
 
   const completitud = form.completeness_score || 0;
-  const isEditing = true;
 
   // ---- Panel listo: la barra lateral incluye TODA la navegación ----
   return (
@@ -276,35 +286,7 @@ export default function DoctorPanel() {
           </div>
         </div>
 
-        <nav className="flex-1 p-3 overflow-y-auto">
-          {SECTION_GROUPS.map((g) => (
-            <div key={g.group} className="flex flex-col gap-0.5 mb-3">
-              <p className="text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 text-white/40">{g.group}</p>
-              {g.items.map((s) => {
-                const locked = s.requiresSaved && !isEditing;
-                return (
-                  <button
-                    key={s.key}
-                    type="button"
-                    disabled={locked}
-                    onClick={() => setSection(s.key)}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
-                      section === s.key
-                        ? "bg-brand-blue text-white"
-                        : locked
-                        ? "text-white/25 cursor-not-allowed"
-                        : "text-white/70 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <s.icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="flex-1">{s.label}</span>
-                    {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+        <nav className="flex-1 p-3 overflow-y-auto">{renderNavGroups()}</nav>
 
         <div className="px-3 pb-2 space-y-0.5">
           {SIDE_LINKS.map((l) => (
@@ -313,6 +295,10 @@ export default function DoctorPanel() {
               {l.label}
             </Link>
           ))}
+          <a href={supportWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-300 hover:bg-white/5 hover:text-emerald-200 transition-colors">
+            <MessageCircle className="w-4 h-4 flex-shrink-0" />
+            ¿Necesitas ayuda? Escríbenos
+          </a>
         </div>
 
         <div className="p-3 border-t border-white/10">
@@ -384,35 +370,7 @@ export default function DoctorPanel() {
             </div>
           </div>
 
-          <nav className="flex-1 p-3 overflow-y-auto">
-            {SECTION_GROUPS.map((g) => (
-              <div key={g.group} className="flex flex-col gap-0.5 mb-3">
-                <p className="text-[10px] font-heading font-semibold uppercase tracking-wide px-3 mb-1 text-white/40">{g.group}</p>
-                {g.items.map((s) => {
-                  const locked = s.requiresSaved && !isEditing;
-                  return (
-                    <button
-                      key={s.key}
-                      type="button"
-                      disabled={locked}
-                      onClick={() => { setSection(s.key); setMobileNavOpen(false); }}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors ${
-                        section === s.key
-                          ? "bg-brand-blue text-white"
-                          : locked
-                          ? "text-white/25 cursor-not-allowed"
-                          : "text-white/70 hover:bg-white/5 hover:text-white"
-                      }`}
-                    >
-                      <s.icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="flex-1">{s.label}</span>
-                      {locked && <Lock className="w-3 h-3 flex-shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </nav>
+          <nav className="flex-1 p-3 overflow-y-auto">{renderNavGroups(() => setMobileNavOpen(false))}</nav>
 
           <div className="px-3 pb-2 space-y-0.5 flex-shrink-0">
             {SIDE_LINKS.map((l) => (
@@ -421,6 +379,10 @@ export default function DoctorPanel() {
                 {l.label}
               </Link>
             ))}
+            <a href={supportWhatsAppLink()} target="_blank" rel="noopener noreferrer" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-300 hover:bg-white/5 hover:text-emerald-200 transition-colors">
+              <MessageCircle className="w-4 h-4 flex-shrink-0" />
+              ¿Necesitas ayuda? Escríbenos
+            </a>
           </div>
 
           <div className="p-3 border-t border-white/10 flex-shrink-0">
@@ -463,7 +425,14 @@ export default function DoctorPanel() {
               </div>
             </div>
 
-            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} />}
+            {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} checklist={completenessChecklist} />}
+            {section === "mi-perfil" && <ProfileHub checklist={completenessChecklist} onNavigate={setSection} />}
+            {PROFILE_SUB_KEYS.includes(section) && (
+              <button type="button" onClick={() => setSection("mi-perfil")} className="flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline mb-4 min-h-[44px]">
+                <ChevronLeft className="w-4 h-4" />
+                Volver a Mi perfil
+              </button>
+            )}
             {section === "completar" && <ProfileChecklist score={form.completeness_score || 0} checklist={completenessChecklist} onNavigate={setSection} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} simple />}
             {section === "plan" && <DoctorPremiumStatus specialistId={specialistId} specialistName={form.full_name} />}

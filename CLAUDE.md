@@ -151,7 +151,9 @@ Reglas SEO que ya existen (no las rompas): `/especialistas` es `noindex` cuando 
 - **Funciones ocultas del menú por ahora** (el código sigue ahí para reactivarlas; ver el comentario sobre `SECTION_GROUPS`): "Tu plan", "Escribir blog", "Productos digitales", "Configuración de pagos" y "Resumen de consulta".
 - `DoctorEditorPerfil` recibe `simple` en el panel del médico (sin dirección web, sin certificaciones en texto libre, sin barra de formato); el admin lo ve completo.
 - La bienvenida es una sola pantalla (`WelcomeTourModal.jsx`).
-- Pendiente: el correo de bienvenida todavía dice "revisa tu Score de SEO" (vive en la RPC `send_transactional_email`); hay que cambiarlo a "llena tu perfil".
+- **Menú de 7 opciones:** Inicio, Solicitudes de cita, Reseñas, Llena tu perfil, Mi perfil, Mi cédula y documentos, y el enlace "Mi página pública". "Mi perfil" (`ProfileHub.jsx`) es una página de tarjetas que abre las pantallas de siempre (datos, formación, idiomas, consultorios, servicios, seguros y lo opcional); esas pantallas siguen teniendo su propia clave en `DoctorPanel` y `PROFILE_SUB_KEYS` mantiene "Mi perfil" resaltado.
+- **Inicio del médico:** arriba `ProfileStatusCard` ("¿ya aparezco en el sitio?"; se calcula con `publication_status`, `active`, `license_verification_status` y el estado de los documentos de cédula e identificación), luego "Tus próximos pasos" (los 3 primeros pendientes de `src/lib/profileChecklistItems.js`), luego estadísticas (con perfil nuevo solo un aviso corto). La ayuda por WhatsApp está en el menú y en una tarjeta al final del inicio (`supportWhatsAppLink`).
+- Para probar los estados de esa tarjeta con datos de prueba: `publication_status` y `active` solo los cambia un admin (trigger `protect_specialist_admin_columns`); por SQL se simula con `set_config('request.jwt.claims', …sub de un admin…, true)` dentro de la misma consulta.
 
 ## 8b. Mapas y ubicación (Google Maps)
 

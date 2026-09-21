@@ -1,8 +1,11 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, BarChart3, ExternalLink, Stethoscope, Sparkles, ArrowRight } from "lucide-react";
+import { TrendingUp, BarChart3, ExternalLink, Stethoscope, Sparkles, ArrowRight, Circle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ProfileStatusCard from "@/components/admin/ProfileStatusCard";
+import { PROFILE_CHECKLIST_ITEMS } from "@/lib/profileChecklistItems";
+import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
@@ -31,7 +34,7 @@ function KpiCard({ value, label, sub }) {
   );
 }
 
-export default function DoctorDashboardHome({ specialist, isOwnProfile = true, onNavigate }) {
+export default function DoctorDashboardHome({ specialist, isOwnProfile = true, onNavigate, checklist }) {
   const specialistId = specialist?.id;
   const [range, setRange] = useState("30d"); // "7d" | "30d" | "12m"
 
@@ -110,6 +113,12 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
       .map(([key, count]) => ({ key, count }));
   }, [clicks, last30Start, now]);
 
+  // Los 3 primeros puntos pendientes de "Llena tu perfil" (ya vienen en orden de importancia).
+  const nextSteps = useMemo(
+    () => (checklist ? PROFILE_CHECKLIST_ITEMS.filter((item) => !checklist[item.key]).slice(0, 3) : []),
+    [checklist]
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -147,98 +156,133 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
         </div>
       </div>
 
-      {/* Aviso de perfil incompleto: un médico nuevo veía puros ceros sin
-          ninguna pista de qué hacer. Usa el mismo porcentaje que el menú
-          lateral y la pantalla "Llena tu perfil" (completeness_score). */}
+      {/* 1) ¿Ya aparezco en el sitio? Estado del perfil en palabras simples. */}
+      {isOwnProfile && <ProfileStatusCard specialist={specialist} onNavigate={onNavigate} />}
+
+      {/* 2) Tus próximos pasos: los 3 más importantes que faltan, con su botón.
+          Usa el mismo porcentaje (completeness_score) que el menú y "Llena tu perfil". */}
       {isOwnProfile && (specialist?.completeness_score ?? 0) < 100 && (
-        <div className="bg-brand-navy rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0" />
-              <p className="text-sm font-heading font-semibold text-white">Tu perfil está {specialist?.completeness_score || 0}% completo</p>
-            </div>
-            <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${specialist?.completeness_score || 0}%` }} />
-            </div>
-            <p className="text-xs text-white/70">Un perfil completo les genera más confianza a tus pacientes y aparece mejor en el directorio.</p>
+        <div className="bg-brand-navy rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0" />
+            <p className="text-sm font-heading font-semibold text-white">Tu perfil está {specialist?.completeness_score || 0}% completo</p>
           </div>
-          <Button onClick={() => onNavigate?.("completar")} className="rounded-xl gap-1.5 min-h-[44px] bg-white text-brand-navy hover:bg-white/90 flex-shrink-0 w-full sm:w-auto">
-            Llenar mi perfil
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden mb-4">
+            <div className="h-full bg-white rounded-full transition-all" style={{ width: `${specialist?.completeness_score || 0}%` }} />
+          </div>
+          {nextSteps.length > 0 ? (
+            <div className="space-y-2">
+              {nextSteps.map((item) => (
+                <div key={item.key} className="flex flex-col sm:flex-row sm:items-center gap-3 bg-white/10 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Circle className="w-4 h-4 text-white/40 flex-shrink-0" />
+                    <p className="text-sm text-white">{item.label}</p>
+                  </div>
+                  <Button onClick={() => onNavigate?.(item.target)} className="rounded-xl gap-1.5 min-h-[44px] bg-white text-brand-navy hover:bg-white/90 w-full sm:w-auto">
+                    {item.cta}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <button type="button" onClick={() => onNavigate?.("completar")} className="text-xs font-semibold text-white/80 hover:text-white underline underline-offset-2 pt-1">
+                Ver todos los pasos
+              </button>
+            </div>
+          ) : (
+            <Button onClick={() => onNavigate?.("completar")} className="rounded-xl gap-1.5 min-h-[44px] bg-white text-brand-navy hover:bg-white/90 w-full sm:w-auto">
+              Llenar mi perfil
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       )}
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <KpiCard value={kpis.impressions30} label="Veces que te vieron este mes" sub={isOwnProfile ? "Tu perfil apareció en el directorio" : "Veces que apareció en el directorio"} />
-        <KpiCard value={kpis.clicks30} label="Visitas a tu perfil este mes" sub={isOwnProfile ? "Pacientes que entraron a tu perfil" : "Visitas al perfil"} />
-        <KpiCard value={kpis.contacts30} label="Pacientes que quieren agendar" sub="Solicitudes de cita este mes" />
-      </div>
-
-      {/* Gráfica o estado vacío */}
-      <div className="bg-card rounded-2xl border border-border/50 p-5">
-        {!hasAnyData ? (
-          <div className="flex flex-col items-center justify-center text-center py-14">
-            <BarChart3 className="w-9 h-9 text-muted-foreground/40 mb-3" />
-            <p className="font-heading font-semibold text-sm text-foreground">Sin datos aún</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-              Las estadísticas aparecerán conforme los pacientes visiten tu perfil.
-            </p>
+      {/* Sin datos todavía (perfil nuevo): en vez de tres ceros y una gráfica
+          vacía, un aviso corto. Las estadísticas aparecen solas al haber visitas. */}
+      {isOwnProfile && !hasAnyData ? (
+        <div className="bg-card rounded-2xl border border-border/50 p-5 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+            <BarChart3 className="w-5 h-5 text-muted-foreground" />
           </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                <h2 className="font-heading font-semibold text-sm text-foreground">Actividad</h2>
-              </div>
-              <div className="flex items-center bg-muted rounded-full p-1">
-                {[["7d", "7 días"], ["30d", "30 días"], ["12m", "12 meses"]].map(([key, label]) => (
-                  <button
-                    key={key}
-                    onClick={() => setRange(key)}
-                    className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${range === key ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+          <div>
+            <p className="font-heading font-semibold text-sm text-foreground">Aún no hay visitas</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Aquí verás cuántos pacientes ven tu perfil y piden una cita, en cuanto empiecen a llegar.</p>
+          </div>
+        </div>
+      ) : (
+        <>
+        {/* KPI cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <KpiCard value={kpis.impressions30} label="Veces que te vieron este mes" sub={isOwnProfile ? "Tu perfil apareció en el directorio" : "Veces que apareció en el directorio"} />
+          <KpiCard value={kpis.clicks30} label="Visitas a tu perfil este mes" sub={isOwnProfile ? "Pacientes que entraron a tu perfil" : "Visitas al perfil"} />
+          <KpiCard value={kpis.contacts30} label="Pacientes que quieren agendar" sub="Solicitudes de cita este mes" />
+        </div>
+
+        {/* Gráfica o estado vacío */}
+        <div className="bg-card rounded-2xl border border-border/50 p-5">
+          {!hasAnyData ? (
+            <div className="flex flex-col items-center justify-center text-center py-14">
+              <BarChart3 className="w-9 h-9 text-muted-foreground/40 mb-3" />
+              <p className="font-heading font-semibold text-sm text-foreground">Sin datos aún</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                Las estadísticas aparecerán conforme los pacientes visiten tu perfil.
+              </p>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="homeImp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2F6FED" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#2F6FED" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="homeClk" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0B1E4D" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#0B1E4D" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="homeCta" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={range === "12m" ? 0 : range === "30d" ? 3 : 0} />
-                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: "1px solid hsl(var(--border))" }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Area type="monotone" dataKey="Veces que te vieron" stroke="#2F6FED" fill="url(#homeImp)" strokeWidth={2} />
-                <Area type="monotone" dataKey="Visitas a tu perfil" stroke="#0B1E4D" fill="url(#homeClk)" strokeWidth={2} />
-                <Area type="monotone" dataKey="Quieren agendar" stroke="#10B981" fill="url(#homeCta)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-            <p className="text-xs text-muted-foreground leading-relaxed mt-4 pt-4 border-t border-border/40">
-              <strong className="text-foreground">Veces que te vieron</strong> = tu perfil apareció en el directorio.{" "}
-              <strong className="text-foreground">Visitas a tu perfil</strong> = un paciente entró a verlo.{" "}
-              <strong className="text-foreground">Quieren agendar</strong> = un paciente pidió una cita contigo.
-            </p>
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="font-heading font-semibold text-sm text-foreground">Actividad</h2>
+                </div>
+                <div className="flex items-center bg-muted rounded-full p-1">
+                  {[["7d", "7 días"], ["30d", "30 días"], ["12m", "12 meses"]].map(([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => setRange(key)}
+                      className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${range === key ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="homeImp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2F6FED" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#2F6FED" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="homeClk" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0B1E4D" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#0B1E4D" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="homeCta" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={range === "12m" ? 0 : range === "30d" ? 3 : 0} />
+                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12, border: "1px solid hsl(var(--border))" }} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Area type="monotone" dataKey="Veces que te vieron" stroke="#2F6FED" fill="url(#homeImp)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="Visitas a tu perfil" stroke="#0B1E4D" fill="url(#homeClk)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="Quieren agendar" stroke="#10B981" fill="url(#homeCta)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-4 pt-4 border-t border-border/40">
+                <strong className="text-foreground">Veces que te vieron</strong> = tu perfil apareció en el directorio.{" "}
+                <strong className="text-foreground">Visitas a tu perfil</strong> = un paciente entró a verlo.{" "}
+                <strong className="text-foreground">Quieren agendar</strong> = un paciente pidió una cita contigo.
+              </p>
+            </>
+          )}
+        </div>
+        </>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tu card en el directorio */}
@@ -296,6 +340,22 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
           )}
         </div>
       </div>
+
+      {/* Ayuda a la vista: antes solo había un botón flotante sin texto. */}
+      {isOwnProfile && (
+        <div className="bg-card rounded-2xl border border-border/50 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="font-heading font-semibold text-sm text-foreground">¿Necesitas ayuda?</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Si algo no queda claro mientras llenas tu perfil, escríbenos por WhatsApp y te ayudamos.</p>
+          </div>
+          <Button variant="outline" className="rounded-xl gap-1.5 min-h-[44px] w-full sm:w-auto" asChild>
+            <a href={supportWhatsAppLink()} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" />
+              Escribirnos por WhatsApp
+            </a>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
