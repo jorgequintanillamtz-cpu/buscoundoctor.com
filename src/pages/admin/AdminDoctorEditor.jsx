@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, X, Mail, ListChecks, Cpu } from "lucide-react";
+import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, ListChecks, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -35,10 +35,6 @@ export default function AdminDoctorEditor() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
-  // Estado del botón "Reenviar aviso": da confirmación visible en el propio
-  // botón (no solo un toast que puede pasar inadvertido) de si el correo en
-  // verdad se mandó o no.
-  const [resendState, setResendState] = useState("idle"); // idle | sending | sent | error
   const [justSaved, setJustSaved] = useState(false);
   const [justPublished, setJustPublished] = useState(false);
   const [section, setSection] = useState(isEditing ? "resumen" : "perfil");
@@ -154,21 +150,21 @@ export default function AdminDoctorEditor() {
       { key: "resumen", label: "Inicio", icon: Home, requiresSaved: true },
     ]},
     { group: "Perfil del médico", items: [
-      { key: "perfil", label: "Datos y biografía", icon: User, requiresSaved: false },
-      { key: "formacion", label: "Formación académica", icon: GraduationCap, requiresSaved: true },
+      { key: "perfil", label: "Datos y presentación", icon: User, requiresSaved: false },
+      { key: "formacion", label: "Formación", icon: GraduationCap, requiresSaved: true },
       { key: "idiomas", label: "Idiomas", icon: Languages, requiresSaved: true },
       { key: "consultorios", label: "Consultorios y horarios", icon: MapPin, requiresSaved: true },
     ]},
-    { group: "Negocio", items: [
+    { group: "Servicios y más", items: [
       { key: "detalles", label: "Detalles y servicios", icon: Stethoscope, requiresSaved: false },
-      { key: "aseguradoras", label: "Aseguradoras aceptadas", icon: ShieldCheck, requiresSaved: false },
+      { key: "aseguradoras", label: "Seguros que acepta", icon: ShieldCheck, requiresSaved: false },
       { key: "enfermedades", label: "Enfermedades que trata", icon: ListChecks, requiresSaved: false },
       { key: "subespecialidades", label: "Subespecialidades", icon: GraduationCap, requiresSaved: false },
       { key: "tecnologia", label: "Tecnología y tratamientos", icon: Cpu, requiresSaved: true },
-      { key: "documentos", label: "Documentos y cédula", icon: FileText, requiresSaved: true },
+      { key: "documentos", label: "Cédula y documentos", icon: FileText, requiresSaved: true },
     ]},
-    { group: "Administración", items: [
-      { key: "publicacion", label: "Publicación", icon: Globe, requiresSaved: false },
+    { group: "Estado", items: [
+      { key: "publicacion", label: "Estado y visibilidad", icon: Globe, requiresSaved: false },
     ]},
   ];
 
@@ -211,47 +207,18 @@ export default function AdminDoctorEditor() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {justSaved ? "¡Guardado!" : "Guardar cambios"}
+            {justSaved ? "¡Guardado!" : isEditing ? "Guardar cambios" : "Guardar como borrador"}
           </Button>
-          <Button onClick={handlePublish} disabled={saving} className="rounded-xl gap-1.5">
-            {saving ? (
-              <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : justPublished ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {justPublished ? "¡Publicado!" : (form.active ? "Actualizar y publicar" : "Publicar perfil")}
-          </Button>
-          {isEditing && form.active && (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={resendState === "sending"}
-              className={`rounded-xl gap-1.5 ${resendState === "sent" ? "text-green-600 border-green-300" : resendState === "error" ? "text-destructive border-destructive/40" : ""}`}
-              onClick={async () => {
-                setResendState("sending");
-                const sent = await notifyProfileApproved(form);
-                if (sent) {
-                  setResendState("sent");
-                  toast.success("Aviso de perfil aprobado reenviado");
-                } else {
-                  setResendState("error");
-                  toast.error("No se pudo enviar: este doctor no tiene un email válido registrado");
-                }
-                setTimeout(() => setResendState("idle"), 4000);
-              }}
-            >
-              {resendState === "sending" ? (
-                <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-              ) : resendState === "sent" ? (
+          {!isEditing && (
+            <Button onClick={handlePublish} disabled={saving} className="rounded-xl gap-1.5">
+              {saving ? (
+                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : justPublished ? (
                 <Check className="w-4 h-4" />
-              ) : resendState === "error" ? (
-                <X className="w-4 h-4" />
               ) : (
-                <Mail className="w-4 h-4" />
+                <Save className="w-4 h-4" />
               )}
-              {resendState === "sending" ? "Enviando..." : resendState === "sent" ? "¡Reenviado!" : resendState === "error" ? "No se pudo enviar" : "Reenviar aviso de aprobación"}
+              {justPublished ? "¡Publicado!" : "Crear y publicar"}
             </Button>
           )}
         </div>
@@ -309,13 +276,13 @@ export default function AdminDoctorEditor() {
             <div className="bg-card rounded-2xl border border-border/50 p-8 text-center">
               <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
-                Guarda primero los datos básicos en "Datos y biografía" para desbloquear esta sección.
+                Guarda primero los datos básicos en "Datos y presentación" para desbloquear esta sección.
               </p>
             </div>
           ) : (
             <>
               {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id }} isOwnProfile={false} />}
-              {section === "perfil" && <DoctorEditorPerfil form={form} update={update} />}
+              {section === "perfil" && <DoctorEditorPerfil form={form} update={update} simple />}
               {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={id} />}
               {section === "formacion" && <EducationManager specialistId={id} />}
               {section === "idiomas" && <LanguagesManager specialistId={id} />}
@@ -326,7 +293,7 @@ export default function AdminDoctorEditor() {
               {section === "tecnologia" && <HighlightsManager specialistId={id} />}
               {section === "documentos" && <DocumentManager specialistId={id} />}
               {section === "publicacion" && (
-                <DoctorEditorSidebar form={form} update={update} onSaveDraft={handleSaveChanges} saving={saving} />
+                <DoctorEditorSidebar form={form} update={update} specialistId={id} />
               )}
             </>
           )}

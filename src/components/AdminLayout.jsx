@@ -26,7 +26,7 @@ const adminNavSections = [
     items: [
       { path: "/admin/bandeja", label: "Bandeja de entrada", icon: Inbox },
       { path: "/admin/doctores", label: "Doctores", icon: Users },
-      { path: "/admin/verificaciones", label: "Verificaciones", icon: ShieldCheck },
+      { path: "/admin/verificaciones", label: "Verificar documentos", icon: ShieldCheck },
       { path: "/admin/blog", label: "Blog", icon: FileText },
       { path: "/admin/resenas", label: "Reseñas", icon: Star },
       { path: "/admin/solicitudes", label: "Solicitudes de cita", icon: Calendar },
@@ -36,19 +36,19 @@ const adminNavSections = [
     ],
   },
   {
-    label: "Bancos",
+    label: "Listas médicas",
     items: [
-      { path: "/admin/especialidades", label: "Banco de especialidades", icon: Heart },
-      { path: "/admin/subespecialidades", label: "Banco de subespecialidades", icon: GraduationCap },
-      { path: "/admin/enfermedades", label: "Banco de enfermedades", icon: ListChecks },
+      { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
+      { path: "/admin/subespecialidades", label: "Subespecialidades", icon: GraduationCap },
+      { path: "/admin/enfermedades", label: "Enfermedades", icon: ListChecks },
     ],
   },
   {
     label: "Contenido",
     items: [
-      { path: "/admin/faqs", label: "FAQs SEO", icon: HelpCircle },
+      { path: "/admin/faqs", label: "Preguntas frecuentes", icon: HelpCircle },
       { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
-      { path: "/admin/vista-registro", label: "Vista: registro de doctores", icon: Eye },
+      { path: "/admin/vista-registro", label: "Vista previa del registro", icon: Eye },
     ],
   },
   {

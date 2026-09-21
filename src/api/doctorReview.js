@@ -34,3 +34,24 @@ export async function rejectDoctor(doc, reason) {
   notifyProfileRejected(doc, reason);
   return { publication_status: "rejected" };
 }
+
+// Cambia el estado de un perfil desde el editor del admin, con las tres
+// opciones que entiende cualquiera: en revisión, publicado (visible) o en
+// pausa (oculto). Devuelve los campos que quedaron para reflejarlos en el
+// formulario (si no, el autoguardado los revertiría).
+export async function setDoctorState(doc, next) {
+  if (next === "published") return approveDoctor(doc);
+  const fields = next === "paused"
+    ? { publication_status: "published", active: false }
+    : { publication_status: "pending_review", active: false };
+  await base44.entities.Specialist.update(doc.id, fields);
+  logActivity({
+    type: "perfil_desactivado",
+    description: next === "paused"
+      ? `Se puso en pausa el perfil de ${doc.full_name}`
+      : `Se regresó a revisión el perfil de ${doc.full_name}`,
+    specialistId: doc.id,
+    specialistName: doc.full_name,
+  });
+  return fields;
+}

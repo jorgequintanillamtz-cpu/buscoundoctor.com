@@ -39,7 +39,8 @@ export default function ProfileStatusCard({ specialist, onNavigate }) {
   const rejectedDoc = docs.find((d) => REQUIRED_DOCS.some((r) => r.type === d.document_type) && d.upload_status === "rejected");
 
   let card;
-  if (publication === "suspended") {
+  if (publication === "suspended" || (publication === "published" && !visible)) {
+    // "Aprobar" ahora deja el perfil visible; un perfil publicado pero oculto es uno en pausa.
     card = {
       tone: "amber", icon: PauseCircle,
       title: "Tu perfil está en pausa",
@@ -62,12 +63,6 @@ export default function ProfileStatusCard({ specialist, onNavigate }) {
       title: "Tu perfil está publicado",
       body: "Los pacientes ya pueden encontrarte en el directorio.",
       link: { label: "Ver mi perfil público", href: `/especialista/${specialist.slug}` },
-    };
-  } else if (publication === "published") {
-    card = {
-      tone: "blue", icon: Clock,
-      title: "Tu perfil está aprobado",
-      body: "Todavía no aparece en el directorio. Nuestro equipo lo activará y te avisaremos por correo.",
     };
   } else if (missing.length > 0) {
     card = {
