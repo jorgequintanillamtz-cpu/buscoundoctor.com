@@ -55,6 +55,18 @@ Necesitas [Node.js](https://nodejs.org) instalado.
 
 Otros comandos: `npm run build`, `npm run lint` y `npm run typecheck`. No hay pruebas automáticas; los cambios se verifican a mano en el navegador.
 
+## Trabajar entre dos personas
+
+Los dos dueños (Jorge y David) pueden cambiar todo: código, base de datos y hosting. Para no estorbarse:
+
+1. Cada quien trabaja en **su propia rama** (`git checkout -b david/nombre-del-cambio`), nunca directo en `main`.
+2. Al terminar, se abre un **Pull Request** en GitHub. Vercel crea un enlace de prueba para revisarlo.
+3. Se junta a `main` solo cuando esté revisado (eso es lo que publica el sitio).
+4. Los cambios de base de datos se avisan al otro *antes* de aplicarlos.
+5. Los datos de prueba llevan el prefijo `QA` más la inicial de quien los crea, y se borran al terminar.
+
+Las llaves del archivo `.env` (mira `.env.example`) se pasan por un canal privado.
+
 ## Cómo publicar cambios
 
 Cada cambio que llega a la rama `main` se publica solo en producción. Lo recomendado es trabajar en una rama propia y abrir un Pull Request para que lo revise el dueño antes de publicarse.

@@ -14,12 +14,21 @@ Guía para Claude (Claude Code u otra sesión) que trabaje en este proyecto. Lé
 
 ## 2. Con quién trabajas (importante)
 
-El dueño, **Jorge, no es técnico**. Reglas de trato:
+Los dueños son **Jorge y David** (hermanos). Los dos tienen acceso completo (código, base de datos, hosting) y cada quien usa **su propia cuenta de Claude**. Si no es evidente quién está en la sesión, pregúntalo al empezar.
 
-- Explica en **español, en lenguaje sencillo**, sin jerga. Di qué hiciste y por qué, no cómo se llama el patrón.
-- **Nunca hagas commit sin que lo pida, y nunca hagas push sin confirmación explícita** ("¿Lo subo a GitHub?" → espera "sí"). Cada push a `main` se publica solo en producción.
+- **Jorge no es técnico.** Con él: explica en **español, en lenguaje sencillo**, sin jerga; di qué hiciste y por qué, no cómo se llama el patrón. Con David, pregúntale al inicio qué nivel de detalle técnico prefiere y adáptate.
+- **Nunca hagas commit sin que te lo pidan, y nunca hagas push sin confirmación explícita** ("¿Lo subo a GitHub?" → espera "sí"). Cada push a `main` se publica solo en producción.
 - **Verifica con evidencia real** (una prueba concreta en el navegador o en la base de datos), no con "debería funcionar". Reporta lo que viste.
-- Antes de decidir por él algo que cambia el negocio (orden de secciones, textos, precios), propónlo y espera aprobación.
+- Antes de decidir algo que cambia el negocio (orden de secciones, textos, precios), propónlo y espera aprobación del dueño con quien trabajas. Si el cambio es grande, conviene que el otro dueño se entere antes de publicarlo.
+
+### Trabajar entre dos personas (y dos Claude)
+
+- **Ramas, no `main` directo:** cada cambio se hace en su propia rama (`jorge/…`, `david/…`) y se abre un Pull Request. Vercel genera un enlace de prueba por rama; se revisa ahí y luego se junta a `main`, que es lo que publica. Antes de empezar, actualiza tu copia (`git pull`) para no pisar lo del otro.
+- **Un solo cambio por rama/commit**, y describe en el mensaje del commit cualquier cambio de base de datos (las migraciones no viven en git, ver §6).
+- **Cambios en la base de datos (producción):** avísale al otro dueño *antes* de aplicarlos y pruébalos con datos de prueba (§9). No hay copia de pruebas: un error afecta a los médicos reales.
+- **Datos de prueba:** usa el prefijo `QA` más tu inicial (`QA-J…`, `QA-D…`) para no borrar por error los del otro, y bórralos al terminar.
+- **Secretos:** cada quien tiene sus propias cuentas y contraseñas; nunca las compartan ni las pongan en el repositorio. Las llaves del `.env` (ver `.env.example`) se pasan por un canal privado.
+- Las **rutinas de Claude** (blog, keep-alive; ver §7a) viven en la cuenta de Jorge. Si David necesita manejarlas, hay que recrearlas en su cuenta.
 
 ## 3. Stack actual (la migración desde Base44 ya se hizo)
 
