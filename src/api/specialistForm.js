@@ -107,7 +107,12 @@ export function useSpecialistForm({ stripFields = [] } = {}) {
   const update = useCallback((field, value) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value };
-      if (field === "full_name" && !prev._slugManual) {
+      // La dirección web (slug) se genera sola a partir del nombre SOLO mientras
+      // el perfil todavía no existe. Una vez guardado (tiene `id`) ya no cambia
+      // al editar el nombre: cambiarla rompe los enlaces compartidos y el
+      // posicionamiento en Google. Para cambiarla a propósito, el admin la edita
+      // en "Avanzado".
+      if (field === "full_name" && !prev._slugManual && !prev.id) {
         next.slug = generateSlug(value);
       }
       return next;
