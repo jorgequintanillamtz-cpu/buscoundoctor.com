@@ -7,8 +7,7 @@ import {
   CheckCircle2, XCircle, Loader2, PartyPopper,
 } from "lucide-react";
 import { toast } from "sonner";
-import { logActivity } from "@/api/activityLog";
-import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify";
+import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
 import { useAdminBadges } from "@/components/adminBadges";
 import { PendingDocCard } from "@/pages/admin/AdminVerificaciones";
@@ -27,15 +26,8 @@ function PendingDoctorCard({ doc, onReviewed }) {
   const approve = async () => {
     setReviewing(true);
     try {
-      await base44.entities.Specialist.update(doc.id, { publication_status: "published" });
+      await approveDoctor(doc);
       toast.success(`Perfil de ${doc.full_name} aprobado y publicado`);
-      logActivity({
-        type: "doctor_aprobado",
-        description: `Se aprobó y publicó el perfil de ${doc.full_name}`,
-        specialistId: doc.id,
-        specialistName: doc.full_name,
-      });
-      notifyProfileApproved(doc);
       onReviewed();
       refreshBadges();
     } catch (e) {
@@ -48,15 +40,8 @@ function PendingDoctorCard({ doc, onReviewed }) {
     if (!rejectReason.trim()) { toast.error("El motivo de rechazo es obligatorio"); return; }
     setReviewing(true);
     try {
-      await base44.entities.Specialist.update(doc.id, { publication_status: "rejected" });
+      await rejectDoctor(doc, rejectReason.trim());
       toast.success(`Perfil de ${doc.full_name} rechazado`);
-      logActivity({
-        type: "doctor_rechazado",
-        description: `Se rechazó el perfil de ${doc.full_name}. Motivo: ${rejectReason.trim()}`,
-        specialistId: doc.id,
-        specialistName: doc.full_name,
-      });
-      notifyProfileRejected(doc, rejectReason.trim());
       setRejecting(false);
       setRejectReason("");
       onReviewed();
@@ -79,7 +64,7 @@ function PendingDoctorCard({ doc, onReviewed }) {
         )}
         <div className="min-w-0">
           <Link
-            to={`/admin/doctores/editar/${doc.id}`}
+            to={`/admin/doctores/revisar/${doc.id}`}
             className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
           >
             {doc.full_name}
@@ -108,14 +93,17 @@ function PendingDoctorCard({ doc, onReviewed }) {
             </div>
           </div>
         ) : (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button size="sm" className="rounded-xl gap-1.5" asChild>
+              <Link to={`/admin/doctores/revisar/${doc.id}`}>Revisar</Link>
+            </Button>
             <Button size="sm" variant="outline" className="rounded-xl gap-1.5" disabled={reviewing} onClick={approve}>
               {reviewing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
-              Aprobar
+              Aprobar y publicar
             </Button>
             <Button size="sm" variant="outline" className="rounded-xl gap-1.5" disabled={reviewing} onClick={() => setRejecting(true)}>
               <XCircle className="w-3.5 h-3.5 text-red-500" />
-              Rechazar
+              Pedir cambios
             </Button>
           </div>
         )}

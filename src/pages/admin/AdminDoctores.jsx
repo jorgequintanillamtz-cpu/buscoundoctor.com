@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
-import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify";
+import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
@@ -274,13 +274,9 @@ export default function AdminDoctores() {
   const handleBulkApprove = async (ids) => {
     if (ids.length === 0) return;
     try {
-      await Promise.all(ids.map(id => base44.entities.Specialist.update(id, { publication_status: "published" })));
-      setDoctors(prev => prev.map(d => (ids.includes(d.id) ? { ...d, publication_status: "published" } : d)));
-      const approvedDocs = doctors.filter(d => ids.includes(d.id));
-      approvedDocs.forEach(d => {
-        logActivity({ type: "doctor_aprobado", description: `Se aprobó y publicó el perfil de ${d.full_name}`, specialistId: d.id, specialistName: d.full_name });
-        notifyProfileApproved(d);
-      });
+      const toApprove = doctors.filter(d => ids.includes(d.id));
+      await Promise.all(toApprove.map(d => approveDoctor(d)));
+      setDoctors(prev => prev.map(d => (ids.includes(d.id) ? { ...d, publication_status: "published", active: true } : d)));
       setSelectedPending(new Set());
       toast.success(`${ids.length} perfil${ids.length !== 1 ? "es" : ""} aprobado${ids.length !== 1 ? "s" : ""} y publicado${ids.length !== 1 ? "s" : ""}`);
       refreshBadges();
@@ -295,18 +291,9 @@ export default function AdminDoctores() {
     if (!rejectDialog.motivo.trim()) { toast.error("Debes ingresar un motivo de rechazo"); return; }
     setRejecting(true);
     try {
-      await Promise.all(rejectDialog.ids.map(id => base44.entities.Specialist.update(id, { publication_status: "rejected" })));
+      const toReject = doctors.filter(d => rejectDialog.ids.includes(d.id));
+      await Promise.all(toReject.map(d => rejectDoctor(d, rejectDialog.motivo.trim())));
       setDoctors(prev => prev.map(d => (rejectDialog.ids.includes(d.id) ? { ...d, publication_status: "rejected" } : d)));
-      const rejectedDocs = doctors.filter(d => rejectDialog.ids.includes(d.id));
-      rejectedDocs.forEach(d => {
-        logActivity({
-          type: "doctor_rechazado",
-          description: `Se rechazó el perfil de ${d.full_name}. Motivo: ${rejectDialog.motivo.trim()}`,
-          specialistId: d.id,
-          specialistName: d.full_name,
-        });
-        notifyProfileRejected(d, rejectDialog.motivo.trim());
-      });
       setSelectedPending(new Set());
       toast.success(`${rejectDialog.ids.length} perfil${rejectDialog.ids.length !== 1 ? "es" : ""} rechazado${rejectDialog.ids.length !== 1 ? "s" : ""}`);
       setRejectDialog({ open: false, ids: [], motivo: "" });
@@ -645,7 +632,7 @@ export default function AdminDoctores() {
                   <BadgeCheck className="w-4 h-4" /> Aprobar seleccionados
                 </Button>
                 <Button size="sm" variant="outline" className="rounded-lg gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => openRejectDialog(Array.from(selectedPending))}>
-                  <XCircle className="w-4 h-4" /> Rechazar seleccionados
+                  <XCircle className="w-4 h-4" /> Pedir cambios a los seleccionados
                 </Button>
               </div>
             )}
@@ -689,11 +676,14 @@ export default function AdminDoctores() {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
+                            <Button size="sm" className="rounded-lg h-8" asChild>
+                              <Link to={`/admin/doctores/revisar/${doc.id}`}>Revisar</Link>
+                            </Button>
                             <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-green-600 border-green-200 hover:bg-green-50" onClick={() => handleBulkApprove([doc.id])}>
-                              <BadgeCheck className="w-4 h-4" /> Aprobar
+                              <BadgeCheck className="w-4 h-4" /> Aprobar y publicar
                             </Button>
                             <Button size="sm" variant="outline" className="rounded-lg h-8 gap-1 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => openRejectDialog([doc.id])}>
-                              <XCircle className="w-4 h-4" /> Rechazar
+                              <XCircle className="w-4 h-4" /> Pedir cambios
                             </Button>
                           </div>
                         </td>
@@ -711,12 +701,12 @@ export default function AdminDoctores() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-heading">
-              Rechazar {rejectDialog.ids.length > 1 ? `${rejectDialog.ids.length} perfiles` : "perfil"}
+              Pedir cambios {rejectDialog.ids.length > 1 ? `a ${rejectDialog.ids.length} perfiles` : "al perfil"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <label className="text-sm font-medium mb-1 block">Motivo de rechazo *</label>
+              <label className="text-sm font-medium mb-1 block">Qué debe corregir el doctor (le llega por correo) *</label>
               <Input
                 value={rejectDialog.motivo}
                 onChange={(e) => setRejectDialog(prev => ({ ...prev, motivo: e.target.value }))}
@@ -728,7 +718,7 @@ export default function AdminDoctores() {
               <Button variant="outline" onClick={() => setRejectDialog({ open: false, ids: [], motivo: "" })} className="rounded-xl">Cancelar</Button>
               <Button variant="destructive" onClick={confirmReject} disabled={rejecting} className="rounded-xl">
                 {rejecting && <Loader2 className="w-4 h-4 animate-spin mr-1.5" />}
-                Rechazar
+                Enviar
               </Button>
             </div>
           </div>

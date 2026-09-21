@@ -156,6 +156,12 @@ Reglas SEO que ya existen (no las rompas): `/especialistas` es `noindex` cuando 
 - **Paso a paso** (`GuidedStepBar.jsx`, lógica en `DoctorPanel`: `startGuided`/`goGuided`): botón "Empezar paso a paso" en "Llena tu perfil" y en la bienvenida. Junta lo pendiente por pantalla y recorre las pantallas de siempre con una barra fija abajo ("Paso 2 de 5", Atrás / Siguiente / Salir); guarda al cambiar de paso y se apaga si el médico usa el menú. No hay formularios duplicados.
 - Para probar los estados de esa tarjeta con datos de prueba: `publication_status` y `active` solo los cambia un admin (trigger `protect_specialist_admin_columns`); por SQL se simula con `set_config('request.jwt.claims', …sub de un admin…, true)` dentro de la misma consulta.
 
+## 8a-bis. Revisar y aprobar doctores (admin)
+
+- **"Aprobar" hace todo en un paso:** deja el perfil `published` **y** `active = true` (visible en el directorio) y manda **un solo** correo de "perfil publicado". Vive en `src/api/doctorReview.js` (`approveDoctor` / `rejectDoctor`); la Bandeja, la lista de Doctores y la pantalla de revisión lo usan, para que se comporten igual. Antes "Aprobar" solo cambiaba `publication_status` y el perfil seguía invisible hasta encender "Perfil activo" aparte.
+- **Pantalla de revisión** `/admin/doctores/revisar/:id` (`AdminDoctorReview.jsx`): resumen del doctor, qué tiene y qué le falta (9 puntos), sus documentos con aprobar/rechazar (`DocumentManager`) y los botones "Aprobar y publicar" / "Pedir cambios" (esto último deja `rejected` y le manda el motivo por correo). Aprobar el perfil no marca la cédula como verificada: eso lo hace aprobar el documento.
+- "Pausar" un perfil sigue siendo el interruptor `active` de la lista/editor.
+
 ## 8b. Mapas y ubicación (Google Maps)
 
 - Todo el mapa usa **Google Maps** (`@vis.gl/react-google-maps`); Leaflet/CARTO ya no existen. Utilidades y configuración en `src/lib/googleMaps.js`.
