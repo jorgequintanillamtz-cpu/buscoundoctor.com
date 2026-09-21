@@ -7,7 +7,7 @@ function barColor(score) {
   return { text: "text-red-400", border: "border-red-400/40" };
 }
 
-export default function ProfileChecklist({ score = 0, checklist, onNavigate }) {
+export default function ProfileChecklist({ score = 0, checklist, onNavigate, onStartGuided }) {
   const colors = barColor(score);
   const pending = checklist ? ITEMS.filter((item) => !checklist[item.key]) : [];
   const done = checklist ? ITEMS.filter((item) => checklist[item.key]) : [];
@@ -35,6 +35,16 @@ export default function ProfileChecklist({ score = 0, checklist, onNavigate }) {
                 ? "Ya tienes todo lo importante. Cuando lleguen tus primeros pacientes, pídeles una reseña."
                 : `Te ${pending.length === 1 ? "falta" : "faltan"} ${pending.length} ${pending.length === 1 ? "paso" : "pasos"} para llegar al 100%.`}
             </p>
+            {pending.length > 0 && onStartGuided && (
+              <button
+                type="button"
+                onClick={onStartGuided}
+                className="mt-4 inline-flex items-center gap-1.5 min-h-[44px] px-5 rounded-xl bg-white text-brand-navy text-sm font-semibold hover:bg-white/90 transition-colors"
+              >
+                Empezar paso a paso
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>

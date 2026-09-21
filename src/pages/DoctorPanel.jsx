@@ -22,6 +22,8 @@ import CasesManager from "@/components/admin/CasesManager";
 import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import ProfileChecklist from "@/components/admin/ProfileChecklist";
+import GuidedStepBar from "@/components/admin/GuidedStepBar";
+import { PROFILE_CHECKLIST_ITEMS } from "@/lib/profileChecklistItems";
 import ProfileHub, { PROFILE_SUB_KEYS } from "@/components/admin/ProfileHub";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
@@ -72,6 +74,9 @@ export default function DoctorPanel() {
   const [lastSaved, setLastSaved] = useState(null);
   const [section, setSection] = useState("resumen");
   const [completenessChecklist, setCompletenessChecklist] = useState(null);
+  // Modo "paso a paso": recorre, una por una, las pantallas de lo que le falta
+  // al médico. { steps: [{ target, labels, keys }], index } o null.
+  const [guided, setGuided] = useState(null);
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const recalcScoreShared = useRecalculateScore(setForm);
@@ -149,6 +154,41 @@ export default function DoctorPanel() {
     setSaving(false);
   };
 
+  // Junta lo pendiente de "Llena tu perfil" por pantalla (varios puntos viven
+  // en la misma, como foto y presentación) y arranca el paso a paso.
+  const startGuided = () => {
+    if (!completenessChecklist) { setSection("completar"); return; }
+    const steps = [];
+    for (const item of PROFILE_CHECKLIST_ITEMS) {
+      if (completenessChecklist[item.key]) continue;
+      const existing = steps.find((st) => st.target === item.target);
+      if (existing) { existing.labels.push(item.label); existing.keys.push(item.key); }
+      else steps.push({ target: item.target, labels: [item.label], keys: [item.key] });
+    }
+    if (steps.length === 0) { toast.success("¡Tu perfil ya está completo!"); return; }
+    setGuided({ steps, index: 0 });
+    setSection(steps[0].target);
+  };
+
+  const goGuided = async (nextIndex) => {
+    await handleSaveChanges();
+    if (nextIndex >= guided.steps.length) {
+      setGuided(null);
+      setSection("completar");
+      return;
+    }
+    setGuided({ ...guided, index: nextIndex });
+    setSection(guided.steps[nextIndex].target);
+  };
+
+  // Si el médico se va a otra pantalla desde el menú, se sale del paso a paso.
+  useEffect(() => {
+    if (guided && section !== guided.steps[guided.index].target) setGuided(null);
+  }, [section, guided]);
+
+  const joinLabels = (labels) =>
+    labels.map((l, i) => (i === 0 ? l : l.charAt(0).toLowerCase() + l.slice(1))).join(" y ");
+
   // Se guarda directo en la base de datos para que quede marcado de
   // inmediato, sin depender de que el doctor llegue a guardar cambios en
   // algún otro momento -- pero TAMBIÉN hay que actualizar el form local
@@ -158,7 +198,7 @@ export default function DoctorPanel() {
   // a `false` en cuanto corre, y el popup vuelve a aparecer la próxima vez.
   const finishWelcomeTour = async (goToChecklist = true) => {
     setShowWelcomeTour(false);
-    if (goToChecklist) setSection("completar");
+    if (goToChecklist) startGuided();
     update("has_seen_welcome_tour", true);
     try {
       await base44.entities.Specialist.update(specialistId, { has_seen_welcome_tour: true });
@@ -397,7 +437,7 @@ export default function DoctorPanel() {
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className={`p-4 sm:p-6 lg:p-8 ${guided ? "pb-36" : ""}`}>
           <div className="max-w-6xl">
             <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
               <div>
@@ -427,13 +467,13 @@ export default function DoctorPanel() {
 
             {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} checklist={completenessChecklist} />}
             {section === "mi-perfil" && <ProfileHub checklist={completenessChecklist} onNavigate={setSection} />}
-            {PROFILE_SUB_KEYS.includes(section) && (
+            {PROFILE_SUB_KEYS.includes(section) && !guided && (
               <button type="button" onClick={() => setSection("mi-perfil")} className="flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline mb-4 min-h-[44px]">
                 <ChevronLeft className="w-4 h-4" />
                 Volver a Mi perfil
               </button>
             )}
-            {section === "completar" && <ProfileChecklist score={form.completeness_score || 0} checklist={completenessChecklist} onNavigate={setSection} />}
+            {section === "completar" && <ProfileChecklist score={form.completeness_score || 0} checklist={completenessChecklist} onNavigate={setSection} onStartGuided={startGuided} />}
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} simple />}
             {section === "plan" && <DoctorPremiumStatus specialistId={specialistId} specialistName={form.full_name} />}
             {section === "solicitudes" && <DoctorAppointmentRequests specialistId={specialistId} />}
@@ -452,6 +492,22 @@ export default function DoctorPanel() {
             {section === "blog" && <DoctorBlogSubmit specialistId={specialistId} specialistName={form.full_name} specialty={form.specialty} />}
           </div>
         </div>
+
+        {guided && (() => {
+          const step = guided.steps[guided.index];
+          return (
+            <GuidedStepBar
+              stepNumber={guided.index + 1}
+              total={guided.steps.length}
+              title={joinLabels(step.labels)}
+              done={step.keys.every((k) => completenessChecklist?.[k])}
+              isLast={guided.index === guided.steps.length - 1}
+              onBack={() => goGuided(guided.index - 1)}
+              onNext={() => goGuided(guided.index + 1)}
+              onExit={() => setGuided(null)}
+            />
+          );
+        })()}
       </div>
     </div>
   );
