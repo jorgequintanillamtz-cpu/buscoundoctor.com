@@ -130,7 +130,7 @@ export function useSpecialistForm({ stripFields = [] } = {}) {
 }
 
 // Recalcula completitud/SEO invocando la función del backend y actualiza el
-// form. Devuelve el checklist (lo usa la pantalla "Score SEO" del panel del
+// form. Devuelve el checklist (lo usa la pantalla "Llena tu perfil" del panel del
 // doctor; el editor del admin simplemente lo ignora).
 export function useRecalculateScore(setForm) {
   return useCallback(async (specialistId) => {

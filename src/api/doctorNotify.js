@@ -56,7 +56,7 @@ function profileLink(doc) {
 // nombre, especialidad, WhatsApp, cédula y zona/modalidad — estos 4 pasos
 // son justo lo que falta para que el perfil compita bien en el directorio
 // y para desbloquear el sello de "Verificado". El orden importa: primero
-// lo que genera más confianza (cédula) y más impacto en SEO.
+// lo que genera más confianza (cédula).
 export function notifyWelcome(doc) {
   const steps = stepList([
     stepRow(
@@ -71,15 +71,15 @@ export function notifyWelcome(doc) {
       2,
       STEP_ICONS.biografia,
       "Completa tu biografía",
-      "Escribe al menos 50 palabras sobre tu experiencia y enfoque. Es lo que más ayuda a que Google y tus pacientes confíen en tu perfil.",
+      "Escribe al menos 50 palabras sobre tu experiencia y enfoque. Es lo que más ayuda a que tus pacientes confíen en tu perfil.",
       "Escribir biografía",
       PANEL_URL
     ),
     stepRow(
       3,
       STEP_ICONS.zona,
-      "Agrega tu zona de cobertura",
-      "Registra tu consultorio con su zona para aparecer en búsquedas como “cardiólogo en San Pedro”.",
+      "Agrega tu consultorio",
+      "Registra la dirección donde atiendes para que los pacientes te encuentren en el mapa y en búsquedas como “cardiólogo en San Pedro”.",
       "Agregar consultorio",
       PANEL_URL
     ),
@@ -113,7 +113,7 @@ export function notifyWelcome(doc) {
     hero: {
       eyebrow: "Cuenta creada",
       title: `¡Bienvenido, ${doc?.full_name || "doctor(a)"}!`,
-      subtitle: "Tu perfil ya existe, pero le faltan algunos datos para verse profesional y aparecer bien en las búsquedas. Toma unos minutos para completarlo.",
+      subtitle: "Tu perfil ya existe, pero le faltan algunos datos para que los pacientes confíen en él y te encuentren fácilmente. Toma unos minutos para completarlo.",
     },
     title: "Primeros pasos para completar tu perfil",
     bodyHtml: `

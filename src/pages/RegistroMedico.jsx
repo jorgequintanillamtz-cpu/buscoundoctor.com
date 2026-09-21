@@ -475,7 +475,7 @@ export default function RegistroMedico() {
                 ))}
               </ul>
               <p className="text-xs text-muted-foreground">
-                Entre más completo esté tu perfil, más confianza le genera a tus pacientes y mejor te posiciona Google. Revisa tu "Score de SEO" en el panel para ver exactamente qué te falta.
+                Un perfil completo les genera más confianza a tus pacientes. En tu panel, entra a "Llena tu perfil" para ver exactamente qué te falta.
               </p>
             </div>
             <Button onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl">
