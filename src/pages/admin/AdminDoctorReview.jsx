@@ -3,10 +3,9 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Circle, Loader2, ExternalLink, Pencil, MapPin, Phone, Mail, BadgeCheck, AlertTriangle, XCircle, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
+import { approveDoctor, rejectDoctor, getDoctorStateInfo } from "@/api/doctorReview";
 import { useAdminBadges } from "@/components/adminBadges";
 import DocumentManager from "@/components/admin/DocumentManager";
-import { formatDateOnly } from "@/lib/dateLabels";
 import { Button } from "@/components/ui/button";
 
 // Nombres cortos para el administrador de los 9 puntos de "perfil completo".
@@ -21,15 +20,6 @@ const CHECK_LABELS = [
   ["languages", "Idiomas"],
   ["cedula_document", "Documento de la cédula"],
 ];
-
-const STATUS = {
-  draft: { label: "Borrador", cls: "bg-muted text-muted-foreground" },
-  pending_review: { label: "En revisión", cls: "bg-amber-100 text-amber-700" },
-  published: { label: "Publicado", cls: "bg-green-100 text-green-700" },
-  suspended: { label: "En pausa", cls: "bg-amber-100 text-amber-700" },
-  rejected: { label: "Con cambios pendientes", cls: "bg-red-100 text-red-700" },
-  rejected_resubmitted: { label: "Corrigió y espera revisión", cls: "bg-blue-100 text-blue-700" },
-};
 
 // Todo lo necesario para decidir sobre un doctor en una sola pantalla: su
 // resumen, lo que le falta, sus documentos (con aprobar/rechazar) y los botones
@@ -86,9 +76,7 @@ export default function AdminDoctorReview() {
     );
   }
 
-  const status = doc.vacation_until
-    ? { label: `De vacaciones hasta el ${formatDateOnly(doc.vacation_until)}`, cls: "bg-sky-100 text-sky-700" }
-    : (doc.publication_status === "rejected" && doc.resubmitted_at ? STATUS.rejected_resubmitted : STATUS[doc.publication_status]) || STATUS.pending_review;
+  const status = getDoctorStateInfo(doc);
   const visible = doc.publication_status === "published" && doc.active === true;
   const verified = doc.license_verification_status === "verified";
 

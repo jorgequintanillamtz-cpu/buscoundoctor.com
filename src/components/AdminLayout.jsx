@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut, Gift, UserRound } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -8,8 +8,9 @@ import { SHOW_PREMIUM } from "@/lib/featureFlags";
 // el menú se pueda escanear de un vistazo: Resumen primero; luego
 // Operación, con las 4 colas de revisión que alimentan la Bandeja de
 // entrada juntas y en el mismo orden que ahí (Doctores, Verificaciones,
-// Blog, Reseñas), seguidas de lo operativo que no es cola de aprobación
-// (Solicitudes, Premium) y el Historial como bitácora al final; luego
+// Blog, Reseñas), Referidos justo después de Doctores (mismo panorama, sin
+// cola propia de aprobación), seguidas de lo operativo que no es cola de
+// aprobación (Solicitudes, Premium) y el Historial como bitácora al final; luego
 // Bancos, los 3 catálogos de taxonomía médica que alimentan la búsqueda
 // (especialidades, subespecialidades, enfermedades) -- viven juntos y con
 // nombre consistente a propósito, en vez de regados en otras secciones;
@@ -27,6 +28,7 @@ const adminNavSections = [
     items: [
       { path: "/admin/bandeja", label: "Bandeja de entrada", icon: Inbox },
       { path: "/admin/doctores", label: "Doctores", icon: Users },
+      { path: "/admin/referidos", label: "Referidos", icon: Gift },
       { path: "/admin/verificaciones", label: "Verificar documentos", icon: ShieldCheck },
       { path: "/admin/blog", label: "Blog", icon: FileText },
       { path: "/admin/resenas", label: "Reseñas", icon: Star },
@@ -137,7 +139,18 @@ function AdminLayoutContent() {
               </div>
             ))}
           </nav>
-          <div className="p-3 border-t border-border/50">
+          <div className="p-3 border-t border-border/50 space-y-0.5">
+            <Link
+              to="/admin/cuenta"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                location.pathname === "/admin/cuenta"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              <UserRound className="w-4 h-4" />
+              Mi cuenta
+            </Link>
             <button
               type="button"
               onClick={handleLogout}
@@ -157,14 +170,19 @@ function AdminLayoutContent() {
                 Sitio
               </Link>
               <h2 className="font-heading font-bold text-foreground">Admin</h2>
-              <button
-                type="button"
-                onClick={handleLogout}
-                aria-label="Cerrar sesión"
-                className="flex items-center gap-1.5 text-xs text-muted-foreground"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-3">
+                <Link to="/admin/cuenta" aria-label="Mi cuenta" className="flex items-center text-muted-foreground">
+                  <UserRound className="w-4 h-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  aria-label="Cerrar sesión"
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="flex gap-1 overflow-x-auto pb-1 -mx-1 px-1">
               {adminNavItems.map((item) => (

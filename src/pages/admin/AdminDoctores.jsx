@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
-import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
+import { approveDoctor, rejectDoctor, isAwaitingReview, getDoctorStateInfo } from "@/api/doctorReview";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
@@ -445,11 +445,16 @@ export default function AdminDoctores() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">{doc.full_name}</p>
+                      <Link to={`/admin/doctores/revisar/${doc.id}`} className="font-medium text-foreground truncate hover:text-primary transition-colors block">
+                        {doc.full_name}
+                      </Link>
                       <p className="text-sm text-muted-foreground truncate">
                         {doc.specialty} {doc.city ? `· ${doc.city}` : ""} {doc.professional_license_number ? `· Céd. ${doc.professional_license_number}` : ""}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${getDoctorStateInfo(doc).cls}`}>
+                          {getDoctorStateInfo(doc).label}
+                        </span>
                         <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${verification.cls}`}>
                           <VerificationIcon className="w-3 h-3" /> {verification.label}
                         </span>

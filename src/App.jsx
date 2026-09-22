@@ -47,6 +47,8 @@ const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
 const BlogEditor = lazy(() => import('./pages/admin/BlogEditor.jsx'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
 const AdminDoctores = lazy(() => import('./pages/admin/AdminDoctores'));
+const AdminReferidos = lazy(() => import('./pages/admin/AdminReferidos'));
+const AdminAccountSettings = lazy(() => import('./pages/admin/AdminAccountSettings'));
 const AdminHistorial = lazy(() => import('./pages/admin/AdminHistorial'));
 const AdminVistaRegistro = lazy(() => import('./pages/admin/AdminVistaRegistro'));
 const AdminDoctorEditor = lazy(() => import('./pages/admin/AdminDoctorEditor'));
@@ -184,10 +186,12 @@ const AuthenticatedApp = () => {
           <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
           <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
           <Route path="/admin/doctores/revisar/:id" element={<AdminDoctorReview />} />
+          <Route path="/admin/referidos" element={<AdminReferidos />} />
           <Route path="/admin/faqs" element={<AdminFaqs />} />
           <Route path="/admin/faqs/editar/:id" element={<AdminFaqEditor />} />
           <Route path="/admin/planes" element={<AdminPlanes />} />
           <Route path="/admin/historial" element={<AdminHistorial />} />
+          <Route path="/admin/cuenta" element={<AdminAccountSettings />} />
           <Route path="/admin/vista-registro" element={<AdminVistaRegistro />} />
         </Route>
       </Route>

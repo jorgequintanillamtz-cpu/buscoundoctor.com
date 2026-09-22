@@ -1,6 +1,38 @@
 import { base44 } from "@/api/base44Client";
 import { logActivity } from "@/api/activityLog";
 import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify";
+import { formatDateOnly } from "@/lib/dateLabels";
+
+// Un solo lugar para "¿en qué estado real está este doctor?", en vez de
+// que cada pantalla (lista de Doctores, revisión individual) lo calcule a
+// su manera y se puedan ir desincronizando. Antes la lista de Doctores solo
+// mostraba "Activo/Inactivo" -- un doctor que nunca se ha revisado se veía
+// idéntico a uno que un admin pausó a propósito.
+export const DOCTOR_STATE_STYLES = {
+  draft: { label: "Borrador", cls: "bg-muted text-muted-foreground" },
+  pending_review: { label: "En revisión", cls: "bg-amber-100 text-amber-700" },
+  rejected: { label: "Con cambios pendientes", cls: "bg-red-100 text-red-700" },
+  rejected_resubmitted: { label: "Corrigió y espera revisión", cls: "bg-blue-100 text-blue-700" },
+  published: { label: "Publicado", cls: "bg-green-100 text-green-700" },
+  paused: { label: "En pausa", cls: "bg-amber-100 text-amber-700" },
+  vacation: { cls: "bg-sky-100 text-sky-700" }, // label se arma con la fecha
+};
+
+export function getDoctorStateInfo(doc) {
+  if (!doc) return DOCTOR_STATE_STYLES.draft;
+  if (doc.vacation_until) {
+    return { ...DOCTOR_STATE_STYLES.vacation, label: `De vacaciones hasta el ${formatDateOnly(doc.vacation_until)}` };
+  }
+  if (doc.publication_status === "rejected") {
+    return doc.resubmitted_at ? DOCTOR_STATE_STYLES.rejected_resubmitted : DOCTOR_STATE_STYLES.rejected;
+  }
+  if (doc.publication_status === "published") {
+    return doc.active === true ? DOCTOR_STATE_STYLES.published : DOCTOR_STATE_STYLES.paused;
+  }
+  if (doc.publication_status === "suspended") return DOCTOR_STATE_STYLES.paused;
+  if (doc.publication_status === "pending_review") return DOCTOR_STATE_STYLES.pending_review;
+  return DOCTOR_STATE_STYLES.draft;
+}
 
 // Aprobar y rechazar a un doctor. Es el ÚNICO lugar donde se hace, para que la
 // Bandeja, la lista de Doctores y la pantalla de revisión se comporten igual.
