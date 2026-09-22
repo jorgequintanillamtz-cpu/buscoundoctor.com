@@ -13,6 +13,11 @@ const OPTIONS = [
     desc: "Un correo cada vez que un paciente pide una cita contigo.",
   },
   {
+    key: "resenas",
+    label: "Reseñas nuevas",
+    desc: "Un correo cada vez que un paciente deja una reseña, antes de que la revisemos y publiquemos.",
+  },
+  {
     key: "estado",
     label: "Estado de mi perfil y documentos",
     desc: "Correos cuando aprobamos tu perfil, verificamos tu cédula o necesitamos que corrijas algo. Te recomendamos dejarlo activado.",
@@ -31,7 +36,7 @@ export default function EmailPreferences({ specialistId }) {
     let active = true;
     getEmailPreferences(specialistId)
       .then((p) => { if (active) { setPrefs(p); setNotice(p.aviso_email || ""); } })
-      .catch(() => { if (active) setPrefs({ citas: true, estado: true, aviso_email: "" }); });
+      .catch(() => { if (active) setPrefs({ citas: true, resenas: true, estado: true, aviso_email: "" }); });
     return () => { active = false; };
   }, [specialistId]);
 

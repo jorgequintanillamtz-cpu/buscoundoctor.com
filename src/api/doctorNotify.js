@@ -275,6 +275,29 @@ export function notifyNewAppointmentRequest(doc, request) {
 // El doctor que envía un artículo desde su panel no siempre tiene su email
 // a la mano en el componente que aprueba/rechaza (BlogPost solo guarda su
 // nombre como autor). Esta función lo busca por su id de Specialist.
+export function notifyNewReview(doc, review) {
+  const stars = "★".repeat(review?.rating || 0) + "☆".repeat(5 - (review?.rating || 0));
+  const html = renderEmail({
+    preheader: "Tienes una nueva reseña de un paciente.",
+    badge: "Nueva reseña",
+    badgeTone: "neutral",
+    title: "Tienes una nueva reseña",
+    bodyHtml: `
+      <p>Hola ${greet(doc)},</p>
+      <p>Un paciente dejó una reseña en tu perfil de ${SITE_NAME}.</p>
+      ${detailTable([
+        detailRow("Calificación", `${stars} (${esc(review?.rating)}/5)`),
+        review?.patient_name ? detailRow("Paciente", esc(review.patient_name)) : "",
+        review?.comment ? detailRow("Comentario", escMultiline(review.comment)) : "",
+      ])}
+      <p>La revisamos antes de que se vea en tu perfil; te avisaremos cuando esté publicada.</p>
+    `,
+    ctaLabel: "Ver mis reseñas",
+    ctaUrl: PANEL_URL,
+  });
+  return sendNotification(doc, `Nueva reseña — ${SITE_NAME}`, html, "nueva_resena");
+}
+
 export async function findSpecialistById(specialistId) {
   if (!specialistId) return null;
   try {
