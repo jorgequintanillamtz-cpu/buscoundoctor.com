@@ -17,6 +17,8 @@ import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/ap
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import { useAdminBadges } from "@/components/adminBadges";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
@@ -25,6 +27,7 @@ const VERIFICATION_LABELS = {
 };
 
 export default function AdminDoctores() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const { refresh: refreshBadges } = useAdminBadges();
   const [doctors, setDoctors] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -57,7 +60,12 @@ export default function AdminDoctores() {
   // permanente en cascada (reseñas, consultorios, documentos, etc.) solo
   // pasa desde la pestaña Papelera, como acción aparte y explícita.
   const handleDelete = async (id, nombre) => {
-    if (!confirm(`¿Mover a la papelera al doctor "${nombre}"? Dejará de verse en el sitio, pero podrás restaurarlo después desde la pestaña Papelera.`)) return;
+    const ok = await confirm({
+      title: `¿Mover a la papelera a "${nombre}"?`,
+      description: "Dejará de verse en el sitio, pero podrás restaurarlo después desde la pestaña Papelera.",
+      confirmLabel: "Mover a la papelera",
+    });
+    if (!ok) return;
     const reason = (prompt(`Motivo (opcional) por el que se da de baja a "${nombre}":`) || "").trim();
     const deletedAt = new Date().toISOString();
     try {
@@ -89,7 +97,12 @@ export default function AdminDoctores() {
   };
 
   const handlePermanentDelete = async (id, nombre) => {
-    if (!confirm(`¿Eliminar PERMANENTEMENTE a "${nombre}"? Se borrarán también sus reseñas, consultorios, servicios, documentos y estadísticas. Esta acción no se puede deshacer.`)) return;
+    const ok = await confirm({
+      title: `¿Eliminar PERMANENTEMENTE a "${nombre}"?`,
+      description: "Se borrarán también sus reseñas, consultorios, servicios, documentos y estadísticas. Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar para siempre",
+    });
+    if (!ok) return;
     try {
       await base44.functions.invoke("deleteDoctorProfile", { specialist_id: id });
       setDoctors(prev => prev.filter(d => d.id !== id));
@@ -134,7 +147,14 @@ export default function AdminDoctores() {
   const toggleActive = async (doc) => {
     const isActive = doc.active !== false;
     const next = !isActive;
-    if (!next && !confirm(`¿Desactivar el perfil de ${doc.full_name}? Dejará de verse en el directorio hasta que lo reactives.`)) return;
+    if (!next) {
+      const ok = await confirm({
+        title: `¿Desactivar el perfil de ${doc.full_name}?`,
+        description: "Dejará de verse en el directorio hasta que lo reactives.",
+        confirmLabel: "Desactivar",
+      });
+      if (!ok) return;
+    }
     setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: next, vacation_until: null } : d));
     try {
       // Una decisión del equipo cancela cualquier vacación del doctor (si no, el proceso automático la contradeciría).
@@ -246,7 +266,8 @@ export default function AdminDoctores() {
   };
 
   const handleDeleteDraft = async (id, nombre) => {
-    if (!confirm(`¿Mover a la papelera el registro en progreso de "${nombre}"?`)) return;
+    const ok = await confirm({ title: `¿Mover a la papelera el registro en progreso de "${nombre}"?`, confirmLabel: "Mover a la papelera" });
+    if (!ok) return;
     const deletedAt = new Date().toISOString();
     try {
       await base44.entities.Specialist.update(id, { active: false, deleted_at: deletedAt });
@@ -735,6 +756,7 @@ export default function AdminDoctores() {
           </div>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

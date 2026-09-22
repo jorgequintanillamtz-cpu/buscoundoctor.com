@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { slugify } from "@/lib/citySlug";
 
 const EMPTY_FORM = { name: "", slug: "", profession_slug: "", icon: "", description: "", active: true };
@@ -17,6 +19,7 @@ const EMPTY_FORM = { name: "", slug: "", profession_slug: "", icon: "", descript
 // pública /{profession_slug}/{ciudad}. Mismo estilo que /admin/enfermedades
 // a propósito, para que los 3 bancos se sientan como una sola familia.
 export default function AdminSpecialties() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -106,7 +109,8 @@ export default function AdminSpecialties() {
   };
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`¿Eliminar "${item.name}"? Esto no se puede deshacer.`)) return;
+    const ok = await confirm({ title: `¿Eliminar "${item.name}"?`, description: "Esto no se puede deshacer.", confirmLabel: "Eliminar" });
+    if (!ok) return;
     try {
       await base44.entities.Specialty.delete(item.id);
       setItems((prev) => prev.filter((s) => s.id !== item.id));
@@ -337,6 +341,7 @@ export default function AdminSpecialties() {
           </div>
         </div>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

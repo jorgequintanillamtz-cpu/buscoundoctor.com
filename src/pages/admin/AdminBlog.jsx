@@ -10,6 +10,8 @@ import { notifyBlogApproved, notifyBlogRejected, findSpecialistById } from "@/ap
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import { useAdminBadges } from "@/components/adminBadges";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 // Tarjeta de un artículo enviado por un doctor y esperando revisión: mismo
 // patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
@@ -138,6 +140,7 @@ export function PendingBlogCard({ post, onReviewed }) {
 }
 
 export default function AdminBlog() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -173,7 +176,8 @@ export default function AdminBlog() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar este artículo?")) return;
+    const ok = await confirm({ title: "¿Eliminar este artículo?", confirmLabel: "Eliminar" });
+    if (!ok) return;
     await base44.entities.BlogPost.delete(id);
     toast.success("Artículo eliminado");
     load();
@@ -267,6 +271,7 @@ export default function AdminBlog() {
         total={otherPosts.length}
         pageSize={20}
       />
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

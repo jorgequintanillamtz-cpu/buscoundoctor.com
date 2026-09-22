@@ -5,6 +5,8 @@ import { ChevronLeft, Save, Globe, Clock, Trash2, Code2, Plus, GripVertical, Ste
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const STATUS_OPTIONS = [
   { value: "borrador", label: "Borrador" },
@@ -138,6 +140,7 @@ function FaqItemRow({ item, onUpdate, onDelete, idx }) {
 }
 
 export default function AdminFaqEditor() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -170,7 +173,8 @@ export default function AdminFaqEditor() {
   };
 
   const handleItemDelete = async (itemId) => {
-    if (!confirm("¿Eliminar esta pregunta?")) return;
+    const ok = await confirm({ title: "¿Eliminar esta pregunta?", confirmLabel: "Eliminar" });
+    if (!ok) return;
     await base44.entities.FaqItem.delete(itemId);
     setItems(prev => prev.filter(it => it.id !== itemId));
     setPage(p => ({ ...p, faq_count: Math.max(0, (p.faq_count || 1) - 1) }));
@@ -486,6 +490,7 @@ export default function AdminFaqEditor() {
           </div>
         </div>
       </div>
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

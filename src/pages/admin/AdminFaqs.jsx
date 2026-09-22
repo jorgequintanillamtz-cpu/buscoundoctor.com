@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import FaqGeneratorModal from "@/components/admin/FaqGeneratorModal";
 import FaqBulkModal from "@/components/admin/FaqBulkModal";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 
 const STATUS_CONFIG = {
   borrador: { label: "Borrador", className: "bg-amber-100 text-amber-700" },
@@ -19,6 +21,7 @@ const CIUDADES = [
 ];
 
 export default function AdminFaqs() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [pages, setPages] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +49,8 @@ export default function AdminFaqs() {
 
 
   const handleDelete = async (id) => {
-    if (!confirm("¿Eliminar esta página de FAQs y todas sus preguntas?")) return;
+    const ok = await confirm({ title: "¿Eliminar esta página de FAQs?", description: "Se eliminarán también todas sus preguntas.", confirmLabel: "Eliminar" });
+    if (!ok) return;
     setDeleting(id);
     const items = await base44.entities.FaqItem.filter({ faq_page_id: id });
     await Promise.all(items.map(i => base44.entities.FaqItem.delete(i.id)));
@@ -246,6 +250,7 @@ export default function AdminFaqs() {
       {showBulkModal && (
         <FaqBulkModal onClose={() => setShowBulkModal(false)} onSuccess={() => { setShowBulkModal(false); loadPages(); }} />
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

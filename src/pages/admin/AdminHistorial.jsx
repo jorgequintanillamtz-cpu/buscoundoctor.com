@@ -26,10 +26,20 @@ function toneFor(type) {
 // pagos, activar/desactivar perfiles, aprobaciones y rechazos de doctores,
 // documentos y reseñas. Cada página relevante registra sus movimientos vía
 // src/api/activityLog.js; aquí solo se listan y se pueden filtrar por tipo.
+// Rango de fecha rápido: "todo" no filtra nada, los demás son días hacia
+// atrás desde ahora.
+const RANGE_OPTIONS = [
+  { key: "todo", label: "Todo" },
+  { key: "7", label: "Últimos 7 días" },
+  { key: "30", label: "Últimos 30 días" },
+  { key: "90", label: "Últimos 90 días" },
+];
+
 export default function AdminHistorial() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState("");
+  const [rangeFilter, setRangeFilter] = useState("todo");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -49,6 +59,11 @@ export default function AdminHistorial() {
   const filteredLogs = useMemo(() => {
     let list = logs;
     if (typeFilter) list = list.filter((l) => l.type === typeFilter);
+    if (rangeFilter !== "todo") {
+      const since = new Date();
+      since.setDate(since.getDate() - Number(rangeFilter));
+      list = list.filter((l) => l.created_date && new Date(l.created_date) >= since);
+    }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter(
@@ -58,11 +73,11 @@ export default function AdminHistorial() {
       );
     }
     return list;
-  }, [logs, typeFilter, search]);
+  }, [logs, typeFilter, rangeFilter, search]);
 
   const { pageItems: pagedLogs, page, setPage, totalPages } = usePaginatedList(filteredLogs, {
     pageSize: 30,
-    resetKey: `${typeFilter}|${search}`,
+    resetKey: `${typeFilter}|${rangeFilter}|${search}`,
   });
 
   if (loading) {
@@ -105,6 +120,21 @@ export default function AdminHistorial() {
         </select>
       </div>
 
+      <div className="flex flex-wrap gap-1.5 mb-5">
+        {RANGE_OPTIONS.map((opt) => (
+          <button
+            key={opt.key}
+            type="button"
+            onClick={() => setRangeFilter(opt.key)}
+            className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+              rangeFilter === opt.key ? "bg-brand-navy text-white" : "bg-muted text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
       {filteredLogs.length === 0 ? (
         <div className="bg-card border border-border/50 rounded-2xl p-8 text-center text-muted-foreground">
           {logs.length === 0 ? "Todavía no hay movimientos registrados." : "Ningún movimiento coincide con el filtro."}
@@ -122,6 +152,16 @@ export default function AdminHistorial() {
                       {ACTIVITY_TYPE_LABELS[log.type] || log.type}
                     </span>
                     <span className="text-xs text-muted-foreground">{fmtDateTime(log.created_date)}</span>
+                    {log.specialist_name && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch(log.specialist_name)}
+                        className="text-xs font-medium text-brand-blue hover:underline"
+                        title={`Ver solo los movimientos de ${log.specialist_name}`}
+                      >
+                        {log.specialist_name}
+                      </button>
+                    )}
                   </div>
                   <p className="text-sm text-foreground">{log.description}</p>
                 </div>

@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 
 const STATUS_LABELS = {
   published: "Publicados",
@@ -27,6 +29,7 @@ const emptyStats = {
 // guardado (varias partes del código todavía lo leen) para que no puedan
 // volver a desalinearse.
 export default function AdminZones() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -94,7 +97,8 @@ export default function AdminZones() {
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (!confirm("¿Eliminar esta ciudad?")) return;
+    const ok = await confirm({ title: "¿Eliminar esta ciudad?", confirmLabel: "Eliminar" });
+    if (!ok) return;
     await base44.entities.Zone.delete(id);
     toast.success("Ciudad eliminada");
     load();
@@ -346,6 +350,7 @@ export default function AdminZones() {
           )}
         </DialogContent>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

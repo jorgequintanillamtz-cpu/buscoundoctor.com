@@ -18,8 +18,14 @@ const EMAIL_TYPE_LABELS = {
   articulo_aprobado: "Artículo aprobado",
   articulo_rechazado: "Artículo rechazado",
   nueva_solicitud_cita: "Nueva solicitud de cita",
+  nueva_resena: "Nueva reseña",
   contacto_publico: "Formulario de contacto",
+  nuevo_interes_especialidad: "Interés en especialidad",
   nuevo_registro_doctor_admin: "Aviso: nuevo registro de doctor",
+  bienvenida_asistente: "Invitación de asistente",
+  referido_aprobado: "Premio de referido acreditado",
+  doctor_solicita_baja_admin: "Aviso: solicitud de baja",
+  doctor_reenvio_revision_admin: "Aviso: doctor reenvió a revisión",
   prueba: "Prueba",
 };
 

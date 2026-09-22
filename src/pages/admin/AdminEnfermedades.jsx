@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { slugify } from "@/lib/citySlug";
 
 const EMPTY_FORM = {
@@ -32,6 +34,7 @@ const EMPTY_FORM = {
 // las páginas públicas /enfermedades/:slug/:ciudad. Esta pantalla es la
 // única forma de mantenerlo -- antes se cargaba solo por script.
 export default function AdminEnfermedades() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [conditions, setConditions] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -192,7 +195,8 @@ export default function AdminEnfermedades() {
   };
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`¿Eliminar "${item.name}"? Esto no se puede deshacer.`)) return;
+    const ok = await confirm({ title: `¿Eliminar "${item.name}"?`, description: "Esto no se puede deshacer.", confirmLabel: "Eliminar" });
+    if (!ok) return;
     try {
       await base44.entities.Condition.delete(item.id);
       setConditions((prev) => prev.filter((c) => c.id !== item.id));
@@ -564,6 +568,7 @@ export default function AdminEnfermedades() {
           </div>
         </div>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

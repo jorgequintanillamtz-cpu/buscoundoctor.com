@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { slugify } from "@/lib/citySlug";
 
 const EMPTY_FORM = { name: "", parent_specialty_id: "", slug: "", description: "", active: true };
@@ -20,6 +22,7 @@ const EMPTY_FORM = { name: "", parent_specialty_id: "", slug: "", description: "
 // estilo que /admin/enfermedades a propósito, para que los 3 bancos se
 // sientan como una sola familia.
 export default function AdminSubespecialidades() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [items, setItems] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -125,7 +128,12 @@ export default function AdminSubespecialidades() {
   };
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`¿Eliminar "${item.name}"? Si algún doctor ya la tiene marcada, dejará de aparecerle. Esto no se puede deshacer.`)) return;
+    const ok = await confirm({
+      title: `¿Eliminar "${item.name}"?`,
+      description: "Si algún doctor ya la tiene marcada, dejará de aparecerle. Esto no se puede deshacer.",
+      confirmLabel: "Eliminar",
+    });
+    if (!ok) return;
     try {
       await base44.entities.Subspecialty.delete(item.id);
       setItems((prev) => prev.filter((s) => s.id !== item.id));
@@ -380,6 +388,7 @@ export default function AdminSubespecialidades() {
           </div>
         </div>
       )}
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }
