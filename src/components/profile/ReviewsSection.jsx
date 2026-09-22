@@ -158,6 +158,12 @@ export default function ReviewsSection({ specialistId, specialist }) {
                 {r.verified_client && r.treatment_performed && (
                   <p className="text-xs text-muted-foreground mt-2">Consulta: {r.treatment_performed}</p>
                 )}
+                {r.doctor_reply && (
+                  <div className="mt-3 ml-4 sm:ml-6 pl-4 border-l-2 border-brand-blue/30 bg-brand-bluePale/40 rounded-r-xl py-2.5 px-3.5">
+                    <p className="text-xs font-semibold text-brand-navy">Respuesta de {specialist?.full_name || "el especialista"}</p>
+                    <p className="text-sm text-foreground/80 mt-1 leading-relaxed">{r.doctor_reply}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

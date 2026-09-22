@@ -27,6 +27,8 @@ export const ACTIVITY_TYPE_LABELS = {
   doctor_descarga_datos: "Doctor descargó sus datos",
   doctor_invita_asistente: "Doctor invitó a un asistente",
   doctor_quita_asistente: "Doctor quitó el acceso de su asistente",
+  doctor_responde_resena: "Doctor respondió una reseña",
+  doctor_borra_respuesta_resena: "Doctor borró su respuesta a una reseña",
   registro_eliminado: "Registro en progreso eliminado permanentemente",
   registro_papelera: "Registro en progreso movido a la papelera",
   documento_aprobado: "Documento aprobado",

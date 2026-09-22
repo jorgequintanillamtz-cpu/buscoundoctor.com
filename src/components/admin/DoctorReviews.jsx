@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { Star, MessageSquareText, Stethoscope, ShieldCheck } from "lucide-react";
+import { Star, MessageSquareText, Stethoscope, ShieldCheck, Reply, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 
@@ -19,7 +21,89 @@ function StarRow({ rating }) {
   );
 }
 
-function ReviewCard({ review }) {
+// Responder una reseña (solo tiene sentido si ya está visible en el
+// perfil -- una pendiente todavía no la ve nadie). La respuesta se guarda
+// con reply_to_review, que solo toca doctor_reply/doctor_reply_at -- nunca
+// el rating, el comentario ni el estado de aprobación de la reseña.
+function ReplyBox({ review, onSaved }) {
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState(review.doctor_reply || "");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    const value = text.trim();
+    setSaving(true);
+    try {
+      await base44.functions.invoke("replyToReview", { review_id: review.id, reply: value });
+      onSaved(review.id, value || null);
+      setEditing(false);
+      toast.success(value ? "Respuesta publicada" : "Respuesta eliminada");
+    } catch (e) {
+      toast.error("No se pudo guardar: " + e.message);
+    }
+    setSaving(false);
+  };
+
+  const remove = async () => {
+    setSaving(true);
+    try {
+      await base44.functions.invoke("replyToReview", { review_id: review.id, reply: "" });
+      onSaved(review.id, null);
+      setText("");
+      toast.success("Respuesta eliminada");
+    } catch (e) {
+      toast.error("No se pudo borrar: " + e.message);
+    }
+    setSaving(false);
+  };
+
+  if (!editing) {
+    if (review.doctor_reply) {
+      return (
+        <div className="mt-2 ml-2 pl-3 border-l-2 border-brand-blue/30 bg-brand-bluePale/40 rounded-r-xl py-2 px-3">
+          <p className="text-xs font-semibold text-brand-navy mb-0.5">Tu respuesta (pública)</p>
+          <p className="text-sm text-foreground/80 leading-relaxed">{review.doctor_reply}</p>
+          <div className="flex gap-3 mt-1.5">
+            <button type="button" onClick={() => setEditing(true)} className="text-xs font-medium text-brand-blue hover:underline flex items-center gap-1">
+              <Pencil className="w-3 h-3" /> Editar
+            </button>
+            <button type="button" onClick={remove} disabled={saving} className="text-xs font-medium text-destructive hover:underline flex items-center gap-1">
+              <Trash2 className="w-3 h-3" /> Borrar
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <button type="button" onClick={() => setEditing(true)} className="text-xs font-medium text-brand-blue hover:underline flex items-center gap-1 mt-1">
+        <Reply className="w-3.5 h-3.5" /> Responder
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-2 space-y-2">
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        maxLength={2000}
+        placeholder="Escribe tu respuesta. Se verá públicamente debajo de esta reseña en tu perfil."
+        className="w-full text-sm border border-input rounded-xl p-3 min-h-[80px]"
+      />
+      <div className="flex gap-2">
+        <Button size="sm" className="rounded-xl gap-1.5" disabled={saving || !text.trim()} onClick={save}>
+          {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+          Publicar respuesta
+        </Button>
+        <Button size="sm" variant="outline" className="rounded-xl" disabled={saving} onClick={() => { setEditing(false); setText(review.doctor_reply || ""); }}>
+          Cancelar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function ReviewCard({ review, onReplySaved }) {
   return (
     <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 space-y-2">
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -46,6 +130,9 @@ function ReviewCard({ review }) {
         </span>
       </div>
       {review.comment && <p className="text-sm text-foreground">{review.comment}</p>}
+      {review.approved && !review.rejected && (
+        <ReplyBox review={review} onSaved={(id, reply) => onReplySaved(id, reply)} />
+      )}
     </div>
   );
 }
@@ -146,7 +233,11 @@ export default function DoctorReviews({ specialistId }) {
       ) : (
         <div className="space-y-3 max-w-2xl">
           {pagedReviews.map((r) => (
-            <ReviewCard key={r.id} review={r} />
+            <ReviewCard
+              key={r.id}
+              review={r}
+              onReplySaved={(id, reply) => setReviews((prev) => prev.map((x) => (x.id === id ? { ...x, doctor_reply: reply } : x)))}
+            />
           ))}
         </div>
       )}

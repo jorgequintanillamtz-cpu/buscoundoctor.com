@@ -412,6 +412,7 @@ const FUNCTION_MAP = {
   exportMyData: () => supabase.rpc('export_my_data'),
   inviteSpecialistAssistant: ({ email } = {}) => supabase.rpc('invite_specialist_assistant', { p_email: email }),
   removeSpecialistAssistant: () => supabase.rpc('remove_specialist_assistant'),
+  replyToReview: ({ review_id, reply } = {}) => supabase.rpc('reply_to_review', { p_review_id: review_id, p_reply: reply }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>

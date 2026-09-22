@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Share2, Copy, Check, Download, MessageCircle } from "lucide-react";
+import { Share2, Copy, Check, Download, MessageCircle, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -65,6 +65,27 @@ export default function ShareProfile({ specialist }) {
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${shareText}: ${profileUrl}`)}`;
 
+  const reviewUrl = `${profileUrl}#opiniones`;
+  const reviewText = `Hola, ¿me ayudarías dejando una reseña de tu consulta conmigo en BuscoUnDoctor? Se hace en un minuto, sin necesidad de crear una cuenta: ${reviewUrl}`;
+  const reviewWhatsappHref = `https://wa.me/?text=${encodeURIComponent(reviewText)}`;
+
+  const shareReview = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Pide una reseña", text: reviewText });
+      } catch {
+        // Canceló el share nativo; no es un error.
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(reviewText);
+      toast.success("Mensaje copiado");
+    } catch {
+      toast.error("No se pudo copiar. Selecciona el enlace a mano.");
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
@@ -88,6 +109,30 @@ export default function ShareProfile({ specialist }) {
               <MessageCircle className="w-4 h-4" />
               Enviar por WhatsApp
             </a>
+          </Button>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <Star className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">Pide una reseña</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Manda este mensaje a un paciente después de su consulta. El enlace lo lleva directo a la sección de reseñas de tu perfil, listo para escribir la suya.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="rounded-xl gap-1.5 min-h-[44px] text-emerald-700 border-emerald-200 hover:bg-emerald-50" asChild>
+            <a href={reviewWhatsappHref} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" />
+              Enviar por WhatsApp
+            </a>
+          </Button>
+          <Button variant="outline" className="rounded-xl gap-1.5 min-h-[44px]" onClick={shareReview}>
+            <Share2 className="w-4 h-4" />
+            Compartir de otra forma
           </Button>
         </div>
       </div>
