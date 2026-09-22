@@ -12,6 +12,19 @@ Guía para Claude (Claude Code u otra sesión) que trabaje en este proyecto. Lé
 - El cuello de botella es **reclutar médicos**, no la tecnología. El registro (`/registro-medico`) es autoservicio con fricción mínima; la calidad se modera después.
 - **Prelanzamiento:** el lanzamiento público es el **15 de octubre de 2026** (`LAUNCH_DATE` en `src/lib/launchCountdown.js`). Todavía hay muy pocos médicos reales; cualquier dato que veas en producción puede ser de prueba, así que pregunta antes de borrar.
 
+## 1b. Vocabulario: los dos tipos de "admin" (importante)
+
+Los dueños usan estos dos nombres; úsalos igual y, si alguien dice solo "el admin", **pregunta a cuál se refiere**:
+
+| Nombre | Qué es | Quién lo usa | Ruta | Código principal |
+|---|---|---|---|---|
+| **Página admin doctores** | Donde los doctores suscritos entran a mover su propia información (perfil, documentos, citas, reseñas, notificaciones). | Los doctores (nuestros clientes) | `/panel-medico` | `src/pages/DoctorPanel.jsx` |
+| **Página admin dueños** | Donde los dueños hacen cambios al sitio y administran la empresa (revisar y aprobar doctores, bandeja, blog, catálogos, historial…). | Jorge y David | `/admin` | `src/components/AdminLayout.jsx` y `src/pages/admin/*` |
+
+- En pantalla, el primero se titula "Panel de Médico" y el segundo "Panel de Administración".
+- **Ojo con las carpetas:** `src/components/admin/` guarda componentes de **los dos** (es un nombre heredado). Por ejemplo `ProfileStatusCard`, `ProfileHub` o `NotificationBell` son de admin doctores; `AdminInbox`, `AdminDoctorReview` o `DoctorEditorSidebar` son de admin dueños. Guíate por quién lo usa, no por la carpeta.
+- El editor de un doctor dentro de admin dueños (`/admin/doctores/editar/:id`) reutiliza varias pantallas de admin doctores (por eso lleva `DoctorEditorPerfil simple`).
+
 ## 2. Con quién trabajas (importante)
 
 Los dueños son **Jorge y David** (hermanos). Los dos tienen acceso completo (código, base de datos, hosting) y cada quien usa **su propia cuenta de Claude**. Si no es evidente quién está en la sesión, pregúntalo al empezar.
