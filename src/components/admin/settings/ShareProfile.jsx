@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Share2, Copy, Check, Download, MessageCircle, Star } from "lucide-react";
+import { Share2, Copy, Check, Download, MessageCircle, Star, Gift, CheckCircle2, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 
 const SITE_URL = "https://buscoundoctor.com";
@@ -15,6 +16,19 @@ export default function ShareProfile({ specialist }) {
   const shareText = `Te recomiendo a ${specialist?.full_name || "este especialista"} en BuscoUnDoctor`;
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState("");
+  const [referrals, setReferrals] = useState(null);
+  const [copiedInvite, setCopiedInvite] = useState(false);
+  const [premiumPrice, setPremiumPrice] = useState(1999);
+
+  useEffect(() => {
+    base44.functions.invoke("listMyReferrals").then((res) => setReferrals(res?.data || [])).catch(() => setReferrals([]));
+  }, []);
+
+  useEffect(() => {
+    base44.entities.Plan.filter({ slug: "premium", active: true })
+      .then((plans) => { if (plans[0]?.price_monthly) setPremiumPrice(Number(plans[0].price_monthly)); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!profileUrl) return;
@@ -65,6 +79,33 @@ export default function ShareProfile({ specialist }) {
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${shareText}: ${profileUrl}`)}`;
 
+  const inviteUrl = specialist?.referral_code ? `${SITE_URL}/registro-medico?ref=${specialist.referral_code}` : "";
+  const inviteText = `Únete a BuscoUnDoctor, el directorio de médicos de Monterrey y San Pedro. Regístrate con mi enlace y cuando tu perfil quede publicado, a mí me regalan un mes de Premium: ${inviteUrl}`;
+  const inviteWhatsappHref = `https://wa.me/?text=${encodeURIComponent(inviteText)}`;
+
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopiedInvite(true);
+      toast.success("Enlace de invitación copiado");
+      setTimeout(() => setCopiedInvite(false), 2500);
+    } catch {
+      toast.error("No se pudo copiar. Selecciona el enlace a mano.");
+    }
+  };
+
+  const shareInvite = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Invita a un colega a BuscoUnDoctor", text: inviteText });
+      } catch {
+        // Canceló el share nativo; no es un error.
+      }
+      return;
+    }
+    copyInviteLink();
+  };
+
   const reviewUrl = `${profileUrl}#opiniones`;
   const reviewText = `Hola, ¿me ayudarías dejando una reseña de tu consulta conmigo en BuscoUnDoctor? Se hace en un minuto, sin necesidad de crear una cuenta: ${reviewUrl}`;
   const reviewWhatsappHref = `https://wa.me/?text=${encodeURIComponent(reviewText)}`;
@@ -112,6 +153,84 @@ export default function ShareProfile({ specialist }) {
           </Button>
         </div>
       </div>
+
+      {inviteUrl && (
+        <div className="bg-card rounded-2xl border border-violet-200 p-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <Gift className="w-4 h-4 text-violet-600 mt-0.5 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">Invita a un colega</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Cuando un médico se registre con tu código y su perfil quede publicado, te regalamos <span className="font-semibold text-foreground">1 mes de Premium</span>. Puedes invitar a varios colegas, y los meses se van sumando.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1">Tu código</p>
+            <div className="flex items-center gap-2">
+              <code className="text-base font-heading font-bold tracking-widest bg-violet-50 text-violet-700 rounded-xl px-3.5 py-2">{specialist.referral_code}</code>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-1">Tu enlace de invitación</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 min-w-0 truncate text-xs sm:text-sm bg-muted rounded-xl px-3 py-2.5 text-foreground">{inviteUrl}</code>
+              <Button variant="outline" size="icon" className="rounded-xl flex-shrink-0" onClick={copyInviteLink} aria-label="Copiar enlace de invitación">
+                {copiedInvite ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" className="rounded-xl gap-1.5 min-h-[44px] text-emerald-700 border-emerald-200 hover:bg-emerald-50" asChild>
+              <a href={inviteWhatsappHref} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4" />
+                Invitar por WhatsApp
+              </a>
+            </Button>
+            <Button variant="outline" className="rounded-xl gap-1.5 min-h-[44px]" onClick={shareInvite}>
+              <Share2 className="w-4 h-4" />
+              Compartir de otra forma
+            </Button>
+          </div>
+
+          {referrals && referrals.length > 0 && (
+            <div className="pt-3 border-t border-border/50 space-y-3">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-violet-50 rounded-xl px-3.5 py-2.5">
+                  <p className="text-[11px] font-medium text-violet-700/80">Colegas invitados</p>
+                  <p className="font-heading font-extrabold text-xl text-violet-900">{referrals.length}</p>
+                </div>
+                <div className="bg-violet-50 rounded-xl px-3.5 py-2.5">
+                  <p className="text-[11px] font-medium text-violet-700/80">Llevas ahorrado</p>
+                  <p className="font-heading font-extrabold text-xl text-violet-900">
+                    ${(referrals.filter((r) => r.rewarded).length * premiumPrice).toLocaleString("es-MX")}
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs font-medium text-muted-foreground">Detalle</p>
+              <ul className="space-y-1.5">
+                {referrals.map((r, i) => (
+                  <li key={i} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="text-foreground truncate">{r.full_name}</span>
+                    {r.rewarded ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full flex-shrink-0">
+                        <CheckCircle2 className="w-3 h-3" /> Premio acreditado
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full flex-shrink-0">
+                        <Clock className="w-3 h-3" /> Esperando aprobación
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
         <div className="flex items-start gap-3">

@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
+import { Gift, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import StepShell from "./StepShell";
 
 // Paso 1 del wizard de registro de médicos ("Cuéntanos sobre ti"). Extraído
@@ -41,6 +43,25 @@ export default function StepDatos({ data, update, error, specialties }) {
       : [...selectedSubspecialties, id];
     update("subspecialties_relation", next);
   };
+
+  // Código de quien lo invitó (opcional). Se valida en vivo solo para
+  // mostrarle "fuiste invitado por Dr. X" -- un código mal escrito o que no
+  // exista NUNCA bloquea el registro, solo no se acredita el premio a nadie.
+  const [referralCheck, setReferralCheck] = useState(null); // null | "checking" | { valid, full_name }
+  useEffect(() => {
+    const code = (data.referral_code || "").trim();
+    if (!code) { setReferralCheck(null); return; }
+    setReferralCheck("checking");
+    const t = setTimeout(async () => {
+      try {
+        const { data: res } = await supabase.rpc("validate_referral_code", { p_code: code });
+        setReferralCheck(res || { valid: false });
+      } catch {
+        setReferralCheck(null);
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [data.referral_code]);
 
   return (
     <StepShell title="Cuéntanos sobre ti" subtitle="Así aparecerás en tu perfil público" error={error}>
@@ -132,6 +153,29 @@ export default function StepDatos({ data, update, error, specialties }) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="sm:col-span-2 bg-accent/40 border border-dashed border-border rounded-xl p-3.5">
+        <label className="text-xs font-medium text-foreground mb-1.5 flex items-center gap-1.5">
+          <Gift className="w-3.5 h-3.5 text-brand-blue" />
+          ¿Te invitó otro médico? (opcional)
+        </label>
+        <Input
+          value={data.referral_code || ""}
+          onChange={(e) => update("referral_code", e.target.value.toUpperCase().replace(/\s/g, ""))}
+          placeholder="Código de invitación, ej: K7QX9P"
+          className="rounded-xl uppercase"
+          maxLength={12}
+        />
+        {referralCheck === "checking" && (
+          <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Buscando…</p>
+        )}
+        {referralCheck?.valid && (
+          <p className="text-xs text-emerald-700 mt-1.5 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Fuiste invitado por {referralCheck.full_name}</p>
+        )}
+        {referralCheck && referralCheck !== "checking" && !referralCheck.valid && (
+          <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> No encontramos ese código — puedes dejarlo en blanco y seguir.</p>
+        )}
       </div>
     </StepShell>
   );

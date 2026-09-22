@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Stethoscope, Users, ShieldCheck, FileText, Crown, ListChecks,
-  CheckCircle2, XCircle, Loader2, PartyPopper, UserMinus,
+  CheckCircle2, XCircle, Loader2, PartyPopper, UserMinus, Gift,
 } from "lucide-react";
 import { toast } from "sonner";
 import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
@@ -184,6 +184,45 @@ function DeletionRequestCard({ doc }) {
   );
 }
 
+// Un doctor invitado que ya está publicado: el equipo decide, con un clic,
+// acreditarle el mes de Premium a quien lo invitó (a propósito no es
+// automático — ver credit_referral_reward en Supabase).
+function ReferralRewardCard({ doc, referrerName, onCredited }) {
+  const [crediting, setCrediting] = useState(false);
+  const { refresh: refreshBadges } = useAdminBadges();
+
+  const credit = async () => {
+    setCrediting(true);
+    try {
+      await base44.functions.invoke("creditReferralReward", { specialist_id: doc.id });
+      toast.success(`Mes de Premium acreditado a ${referrerName || "quien invitó"}`);
+      onCredited();
+      refreshBadges();
+    } catch (e) {
+      toast.error("No se pudo acreditar: " + e.message);
+    }
+    setCrediting(false);
+  };
+
+  return (
+    <div className="bg-card rounded-2xl border border-violet-200 p-4 flex items-center gap-3 flex-wrap">
+      <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
+        <Gift className="w-5 h-5 text-violet-600" />
+      </div>
+      <div className="flex-1 min-w-[220px]">
+        <p className="text-sm font-semibold text-foreground">{doc.full_name}</p>
+        <p className="text-xs text-muted-foreground">
+          Invitado por <span className="font-medium text-foreground">{referrerName || "un médico"}</span> — ya está publicado, listo para acreditar el mes.
+        </p>
+      </div>
+      <Button size="sm" className="rounded-xl gap-1.5 flex-shrink-0" disabled={crediting} onClick={credit}>
+        {crediting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gift className="w-3.5 h-3.5" />}
+        Acreditar mes de Premium
+      </Button>
+    </div>
+  );
+}
+
 // Sección genérica de la bandeja: título, ícono, contador y lista (o el
 // estado "nada pendiente aquí").
 function InboxSection({ icon: Icon, title, count, emptyLabel, children }) {
@@ -262,6 +301,14 @@ export default function AdminInbox() {
     [specialists]
   );
 
+  // Doctores invitados que ya están publicados y a quien los invitó todavía
+  // no se le acreditó el mes -- a propósito el premio no se da solo, lo
+  // decide el equipo aquí.
+  const pendingReferralRewards = useMemo(
+    () => specialists.filter((s) => !s.deleted_at && s.referred_by_id && s.publication_status === "published" && s.active && !s.referral_rewarded_at),
+    [specialists]
+  );
+
   const pendingDocs = useMemo(
     () => docs.filter((d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at),
     [docs, specialistsById]
@@ -277,7 +324,7 @@ export default function AdminInbox() {
     [specialists, premiumStatuses, payments]
   );
 
-  const totalPending = deletionRequests.length + pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
+  const totalPending = deletionRequests.length + pendingReferralRewards.length + pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
 
   if (loading) {
     return (
@@ -295,7 +342,7 @@ export default function AdminInbox() {
       </div>
       <p className="text-sm text-muted-foreground mb-6">
         Lo que necesita tu atención, junto en un solo lugar: doctores por aprobar, documentos por
-        verificar, artículos de blog por revisar y solicitudes de enfermedades nuevas.
+        verificar, artículos de blog por revisar, premios de referidos y solicitudes de enfermedades nuevas.
       </p>
 
       {totalPending === 0 ? (
@@ -309,6 +356,19 @@ export default function AdminInbox() {
             <InboxSection icon={UserMinus} title="Solicitudes de baja" count={deletionRequests.length} emptyLabel="">
               {deletionRequests.map((doc) => (
                 <DeletionRequestCard key={doc.id} doc={doc} />
+              ))}
+            </InboxSection>
+          )}
+
+          {pendingReferralRewards.length > 0 && (
+            <InboxSection icon={Gift} title="Premios de referidos por acreditar" count={pendingReferralRewards.length} emptyLabel="">
+              {pendingReferralRewards.map((doc) => (
+                <ReferralRewardCard
+                  key={doc.id}
+                  doc={doc}
+                  referrerName={specialistsById[doc.referred_by_id]?.full_name}
+                  onCredited={load}
+                />
               ))}
             </InboxSection>
           )}

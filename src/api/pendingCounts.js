@@ -27,6 +27,10 @@ export async function loadPendingCounts() {
 
   const deletionRequests = activeSpecialists.filter((s) => s.deletion_requested_at).length;
 
+  const pendingReferralRewards = activeSpecialists.filter(
+    (s) => s.referred_by_id && s.publication_status === "published" && s.active && !s.referral_rewarded_at
+  ).length;
+
   const pendingDocuments = docs.filter(
     (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at
   ).length;
@@ -44,6 +48,6 @@ export async function loadPendingCounts() {
     "/admin/blog": pendingBlogPosts,
     "/admin/premium": lateDoctors,
     "/admin/enfermedades": pendingConditionRequests,
-    "/admin/bandeja": deletionRequests + pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
+    "/admin/bandeja": deletionRequests + pendingReferralRewards + pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
   };
 }

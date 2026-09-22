@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Circle, Loader2, ExternalLink, Pencil, MapPin, Phone, Mail, BadgeCheck, AlertTriangle, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Loader2, ExternalLink, Pencil, MapPin, Phone, Mail, BadgeCheck, AlertTriangle, XCircle, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
@@ -45,6 +45,8 @@ export default function AdminDoctorReview() {
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState("");
+  const [referrer, setReferrer] = useState(null);
+  const [crediting, setCrediting] = useState(false);
 
   const load = async () => {
     const [specialist, offs] = await Promise.all([
@@ -53,6 +55,11 @@ export default function AdminDoctorReview() {
     ]);
     setDoc(specialist);
     setOffices(offs || []);
+    if (specialist?.referred_by_id) {
+      base44.entities.Specialist.get(specialist.referred_by_id).then(setReferrer).catch(() => setReferrer(null));
+    } else {
+      setReferrer(null);
+    }
     try {
       const res = await base44.functions.invoke("recalculateSpecialistScore", { specialist_id: id });
       const data = res.data || res;
@@ -149,9 +156,36 @@ export default function AdminDoctorReview() {
               {doc.whatsapp && <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-muted-foreground" /> {doc.whatsapp}</p>}
               {doc.email && <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> {doc.email}</p>}
               <p className="text-xs text-muted-foreground">Cédula: {doc.professional_license_number || "no capturada"}</p>
+              {referrer && <p className="text-xs text-violet-700 mt-1">🎁 Invitado por {referrer.full_name}</p>}
             </div>
           </div>
         </div>
+
+        {referrer && visible && !doc.referral_rewarded_at && (
+          <div className="flex items-center justify-between gap-3 flex-wrap bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
+            <p className="text-sm text-violet-900">Este perfil ya está publicado. ¿Acreditar el mes de Premium a {referrer.full_name}?</p>
+            <Button
+              size="sm"
+              className="rounded-xl gap-1.5 flex-shrink-0"
+              disabled={crediting}
+              onClick={async () => {
+                setCrediting(true);
+                try {
+                  await base44.functions.invoke("creditReferralReward", { specialist_id: doc.id });
+                  toast.success(`Mes de Premium acreditado a ${referrer.full_name}`);
+                  setDoc((prev) => ({ ...prev, referral_rewarded_at: new Date().toISOString() }));
+                  refreshBadges();
+                } catch (e) {
+                  toast.error("No se pudo acreditar: " + e.message);
+                }
+                setCrediting(false);
+              }}
+            >
+              {crediting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gift className="w-3.5 h-3.5" />}
+              Acreditar mes de Premium
+            </Button>
+          </div>
+        )}
 
         <div>
           <p className="text-xs font-heading font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">Presentación</p>
