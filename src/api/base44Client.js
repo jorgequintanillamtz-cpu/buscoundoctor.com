@@ -7,12 +7,15 @@ import { supabase } from '@/lib/supabaseClient';
 
 // ---------------------------------------------------------------------------
 // Entidades: nombre de entidad (PascalCase, como en Base44) -> tabla real.
-// Las 3 entidades de Stripe (DoctorProduct, DoctorStripeAccount, ProductSale)
-// quedan fuera de alcance a propósito (ver plan de migración) y no están en
-// este mapa: cualquier llamada a ellas lanza un error claro en vez de fallar
-// de forma confusa.
+// DoctorStripeAccount y ProductSale (cobro real vía Stripe) siguen fuera de
+// alcance a propósito y no están en este mapa: cualquier llamada a ellas
+// lanza un error claro en vez de fallar de forma confusa. DoctorProduct SÍ
+// se reactivó (2026-09) para el catálogo de guías digitales — el doctor
+// administra su propio catálogo, pero comprar sigue sin existir.
 // ---------------------------------------------------------------------------
 const ENTITY_TABLE_MAP = {
+  DoctorProduct: 'doctor_product',
+  Guide: 'guide',
   Specialty: 'specialty',
   Zone: 'zone',
   Insurer: 'insurer',
@@ -59,7 +62,7 @@ const ENTITY_TABLE_MAP = {
   FaqItem: 'faq_item',
 };
 
-const STRIPE_ENTITIES = new Set(['DoctorProduct', 'DoctorStripeAccount', 'ProductSale']);
+const STRIPE_ENTITIES = new Set(['DoctorStripeAccount', 'ProductSale']);
 
 // Columnas que se llaman distinto en el frontend que en la tabla real de
 // Postgres (renombradas durante el diseño del esquema nuevo). Se traducen en
@@ -390,7 +393,6 @@ const STRIPE_FUNCTIONS = new Set([
   'createStripeConnectOnboarding',
   'downloadProductFile',
   'getProductPurchaseInfo',
-  'getPublicDoctorProducts',
   'getSaleDownloadLink',
   'stripeConnectWebhook',
 ]);
@@ -409,6 +411,22 @@ const FUNCTION_MAP = {
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>
     supabase.rpc('create_consult_review', { p_consult_summary_id: consult_summary_id, p_rating: rating }),
+  // El código existente (StorefrontPublic, StorefrontProductDetail,
+  // ConsultSummaryPublic -- ya escritos desde la época de Base44) llama a
+  // esta función de dos formas: sin product_id espera { products: [...] },
+  // con product_id espera { product: {...} } de uno solo. La RPC real solo
+  // trae la lista completa (activos de ese doctor); acá se filtra el caso
+  // de un producto individual en JS en vez de tener una segunda RPC, porque
+  // el catálogo por doctor es chico.
+  getPublicDoctorProducts: async ({ doctor_id, product_id }) => {
+    const { data, error } = await supabase.rpc('get_public_doctor_products', { p_doctor_id: doctor_id });
+    if (error) return { data: null, error };
+    const products = data || [];
+    if (product_id) {
+      return { data: { product: products.find((p) => p.id === product_id) || null } };
+    }
+    return { data: { products } };
+  },
 };
 
 async function invoke(name, payload) {

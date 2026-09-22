@@ -56,7 +56,10 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
     }
     setUploadingPdf(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      // Bucket privado "doctor-products": la carpeta debe ser el id del
+      // doctor (no el user.id) -- así lo exige la policy de RLS del bucket
+      // (is_specialist_owner sobre el primer segmento de la ruta).
+      const res = await base44.integrations.Core.UploadFile({ file, bucket: "doctor-products", folder: doctorId });
       setFileUrl(res.file_url);
       toast.success("PDF cargado");
     } catch (e) {
@@ -72,7 +75,7 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
     }
     setUploadingImg(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadFile({ file, bucket: "doctor-products", folder: doctorId });
       setImages((prev) => [...prev, res.file_url]);
     } catch (e) {
       toast.error("Error al subir la imagen: " + e.message);

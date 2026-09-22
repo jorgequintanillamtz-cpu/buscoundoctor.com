@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut, BookOpen } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -10,9 +10,10 @@ import { SHOW_PREMIUM } from "@/lib/featureFlags";
 // entrada juntas y en el mismo orden que ahí (Doctores, Verificaciones,
 // Blog, Reseñas), seguidas de lo operativo que no es cola de aprobación
 // (Solicitudes, Premium) y el Historial como bitácora al final; luego
-// Bancos, los 3 catálogos de taxonomía médica que alimentan la búsqueda
-// (especialidades, subespecialidades, enfermedades) -- viven juntos y con
-// nombre consistente a propósito, en vez de regados en otras secciones;
+// Listas médicas, los catálogos de taxonomía médica que alimentan la
+// búsqueda (especialidades, subespecialidades, enfermedades, guías) -- viven
+// juntos y con nombre consistente a propósito, en vez de regados en otras
+// secciones;
 // después Contenido (solo texto/imagen del sitio, sin cola de revisión); y
 // Configuración al final (lo que casi nunca cambia).
 const adminNavSections = [
@@ -42,6 +43,7 @@ const adminNavSections = [
       { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
       { path: "/admin/subespecialidades", label: "Subespecialidades", icon: GraduationCap },
       { path: "/admin/enfermedades", label: "Enfermedades", icon: ListChecks },
+      { path: "/admin/guias", label: "Guías", icon: BookOpen },
     ],
   },
   {

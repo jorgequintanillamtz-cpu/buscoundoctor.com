@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Eye, Save, Clock, Stethoscope, FileText, Home, ArrowLeft, LogOut, Sparkles, Calendar, Star, Globe, Menu, X, MessageCircle, UserCog, ChevronLeft, Settings } from "lucide-react";
+import { Eye, Save, Clock, Stethoscope, FileText, Home, ArrowLeft, LogOut, Sparkles, Calendar, Star, Globe, Menu, X, MessageCircle, UserCog, ChevronLeft, Settings, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -46,10 +46,10 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackCon
 //
 // Funciones ocultas por ahora (no están en el menú, pero su código sigue
 // aquí para reactivarlas): "Tu plan" (section "plan"), "Escribir blog"
-// (section "blog"), "Productos digitales" (/panel-medico/productos),
-// "Configuración de pagos" (/panel-medico/pagos) y "Resumen de consulta"
-// (/panel-medico/resumen). Para volver a mostrar una, agrégala aquí o a
-// SIDE_LINKS.
+// (section "blog"), "Configuración de pagos" (/panel-medico/pagos) y
+// "Resumen de consulta" (/panel-medico/resumen). Para volver a mostrar una,
+// agrégala aquí o a SIDE_LINKS. "Productos digitales" se reactivó en 2026-09
+// (catálogo de guías digitales, sin cobro todavía) -- ver SIDE_LINKS.
 const SECTION_GROUPS = [
   { group: "Mi actividad", items: [
     { key: "resumen", label: "Inicio", icon: Home },
@@ -66,6 +66,7 @@ const SECTION_GROUPS = [
 // Enlaces que abren otra página, debajo del menú.
 const SIDE_LINKS = [
   { to: "/panel-medico/storefront", label: "Mi página pública", icon: Globe },
+  { to: "/panel-medico/productos", label: "Productos digitales", icon: Package },
 ];
 
 export default function DoctorPanel() {
