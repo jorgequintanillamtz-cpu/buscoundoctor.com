@@ -115,6 +115,16 @@ export default function AdminDoctorReview() {
         <ArrowLeft className="w-4 h-4" /> Volver a la bandeja
       </Link>
 
+      {doc.deletion_requested_at && (
+        <div className="flex items-start gap-2 text-sm text-red-800 bg-red-50 border border-red-200 rounded-2xl px-4 py-3">
+          <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <p>
+            Este doctor pidió darse de baja el {new Date(doc.deletion_requested_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}.
+            Contáctalo para confirmarlo; si se confirma, mándalo a la papelera desde Doctores. No se ha borrado nada.
+          </p>
+        </div>
+      )}
+
       {/* Resumen */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
         <div className="flex items-start gap-4">

@@ -401,6 +401,8 @@ const FUNCTION_MAP = {
   deleteDoctorProfile: ({ specialist_id }) => supabase.rpc('delete_doctor_profile', { p_specialist_id: specialist_id }),
   recalculateSpecialistScore: ({ specialist_id }) => supabase.rpc('recalculate_specialist_score', { p_specialist_id: specialist_id }),
   resubmitForReview: () => supabase.rpc('resubmit_for_review'),
+  requestProfileDeletion: ({ reason } = {}) => supabase.rpc('request_profile_deletion', { p_reason: reason || null }),
+  cancelProfileDeletion: () => supabase.rpc('cancel_profile_deletion_request'),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>

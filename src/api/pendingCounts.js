@@ -25,6 +25,8 @@ export async function loadPendingCounts() {
 
   const pendingDoctors = activeSpecialists.filter(isAwaitingReview).length;
 
+  const deletionRequests = activeSpecialists.filter((s) => s.deletion_requested_at).length;
+
   const pendingDocuments = docs.filter(
     (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at
   ).length;
@@ -42,6 +44,6 @@ export async function loadPendingCounts() {
     "/admin/blog": pendingBlogPosts,
     "/admin/premium": lateDoctors,
     "/admin/enfermedades": pendingConditionRequests,
-    "/admin/bandeja": pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
+    "/admin/bandeja": deletionRequests + pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
   };
 }

@@ -176,6 +176,15 @@ Reglas SEO que ya existen (no las rompas): `/especialistas` es `noindex` cuando 
 - Para agregar un tipo de aviso: crear el trigger/función en Supabase, y darle icono y color en `src/lib/doctorNotifications.js`.
 - Pendiente a propósito: avisos de "nuevo mensaje" o de artículos del blog (el blog del médico está oculto).
 
+## 8a-quater. Ajustes del médico (admin doctores)
+
+- Botón **"Ajustes"** (engranaje) debajo del menú del panel, en escritorio y en el menú de celular; sección `ajustes` de `DoctorPanel.jsx`. Tres pestañas en `src/components/admin/settings/DoctorSettings.jsx`: **Mi cuenta**, **Correos** y **Ayuda**.
+- **Mi cuenta** (`AccountSettings.jsx`): cambiar contraseña (pide la actual, la verifica iniciando sesión de nuevo; si la cuenta entra con Google/Microsoft no se muestra) y **solicitar baja**. El **correo de acceso no se cambia solo**: se muestra y se manda por WhatsApp (cambiarlo exige confirmar con código y se prefirió no abrir esa puerta todavía).
+- **Solicitar baja no borra nada.** La RPC `request_profile_deletion(reason)` pone `specialist.deletion_requested_at`, registra `doctor_solicita_baja` en el historial y manda correo a `admin_notification_emails()`; `cancel_profile_deletion()` lo revierte (`doctor_cancela_baja`). Los dueños la ven en la **Bandeja** ("Solicitudes de baja", cuenta en el número rojo) y como aviso rojo en la pantalla de revisión; si se confirma, se manda a la papelera desde Doctores. `buildData` nunca escribe `deletion_requested_at` (para que el autoguardado no la pise).
+- **Correos** (`EmailPreferences.jsx`): dos interruptores, `citas` y `estado`, en la tabla `doctor_email_preference` (RLS: solo su dueño; sin fila = todo activado). `send_transactional_email` los respeta y devuelve `preferencia_desactivada` (la bienvenida siempre sale). La campana del panel no se apaga.
+- **Ayuda** (`HelpCenter.jsx`, textos en `src/lib/doctorHelp.js`): enlace público del perfil con botón copiar, preguntas frecuentes por tema y WhatsApp. Si cambias nombres del menú, actualiza esos textos.
+- Migración aplicada en Supabase (no está en git): `doctor_settings_email_prefs_and_deletion_request`.
+
 ## 8a-bis. Revisar y aprobar doctores (admin)
 
 - **"Aprobar" hace todo en un paso:** deja el perfil `published` **y** `active = true` (visible en el directorio) y manda **un solo** correo de "perfil publicado". Vive en `src/api/doctorReview.js` (`approveDoctor` / `rejectDoctor`); la Bandeja, la lista de Doctores y la pantalla de revisión lo usan, para que se comporten igual. Antes "Aprobar" solo cambiaba `publication_status` y el perfil seguía invisible hasta encender "Perfil activo" aparte.

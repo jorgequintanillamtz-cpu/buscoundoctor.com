@@ -20,6 +20,8 @@ export const ACTIVITY_TYPE_LABELS = {
   doctor_eliminado: "Doctor eliminado permanentemente",
   doctor_papelera: "Doctor movido a la papelera",
   doctor_restaurado: "Doctor restaurado",
+  doctor_solicita_baja: "Doctor pidió darse de baja",
+  doctor_cancela_baja: "Doctor canceló su solicitud de baja",
   registro_eliminado: "Registro en progreso eliminado permanentemente",
   registro_papelera: "Registro en progreso movido a la papelera",
   documento_aprobado: "Documento aprobado",
@@ -42,7 +44,7 @@ export const ACTIVITY_POSITIVE = new Set([
 ]);
 export const ACTIVITY_NEGATIVE = new Set([
   "premium_desactivado", "perfil_desactivado", "destacado_desactivado", "pago_eliminado",
-  "doctor_rechazado", "doctor_eliminado", "doctor_papelera", "registro_eliminado", "registro_papelera",
+  "doctor_rechazado", "doctor_solicita_baja", "doctor_eliminado", "doctor_papelera", "registro_eliminado", "registro_papelera",
   "documento_rechazado", "resena_eliminada", "resena_rechazada", "blog_rechazado", "acceso_admin_denegado",
 ]);
 

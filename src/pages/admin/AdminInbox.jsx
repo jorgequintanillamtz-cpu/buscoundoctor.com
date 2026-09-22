@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Stethoscope, Users, ShieldCheck, FileText, Crown, ListChecks,
-  CheckCircle2, XCircle, Loader2, PartyPopper,
+  CheckCircle2, XCircle, Loader2, PartyPopper, UserMinus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
@@ -162,6 +162,28 @@ function LatePaymentCard({ doc }) {
   );
 }
 
+// Un doctor que pidió darse de baja desde su panel (Ajustes). No se borra nada
+// solo: el dueño lo contacta y, si se confirma, lo manda a la papelera desde Doctores.
+function DeletionRequestCard({ doc }) {
+  return (
+    <div className="bg-card rounded-2xl border border-red-200 p-4 flex items-center gap-3 flex-wrap">
+      <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+        <UserMinus className="w-5 h-5 text-red-600" />
+      </div>
+      <div className="flex-1 min-w-[180px]">
+        <p className="text-sm font-semibold text-foreground">{doc.full_name}</p>
+        <p className="text-xs text-muted-foreground">
+          Pidió darse de baja el {new Date(doc.deletion_requested_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+          {doc.whatsapp ? ` · ${doc.whatsapp}` : ""}
+        </p>
+      </div>
+      <Button variant="outline" size="sm" className="rounded-xl" asChild>
+        <Link to={`/admin/doctores/revisar/${doc.id}`}>Ver al doctor</Link>
+      </Button>
+    </div>
+  );
+}
+
 // Sección genérica de la bandeja: título, ícono, contador y lista (o el
 // estado "nada pendiente aquí").
 function InboxSection({ icon: Icon, title, count, emptyLabel, children }) {
@@ -235,6 +257,11 @@ export default function AdminInbox() {
     [specialists]
   );
 
+  const deletionRequests = useMemo(
+    () => specialists.filter((s) => s.deletion_requested_at && !s.deleted_at),
+    [specialists]
+  );
+
   const pendingDocs = useMemo(
     () => docs.filter((d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at),
     [docs, specialistsById]
@@ -250,7 +277,7 @@ export default function AdminInbox() {
     [specialists, premiumStatuses, payments]
   );
 
-  const totalPending = pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
+  const totalPending = deletionRequests.length + pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
 
   if (loading) {
     return (
@@ -278,6 +305,14 @@ export default function AdminInbox() {
         </div>
       ) : (
         <>
+          {deletionRequests.length > 0 && (
+            <InboxSection icon={UserMinus} title="Solicitudes de baja" count={deletionRequests.length} emptyLabel="">
+              {deletionRequests.map((doc) => (
+                <DeletionRequestCard key={doc.id} doc={doc} />
+              ))}
+            </InboxSection>
+          )}
+
           <InboxSection icon={Users} title="Doctores por aprobar" count={pendingDoctors.length} emptyLabel="No hay perfiles esperando aprobación.">
             {pendingDoctors.map((doc) => (
               <PendingDoctorCard key={doc.id} doc={doc} onReviewed={load} />
