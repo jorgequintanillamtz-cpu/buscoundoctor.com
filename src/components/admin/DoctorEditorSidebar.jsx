@@ -57,6 +57,7 @@ export default function DoctorEditorSidebar({ form, update, specialistId }) {
       const fields = await setDoctorState({ ...form, id: specialistId }, next);
       update("publication_status", fields.publication_status);
       update("active", fields.active);
+      update("vacation_until", fields.vacation_until ?? null);
       toast.success(next === "published" ? "Perfil publicado" : next === "paused" ? "Perfil en pausa" : "Perfil en revisión");
     } catch (e) {
       toast.error("No se pudo cambiar el estado: " + e.message);

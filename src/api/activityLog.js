@@ -22,6 +22,8 @@ export const ACTIVITY_TYPE_LABELS = {
   doctor_restaurado: "Doctor restaurado",
   doctor_solicita_baja: "Doctor pidió darse de baja",
   doctor_cancela_baja: "Doctor canceló su solicitud de baja",
+  doctor_inicia_vacaciones: "Doctor se fue de vacaciones",
+  doctor_termina_vacaciones: "Doctor terminó sus vacaciones",
   registro_eliminado: "Registro en progreso eliminado permanentemente",
   registro_papelera: "Registro en progreso movido a la papelera",
   documento_aprobado: "Documento aprobado",

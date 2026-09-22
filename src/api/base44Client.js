@@ -403,6 +403,8 @@ const FUNCTION_MAP = {
   resubmitForReview: () => supabase.rpc('resubmit_for_review'),
   requestProfileDeletion: ({ reason } = {}) => supabase.rpc('request_profile_deletion', { p_reason: reason || null }),
   cancelProfileDeletion: () => supabase.rpc('cancel_profile_deletion_request'),
+  startVacation: ({ return_date } = {}) => supabase.rpc('start_vacation', { p_return: return_date }),
+  endVacation: () => supabase.rpc('end_vacation'),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>

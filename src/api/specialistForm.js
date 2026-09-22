@@ -130,6 +130,7 @@ export function useSpecialistForm({ stripFields = [] } = {}) {
     // La marca "corrigió y espera revisión" solo la escriben la función resubmit_for_review y
     // las decisiones del admin; un guardado del formulario (autoguardado) nunca debe pisarla.
     delete data.resubmitted_at;
+    delete data.vacation_until; // solo la escriben start_vacation/end_vacation y el revisor de vacaciones
     delete data.deletion_requested_at; // solo la escriben las funciones request/cancel_profile_deletion
     stripFields.forEach((field) => { delete data[field]; });
     return data;

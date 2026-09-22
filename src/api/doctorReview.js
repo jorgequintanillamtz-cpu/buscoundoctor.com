@@ -24,7 +24,7 @@ export function isAwaitingReview(s) {
 
 export async function approveDoctor(doc) {
   const alreadyVisible = doc.publication_status === "published" && doc.active === true;
-  await base44.entities.Specialist.update(doc.id, { publication_status: "published", active: true, resubmitted_at: null });
+  await base44.entities.Specialist.update(doc.id, { publication_status: "published", active: true, resubmitted_at: null, vacation_until: null });
   logActivity({
     type: "doctor_aprobado",
     description: `Se aprobó y publicó el perfil de ${doc.full_name}`,
@@ -32,11 +32,11 @@ export async function approveDoctor(doc) {
     specialistName: doc.full_name,
   });
   if (!alreadyVisible) notifyProfileApproved({ ...doc, publication_status: "published", active: true });
-  return { publication_status: "published", active: true };
+  return { publication_status: "published", active: true, vacation_until: null };
 }
 
 export async function rejectDoctor(doc, reason) {
-  await base44.entities.Specialist.update(doc.id, { publication_status: "rejected", resubmitted_at: null });
+  await base44.entities.Specialist.update(doc.id, { publication_status: "rejected", resubmitted_at: null, vacation_until: null });
   logActivity({
     type: "doctor_rechazado",
     description: `Se rechazó el perfil de ${doc.full_name}. Motivo: ${reason}`,
@@ -54,8 +54,8 @@ export async function rejectDoctor(doc, reason) {
 export async function setDoctorState(doc, next) {
   if (next === "published") return approveDoctor(doc);
   const fields = next === "paused"
-    ? { publication_status: "published", active: false, resubmitted_at: null }
-    : { publication_status: "pending_review", active: false, resubmitted_at: null };
+    ? { publication_status: "published", active: false, resubmitted_at: null, vacation_until: null }
+    : { publication_status: "pending_review", active: false, resubmitted_at: null, vacation_until: null };
   await base44.entities.Specialist.update(doc.id, fields);
   logActivity({
     type: "perfil_desactivado",

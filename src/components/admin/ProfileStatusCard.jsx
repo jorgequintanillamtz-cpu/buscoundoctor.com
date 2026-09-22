@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CheckCircle2, Clock, AlertTriangle, PauseCircle, Eye, MessageCircle, ArrowRight, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle, PauseCircle, Eye, MessageCircle, ArrowRight, ShieldCheck, Plane } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import { formatDateOnly } from "@/lib/dateLabels";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 
 // Los documentos que el equipo necesita para aprobar un perfil.
@@ -55,8 +56,28 @@ export default function ProfileStatusCard({ specialist, onNavigate, onStatusChan
     setSending(false);
   };
 
+  const endVacation = async () => {
+    setSending(true);
+    try {
+      const res = await base44.functions.invoke("endVacation");
+      const data = res.data || res;
+      onStatusChange?.({ vacation_until: null, active: !!data.active });
+      toast.success("Tu perfil volvió al directorio");
+    } catch (e) {
+      toast.error("No se pudo reactivar: " + e.message);
+    }
+    setSending(false);
+  };
+
   let card;
-  if (publication === "suspended" || (publication === "published" && !visible)) {
+  if (specialist.vacation_until) {
+    card = {
+      tone: "blue", icon: Plane,
+      title: "Tu perfil está de vacaciones",
+      body: `No aparece en el directorio y volverá solo el ${formatDateOnly(specialist.vacation_until)}.`,
+      endVacation: true,
+    };
+  } else if (publication === "suspended" || (publication === "published" && !visible)) {
     // "Aprobar" ahora deja el perfil visible; un perfil publicado pero oculto es uno en pausa.
     card = {
       tone: "amber", icon: PauseCircle,
@@ -122,7 +143,7 @@ export default function ProfileStatusCard({ specialist, onNavigate, onStatusChan
               : "Cédula pendiente de subir"}
           </div>
 
-          {(card.cta || card.link || card.help || card.resubmit) && (
+          {(card.cta || card.link || card.help || card.resubmit || card.endVacation) && (
             <div className="flex flex-wrap gap-2 mt-4">
               {card.cta && (
                 <Button className="rounded-xl gap-1.5 min-h-[44px]" onClick={() => onNavigate?.(card.cta.target)}>
@@ -133,6 +154,12 @@ export default function ProfileStatusCard({ specialist, onNavigate, onStatusChan
               {card.resubmit && (
                 <Button variant={card.cta ? "outline" : "default"} className="rounded-xl gap-1.5 min-h-[44px]" disabled={sending} onClick={resubmit}>
                   Ya corregí, enviar a revisión
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              )}
+              {card.endVacation && (
+                <Button className="rounded-xl gap-1.5 min-h-[44px]" disabled={sending} onClick={endVacation}>
+                  Volver ahora
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               )}

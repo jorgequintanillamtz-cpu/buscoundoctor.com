@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
 import { useAdminBadges } from "@/components/adminBadges";
 import DocumentManager from "@/components/admin/DocumentManager";
+import { formatDateOnly } from "@/lib/dateLabels";
 import { Button } from "@/components/ui/button";
 
 // Nombres cortos para el administrador de los 9 puntos de "perfil completo".
@@ -78,7 +79,9 @@ export default function AdminDoctorReview() {
     );
   }
 
-  const status = (doc.publication_status === "rejected" && doc.resubmitted_at ? STATUS.rejected_resubmitted : STATUS[doc.publication_status]) || STATUS.pending_review;
+  const status = doc.vacation_until
+    ? { label: `De vacaciones hasta el ${formatDateOnly(doc.vacation_until)}`, cls: "bg-sky-100 text-sky-700" }
+    : (doc.publication_status === "rejected" && doc.resubmitted_at ? STATUS.rejected_resubmitted : STATUS[doc.publication_status]) || STATUS.pending_review;
   const visible = doc.publication_status === "published" && doc.active === true;
   const verified = doc.license_verification_status === "verified";
 

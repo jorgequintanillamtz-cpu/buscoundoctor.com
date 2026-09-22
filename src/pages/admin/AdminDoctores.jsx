@@ -135,9 +135,10 @@ export default function AdminDoctores() {
     const isActive = doc.active !== false;
     const next = !isActive;
     if (!next && !confirm(`¿Desactivar el perfil de ${doc.full_name}? Dejará de verse en el directorio hasta que lo reactives.`)) return;
-    setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: next } : d));
+    setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: next, vacation_until: null } : d));
     try {
-      await base44.entities.Specialist.update(doc.id, { active: next });
+      // Una decisión del equipo cancela cualquier vacación del doctor (si no, el proceso automático la contradeciría).
+      await base44.entities.Specialist.update(doc.id, { active: next, vacation_until: null });
       toast.success(next ? `${doc.full_name} reactivado` : `${doc.full_name} desactivado`);
       logActivity({
         type: next ? "perfil_activado" : "perfil_desactivado",
@@ -146,7 +147,7 @@ export default function AdminDoctores() {
         specialistName: doc.full_name,
       });
     } catch (e) {
-      setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: isActive } : d));
+      setDoctors(prev => prev.map(d => d.id === doc.id ? { ...d, active: isActive, vacation_until: doc.vacation_until } : d));
       toast.error("No se pudo actualizar: " + e.message);
     }
   };
@@ -476,14 +477,14 @@ export default function AdminDoctores() {
                       <button
                         type="button"
                         onClick={() => toggleActive(doc)}
-                        title={isActive ? "Desactivar perfil" : "Reactivar perfil"}
+                        title={doc.vacation_until ? `De vacaciones hasta el ${doc.vacation_until}. Clic para reactivarlo ya.` : isActive ? "Desactivar perfil" : "Reactivar perfil"}
                         className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors flex-shrink-0 ${
                           isActive
                             ? "bg-green-100 text-green-700 hover:bg-green-200"
                             : "bg-muted text-muted-foreground hover:bg-red-50 hover:text-red-600"
                         }`}
                       >
-                        {isActive ? "Activo" : "Inactivo"}
+                        {doc.vacation_until ? "Vacaciones" : isActive ? "Activo" : "Inactivo"}
                       </button>
                       <Link to={`/admin/doctores/editar/${doc.id}`}>
                         <Button variant="ghost" size="icon" aria-label="Editar doctor" className="rounded-xl h-8 w-8">

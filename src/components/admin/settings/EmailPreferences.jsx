@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserRound } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { getEmailPreferences, saveEmailPreferences } from "@/api/doctorSettings";
 
@@ -17,13 +19,19 @@ const OPTIONS = [
   },
 ];
 
+const EMAIL_RE = /^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/;
+
 export default function EmailPreferences({ specialistId }) {
   const [prefs, setPrefs] = useState(null);
   const [saving, setSaving] = useState(null);
+  const [notice, setNotice] = useState("");
+  const [noticeError, setNoticeError] = useState("");
 
   useEffect(() => {
     let active = true;
-    getEmailPreferences(specialistId).then((p) => { if (active) setPrefs(p); }).catch(() => { if (active) setPrefs({ citas: true, estado: true }); });
+    getEmailPreferences(specialistId)
+      .then((p) => { if (active) { setPrefs(p); setNotice(p.aviso_email || ""); } })
+      .catch(() => { if (active) setPrefs({ citas: true, estado: true, aviso_email: "" }); });
     return () => { active = false; };
   }, [specialistId]);
 
@@ -36,6 +44,23 @@ export default function EmailPreferences({ specialistId }) {
       toast.success("Preferencia guardada");
     } catch {
       setPrefs(prefs);
+      toast.error("No se pudo guardar. Intenta de nuevo.");
+    }
+    setSaving(null);
+  };
+
+  const saveNotice = async () => {
+    const value = notice.trim().toLowerCase();
+    setNoticeError("");
+    if (value && !EMAIL_RE.test(value)) { setNoticeError("Escribe un correo válido, por ejemplo asistente@correo.com"); return; }
+    const next = { ...prefs, aviso_email: value };
+    setSaving("aviso_email");
+    try {
+      await saveEmailPreferences(specialistId, next);
+      setPrefs(next);
+      setNotice(value);
+      toast.success(value ? "Guardamos ese correo para tus avisos" : "Quitamos el correo adicional");
+    } catch {
       toast.error("No se pudo guardar. Intenta de nuevo.");
     }
     setSaving(null);
@@ -58,6 +83,39 @@ export default function EmailPreferences({ specialistId }) {
           </div>
         ))}
       </div>
+      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <UserRound className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">Correo de tu asistente (opcional)</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Las solicitudes de cita también llegarán a este correo, además de al tuyo. Sirve si alguien más agenda tus citas. Los correos sobre tu perfil y tus documentos solo llegan a ti.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Input
+            type="email"
+            inputMode="email"
+            value={notice}
+            onChange={(e) => setNotice(e.target.value)}
+            placeholder="asistente@correo.com"
+            className="rounded-xl flex-1 min-w-[200px]"
+            aria-label="Correo de tu asistente"
+          />
+          <Button
+            variant="outline"
+            className="rounded-xl min-h-[44px]"
+            disabled={saving === "aviso_email" || notice.trim().toLowerCase() === (prefs.aviso_email || "")}
+            onClick={saveNotice}
+          >
+            {saving === "aviso_email" && <Loader2 className="w-4 h-4 animate-spin mr-1.5" />}
+            Guardar
+          </Button>
+        </div>
+        {noticeError && <p className="text-sm text-destructive" role="alert">{noticeError}</p>}
+      </div>
+
       <p className="text-xs text-muted-foreground px-1">
         Estas opciones solo cambian los correos. Las notificaciones de la campana dentro de tu panel siempre se muestran.
       </p>
