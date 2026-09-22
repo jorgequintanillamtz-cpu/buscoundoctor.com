@@ -23,6 +23,9 @@ import PostsManager from "@/components/admin/PostsManager";
 import DoctorBlogSubmit from "@/components/admin/DoctorBlogSubmit";
 import ProfileChecklist from "@/components/admin/ProfileChecklist";
 import GuidedStepBar from "@/components/admin/GuidedStepBar";
+import NotificationBell from "@/components/admin/NotificationBell";
+import DoctorNotifications from "@/components/admin/DoctorNotifications";
+import { useDoctorNotifications } from "@/hooks/useDoctorNotifications";
 import { PROFILE_CHECKLIST_ITEMS } from "@/lib/profileChecklistItems";
 import ProfileHub, { PROFILE_SUB_KEYS } from "@/components/admin/ProfileHub";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
@@ -80,6 +83,7 @@ export default function DoctorPanel() {
   const [showWelcomeTour, setShowWelcomeTour] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const recalcScoreShared = useRecalculateScore(setForm);
+  const { notifications, unread, unreadBySection, markRead } = useDoctorNotifications(specialistId);
 
   const recalculateScore = async (idOverride) => {
     const id = idOverride || specialistId;
@@ -207,6 +211,20 @@ export default function DoctorPanel() {
     }
   };
 
+  // Abrir un aviso: se marca como leído y lleva a la pantalla donde se atiende.
+  const openNotification = (n) => {
+    if (!n.read_at) markRead([n.id]);
+    setSection(n.section || "resumen");
+  };
+
+  // Al entrar a una pantalla que tiene avisos propios (citas, reseñas, documentos),
+  // esos avisos se marcan como leídos: ya los está viendo.
+  useEffect(() => {
+    if (!["solicitudes", "resenas", "documentos"].includes(section)) return;
+    const ids = unread.filter((n) => n.section === section).map((n) => n.id);
+    if (ids.length > 0) markRead(ids);
+  }, [section, notifications]);
+
   // Menú (mismos elementos en escritorio y en el menú de celular).
   const isActive = (key) => section === key || (key === "mi-perfil" && PROFILE_SUB_KEYS.includes(section));
   const renderNavGroups = (afterPick) => SECTION_GROUPS.map((g) => (
@@ -223,6 +241,11 @@ export default function DoctorPanel() {
         >
           <s.icon className="w-4 h-4 flex-shrink-0" />
           <span className="flex-1">{s.label}</span>
+          {unreadBySection[s.key] > 0 && !isActive(s.key) && (
+            <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+              {unreadBySection[s.key] > 9 ? "9+" : unreadBySection[s.key]}
+            </span>
+          )}
         </button>
       ))}
     </div>
@@ -361,14 +384,24 @@ export default function DoctorPanel() {
             Sitio
           </Link>
           <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
-          <button
-            type="button"
-            onClick={() => setMobileNavOpen(true)}
-            aria-label="Abrir menú"
-            className="w-10 h-10 -mr-2 flex items-center justify-center text-white/80 hover:text-white"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          <div className="flex items-center -mr-2">
+            <NotificationBell
+              tone="dark"
+              notifications={notifications}
+              unread={unread}
+              onOpenItem={openNotification}
+              onMarkAllRead={() => markRead()}
+              onViewAll={() => setSection("notificaciones")}
+            />
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(true)}
+              aria-label="Abrir menú"
+              className="w-10 h-10 flex items-center justify-center text-white/80 hover:text-white"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
         {/* Menú lateral en móvil: mismas secciones que la barra lateral de escritorio */}
@@ -450,6 +483,15 @@ export default function DoctorPanel() {
                 )}
               </div>
               <div className="flex items-center gap-2">
+                <div className="hidden lg:block">
+                  <NotificationBell
+                    notifications={notifications}
+                    unread={unread}
+                    onOpenItem={openNotification}
+                    onMarkAllRead={() => markRead()}
+                    onViewAll={() => setSection("notificaciones")}
+                  />
+                </div>
                 {form.slug && (
                   <Button variant="outline" size="sm" className="rounded-xl gap-1.5" asChild>
                     <a href={`/especialista/${form.slug}`} target="_blank" rel="noopener noreferrer">
@@ -466,6 +508,9 @@ export default function DoctorPanel() {
             </div>
 
             {section === "resumen" && <DoctorDashboardHome specialist={{ ...form, id: specialistId }} isOwnProfile={true} onNavigate={setSection} checklist={completenessChecklist} onStatusChange={(fields) => Object.entries(fields).forEach(([k, v]) => update(k, v))} />}
+            {section === "notificaciones" && (
+              <DoctorNotifications notifications={notifications} unread={unread} onOpenItem={openNotification} onMarkAllRead={() => markRead()} />
+            )}
             {section === "mi-perfil" && <ProfileHub checklist={completenessChecklist} onNavigate={setSection} />}
             {PROFILE_SUB_KEYS.includes(section) && !guided && (
               <button type="button" onClick={() => setSection("mi-perfil")} className="flex items-center gap-1 text-sm font-medium text-brand-blue hover:underline mb-4 min-h-[44px]">

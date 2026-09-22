@@ -28,6 +28,7 @@ const ENTITY_TABLE_MAP = {
   SpecialistLanguage: 'specialist_language',
   SpecialistSeoChecklist: 'specialist_seo_checklist',
   Review: 'review',
+  DoctorNotification: 'doctor_notification',
   AppointmentRequest: 'appointment_request',
   DoctorStorefront: 'doctor_storefront',
   StorefrontFAQ: 'storefront_faq',
@@ -400,6 +401,7 @@ const FUNCTION_MAP = {
   deleteDoctorProfile: ({ specialist_id }) => supabase.rpc('delete_doctor_profile', { p_specialist_id: specialist_id }),
   recalculateSpecialistScore: ({ specialist_id }) => supabase.rpc('recalculate_specialist_score', { p_specialist_id: specialist_id }),
   resubmitForReview: () => supabase.rpc('resubmit_for_review'),
+  markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>
     supabase.rpc('create_consult_review', { p_consult_summary_id: consult_summary_id, p_rating: rating }),
