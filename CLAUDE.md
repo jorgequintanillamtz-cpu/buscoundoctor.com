@@ -281,6 +281,17 @@ Como no hay staging, el patrón acordado es: **crear datos de prueba, verificar,
 - **`SpecialistCard.jsx` es la única tarjeta de médico**; no crees otra.
 - Componentes de dominio del panel en `src/components/admin/`.
 
+### Bancos de taxonomía médica (Especialidades, Subespecialidades, Enfermedades)
+
+`AdminSpecialties.jsx`, `AdminSubespecialidades.jsx` y `AdminEnfermedades.jsx` (bajo "LISTAS MÉDICAS" en admin dueños) eran ~85% código duplicado y ya se habían desalineado entre sí. Lo genuinamente idéntico se movió a piezas compartidas; lo propio de cada pantalla (sus campos de formulario, sus columnas, y cómo entiende cada una "huecos por especialidad") se quedó en cada archivo:
+
+- **`src/hooks/useTaxonomyBank.js`**: cargar, buscar por nombre, abrir/cerrar el modal de crear-editar con slug automático desde el nombre (`updateField`) o manual (`updateSlugManually`), guardar, borrar con `useConfirmDialog`, y prender/apagar un campo tipo switch (`toggleField`). Se configura con el `entity` de base44, validaciones propias (`validate`) y un gancho opcional `afterCreate(created, form)` para efectos extra al crear (lo usa Enfermedades para marcar aprobada la solicitud del doctor que la originó).
+- **`TaxonomyModal.jsx`** / **`TaxonomyTable.jsx`** / **`TaxonomyStatsBar.jsx`**: chrome del modal (Dialog de shadcn), tabla genérica por `columns: [{key, header, render(item)}]`, y las 3 tarjetas de arriba (total / segundo dato propio / huecos-que-también-es-botón-de-filtro).
+- **`SpecialtyGapList.jsx`**: la lista de "especialidades sin ninguna todavía" (chips clicables que abren "Agregar" con esa especialidad ya elegida). La usan Subespecialidades y Enfermedades. **Antes Enfermedades, al filtrar por huecos, dejaba la tabla vacía sin decir cuáles especialidades faltaban** (una enfermedad de una especialidad sin ninguna, por definición, no puede aparecer en esa tabla); con este componente compartido las dos pantallas se comportan igual y mejor.
+- Lo que **no** se compartió a propósito: el formulario largo de Enfermedades (síntomas, causas, SEO...) y su bandeja de "Solicitudes de doctores" (`ConditionRequest`); el cálculo de huecos de cada banco (Especialidades: perfiles sin `profession_slug`; Subespecialidades: por `parent_specialty_id`, un id; Enfermedades: por `specialty`, un campo de **texto**, no un id — inconsistencia de datos existente, fuera de alcance).
+
+Si agregas un cuarto banco de catálogo similar, reutiliza estas piezas en vez de copiar una de las tres pantallas.
+
 ## 12. Decisiones históricas (no las repitas)
 
 1. **`Doctor` vs `Specialist`:** ganó `Specialist` (tenía los datos reales). `Doctor` se eliminó y no debe volver.
