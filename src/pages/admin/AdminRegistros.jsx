@@ -47,6 +47,37 @@ function DetailRow({ label, value }) {
   );
 }
 
+const RECOVERY_EMAIL_FIELDS = [
+  { key: "recovery_email_1_sent_at", label: "Correo 1 (30 min después de empezar)" },
+  { key: "recovery_email_2_sent_at", label: "Correo 2 (24h después del 1°)" },
+  { key: "recovery_email_3_sent_at", label: "Correo 3 (4 días después del 2°)" },
+];
+
+// Estado de los 3 correos de recuperación de registro (ver CLAUDE.md §8g):
+// si ya se mandó y cuándo, o si todavía no le toca. No hay forma de saber
+// si el doctor lo abrió -- Resend sí puede avisar eso, pero necesita
+// habilitarlo en la cuenta de Resend y un webhook nuevo que reciba el
+// aviso; queda pendiente, es un cambio aparte.
+function RecoveryEmailsStatus({ r }) {
+  return (
+    <div className="mb-4 bg-muted/40 rounded-xl p-3 space-y-2">
+      <p className="text-xs font-semibold text-foreground">Correos de recuperación</p>
+      {RECOVERY_EMAIL_FIELDS.map((f) => (
+        <div key={f.key} className="flex items-center justify-between gap-3 text-xs">
+          <span className="text-muted-foreground">{f.label}</span>
+          {r[f.key] ? (
+            <span className="inline-flex items-center gap-1 text-emerald-700 font-medium whitespace-nowrap">
+              <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" /> Enviado {fmtDateTime(r[f.key])}
+            </span>
+          ) : (
+            <span className="text-muted-foreground whitespace-nowrap">No enviado todavía</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // Todos los intentos de autoregistro público (/registro-medico), terminados
 // o no. Se aíslan del resto de `specialist` por registration_step -- lo
 // escribe save_registration_draft en cada paso del wizard, antes incluso de
@@ -246,6 +277,7 @@ export default function AdminRegistros() {
                 <DialogTitle>{detail.full_name || "Sin nombre"}</DialogTitle>
               </DialogHeader>
               <div className="mb-3"><EstadoBadge r={detail} /></div>
+              <RecoveryEmailsStatus r={detail} />
               <div className="space-y-0">
                 <DetailRow label="Correo" value={detail.email} />
                 <DetailRow label="WhatsApp" value={detail.whatsapp} />

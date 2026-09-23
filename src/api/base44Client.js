@@ -403,6 +403,7 @@ const STRIPE_FUNCTIONS = new Set([
 
 const FUNCTION_MAP = {
   saveRegistrationDraft: (payload) => supabase.rpc('save_registration_draft', { p_payload: payload }),
+  getRegistrationDraft: ({ draft_id }) => supabase.rpc('get_registration_draft', { p_draft_id: draft_id }),
   createDoctorProfile: (payload) => supabase.rpc('create_doctor_profile', { p_payload: payload }),
   deleteDoctorProfile: ({ specialist_id }) => supabase.rpc('delete_doctor_profile', { p_specialist_id: specialist_id }),
   recalculateSpecialistScore: ({ specialist_id }) => supabase.rpc('recalculate_specialist_score', { p_specialist_id: specialist_id }),
