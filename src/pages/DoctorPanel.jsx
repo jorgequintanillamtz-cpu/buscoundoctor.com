@@ -371,13 +371,13 @@ export default function DoctorPanel() {
         <nav className="flex-1 p-3 overflow-y-auto">{renderNavGroups()}</nav>
 
         <div className="px-3 pb-2 space-y-0.5">
-          {renderSettingsButton()}
           {SIDE_LINKS.map((l) => (
             <Link key={l.to} to={l.to} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
               <l.icon className="w-4 h-4 flex-shrink-0" />
               {l.label}
             </Link>
           ))}
+          {renderSettingsButton()}
           <a href={supportWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-300 hover:bg-white/5 hover:text-emerald-200 transition-colors">
             <MessageCircle className="w-4 h-4 flex-shrink-0" />
             ¿Necesitas ayuda? Escríbenos
@@ -468,13 +468,13 @@ export default function DoctorPanel() {
           <nav className="flex-1 p-3 overflow-y-auto">{renderNavGroups(() => setMobileNavOpen(false))}</nav>
 
           <div className="px-3 pb-2 space-y-0.5 flex-shrink-0">
-            {renderSettingsButton(() => setMobileNavOpen(false))}
             {SIDE_LINKS.map((l) => (
               <Link key={l.to} to={l.to} onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors">
                 <l.icon className="w-4 h-4 flex-shrink-0" />
                 {l.label}
               </Link>
             ))}
+            {renderSettingsButton(() => setMobileNavOpen(false))}
             <a href={supportWhatsAppLink()} target="_blank" rel="noopener noreferrer" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-300 hover:bg-white/5 hover:text-emerald-200 transition-colors">
               <MessageCircle className="w-4 h-4 flex-shrink-0" />
               ¿Necesitas ayuda? Escríbenos
