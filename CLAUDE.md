@@ -257,6 +257,16 @@ Decisión de negocio (2026-09-22, aprobada por Jorge) para atacar el cuello de b
 - **Historial** (`AdminHistorial.jsx`): además de la búsqueda y el filtro por tipo que ya tenía, ahora hay filtro rápido de fecha (Todo / 7 / 30 / 90 días) y el nombre del doctor en cada movimiento es clickeable — llena el buscador con ese nombre, para ver solo lo suyo (no es un filtro aparte, reusa el mismo campo de búsqueda).
 - **Correos enviados** (`AdminCorreos.jsx`, `EMAIL_TYPE_LABELS`): le faltaban las etiquetas en español de varios tipos de correo agregados este mismo día (reseña nueva, interés en especialidad, invitación de asistente, referido premiado, aviso de baja, aviso de reenvío a revisión) — se veían con su nombre técnico. **Si agregas un tipo nuevo a `send_transactional_email` o insertas en `email_log` con un tipo propio, agrega también su entrada aquí** o se repite el mismo hueco.
 
+## 8e. Menú del admin dueños simplificado (2026-09-23)
+
+El menú lateral (`AdminLayout.jsx`) tenía 19 enlaces sueltos en 5 grupos — mucho para escanear de un vistazo. Se redujo a **12**, sin quitar ninguna pantalla:
+
+- **Buscador arriba del menú** (solo escritorio): escribe y filtra en vivo; Enter salta directo si queda una sola coincidencia. Se limpia solo al cambiar de página.
+- **"Catálogo médico"** (`/admin/catalogo-medico/:tab`, `AdminCatalogoMedico.jsx`): junta Especialidades/Subespecialidades/Enfermedades (antes 3 enlaces) en pestañas. Cada pestaña es la pantalla de siempre sin tocar (`AdminSpecialties`/`AdminSubespecialidades`/`AdminEnfermedades` como componentes, no como rutas propias). Las rutas viejas (`/admin/especialidades`, `/admin/subespecialidades`, `/admin/enfermedades`) redirigen a su pestaña correspondiente por si quedan enlaces guardados.
+- **"Configuración"** (`/admin/configuracion`, `AdminConfigHub.jsx`): mismo truco que "Mi perfil" del panel del doctor (`ProfileHub.jsx`) — tarjetas grandes en vez de enlaces sueltos, para Ciudades/Catálogos/Planes/Preguntas frecuentes/Imágenes del sitio/Vista previa del registro (antes 6 enlaces). **Estas 6 rutas NO cambiaron** (solo se les quitó su renglón del menú), así que no necesitaron redirección.
+- **El conteo pendiente de "Enfermedades"** (solicitudes de doctores) vive ahora bajo la llave `/admin/catalogo-medico` en `src/api/pendingCounts.js` (antes `/admin/enfermedades`) — si agregas otra cola pendiente a alguna de las 3 pestañas del catálogo, usa esa misma llave.
+- **Pendiente de verificar con datos reales:** este cambio se hizo mientras la conexión de Claude a Supabase estaba caída, así que solo se comprobó con `npm run lint`/`npm run build` y navegación sin sesión (redirige a login sin errores) — falta la prueba completa con una cuenta admin de verdad (dar clic por las pestañas y tarjetas nuevas). Hazlo tú en el enlace de prueba de Vercel antes de aprobarlo, o pide que se repita la prueba en la próxima sesión.
+
 ## 9. Cómo probar sin ensuciar producción
 
 Como no hay staging, el patrón acordado es: **crear datos de prueba, verificar, y borrarlos siempre al terminar**, confirmando con un `count(*)` que quedó en 0. Reglas:
