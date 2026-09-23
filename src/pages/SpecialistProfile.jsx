@@ -23,11 +23,16 @@ import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
 import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
+import { slugify } from "@/lib/citySlug";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
   if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
   el.setAttribute("content", content);
+}
+
+function fmtLongDate(d) {
+  return new Date(d).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
 }
 
 const MODALITY_LABELS = {
@@ -295,9 +300,22 @@ export default function SpecialistProfile() {
         <ShareProfileButton specialist={specialist} className="!min-h-0 !py-1.5 !px-3 text-xs" />
       </div>
 
-      {specialist.license_verification_status === "verified" && specialist.license_verified_at && (
+      {/* "Perfil actualizado" usa specialist.updated_date, que hasta hace poco
+          nunca cambiaba después de crear el perfil (era la única tabla del
+          sitio sin el trigger estándar touch_updated_date() -- ver migración
+          agregada junto con esto). Con el trigger ya puesto, esta fecha sí
+          refleja la última vez que se guardó algo del perfil -- una señal de
+          confianza tanto para el paciente como para Google (contenido
+          vigente). */}
+      {((specialist.license_verification_status === "verified" && specialist.license_verified_at) || specialist.updated_date) && (
         <p className="text-xs text-muted-foreground mb-3">
-          Última verificación: {new Date(specialist.license_verified_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })} · Verificamos manualmente cada cédula profesional
+          {[
+            specialist.license_verification_status === "verified" && specialist.license_verified_at
+              && `Última verificación: ${fmtLongDate(specialist.license_verified_at)}`,
+            specialist.updated_date && `Perfil actualizado: ${fmtLongDate(specialist.updated_date)}`,
+            specialist.license_verification_status === "verified" && specialist.license_verified_at
+              && "Verificamos manualmente cada cédula profesional",
+          ].filter(Boolean).join(" · ")}
         </p>
       )}
 
@@ -340,10 +358,31 @@ export default function SpecialistProfile() {
                   </span>
                 )}
                 {topConditions.map((c) => (
-                  <span key={c.id} className="text-xs font-medium bg-accent text-accent-foreground rounded-full px-3 py-1.5">
+                  <Link
+                    key={c.id}
+                    to={`/enfermedades/${c.slug}/${slugify(specialist.zone || specialist.location || "Monterrey")}`}
+                    className="text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/70 rounded-full px-3 py-1.5 transition-colors"
+                  >
                     {c.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+            {/* Aseguradoras arriba en el hero (no solo dentro de "Agendar
+                cita"): "¿acepta mi seguro?" es de lo primero que decide un
+                paciente, y antes solo se veía si bajaba hasta el bloque de
+                agendar (o hasta el bloque extra en móvil). */}
+            {resolvedInsurers.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5 mt-2">
+                {resolvedInsurers.slice(0, 4).map((ins) => (
+                  <span key={ins.id} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground bg-muted rounded-full px-2.5 py-1">
+                    {ins.logo_url && <img src={ins.logo_url} alt="" loading="lazy" className="w-3.5 h-3.5 object-contain" />}
+                    {ins.name}
                   </span>
                 ))}
+                {resolvedInsurers.length > 4 && (
+                  <span className="text-xs text-muted-foreground">+{resolvedInsurers.length - 4} más</span>
+                )}
               </div>
             )}
             {primaryOffice?.address_line && (
