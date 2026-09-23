@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut, Gift, UserRound } from "lucide-react";
+import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut, BookOpen, Gift, UserRound } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -11,9 +11,10 @@ import { SHOW_PREMIUM } from "@/lib/featureFlags";
 // Blog, Reseñas), Referidos justo después de Doctores (mismo panorama, sin
 // cola propia de aprobación), seguidas de lo operativo que no es cola de
 // aprobación (Solicitudes, Premium) y el Historial como bitácora al final; luego
-// Bancos, los 3 catálogos de taxonomía médica que alimentan la búsqueda
-// (especialidades, subespecialidades, enfermedades) -- viven juntos y con
-// nombre consistente a propósito, en vez de regados en otras secciones;
+// Listas médicas, los catálogos de taxonomía médica que alimentan la
+// búsqueda (especialidades, subespecialidades, enfermedades, guías) -- viven
+// juntos y con nombre consistente a propósito, en vez de regados en otras
+// secciones;
 // después Contenido (solo texto/imagen del sitio, sin cola de revisión); y
 // Configuración al final (lo que casi nunca cambia).
 const adminNavSections = [
@@ -44,6 +45,7 @@ const adminNavSections = [
       { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
       { path: "/admin/subespecialidades", label: "Subespecialidades", icon: GraduationCap },
       { path: "/admin/enfermedades", label: "Enfermedades", icon: ListChecks },
+      { path: "/admin/guias", label: "Guías", icon: BookOpen },
     ],
   },
   {

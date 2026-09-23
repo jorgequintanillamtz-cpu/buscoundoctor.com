@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, MessageCircle, Home, Calendar, Star, Sparkles, UserCog, FileText, Globe, Settings } from "lucide-react";
+import { ArrowLeft, LogOut, MessageCircle, Home, Calendar, Star, Sparkles, UserCog, FileText, Globe, Settings, Package } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 
@@ -22,6 +22,7 @@ export const SECTION_GROUPS = [
 
 export const SIDE_LINKS = [
   { to: "/panel-medico/storefront", label: "Mi página pública", icon: Globe },
+  { to: "/panel-medico/productos", label: "Productos digitales", icon: Package },
 ];
 
 // Barra lateral "estática" del panel del doctor -- para las páginas que

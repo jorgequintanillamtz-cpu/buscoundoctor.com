@@ -48,12 +48,12 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackCon
 //
 // Funciones ocultas por ahora (no están en el menú, pero su código sigue
 // aquí para reactivarlas): "Tu plan" (section "plan"), "Escribir blog"
-// (section "blog"), "Productos digitales" (/panel-medico/productos),
-// "Configuración de pagos" (/panel-medico/pagos) y "Resumen de consulta"
-// (/panel-medico/resumen). Para volver a mostrar una, agrégala aquí o a
-// SIDE_LINKS. SECTION_GROUPS y SIDE_LINKS viven en DoctorPanelSidebar.jsx
-// (única fuente de verdad, compartida con la barra estática que usan las
-// páginas externas como el editor de storefront).
+// (section "blog"), "Configuración de pagos" (/panel-medico/pagos) y
+// "Resumen de consulta" (/panel-medico/resumen). Para volver a mostrar una,
+// agrégala aquí o a SIDE_LINKS. SECTION_GROUPS y SIDE_LINKS viven en
+// DoctorPanelSidebar.jsx (única fuente de verdad, compartida con la barra
+// estática que usan las páginas externas como el editor de storefront y
+// productos digitales).
 
 export default function DoctorPanel() {
   const navigate = useNavigate();

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { ArrowLeft, Stethoscope, Globe, Plus, Pencil, Trash2, FileText, Package } from "lucide-react";
+import { ArrowLeft, Stethoscope, Plus, Pencil, Trash2, FileText, Package, BookOpen, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductForm from "@/components/products/ProductForm";
 import ProductCardPreview from "@/components/products/ProductCardPreview";
+import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
 
 const STATUS_META = {
   draft: { label: "Borrador", cls: "bg-amber-100 text-amber-700" },
@@ -19,6 +20,9 @@ export default function DoctorProducts() {
   const [products, setProducts] = useState([]);
   const [editing, setEditing] = useState(null); // product | "new" | null
   const [deletingId, setDeletingId] = useState(null);
+  const [tab, setTab] = useState("mine"); // mine | library
+  const [guides, setGuides] = useState([]);
+  const [addingGuideId, setAddingGuideId] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -36,7 +40,7 @@ export default function DoctorProducts() {
         return;
       }
       setSpecialist(own[0]);
-      await loadProducts(own[0].id);
+      await Promise.all([loadProducts(own[0].id), loadGuides(own[0].specialty)]);
       setStatus("ready");
     })();
     return () => { active = false; };
@@ -45,6 +49,42 @@ export default function DoctorProducts() {
   const loadProducts = async (doctorId) => {
     const list = await base44.entities.DoctorProduct.filter({ doctor_id: doctorId }, "-created_date", 50).catch(() => []);
     setProducts(list);
+  };
+
+  const loadGuides = async (specialty) => {
+    if (!specialty) { setGuides([]); return; }
+    const list = await base44.entities.Guide.filter({ specialty, status: "active" }, "-created_date", 100).catch(() => []);
+    setGuides(list);
+  };
+
+  // Guías que el doctor ya agregó (para no ofrecer duplicarlas)
+  const addedGuideIds = useMemo(
+    () => new Set(products.filter((p) => p.source_guide_id).map((p) => p.source_guide_id)),
+    [products]
+  );
+
+  const addFromLibrary = async (guide) => {
+    setAddingGuideId(guide.id);
+    try {
+      const created = await base44.entities.DoctorProduct.create({
+        doctor_id: specialist.id,
+        source_guide_id: guide.id,
+        title: guide.title,
+        description: guide.description || "",
+        price: guide.price,
+        cover_image: guide.cover_image || null,
+        images: Array.isArray(guide.images) ? guide.images : [],
+        file_url: guide.file_url,
+        status: "draft",
+      });
+      setProducts((prev) => [created, ...prev]);
+      toast.success("Guía agregada a tu catálogo. Ajusta precio o descripción y actívala cuando quieras.");
+      setTab("mine");
+      setEditing(created);
+    } catch (e) {
+      toast.error("No se pudo agregar: " + e.message);
+    }
+    setAddingGuideId(null);
   };
 
   const toggleStatus = async (p) => {
@@ -72,19 +112,22 @@ export default function DoctorProducts() {
   };
 
   const shell = (content) => (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
-        <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
-          <ArrowLeft className="w-4 h-4" />
-          Volver al panel
-        </Link>
-        <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
-          <Package className="w-4 h-4" />
-          Productos digitales
-        </h1>
-        <div className="w-20" />
+    <div className="min-h-screen bg-background flex">
+      <DoctorPanelSidebar activePath="/panel-medico/productos" completitud={specialist?.completeness_score ?? null} />
+      <div className="flex-1 min-w-0">
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
+          <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al panel
+          </Link>
+          <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Productos digitales
+          </h1>
+          <div className="w-20" />
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">{content}</div>
       </div>
-      <div className="p-4 sm:p-6 lg:p-8">{content}</div>
     </div>
   );
 
@@ -116,6 +159,23 @@ export default function DoctorProducts() {
         </p>
       </div>
 
+      {!editing && (
+        <div className="flex gap-1.5 mb-5 bg-muted/50 rounded-xl p-1 w-fit">
+          <button
+            onClick={() => setTab("mine")}
+            className={`text-sm font-medium px-3.5 py-1.5 rounded-lg transition-colors ${tab === "mine" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}
+          >
+            Tus productos ({products.length})
+          </button>
+          <button
+            onClick={() => setTab("library")}
+            className={`text-sm font-medium px-3.5 py-1.5 rounded-lg transition-colors ${tab === "library" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}
+          >
+            Biblioteca de guías ({guides.length})
+          </button>
+        </div>
+      )}
+
       {editing ? (
         <div className="bg-card rounded-2xl border border-border/50 p-5">
           <h2 className="font-heading font-bold text-base text-foreground mb-4">
@@ -128,10 +188,58 @@ export default function DoctorProducts() {
             onCancel={() => setEditing(null)}
           />
         </div>
+      ) : tab === "library" ? (
+        <>
+          <p className="text-sm text-muted-foreground mb-4">
+            Guías que BuscoUnDoctor preparó para tu especialidad ({specialist.specialty || "sin especialidad"}). Agrégalas a tu catálogo y ajusta precio o descripción antes de activarlas.
+          </p>
+          {guides.length === 0 ? (
+            <div className="text-center py-16 border-2 border-dashed border-border rounded-2xl">
+              <BookOpen className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">Todavía no hay guías disponibles para tu especialidad.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {guides.map((g) => {
+                const added = addedGuideIds.has(g.id);
+                return (
+                  <div key={g.id} className="bg-card rounded-2xl border border-border/50 p-4 flex gap-4">
+                    <div className="w-24 flex-shrink-0">
+                      <ProductCardPreview product={g} />
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col">
+                      <p className="font-heading font-semibold text-sm text-foreground line-clamp-1">{g.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{g.description || "Sin descripción"}</p>
+                      <p className="text-xs text-foreground mt-1">
+                        {g.price != null ? `Sugerido: $${Number(g.price).toLocaleString("es-MX")} MXN` : "Sin precio sugerido"}
+                      </p>
+                      <div className="mt-auto pt-3">
+                        {added ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Ya la agregaste
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="rounded-lg h-7 px-2.5 text-xs"
+                            disabled={addingGuideId === g.id}
+                            onClick={() => addFromLibrary(g)}
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            {addingGuideId === g.id ? "Agregando..." : "Agregar a mi tienda"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       ) : (
         <>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-heading font-bold text-base text-foreground">Tus productos ({products.length})</h2>
+          <div className="flex justify-end items-center mb-4">
             <Button className="rounded-xl" onClick={() => setEditing("new")}>
               <Plus className="w-4 h-4" />
               Nuevo producto

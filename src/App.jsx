@@ -38,6 +38,7 @@ const AdminSolicitudes = lazy(() => import('./pages/admin/AdminSolicitudes'));
 const AdminCorreos = lazy(() => import('./pages/admin/AdminCorreos'));
 const AdminCatalogos = lazy(() => import('./pages/admin/AdminCatalogos'));
 const AdminEnfermedades = lazy(() => import('./pages/admin/AdminEnfermedades'));
+const AdminGuides = lazy(() => import('./pages/admin/AdminGuides'));
 const AdminSubespecialidades = lazy(() => import('./pages/admin/AdminSubespecialidades'));
 const AdminPremium = lazy(() => import('./pages/admin/AdminPremium'));
 const AdminSpecialties = lazy(() => import('./pages/admin/AdminSpecialties'));
@@ -171,6 +172,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/correos" element={<AdminCorreos />} />
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
           <Route path="/admin/enfermedades" element={<AdminEnfermedades />} />
+          <Route path="/admin/guias" element={<AdminGuides />} />
           <Route path="/admin/subespecialidades" element={<AdminSubespecialidades />} />
           <Route path="/admin/premium" element={<AdminPremium />} />
           <Route path="/admin/especialidades" element={<AdminSpecialties />} />

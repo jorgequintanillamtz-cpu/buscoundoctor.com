@@ -11,13 +11,16 @@ import { supabase } from '@/lib/supabaseClient';
 //   - "specialist-documents" cédula/identificación (bucket privado)
 //   - "blog-images"         imágenes de artículos del blog
 //   - "site-assets"         íconos de catálogo, imágenes del home/sitio
+//   - "admin-guides"        PDFs maestros de guías digitales, solo admin (privado)
+//   - "doctor-products"     PDFs/imágenes del catálogo propio de cada doctor (privado)
 //
 // `folder` es el primer segmento de la ruta que las policies de RLS de cada
 // bucket usan para decidir permisos (ver Fase 3 del plan de migración):
-// specialist-documents espera `{specialist_id}/...`, specialist-photos y
-// specialist-videos esperan `{owner_user_id}/...`. Si se omite, se sube a la
-// raíz del bucket (correcto para blog-images/site-assets, que solo dependen
-// de `is_admin()` y no de una carpeta).
+// specialist-documents y doctor-products esperan `{specialist_id}/...`,
+// specialist-photos y specialist-videos esperan `{owner_user_id}/...`.
+// admin-guides no depende de carpeta (solo `is_admin()`). Si se omite, se
+// sube a la raíz del bucket (correcto para blog-images/site-assets/admin-guides,
+// que solo dependen de `is_admin()` y no de una carpeta).
 export async function uploadFile(file, bucket = 'specialist-photos', folder = '') {
   const ext = file.name.includes('.') ? file.name.split('.').pop() : 'bin';
   const path = `${folder ? `${folder}/` : ''}${crypto.randomUUID()}.${ext}`;
@@ -28,8 +31,8 @@ export async function uploadFile(file, bucket = 'specialist-photos', folder = ''
   });
   if (error) throw error;
 
-  if (bucket === 'specialist-documents') {
-    // Bucket privado: no hay URL pública -- se entrega una firmada de larga
+  if (bucket === 'specialist-documents' || bucket === 'admin-guides' || bucket === 'doctor-products') {
+    // Buckets privados: no hay URL pública -- se entrega una firmada de larga
     // duración (1 año), suficiente para el ciclo de vida de una revisión de
     // documento. Quien necesite verla después de eso puede pedir una nueva
     // con getSignedUrl().
