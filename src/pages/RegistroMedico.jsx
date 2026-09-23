@@ -199,6 +199,32 @@ export default function RegistroMedico() {
       const isAuth = await base44.auth.isAuthenticated().catch(() => false);
       if (!active) return;
       if (!isAuth) {
+        // Enlace de "Continuar registro" de un correo de recuperaci\u00f3n
+        // (?draft=ID): rellena el formulario con lo que ya hab\u00eda escrito y
+        // lo manda directo al paso donde se qued\u00f3, en vez de arrancar en
+        // blanco. Si el id ya no existe o ya tiene cuenta, sigue igual que
+        // siempre (formulario vac\u00edo) -- nunca bloquea el registro.
+        const draftParam = new URLSearchParams(window.location.search).get("draft");
+        if (draftParam) {
+          try {
+            const res = await base44.functions.invoke("getRegistrationDraft", { draft_id: draftParam });
+            const draft = res?.data;
+            if (active && draft?.id) {
+              setData((prev) => ({
+                ...prev,
+                ...draft,
+                subspecialties_relation: draft.subspecialties_relation || [],
+                gallery: draft.gallery || [],
+              }));
+              setDraftId(draft.id);
+              localStorage.setItem(DRAFT_ID_KEY, draft.id);
+              const resumeIndex = STEP_KEYS.indexOf(draft.registration_step);
+              setStepIndex(resumeIndex >= 0 ? Math.min(resumeIndex + 1, STEP_KEYS.length - 1) : 0);
+            }
+          } catch {
+            // Silencioso: si falla, el registro sigue como si no hubiera venido de un enlace.
+          }
+        }
         setPhase("wizard");
         return;
       }
