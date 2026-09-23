@@ -20,6 +20,7 @@ import LocationEditor from "@/components/storefront/editor/LocationEditor";
 import SectionOrderEditor from "@/components/storefront/editor/SectionOrderEditor";
 import { generateUniqueSlug, byPosition } from "@/lib/storefrontUtils";
 import { DEFAULT_SECTION_ORDER } from "@/lib/storefrontSections";
+import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
 
 export default function DoctorStorefrontEditor() {
   const [status, setStatus] = useState("loading"); // loading | no-profile | no-storefront | ready
@@ -147,19 +148,22 @@ export default function DoctorStorefrontEditor() {
     }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.status, storefront?.section_order]);
 
   const shell = (content) => (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
-        <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
-          <ArrowLeft className="w-4 h-4" />
-          Volver al panel
-        </Link>
-        <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
-          <Globe className="w-4 h-4" />
-          Mi página pública
-        </h1>
-        <div className="w-20" />
+    <div className="min-h-screen bg-background flex">
+      <DoctorPanelSidebar activePath="/panel-medico/storefront" completitud={specialist?.completeness_score ?? null} />
+      <div className="flex-1 min-w-0">
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
+          <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al panel
+          </Link>
+          <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            Mi página pública
+          </h1>
+          <div className="w-20" />
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">{content}</div>
       </div>
-      <div className="p-4 sm:p-6 lg:p-8">{content}</div>
     </div>
   );
 

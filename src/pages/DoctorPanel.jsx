@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { supabase } from "@/lib/supabaseClient";
-import { Eye, Save, Clock, Stethoscope, FileText, Home, ArrowLeft, LogOut, Sparkles, Calendar, Star, Globe, Menu, X, MessageCircle, UserCog, ChevronLeft, Settings, Package } from "lucide-react";
+import { Eye, Save, Clock, Stethoscope, ArrowLeft, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -32,6 +32,7 @@ import ProfileHub, { PROFILE_SUB_KEYS } from "@/components/admin/ProfileHub";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 import DoctorSettings from "@/components/admin/settings/DoctorSettings";
 import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
+import { SECTION_GROUPS, SIDE_LINKS } from "@/components/admin/DoctorPanelSidebar";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
@@ -49,29 +50,14 @@ import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackCon
 // aquí para reactivarlas): "Tu plan" (section "plan"), "Escribir blog"
 // (section "blog"), "Configuración de pagos" (/panel-medico/pagos) y
 // "Resumen de consulta" (/panel-medico/resumen). Para volver a mostrar una,
-// agrégala aquí o a SIDE_LINKS. "Productos digitales" se reactivó en 2026-09
-// (catálogo de guías digitales, sin cobro todavía) -- ver SIDE_LINKS.
-const SECTION_GROUPS = [
-  { group: "Mi actividad", items: [
-    { key: "resumen", label: "Inicio", icon: Home },
-    { key: "solicitudes", label: "Solicitudes de cita", icon: Calendar },
-    { key: "resenas", label: "Reseñas", icon: Star },
-  ]},
-  { group: "Mi perfil", items: [
-    { key: "completar", label: "Llena tu perfil", icon: Sparkles },
-    { key: "mi-perfil", label: "Mi perfil", icon: UserCog },
-    { key: "documentos", label: "Mi cédula y documentos", icon: FileText },
-  ]},
-];
-
-// Enlaces que abren otra página, debajo del menú.
-const SIDE_LINKS = [
-  { to: "/panel-medico/storefront", label: "Mi página pública", icon: Globe },
-  { to: "/panel-medico/productos", label: "Productos digitales", icon: Package },
-];
+// agrégala aquí o a SIDE_LINKS. SECTION_GROUPS y SIDE_LINKS viven en
+// DoctorPanelSidebar.jsx (única fuente de verdad, compartida con la barra
+// estática que usan las páginas externas como el editor de storefront y
+// productos digitales).
 
 export default function DoctorPanel() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [status, setStatus] = useState("loading"); // loading | ready | no-profile | wrong-role
   const [specialistId, setSpecialistId] = useState(null);
   const [isAssistant, setIsAssistant] = useState(false);
@@ -79,7 +65,10 @@ export default function DoctorPanel() {
   const originalContactRef = useRef({ email: "", whatsapp: "" });
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
-  const [section, setSection] = useState("resumen");
+  // Si se llega desde la barra estática de una página externa (Mi página
+  // pública, Productos digitales) con una sección pedida en location.state,
+  // abre ahí directo en vez de siempre en "Inicio".
+  const [section, setSection] = useState(() => location.state?.section || "resumen");
   const [completenessChecklist, setCompletenessChecklist] = useState(null);
   // Modo "paso a paso": recorre, una por una, las pantallas de lo que le falta
   // al médico. { steps: [{ target, labels, keys }], index } o null.
@@ -282,7 +271,7 @@ export default function DoctorPanel() {
   // ---- Estados sin perfil listo: se muestran dentro del mismo shell oscuro ----
   const renderShell = (content) => (
     <div className="min-h-screen bg-background flex">
-      <aside className="hidden lg:flex w-64 flex-col bg-brand-navy min-h-screen sticky top-0">
+      <aside className="hidden lg:flex w-64 flex-col bg-brand-navy h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
           <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" />
@@ -354,7 +343,7 @@ export default function DoctorPanel() {
     <div className="min-h-screen bg-background flex">
       <WelcomeTourModal open={showWelcomeTour} name={form.full_name} onFinish={finishWelcomeTour} />
 
-      <aside className="hidden lg:flex w-72 flex-col bg-brand-navy min-h-screen sticky top-0">
+      <aside className="hidden lg:flex w-72 flex-col bg-brand-navy h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
           <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" />
