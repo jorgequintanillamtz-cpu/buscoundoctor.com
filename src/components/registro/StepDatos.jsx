@@ -87,6 +87,12 @@ export default function StepDatos({ data, update, error, specialties }) {
       </div>
 
       <div className="sm:col-span-2">
+        <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Correo electrónico</label>
+        <Input value={data.email} onChange={(e) => update("email", e.target.value.trim())} placeholder="tu@correo.com" type="email" className="rounded-xl" />
+        <p className="text-xs text-muted-foreground mt-1">Aquí te avisamos del avance de tu registro. Después es también el correo con el que entras a tu panel.</p>
+      </div>
+
+      <div className="sm:col-span-2">
         <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Especialidad</label>
         <select value={specialties.some((s) => s.name === data.specialty) ? data.specialty : (data.specialty ? "__otra__" : "")}
           onChange={(e) => update("specialty", e.target.value === "__otra__" ? " " : e.target.value)}
