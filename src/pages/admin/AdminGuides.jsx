@@ -248,7 +248,8 @@ export default function AdminGuides() {
             <table className="w-full text-sm">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Título</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Portada</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Título</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Especialidad</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Precio sugerido</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Activa</th>
@@ -256,13 +257,21 @@ export default function AdminGuides() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
-                {paged.map((g) => (
+                {paged.map((g) => {
+                  const cover = (Array.isArray(g.images) && g.images[0]) || g.cover_image || null;
+                  return (
                   <tr key={g.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-5 py-3 font-medium text-foreground">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        {g.title}
+                    <td className="px-5 py-3">
+                      <div className="w-20 h-28 rounded-md bg-muted border border-border/50 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+                        {cover ? (
+                          <img src={cover} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <FileText className="w-8 h-8 text-muted-foreground/50" />
+                        )}
                       </div>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {g.title}
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full whitespace-nowrap">{g.specialty}</span>
@@ -284,7 +293,8 @@ export default function AdminGuides() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
