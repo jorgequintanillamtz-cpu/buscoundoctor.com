@@ -209,7 +209,16 @@ export default function AdminRegistros() {
               <tbody className="divide-y divide-border/30">
                 {paged.map((r) => (
                   <tr key={r.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-5 py-3 font-medium text-foreground">{r.full_name || "—"}</td>
+                    <td className="px-5 py-3">
+                      <button
+                        type="button"
+                        onClick={() => setDetail(r)}
+                        className="font-medium text-brand-blue hover:underline text-left"
+                        title="Ver toda la información"
+                      >
+                        {r.full_name || "—"}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{r.email || "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">{r.specialty || "—"}</td>
                     <td className="px-4 py-3"><EstadoBadge r={r} /></td>
