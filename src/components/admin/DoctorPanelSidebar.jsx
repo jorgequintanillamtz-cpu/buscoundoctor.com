@@ -90,14 +90,6 @@ export default function DoctorPanelSidebar({ activePath, completitud = null, isA
       </nav>
 
       <div className="px-3 pb-2 space-y-0.5">
-        <Link
-          to="/panel-medico"
-          state={{ section: "ajustes" }}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors text-white/70 hover:bg-white/5 hover:text-white"
-        >
-          <Settings className="w-4 h-4 flex-shrink-0" />
-          Ajustes
-        </Link>
         {SIDE_LINKS.map((l) => (
           <Link
             key={l.to}
@@ -110,6 +102,14 @@ export default function DoctorPanelSidebar({ activePath, completitud = null, isA
             {l.label}
           </Link>
         ))}
+        <Link
+          to="/panel-medico"
+          state={{ section: "ajustes" }}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors text-white/70 hover:bg-white/5 hover:text-white"
+        >
+          <Settings className="w-4 h-4 flex-shrink-0" />
+          Ajustes
+        </Link>
         <a href={supportWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-300 hover:bg-white/5 hover:text-emerald-200 transition-colors">
           <MessageCircle className="w-4 h-4 flex-shrink-0" />
           ¿Necesitas ayuda? Escríbenos

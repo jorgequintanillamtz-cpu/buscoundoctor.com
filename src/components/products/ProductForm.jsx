@@ -201,14 +201,13 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
         </div>
 
         {images.length > 0 && (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 flex flex-wrap gap-4">
             {images.map((img, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-3 rounded-lg border border-border/60 p-2"
-              >
-                <img src={img} alt="" className="w-12 h-12 rounded-md object-cover flex-shrink-0" />
-                <div className="flex-1 min-w-0">
+              <div key={idx} className="w-32">
+                <div className="w-32 h-44 rounded-lg border border-border/60 overflow-hidden shadow-sm">
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
                   {idx === 0 ? (
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
                       <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
@@ -217,34 +216,34 @@ export default function ProductForm({ doctorId, product, onSaved, onCancel }) {
                   ) : (
                     <span className="text-xs text-muted-foreground">Imagen {idx + 1}</span>
                   )}
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => moveImage(idx, -1)}
-                    disabled={idx === 0}
-                    className="p-1 rounded hover:bg-accent disabled:opacity-30"
-                    aria-label="Subir"
-                  >
-                    <ArrowUp className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => moveImage(idx, 1)}
-                    disabled={idx === images.length - 1}
-                    className="p-1 rounded hover:bg-accent disabled:opacity-30"
-                    aria-label="Bajar"
-                  >
-                    <ArrowDown className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    className="p-1 rounded bg-destructive text-white"
-                    aria-label="Quitar"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => moveImage(idx, -1)}
+                      disabled={idx === 0}
+                      className="p-1 rounded hover:bg-accent disabled:opacity-30"
+                      aria-label="Subir"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveImage(idx, 1)}
+                      disabled={idx === images.length - 1}
+                      className="p-1 rounded hover:bg-accent disabled:opacity-30"
+                      aria-label="Bajar"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="p-1 rounded bg-destructive text-white"
+                      aria-label="Quitar"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
