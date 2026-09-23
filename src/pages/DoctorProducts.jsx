@@ -6,6 +6,7 @@ import { ArrowLeft, Stethoscope, Plus, Pencil, Trash2, FileText, Package, BookOp
 import { Button } from "@/components/ui/button";
 import ProductForm from "@/components/products/ProductForm";
 import ProductCardPreview from "@/components/products/ProductCardPreview";
+import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
 
 const STATUS_META = {
   draft: { label: "Borrador", cls: "bg-amber-100 text-amber-700" },
@@ -111,19 +112,22 @@ export default function DoctorProducts() {
   };
 
   const shell = (content) => (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
-        <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
-          <ArrowLeft className="w-4 h-4" />
-          Volver al panel
-        </Link>
-        <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
-          <Package className="w-4 h-4" />
-          Productos digitales
-        </h1>
-        <div className="w-20" />
+    <div className="min-h-screen bg-background flex">
+      <DoctorPanelSidebar activePath="/panel-medico/productos" completitud={specialist?.completeness_score ?? null} />
+      <div className="flex-1 min-w-0">
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
+          <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al panel
+          </Link>
+          <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Productos digitales
+          </h1>
+          <div className="w-20" />
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">{content}</div>
       </div>
-      <div className="p-4 sm:p-6 lg:p-8">{content}</div>
     </div>
   );
 
