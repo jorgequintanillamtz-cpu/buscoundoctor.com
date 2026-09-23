@@ -47,6 +47,7 @@ const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
 const BlogEditor = lazy(() => import('./pages/admin/BlogEditor.jsx'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
 const AdminDoctores = lazy(() => import('./pages/admin/AdminDoctores'));
+const AdminRegistros = lazy(() => import('./pages/admin/AdminRegistros'));
 const AdminReferidos = lazy(() => import('./pages/admin/AdminReferidos'));
 const AdminAccountSettings = lazy(() => import('./pages/admin/AdminAccountSettings'));
 const AdminHistorial = lazy(() => import('./pages/admin/AdminHistorial'));
@@ -195,6 +196,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
           <Route path="/admin/resenas" element={<AdminReviews />} />
           <Route path="/admin/doctores" element={<AdminDoctores />} />
+          <Route path="/admin/registros" element={<AdminRegistros />} />
           <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
           <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
           <Route path="/admin/doctores/revisar/:id" element={<AdminDoctorReview />} />

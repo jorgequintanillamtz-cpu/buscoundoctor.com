@@ -7,6 +7,7 @@ export const EMPTY_REGISTRO_DATA = {
   title: "",
   full_name: "",
   whatsapp: "",
+  email: "",
   specialty: "",
   subspecialty: "",
   subspecialties_relation: [],
