@@ -27,4 +27,5 @@ export const EMPTY_REGISTRO_DATA = {
   address_place_id: "",
   profile_photo: "",
   gallery: [],
+  referral_code: "",
 };

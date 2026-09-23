@@ -17,6 +17,8 @@ import {
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 
 const METHOD_LABELS = {
@@ -255,6 +257,7 @@ function PremiumDoctorCard({
 // cada pago que recibe. La app calcula sola quién está al día y quién va
 // retrasado (y cuántos días), usando el día de cobro de cada doctor.
 export default function AdminPremium() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [specialists, setSpecialists] = useState([]);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -485,7 +488,14 @@ export default function AdminPremium() {
 
   const toggleActive = async (doc) => {
     const next = !doc.active;
-    if (!next && !confirm(`¿Desactivar el perfil de ${doc.full_name} mientras no ha pagado? Dejará de verse en el directorio hasta que lo reactives.`)) return;
+    if (!next) {
+      const ok = await confirm({
+        title: `¿Desactivar el perfil de ${doc.full_name}?`,
+        description: "Mientras no ha pagado, dejará de verse en el directorio hasta que lo reactives.",
+        confirmLabel: "Desactivar",
+      });
+      if (!ok) return;
+    }
     setSpecialists((prev) => prev.map((d) => (d.id === doc.id ? { ...d, active: next } : d)));
     try {
       await base44.entities.Specialist.update(doc.id, { active: next });
@@ -549,7 +559,8 @@ export default function AdminPremium() {
   };
 
   const handleDeletePayment = async (id, doc) => {
-    if (!confirm("¿Eliminar este pago del historial?")) return;
+    const ok = await confirm({ title: "¿Eliminar este pago del historial?", confirmLabel: "Eliminar" });
+    if (!ok) return;
     try {
       await base44.entities.PremiumPayment.delete(id);
       toast.success("Pago eliminado");
@@ -814,6 +825,7 @@ export default function AdminPremium() {
           </div>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

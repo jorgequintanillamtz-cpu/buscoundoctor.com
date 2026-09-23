@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const emptyForm = {
   name: "", slug: "", tagline: "", price_monthly: "0", price_yearly: "0",
@@ -25,6 +27,7 @@ const slugify = (s) => (s || "")
   .replace(/-+/g, "-");
 
 export default function AdminPlanes() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -101,7 +104,8 @@ export default function AdminPlanes() {
   };
 
   const handleDelete = async (id, nombre) => {
-    if (!confirm(`¿Eliminar el plan "${nombre}"? Ya no se mostrará en /planes.`)) return;
+    const ok = await confirm({ title: `¿Eliminar el plan "${nombre}"?`, description: "Ya no se mostrará en /planes.", confirmLabel: "Eliminar" });
+    if (!ok) return;
     await base44.entities.Plan.delete(id);
     setPlans((prev) => prev.filter((p) => p.id !== id));
     toast.success("Plan eliminado");
@@ -276,6 +280,7 @@ export default function AdminPlanes() {
           </div>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

@@ -74,6 +74,14 @@ export default function RegistroMedico() {
     } catch {}
   }, []);
 
+  // Enlace de invitación de un colega: /registro-medico?ref=CODIGO precarga
+  // el código para que no tenga que teclearlo (StepDatos igual lo valida y
+  // lo puede editar a mano).
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) setData((prev) => (prev.referral_code ? prev : { ...prev, referral_code: ref.toUpperCase() }));
+  }, []);
+
   const update = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
 
   // Autoguardado progresivo: se llama al avanzar cada paso del wizard, antes
@@ -171,6 +179,7 @@ export default function RegistroMedico() {
       professional_license_number: finalData.cedula,
       modality: finalData.modality,
       zone: finalData.zone,
+      referral_code: finalData.referral_code || undefined,
       draft_id: finalData.draft_id || draftId || undefined,
     });
     const created = res?.data;

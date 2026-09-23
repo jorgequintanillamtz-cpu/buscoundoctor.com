@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Circle, Loader2, ExternalLink, Pencil, MapPin, Phone, Mail, BadgeCheck, AlertTriangle, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Loader2, ExternalLink, Pencil, MapPin, Phone, Mail, BadgeCheck, AlertTriangle, XCircle, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { approveDoctor, rejectDoctor } from "@/api/doctorReview";
+import { approveDoctor, rejectDoctor, getDoctorStateInfo } from "@/api/doctorReview";
 import { useAdminBadges } from "@/components/adminBadges";
 import DocumentManager from "@/components/admin/DocumentManager";
-import { formatDateOnly } from "@/lib/dateLabels";
 import { Button } from "@/components/ui/button";
 
 // Nombres cortos para el administrador de los 9 puntos de "perfil completo".
@@ -22,15 +21,6 @@ const CHECK_LABELS = [
   ["cedula_document", "Documento de la cédula"],
 ];
 
-const STATUS = {
-  draft: { label: "Borrador", cls: "bg-muted text-muted-foreground" },
-  pending_review: { label: "En revisión", cls: "bg-amber-100 text-amber-700" },
-  published: { label: "Publicado", cls: "bg-green-100 text-green-700" },
-  suspended: { label: "En pausa", cls: "bg-amber-100 text-amber-700" },
-  rejected: { label: "Con cambios pendientes", cls: "bg-red-100 text-red-700" },
-  rejected_resubmitted: { label: "Corrigió y espera revisión", cls: "bg-blue-100 text-blue-700" },
-};
-
 // Todo lo necesario para decidir sobre un doctor en una sola pantalla: su
 // resumen, lo que le falta, sus documentos (con aprobar/rechazar) y los botones
 // de decisión. Antes había que ir a Bandeja, Verificaciones y al editor.
@@ -45,6 +35,8 @@ export default function AdminDoctorReview() {
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState("");
+  const [referrer, setReferrer] = useState(null);
+  const [crediting, setCrediting] = useState(false);
 
   const load = async () => {
     const [specialist, offs] = await Promise.all([
@@ -53,6 +45,11 @@ export default function AdminDoctorReview() {
     ]);
     setDoc(specialist);
     setOffices(offs || []);
+    if (specialist?.referred_by_id) {
+      base44.entities.Specialist.get(specialist.referred_by_id).then(setReferrer).catch(() => setReferrer(null));
+    } else {
+      setReferrer(null);
+    }
     try {
       const res = await base44.functions.invoke("recalculateSpecialistScore", { specialist_id: id });
       const data = res.data || res;
@@ -79,9 +76,7 @@ export default function AdminDoctorReview() {
     );
   }
 
-  const status = doc.vacation_until
-    ? { label: `De vacaciones hasta el ${formatDateOnly(doc.vacation_until)}`, cls: "bg-sky-100 text-sky-700" }
-    : (doc.publication_status === "rejected" && doc.resubmitted_at ? STATUS.rejected_resubmitted : STATUS[doc.publication_status]) || STATUS.pending_review;
+  const status = getDoctorStateInfo(doc);
   const visible = doc.publication_status === "published" && doc.active === true;
   const verified = doc.license_verification_status === "verified";
 
@@ -149,9 +144,36 @@ export default function AdminDoctorReview() {
               {doc.whatsapp && <p className="flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-muted-foreground" /> {doc.whatsapp}</p>}
               {doc.email && <p className="flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> {doc.email}</p>}
               <p className="text-xs text-muted-foreground">Cédula: {doc.professional_license_number || "no capturada"}</p>
+              {referrer && <p className="text-xs text-violet-700 mt-1">🎁 Invitado por {referrer.full_name}</p>}
             </div>
           </div>
         </div>
+
+        {referrer && visible && !doc.referral_rewarded_at && (
+          <div className="flex items-center justify-between gap-3 flex-wrap bg-violet-50 border border-violet-200 rounded-xl px-4 py-3">
+            <p className="text-sm text-violet-900">Este perfil ya está publicado. ¿Acreditar el mes de Premium a {referrer.full_name}?</p>
+            <Button
+              size="sm"
+              className="rounded-xl gap-1.5 flex-shrink-0"
+              disabled={crediting}
+              onClick={async () => {
+                setCrediting(true);
+                try {
+                  await base44.functions.invoke("creditReferralReward", { specialist_id: doc.id });
+                  toast.success(`Mes de Premium acreditado a ${referrer.full_name}`);
+                  setDoc((prev) => ({ ...prev, referral_rewarded_at: new Date().toISOString() }));
+                  refreshBadges();
+                } catch (e) {
+                  toast.error("No se pudo acreditar: " + e.message);
+                }
+                setCrediting(false);
+              }}
+            >
+              {crediting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gift className="w-3.5 h-3.5" />}
+              Acreditar mes de Premium
+            </Button>
+          </div>
+        )}
 
         <div>
           <p className="text-xs font-heading font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">Presentación</p>

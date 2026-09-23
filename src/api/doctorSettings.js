@@ -3,13 +3,13 @@ import { base44 } from "@/api/base44Client";
 
 // Datos de la pantalla "Ajustes" del admin doctores (panel del médico).
 
-const DEFAULT_PREFS = { citas: true, estado: true, aviso_email: "" };
+const DEFAULT_PREFS = { citas: true, resenas: true, estado: true, aviso_email: "" };
 
 // Preferencias de correo. Si el doctor nunca las tocó, todo está activado.
 export async function getEmailPreferences(specialistId) {
   const { data } = await supabase
     .from("doctor_email_preference")
-    .select("citas, estado, aviso_email")
+    .select("citas, resenas, estado, aviso_email")
     .eq("specialist_id", specialistId)
     .maybeSingle();
   return { ...DEFAULT_PREFS, ...(data || {}), aviso_email: data?.aviso_email || "" };
@@ -18,7 +18,20 @@ export async function getEmailPreferences(specialistId) {
 export async function saveEmailPreferences(specialistId, prefs) {
   const { error } = await supabase
     .from("doctor_email_preference")
-    .upsert({ specialist_id: specialistId, citas: !!prefs.citas, estado: !!prefs.estado, aviso_email: (prefs.aviso_email || "").trim().toLowerCase() || null, updated_date: new Date().toISOString() });
+    .upsert({
+      specialist_id: specialistId,
+      citas: !!prefs.citas,
+      resenas: !!prefs.resenas,
+      estado: !!prefs.estado,
+      aviso_email: (prefs.aviso_email || "").trim().toLowerCase() || null,
+      updated_date: new Date().toISOString(),
+    });
+  if (error) throw error;
+}
+
+// Cierra TODAS las sesiones del doctor en cualquier dispositivo (no solo esta).
+export async function signOutEverywhere() {
+  const { error } = await supabase.auth.signOut({ scope: "global" });
   if (error) throw error;
 }
 

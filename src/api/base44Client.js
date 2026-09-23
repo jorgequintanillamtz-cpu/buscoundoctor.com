@@ -304,8 +304,12 @@ function redirectToLogin(returnUrl) {
   window.location.href = url.toString();
 }
 
-async function logout(returnUrl) {
-  await supabase.auth.signOut();
+// scope 'local' (por defecto) solo cierra esta sesión/este dispositivo;
+// 'global' cierra TODAS las sesiones del usuario en cualquier dispositivo.
+// OJO: el valor por defecto de supabase-js es 'global' -- sin este parámetro,
+// "Salir del panel" cerraba sesión en todos lados sin avisar. Se corrige aquí.
+async function logout(returnUrl, scope = 'local') {
+  await supabase.auth.signOut({ scope });
   if (returnUrl) window.location.href = returnUrl;
 }
 
@@ -407,6 +411,12 @@ const FUNCTION_MAP = {
   cancelProfileDeletion: () => supabase.rpc('cancel_profile_deletion_request'),
   startVacation: ({ return_date } = {}) => supabase.rpc('start_vacation', { p_return: return_date }),
   endVacation: () => supabase.rpc('end_vacation'),
+  exportMyData: () => supabase.rpc('export_my_data'),
+  inviteSpecialistAssistant: ({ email } = {}) => supabase.rpc('invite_specialist_assistant', { p_email: email }),
+  removeSpecialistAssistant: () => supabase.rpc('remove_specialist_assistant'),
+  replyToReview: ({ review_id, reply } = {}) => supabase.rpc('reply_to_review', { p_review_id: review_id, p_reply: reply }),
+  listMyReferrals: () => supabase.rpc('list_my_referrals'),
+  creditReferralReward: ({ specialist_id } = {}) => supabase.rpc('credit_referral_reward', { p_specialist_id: specialist_id }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>
@@ -460,7 +470,18 @@ async function uploadFile({ file, bucket, folder }) {
   let effectiveFolder = folder;
   if (!effectiveFolder && (!bucket || bucket === 'specialist-photos' || bucket === 'specialist-videos')) {
     const { data: { user } } = await supabase.auth.getUser();
-    effectiveFolder = user?.id || '';
+    let uid = user?.id || '';
+    // Si quien sube el archivo es un asistente (no el dueño), la carpeta
+    // debe seguir siendo la del médico dueño -- si no, la policy de RLS
+    // (carpeta = dueño, ver can_write_specialist_media) la rechazaría, y el
+    // archivo quedaría "huérfano" si algún día se le quita el acceso a esa
+    // persona.
+    const { data: asst } = await supabase.from('specialist_assistant').select('specialist_id').eq('user_id', uid).maybeSingle();
+    if (asst?.specialist_id) {
+      const { data: spec } = await supabase.from('specialist').select('owner_user_id').eq('id', asst.specialist_id).single();
+      if (spec?.owner_user_id) uid = spec.owner_user_id;
+    }
+    effectiveFolder = uid;
   }
   return doUpload(file, bucket, effectiveFolder);
 }

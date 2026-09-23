@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 const EMPTY_INSURER = { name: "", logo_url: "", is_active: true };
 const EMPTY_LANGUAGE = { name: "", iso_code: "" };
@@ -15,6 +17,7 @@ const EMPTY_LANGUAGE = { name: "", iso_code: "" };
 // InsurersManager.jsx / LanguagesManager.jsx), lo que genera duplicados y no
 // deja subir logos. Esta página es el lugar único para mantenerlos limpios.
 export default function AdminCatalogos() {
+  const { confirm, dialogProps } = useConfirmDialog();
   const [tab, setTab] = useState("aseguradoras");
   const [insurers, setInsurers] = useState([]);
   const [languages, setLanguages] = useState([]);
@@ -112,14 +115,24 @@ export default function AdminCatalogos() {
   };
 
   const handleDeleteInsurer = async (id) => {
-    if (!confirm("¿Eliminar esta aseguradora? Los doctores que la tenían seleccionada la perderán de su perfil.")) return;
+    const ok = await confirm({
+      title: "¿Eliminar esta aseguradora?",
+      description: "Los doctores que la tenían seleccionada la perderán de su perfil.",
+      confirmLabel: "Eliminar",
+    });
+    if (!ok) return;
     await base44.entities.Insurer.delete(id);
     toast.success("Aseguradora eliminada");
     load();
   };
 
   const handleDeleteLanguage = async (id) => {
-    if (!confirm("¿Eliminar este idioma? Los doctores que lo tenían seleccionado lo perderán de su perfil.")) return;
+    const ok = await confirm({
+      title: "¿Eliminar este idioma?",
+      description: "Los doctores que lo tenían seleccionado lo perderán de su perfil.",
+      confirmLabel: "Eliminar",
+    });
+    if (!ok) return;
     await base44.entities.Language.delete(id);
     toast.success("Idioma eliminado");
     load();
@@ -316,6 +329,7 @@ export default function AdminCatalogos() {
           )}
         </DialogContent>
       </Dialog>
+      <ConfirmDialog {...dialogProps} />
     </div>
   );
 }

@@ -1,14 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import {
-  Stethoscope, Search, Plus, Pencil, Trash2, X, AlertTriangle, ListChecks, Inbox,
-} from "lucide-react";
+import { Stethoscope, Search, Plus, X, ListChecks, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
-import { slugify } from "@/lib/citySlug";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import TaxonomyModal from "@/components/admin/TaxonomyModal";
+import TaxonomyTable from "@/components/admin/TaxonomyTable";
+import TaxonomyStatsBar from "@/components/admin/TaxonomyStatsBar";
+import SpecialtyGapList from "@/components/admin/SpecialtyGapList";
+import { useTaxonomyBank } from "@/hooks/useTaxonomyBank";
 
 const EMPTY_FORM = {
   name: "",
@@ -29,88 +32,43 @@ const EMPTY_FORM = {
 
 // Banco de enfermedades (entidad Condition): el catálogo del que los
 // doctores eligen cuáles tratan (feature pendiente) y que ya alimenta hoy
-// las páginas públicas /enfermedades/:slug/:ciudad. Esta pantalla es la
-// única forma de mantenerlo -- antes se cargaba solo por script.
+// las páginas públicas /enfermedades/:slug/:ciudad. Comparte el estado y las
+// acciones (cargar, buscar, guardar, borrar, activar) con Especialidades y
+// Subespecialidades vía useTaxonomyBank; lo propio de esta pantalla es su
+// formulario largo (síntomas, causas, SEO...), el filtro por especialidad
+// (Condition.specialty es texto, no un id, así que el cálculo de "huecos" es
+// distinto al de Subespecialidades) y la bandeja de "Solicitudes de
+// doctores" (ConditionRequest) bajo la cual "Crear enfermedad" abre este
+// mismo formulario con el nombre ya puesto. "Especialidades sin ninguna"
+// usa SpecialtyGapList, compartido con Subespecialidades: antes esta
+// pantalla, al filtrar por huecos, dejaba la tabla vacía sin decir cuáles
+// especialidades faltaban (una enfermedad de un hueco, por definición, no
+// puede existir); ahora muestra la misma lista útil que ya tenía
+// Subespecialidades.
 export default function AdminEnfermedades() {
-  const [conditions, setConditions] = useState([]);
   const [specialties, setSpecialties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [specialtiesLoaded, setSpecialtiesLoaded] = useState(false);
   const [specialtyFilter, setSpecialtyFilter] = useState("");
   const [onlyGaps, setOnlyGaps] = useState(false);
   const [pageSize, setPageSize] = useState(30);
-  const [editing, setEditing] = useState(null); // null = cerrado, {} = nuevo, objeto = editando
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [slugTouched, setSlugTouched] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   // Solicitudes de doctores para agregar una enfermedad que no está en el
   // banco (entidad ConditionRequest). "Crear enfermedad" abre el mismo modal
   // de siempre con el nombre pre-llenado; al guardar, la solicitud que la
-  // originó se marca aprobada sola (ver handleSave). "Rechazar" solo pide un
-  // motivo, no crea nada.
+  // originó se marca aprobada sola (ver afterCreate más abajo). "Rechazar"
+  // solo pide un motivo, no crea nada.
   const [requests, setRequests] = useState([]);
   const [fulfillingRequestId, setFulfillingRequestId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [resolvingId, setResolvingId] = useState(null);
 
-  const loadData = async () => {
-    const [condList, specList, reqList] = await Promise.all([
-      base44.entities.Condition.list("name", 2000),
-      base44.entities.Specialty.filter({ active: true }),
-      base44.entities.ConditionRequest.filter({ status: "pendiente" }, "-created_date").catch(() => []),
-    ]);
-    setConditions(condList);
-    setSpecialties(specList.sort((a, b) => a.name.localeCompare(b.name, "es")));
-    setRequests(reqList);
-    setLoading(false);
-  };
-
-  useEffect(() => { loadData(); }, []);
-
-  // Especialidades sin ni una enfermedad en el banco todavía -- lo primero
-  // que hay que llenar antes de dejar que un doctor de esa especialidad
-  // entre a "elegir cuáles trata" y no encuentre nada.
-  const specialtiesWithoutConditions = useMemo(() => {
-    const covered = new Set(conditions.map((c) => c.specialty));
-    return specialties.filter((s) => !covered.has(s.name)).map((s) => s.name);
-  }, [conditions, specialties]);
-
-  const filtered = useMemo(() => {
-    let list = conditions;
-    if (onlyGaps) {
-      list = list.filter((c) => specialtiesWithoutConditions.includes(c.specialty));
-    }
-    if (specialtyFilter) list = list.filter((c) => c.specialty === specialtyFilter);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
-      list = list.filter((c) => c.name.toLowerCase().includes(q) || c.specialty.toLowerCase().includes(q));
-    }
-    return list;
-  }, [conditions, specialtyFilter, search, onlyGaps, specialtiesWithoutConditions]);
-
-  const { pageItems: paged, page, setPage, totalPages } = usePaginatedList(filtered, {
-    pageSize,
-    resetKey: `${specialtyFilter}|${search}|${onlyGaps}|${pageSize}`,
-  });
-
-  const openNew = () => {
-    setFulfillingRequestId(null);
-    setForm(EMPTY_FORM);
-    setSlugTouched(false);
-    setEditing({});
-  };
-
-  const openNewFromRequest = (r) => {
-    setFulfillingRequestId(r.id);
-    setForm({ ...EMPTY_FORM, name: r.requested_name });
-    setSlugTouched(false);
-    setEditing({});
-  };
-
-  const openEdit = (item) => {
-    setForm({
+  const bank = useTaxonomyBank({
+    entity: base44.entities.Condition,
+    entityLabel: "enfermedad",
+    listLimit: 2000,
+    emptyForm: EMPTY_FORM,
+    toFormValues: (item) => ({
       name: item.name || "",
       specialty: item.specialty || "",
       slug: item.slug || "",
@@ -125,12 +83,36 @@ export default function AdminEnfermedades() {
       when_to_consult: item.when_to_consult || "",
       meta_title: item.meta_title || "",
       meta_description: item.meta_description || "",
-    });
-    setSlugTouched(true);
-    setEditing(item);
-  };
+    }),
+    validate: (form) => (!form.specialty ? "Elige la especialidad que la atiende" : null),
+    afterCreate: async (created) => {
+      if (!fulfillingRequestId) return;
+      try {
+        await base44.entities.ConditionRequest.update(fulfillingRequestId, {
+          status: "aprobada",
+          resolution_note: `Se agregó al banco como "${created.name}".`,
+        });
+        setRequests((prev) => prev.filter((x) => x.id !== fulfillingRequestId));
+      } catch { /* la enfermedad ya se creó bien; la solicitud puede cerrarse a mano si esto falla */ }
+    },
+  });
+  const { items, loading, search, setSearch, editing, form, saving, openEdit, updateField, updateSlugManually, handleSave, handleDelete, toggleField, confirmDialogProps } = bank;
 
-  const closeModal = () => { setEditing(null); setForm(EMPTY_FORM); setFulfillingRequestId(null); };
+  useEffect(() => {
+    Promise.all([
+      base44.entities.Specialty.filter({ active: true }),
+      base44.entities.ConditionRequest.filter({ status: "pendiente" }, "-created_date").catch(() => []),
+    ]).then(([specList, reqList]) => {
+      setSpecialties(specList.sort((a, b) => a.name.localeCompare(b.name, "es")));
+      setRequests(reqList);
+      setSpecialtiesLoaded(true);
+    });
+  }, []);
+
+  const openNew = () => { setFulfillingRequestId(null); bank.openNew(); };
+  const openNewForSpecialty = (name) => { setFulfillingRequestId(null); bank.openNew({ specialty: name }); };
+  const openNewFromRequest = (r) => { setFulfillingRequestId(r.id); bank.openNew({ name: r.requested_name }); };
+  const closeModal = () => { bank.closeModal(); setFulfillingRequestId(null); };
 
   const rejectRequest = async (r) => {
     if (!rejectReason.trim()) { toast.error("Escribe un motivo de rechazo"); return; }
@@ -147,79 +129,61 @@ export default function AdminEnfermedades() {
     setResolvingId(null);
   };
 
-  const updateField = (key, value) => {
-    setForm((prev) => {
-      const next = { ...prev, [key]: value };
-      if (key === "name" && !slugTouched) next.slug = slugify(value);
-      return next;
-    });
-  };
+  // Especialidades sin ni una enfermedad en el banco todavía -- lo primero
+  // que hay que llenar antes de dejar que un doctor de esa especialidad
+  // entre a "elegir cuáles trata" y no encuentre nada.
+  const specialtiesWithoutConditions = useMemo(() => {
+    const covered = new Set(items.map((c) => c.specialty));
+    return specialties.filter((s) => !covered.has(s.name));
+  }, [items, specialties]);
+  const gapNames = useMemo(() => new Set(specialtiesWithoutConditions.map((s) => s.name)), [specialtiesWithoutConditions]);
 
-  const handleSave = async () => {
-    if (!form.name.trim()) { toast.error("El nombre es obligatorio"); return; }
-    if (!form.specialty) { toast.error("Elige la especialidad que la atiende"); return; }
-    const slug = (form.slug || slugify(form.name)).trim();
-    const isNew = !editing?.id;
-    const duplicate = conditions.some((c) => c.slug === slug && c.id !== editing?.id);
-    if (duplicate) { toast.error("Ya existe una enfermedad con ese slug. Cámbialo para que sea único."); return; }
-
-    setSaving(true);
-    try {
-      const payload = { ...form, slug };
-      if (isNew) {
-        const created = await base44.entities.Condition.create(payload);
-        setConditions((prev) => [...prev, created]);
-        toast.success("Enfermedad agregada");
-        if (fulfillingRequestId) {
-          try {
-            await base44.entities.ConditionRequest.update(fulfillingRequestId, {
-              status: "aprobada",
-              resolution_note: `Se agregó al banco como "${created.name}".`,
-            });
-            setRequests((prev) => prev.filter((x) => x.id !== fulfillingRequestId));
-          } catch { /* la enfermedad ya se creó bien; la solicitud puede cerrarse a mano si esto falla */ }
-        }
-      } else {
-        await base44.entities.Condition.update(editing.id, payload);
-        setConditions((prev) => prev.map((c) => (c.id === editing.id ? { ...c, ...payload } : c)));
-        toast.success("Cambios guardados");
-      }
-      closeModal();
-    } catch {
-      toast.error("No se pudo guardar");
+  const filtered = useMemo(() => {
+    let list = items;
+    if (specialtyFilter) list = list.filter((c) => c.specialty === specialtyFilter);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((c) => c.name.toLowerCase().includes(q) || c.specialty.toLowerCase().includes(q));
     }
-    setSaving(false);
-  };
+    return list;
+  }, [items, specialtyFilter, search]);
 
-  const handleDelete = async (item) => {
-    if (!window.confirm(`¿Eliminar "${item.name}"? Esto no se puede deshacer.`)) return;
-    try {
-      await base44.entities.Condition.delete(item.id);
-      setConditions((prev) => prev.filter((c) => c.id !== item.id));
-      toast.success("Enfermedad eliminada");
-    } catch {
-      toast.error("No se pudo eliminar");
-    }
-  };
+  const { pageItems: paged, page, setPage, totalPages } = usePaginatedList(filtered, {
+    pageSize,
+    resetKey: `${specialtyFilter}|${search}|${pageSize}`,
+  });
 
-  const toggleField = async (item, field) => {
-    const next = !item[field];
-    setConditions((prev) => prev.map((c) => (c.id === item.id ? { ...c, [field]: next } : c)));
-    try {
-      await base44.entities.Condition.update(item.id, { [field]: next });
-    } catch {
-      setConditions((prev) => prev.map((c) => (c.id === item.id ? { ...c, [field]: !next } : c)));
-      toast.error("No se pudo actualizar");
-    }
-  };
-
-  if (loading) {
+  if (loading || !specialtiesLoaded) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
       </div>
     );
   }
+
+  const columns = [
+    { key: "name", header: "Nombre", render: (c) => c.name },
+    {
+      key: "specialty",
+      header: "Especialidad",
+      render: (c) => (
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${gapNames.has(c.specialty) ? "text-amber-700 bg-amber-50" : "text-primary bg-accent"}`}>
+          {c.specialty}
+        </span>
+      ),
+    },
+    {
+      key: "content_status",
+      header: "Contenido",
+      render: (c) => (
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${c.content_status === "publicado" ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
+          {c.content_status === "publicado" ? "Publicado" : "Borrador"}
+        </span>
+      ),
+    },
+    { key: "popular", header: "Popular", render: (c) => <Switch checked={!!c.popular} onCheckedChange={() => toggleField(c, "popular")} /> },
+    { key: "active", header: "Activa", render: (c) => <Switch checked={c.active !== false} onCheckedChange={() => toggleField(c)} /> },
+  ];
 
   return (
     <div className="max-w-6xl">
@@ -286,26 +250,16 @@ export default function AdminEnfermedades() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-card border border-border/50 rounded-2xl p-4">
-          <p className="text-2xl font-heading font-bold text-foreground">{conditions.length}</p>
-          <p className="text-xs text-muted-foreground">Enfermedades en el banco</p>
-        </div>
-        <div className="bg-card border border-border/50 rounded-2xl p-4">
-          <p className="text-2xl font-heading font-bold text-foreground">{specialties.length - specialtiesWithoutConditions.length}/{specialties.length}</p>
-          <p className="text-xs text-muted-foreground">Especialidades con al menos una</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setOnlyGaps((v) => !v)}
-          className={`text-left bg-card border rounded-2xl p-4 transition-colors col-span-2 sm:col-span-1 ${onlyGaps ? "border-amber-400 ring-1 ring-amber-400" : "border-border/50 hover:border-amber-300"}`}
-        >
-          <p className="text-2xl font-heading font-bold text-amber-600 flex items-center gap-1.5">
-            <AlertTriangle className="w-5 h-5" /> {specialtiesWithoutConditions.length}
-          </p>
-          <p className="text-xs text-muted-foreground">Especialidades sin ninguna (clic para filtrar)</p>
-        </button>
-      </div>
+      <TaxonomyStatsBar
+        total={items.length}
+        totalLabel="Enfermedades en el banco"
+        secondary={`${specialties.length - specialtiesWithoutConditions.length}/${specialties.length}`}
+        secondaryLabel="Especialidades con al menos una"
+        gapCount={specialtiesWithoutConditions.length}
+        gapLabel="Especialidades sin ninguna (clic para ver cuáles)"
+        gapActive={onlyGaps}
+        onToggleGap={() => setOnlyGaps((v) => !v)}
+      />
 
       <div className="bg-card border border-border/50 rounded-2xl p-4 mb-4 flex flex-wrap gap-3 items-center">
         <div className="flex items-center gap-2 flex-1 min-w-[200px] bg-muted/50 rounded-xl px-3 py-2">
@@ -348,222 +302,161 @@ export default function AdminEnfermedades() {
         )}
       </div>
 
-      <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="text-center py-20">
-            <ListChecks className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground font-medium">Sin resultados</p>
+      {onlyGaps ? (
+        <SpecialtyGapList
+          specialties={specialtiesWithoutConditions}
+          emptyMessage="Todas las especialidades tienen al menos una enfermedad. 🎉"
+          onPick={(s) => { setOnlyGaps(false); openNewForSpecialty(s.name); }}
+        />
+      ) : (
+        <>
+          <TaxonomyTable items={paged} columns={columns} onEdit={openEdit} onDelete={handleDelete} emptyIcon={ListChecks} />
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filtered.length} pageSize={pageSize} />
+        </>
+      )}
+
+      <TaxonomyModal
+        open={editing !== null}
+        onOpenChange={(open) => { if (!open) closeModal(); }}
+        title={editing?.id ? "Editar enfermedad" : "Agregar enfermedad"}
+        onSave={handleSave}
+        saving={saving}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1.5 block">Nombre</label>
+            <input
+              value={form.name}
+              onChange={(e) => updateField("name", e.target.value)}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              placeholder="Ej. Migraña"
+            />
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/30 border-b border-border/50">
-                <tr>
-                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Nombre</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Especialidad</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Contenido</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Popular</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Activa</th>
-                  <th className="text-right px-5 py-3 font-medium text-muted-foreground">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {paged.map((c) => (
-                  <tr key={c.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-5 py-3 font-medium text-foreground">{c.name}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full whitespace-nowrap">{c.specialty}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${c.content_status === "publicado" ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
-                        {c.content_status === "publicado" ? "Publicado" : "Borrador"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Switch checked={!!c.popular} onCheckedChange={() => toggleField(c, "popular")} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Switch checked={c.active !== false} onCheckedChange={() => toggleField(c, "active")} />
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(c)} aria-label="Editar" className="p-1.5 rounded-lg hover:bg-muted">
-                          <Pencil className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                        <button onClick={() => handleDelete(c)} aria-label="Eliminar" className="p-1.5 rounded-lg hover:bg-destructive/10">
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={filtered.length} pageSize={pageSize} />
-
-      {editing !== null && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto" onClick={closeModal}>
-          <div
-            className="bg-card rounded-3xl border border-border/50 w-full max-w-2xl my-8 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-6 border-b border-border/50">
-              <h2 className="font-heading font-bold text-lg text-foreground">
-                {editing?.id ? "Editar enfermedad" : "Agregar enfermedad"}
-              </h2>
-              <button onClick={closeModal} aria-label="Cerrar" className="p-1.5 rounded-lg hover:bg-muted">
-                <X className="w-5 h-5 text-muted-foreground" />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-foreground mb-1.5 block">Nombre</label>
-                  <input
-                    value={form.name}
-                    onChange={(e) => updateField("name", e.target.value)}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                    placeholder="Ej. Migraña"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-foreground mb-1.5 block">Especialidad que la atiende</label>
-                  <select
-                    value={form.specialty}
-                    onChange={(e) => updateField("specialty", e.target.value)}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  >
-                    <option value="">Elige una especialidad</option>
-                    {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-foreground mb-1.5 block">Slug (URL)</label>
-                <input
-                  value={form.slug}
-                  onChange={(e) => { setSlugTouched(true); updateField("slug", slugify(e.target.value)); }}
-                  className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
-                />
-              </div>
-
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <Switch checked={form.popular} onCheckedChange={(v) => updateField("popular", v)} />
-                  Destacada en "más buscadas"
-                </label>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <Switch checked={form.active} onCheckedChange={(v) => updateField("active", v)} />
-                  Activa
-                </label>
-                <select
-                  value={form.content_status}
-                  onChange={(e) => updateField("content_status", e.target.value)}
-                  className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="borrador">Borrador (no indexado)</option>
-                  <option value="publicado">Publicado</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-foreground mb-1.5 block">Descripción (¿qué es?)</label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  rows={3}
-                  className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  placeholder="Párrafos separados por línea en blanco"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-foreground mb-1.5 block">Síntomas (uno por línea)</label>
-                  <textarea
-                    value={form.symptoms}
-                    onChange={(e) => updateField("symptoms", e.target.value)}
-                    rows={4}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-foreground mb-1.5 block">Causas / factores de riesgo (uno por línea)</label>
-                  <textarea
-                    value={form.causes}
-                    onChange={(e) => updateField("causes", e.target.value)}
-                    rows={4}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-foreground mb-1.5 block">Tratamiento</label>
-                <textarea
-                  value={form.treatment}
-                  onChange={(e) => updateField("treatment", e.target.value)}
-                  rows={2}
-                  className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-foreground mb-1.5 block">Prevención (uno por línea)</label>
-                  <textarea
-                    value={form.prevention}
-                    onChange={(e) => updateField("prevention", e.target.value)}
-                    rows={4}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-foreground mb-1.5 block">¿Cuándo consultar?</label>
-                  <textarea
-                    value={form.when_to_consult}
-                    onChange={(e) => updateField("when_to_consult", e.target.value)}
-                    rows={4}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-              </div>
-
-              <details className="text-sm">
-                <summary className="cursor-pointer font-semibold text-foreground">SEO (opcional)</summary>
-                <div className="mt-3 space-y-3">
-                  <input
-                    value={form.meta_title}
-                    onChange={(e) => updateField("meta_title", e.target.value)}
-                    placeholder="Meta título"
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                  <textarea
-                    value={form.meta_description}
-                    onChange={(e) => updateField("meta_description", e.target.value)}
-                    placeholder="Meta descripción"
-                    rows={2}
-                    className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-              </details>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 p-6 border-t border-border/50">
-              <Button variant="outline" onClick={closeModal} className="rounded-xl">Cancelar</Button>
-              <Button onClick={handleSave} disabled={saving} className="rounded-xl">
-                {saving ? "Guardando..." : "Guardar"}
-              </Button>
-            </div>
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1.5 block">Especialidad que la atiende</label>
+            <select
+              value={form.specialty}
+              onChange={(e) => updateField("specialty", e.target.value)}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              <option value="">Elige una especialidad</option>
+              {specialties.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+            </select>
           </div>
         </div>
-      )}
+
+        <div>
+          <label className="text-xs font-semibold text-foreground mb-1.5 block">Slug (URL)</label>
+          <input
+            value={form.slug}
+            onChange={(e) => updateSlugManually(e.target.value)}
+            className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+          />
+        </div>
+
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <Switch checked={form.popular} onCheckedChange={(v) => updateField("popular", v)} />
+            Destacada en "más buscadas"
+          </label>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <Switch checked={form.active} onCheckedChange={(v) => updateField("active", v)} />
+            Activa
+          </label>
+          <select
+            value={form.content_status}
+            onChange={(e) => updateField("content_status", e.target.value)}
+            className="text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="borrador">Borrador (no indexado)</option>
+            <option value="publicado">Publicado</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-foreground mb-1.5 block">Descripción (¿qué es?)</label>
+          <textarea
+            value={form.description}
+            onChange={(e) => updateField("description", e.target.value)}
+            rows={3}
+            className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            placeholder="Párrafos separados por línea en blanco"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1.5 block">Síntomas (uno por línea)</label>
+            <textarea
+              value={form.symptoms}
+              onChange={(e) => updateField("symptoms", e.target.value)}
+              rows={4}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1.5 block">Causas / factores de riesgo (uno por línea)</label>
+            <textarea
+              value={form.causes}
+              onChange={(e) => updateField("causes", e.target.value)}
+              rows={4}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-foreground mb-1.5 block">Tratamiento</label>
+          <textarea
+            value={form.treatment}
+            onChange={(e) => updateField("treatment", e.target.value)}
+            rows={2}
+            className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1.5 block">Prevención (uno por línea)</label>
+            <textarea
+              value={form.prevention}
+              onChange={(e) => updateField("prevention", e.target.value)}
+              rows={4}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1.5 block">¿Cuándo consultar?</label>
+            <textarea
+              value={form.when_to_consult}
+              onChange={(e) => updateField("when_to_consult", e.target.value)}
+              rows={4}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </div>
+
+        <details className="text-sm">
+          <summary className="cursor-pointer font-semibold text-foreground">SEO (opcional)</summary>
+          <div className="mt-3 space-y-3">
+            <input
+              value={form.meta_title}
+              onChange={(e) => updateField("meta_title", e.target.value)}
+              placeholder="Meta título"
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+            <textarea
+              value={form.meta_description}
+              onChange={(e) => updateField("meta_description", e.target.value)}
+              placeholder="Meta descripción"
+              rows={2}
+              className="w-full text-sm border border-input rounded-xl px-3 py-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </details>
+      </TaxonomyModal>
+
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabaseClient";
 import { Eye, Save, Clock, Stethoscope, FileText, Home, ArrowLeft, LogOut, Sparkles, Calendar, Star, Globe, Menu, X, MessageCircle, UserCog, ChevronLeft, Settings, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -73,6 +74,7 @@ export default function DoctorPanel() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // loading | ready | no-profile | wrong-role
   const [specialistId, setSpecialistId] = useState(null);
+  const [isAssistant, setIsAssistant] = useState(false);
   const { form, setForm, formRef, update, buildData } = useSpecialistForm({ stripFields: DOCTOR_RESTRICTED_FIELDS });
   const originalContactRef = useRef({ email: "", whatsapp: "" });
   const [saving, setSaving] = useState(false);
@@ -109,11 +111,21 @@ export default function DoctorPanel() {
       }
       const own = await base44.entities.Specialist.filter({ owner_user_id: u.id }).catch(() => []);
       if (!active) return;
-      if (own.length === 0) {
+      let specialist = own[0];
+      let asAssistant = false;
+      if (!specialist) {
+        // No es dueño de ningún perfil: puede ser el asistente de un médico.
+        const { data: asst } = await supabase.from("specialist_assistant").select("specialist_id").eq("user_id", u.id).maybeSingle();
+        if (asst?.specialist_id) {
+          specialist = await base44.entities.Specialist.get(asst.specialist_id).catch(() => null);
+          asAssistant = !!specialist;
+        }
+      }
+      if (!specialist) {
         setStatus("no-profile");
         return;
       }
-      const specialist = own[0];
+      setIsAssistant(asAssistant);
       setSpecialistId(specialist.id);
       originalContactRef.current = { email: specialist.email || "", whatsapp: specialist.whatsapp || "" };
       setForm({
@@ -349,7 +361,9 @@ export default function DoctorPanel() {
             Volver al sitio
           </Link>
           <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
-          <p className="text-xs text-white/50 mt-1">Administra tu perfil en BuscoUnDoctor.</p>
+          <p className="text-xs text-white/50 mt-1">
+            {isAssistant ? "Entraste como asistente de este médico." : "Administra tu perfil en BuscoUnDoctor."}
+          </p>
 
           <div className="mt-4">
             <div className="flex justify-between text-xs mb-1.5">
@@ -435,7 +449,9 @@ export default function DoctorPanel() {
                 Volver al sitio
               </Link>
               <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
-              <p className="text-xs text-white/50 mt-1">Administra tu perfil en BuscoUnDoctor.</p>
+              <p className="text-xs text-white/50 mt-1">
+                {isAssistant ? "Entraste como asistente de este médico." : "Administra tu perfil en BuscoUnDoctor."}
+              </p>
             </div>
             <button
               type="button"
@@ -530,7 +546,7 @@ export default function DoctorPanel() {
               <DoctorNotifications notifications={notifications} unread={unread} onOpenItem={openNotification} onMarkAllRead={() => markRead()} />
             )}
             {section === "ajustes" && (
-              <DoctorSettings specialist={{ ...form, id: specialistId }} onStatusChange={(fields) => Object.entries(fields).forEach(([k, v]) => update(k, v))} />
+              <DoctorSettings specialist={{ ...form, id: specialistId }} isAssistant={isAssistant} onStatusChange={(fields) => Object.entries(fields).forEach(([k, v]) => update(k, v))} />
             )}
             {section === "mi-perfil" && <ProfileHub checklist={completenessChecklist} onNavigate={setSection} />}
             {PROFILE_SUB_KEYS.includes(section) && !guided && (
