@@ -38,6 +38,7 @@ const AdminSolicitudes = lazy(() => import('./pages/admin/AdminSolicitudes'));
 const AdminCorreos = lazy(() => import('./pages/admin/AdminCorreos'));
 const AdminCatalogos = lazy(() => import('./pages/admin/AdminCatalogos'));
 const AdminCatalogoMedico = lazy(() => import('./pages/admin/AdminCatalogoMedico'));
+const AdminGuides = lazy(() => import('./pages/admin/AdminGuides'));
 const AdminPremium = lazy(() => import('./pages/admin/AdminPremium'));
 const AdminZones = lazy(() => import('./pages/admin/AdminZones'));
 const AdminConfigHub = lazy(() => import('./pages/admin/AdminConfigHub'));
@@ -171,12 +172,15 @@ const AuthenticatedApp = () => {
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
           {/* Catálogo médico: junta especialidades/subespecialidades/enfermedades
               (antes 3 enlaces sueltos) en una sola pantalla con pestañas. Las
-              rutas viejas se redirigen por si quedan enlaces guardados. */}
+              rutas viejas se redirigen por si quedan enlaces guardados.
+              "Guías" (biblioteca de PDFs) es una entidad y pantalla aparte,
+              no entra a estas pestañas -- ver AdminLayout.jsx. */}
           <Route path="/admin/catalogo-medico" element={<Navigate to="/admin/catalogo-medico/especialidades" replace />} />
           <Route path="/admin/catalogo-medico/:tab" element={<AdminCatalogoMedico />} />
           <Route path="/admin/especialidades" element={<Navigate to="/admin/catalogo-medico/especialidades" replace />} />
           <Route path="/admin/subespecialidades" element={<Navigate to="/admin/catalogo-medico/subespecialidades" replace />} />
           <Route path="/admin/enfermedades" element={<Navigate to="/admin/catalogo-medico/enfermedades" replace />} />
+          <Route path="/admin/guias" element={<AdminGuides />} />
           <Route path="/admin/premium" element={<AdminPremium />} />
           <Route path="/admin/ciudades" element={<AdminZones />} />
           {/* Redirección: la página se renombró de "zonas" a "ciudades" */}

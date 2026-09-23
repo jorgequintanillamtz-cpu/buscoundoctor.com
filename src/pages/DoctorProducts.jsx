@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { ArrowLeft, Stethoscope, Globe, Plus, Pencil, Trash2, FileText, Package } from "lucide-react";
+import { ArrowLeft, Stethoscope, Plus, Pencil, Trash2, FileText, Package, BookOpen, CheckCircle2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductForm from "@/components/products/ProductForm";
-import ProductCardPreview from "@/components/products/ProductCardPreview";
+import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
 
 const STATUS_META = {
   draft: { label: "Borrador", cls: "bg-amber-100 text-amber-700" },
@@ -19,6 +19,10 @@ export default function DoctorProducts() {
   const [products, setProducts] = useState([]);
   const [editing, setEditing] = useState(null); // product | "new" | null
   const [deletingId, setDeletingId] = useState(null);
+  const [guides, setGuides] = useState([]);
+  const [addingGuideId, setAddingGuideId] = useState(null);
+  const [viewingGuide, setViewingGuide] = useState(null); // guía a mostrar en el visor de PDF, o null
+  const [savingPriceId, setSavingPriceId] = useState(null); // id del producto cuyo precio se está guardando, o null
 
   useEffect(() => {
     let active = true;
@@ -36,7 +40,7 @@ export default function DoctorProducts() {
         return;
       }
       setSpecialist(own[0]);
-      await loadProducts(own[0].id);
+      await Promise.all([loadProducts(own[0].id), loadGuides(own[0].specialty)]);
       setStatus("ready");
     })();
     return () => { active = false; };
@@ -45,6 +49,41 @@ export default function DoctorProducts() {
   const loadProducts = async (doctorId) => {
     const list = await base44.entities.DoctorProduct.filter({ doctor_id: doctorId }, "-created_date", 50).catch(() => []);
     setProducts(list);
+  };
+
+  const loadGuides = async (specialty) => {
+    if (!specialty) { setGuides([]); return; }
+    const list = await base44.entities.Guide.filter({ specialty, status: "active" }, "-created_date", 100).catch(() => []);
+    setGuides(list);
+  };
+
+  // Guías que el doctor ya agregó (para no ofrecer duplicarlas)
+  const addedGuideIds = useMemo(
+    () => new Set(products.filter((p) => p.source_guide_id).map((p) => p.source_guide_id)),
+    [products]
+  );
+
+  const addFromLibrary = async (guide) => {
+    setAddingGuideId(guide.id);
+    try {
+      const created = await base44.entities.DoctorProduct.create({
+        doctor_id: specialist.id,
+        source_guide_id: guide.id,
+        title: guide.title,
+        description: guide.description || "",
+        price: guide.price,
+        cover_image: guide.cover_image || null,
+        images: Array.isArray(guide.images) ? guide.images : [],
+        file_url: guide.file_url,
+        status: "draft",
+      });
+      setProducts((prev) => [created, ...prev]);
+      toast.success("Guía agregada a tu catálogo. Ajusta precio o descripción y actívala cuando quieras.");
+      setEditing(created);
+    } catch (e) {
+      toast.error("No se pudo agregar: " + e.message);
+    }
+    setAddingGuideId(null);
   };
 
   const toggleStatus = async (p) => {
@@ -56,6 +95,30 @@ export default function DoctorProducts() {
     } catch (e) {
       toast.error("Error: " + e.message);
     }
+  };
+
+  // Edita el precio directo en la tarjeta, sin abrir el formulario completo.
+  // Los inputs siempre están habilitados; al salir del campo (blur) se guarda
+  // solo si algo cambió, para no mandar un update por cada tecla.
+  const setPriceField = (id, field, value) => {
+    setProducts((prev) => prev.map((x) => (x.id === id ? { ...x, [field]: value } : x)));
+  };
+
+  const commitPriceField = async (p) => {
+    const price = p.price === "" || p.price == null ? null : Number(p.price);
+    const compareAtPrice = p.compare_at_price === "" || p.compare_at_price == null ? null : Number(p.compare_at_price);
+    if (compareAtPrice != null && price != null && compareAtPrice <= price) {
+      toast.error("El precio de comparación debe ser mayor al precio actual");
+      return;
+    }
+    setSavingPriceId(p.id);
+    try {
+      await base44.entities.DoctorProduct.update(p.id, { price, compare_at_price: compareAtPrice });
+      setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, price, compare_at_price: compareAtPrice } : x)));
+    } catch (e) {
+      toast.error("Error al guardar el precio: " + e.message);
+    }
+    setSavingPriceId(null);
   };
 
   const remove = async (p) => {
@@ -72,19 +135,22 @@ export default function DoctorProducts() {
   };
 
   const shell = (content) => (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
-        <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
-          <ArrowLeft className="w-4 h-4" />
-          Volver al panel
-        </Link>
-        <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
-          <Package className="w-4 h-4" />
-          Productos digitales
-        </h1>
-        <div className="w-20" />
+    <div className="min-h-screen bg-background flex">
+      <DoctorPanelSidebar activePath="/panel-medico/productos" completitud={specialist?.completeness_score ?? null} />
+      <div className="flex-1 min-w-0">
+        <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
+          <Link to="/panel-medico" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al panel
+          </Link>
+          <h1 className="font-heading font-bold text-white text-sm flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            Productos digitales
+          </h1>
+          <div className="w-20" />
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8">{content}</div>
       </div>
-      <div className="p-4 sm:p-6 lg:p-8">{content}</div>
     </div>
   );
 
@@ -115,6 +181,58 @@ export default function DoctorProducts() {
           Sube guías, ebooks o documentos en PDF para venderlos a tus pacientes. Por ahora solo administras el catálogo — el cobro se habilita en una fase posterior.
         </p>
       </div>
+
+      {!editing && guides.length > 0 && (
+        <div className="mb-7">
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="w-4 h-4 text-brand-blue" />
+            <h2 className="font-heading font-bold text-base text-foreground">Biblioteca de guías para tu especialidad</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-3">
+            Preparadas por BuscoUnDoctor para {specialist.specialty || "tu especialidad"}. Agrégalas a tu catálogo y ajusta precio o descripción antes de activarlas.
+          </p>
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
+            {guides.map((g) => {
+              const added = addedGuideIds.has(g.id);
+              const cover = (Array.isArray(g.images) && g.images[0]) || g.cover_image || null;
+              return (
+                <div key={g.id} className="flex-shrink-0 w-32">
+                  <button
+                    type="button"
+                    onClick={() => setViewingGuide(g)}
+                    className="w-32 h-44 rounded-lg bg-muted border border-border/50 flex items-center justify-center overflow-hidden shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                    title="Leer guía"
+                  >
+                    {cover ? (
+                      <img src={cover} alt={g.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <FileText className="w-8 h-8 text-muted-foreground/50" />
+                    )}
+                  </button>
+                  <p className="font-heading font-semibold text-xs text-foreground mt-2 line-clamp-2 leading-snug">{g.title}</p>
+                  <div className="mt-1.5">
+                    {added ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                        <CheckCircle2 className="w-3 h-3" /> Ya la agregaste
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="rounded-lg h-7 w-full px-2 text-xs"
+                        disabled={addingGuideId === g.id}
+                        onClick={() => addFromLibrary(g)}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        {addingGuideId === g.id ? "Agregando..." : "Agregar"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {editing ? (
         <div className="bg-card rounded-2xl border border-border/50 p-5">
@@ -151,18 +269,63 @@ export default function DoctorProducts() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {products.map((p) => {
                 const meta = STATUS_META[p.status] || STATUS_META.draft;
+                const cover = (Array.isArray(p.images) && p.images[0]) || p.cover_image || null;
                 return (
                   <div key={p.id} className="bg-card rounded-2xl border border-border/50 p-4 flex gap-4">
-                    <div className="w-24 flex-shrink-0">
-                      <ProductCardPreview product={p} />
+                    <div className="relative w-32 h-44 flex-shrink-0 rounded-lg bg-muted border border-border/50 overflow-hidden shadow-sm">
+                      {cover ? (
+                        <img src={cover} alt={p.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <FileText className="w-8 h-8 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      {p.source_guide_id && (
+                        <span className="absolute top-1.5 right-1.5 bg-emerald-500 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full shadow-sm">
+                          Agregado
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col">
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2">
                         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
-                        <span className="font-heading font-bold text-sm text-foreground">
-                          {p.price != null ? `$${Number(p.price).toLocaleString("es-MX")} MXN` : "—"}
-                        </span>
+                        {savingPriceId === p.id && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
                       </div>
+
+                      <div className="flex items-end gap-2 mt-2 mb-1">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-medium text-muted-foreground block mb-0.5">Precio</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={p.price ?? ""}
+                            onChange={(e) => setPriceField(p.id, "price", e.target.value)}
+                            onBlur={() => commitPriceField(p)}
+                            className="w-full h-8 text-sm border border-input rounded-lg px-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                            placeholder="199"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[10px] font-medium text-muted-foreground block mb-0.5">Precio tachado</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={p.compare_at_price ?? ""}
+                            onChange={(e) => setPriceField(p.id, "compare_at_price", e.target.value)}
+                            onBlur={() => commitPriceField(p)}
+                            className="w-full h-8 text-sm border border-input rounded-lg px-2 bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                            placeholder="299"
+                          />
+                        </div>
+                      </div>
+                      {p.compare_at_price != null && p.price != null && (
+                        <p className="text-xs mb-1">
+                          <span className="font-semibold text-emerald-600">${Number(p.price).toLocaleString("es-MX")} MXN</span>{" "}
+                          <span className="text-muted-foreground line-through">${Number(p.compare_at_price).toLocaleString("es-MX")}</span>
+                        </p>
+                      )}
                       <p className="font-heading font-semibold text-sm text-foreground mt-1 line-clamp-1">{p.title}</p>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{p.description || "Sin descripción"}</p>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
@@ -197,6 +360,19 @@ export default function DoctorProducts() {
                   </div>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => setEditing("new")}
+                className="bg-card rounded-2xl border-2 border-dashed border-border p-4 flex gap-4 items-center text-left hover:border-brand-blue hover:bg-accent/30 transition-colors"
+              >
+                <div className="w-32 h-44 flex-shrink-0 rounded-lg border-2 border-dashed border-border/70 flex items-center justify-center">
+                  <Plus className="w-8 h-8 text-muted-foreground/50" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-heading font-semibold text-sm text-foreground">Crear producto</p>
+                  <p className="text-xs text-muted-foreground mt-1">Sube un PDF nuevo y agrégalo a tu tienda.</p>
+                </div>
+              </button>
             </div>
           )}
 
@@ -206,6 +382,23 @@ export default function DoctorProducts() {
             </p>
           </div>
         </>
+      )}
+
+      {viewingGuide && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setViewingGuide(null)}>
+          <div
+            className="bg-card rounded-2xl w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 flex-shrink-0">
+              <h2 className="font-heading font-semibold text-sm text-foreground line-clamp-1 pr-3">{viewingGuide.title}</h2>
+              <button onClick={() => setViewingGuide(null)} aria-label="Cerrar" className="p-1.5 rounded-lg hover:bg-muted flex-shrink-0">
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+            <iframe title={viewingGuide.title} src={viewingGuide.file_url} className="flex-1 w-full" />
+          </div>
+        </div>
       )}
     </div>
   );

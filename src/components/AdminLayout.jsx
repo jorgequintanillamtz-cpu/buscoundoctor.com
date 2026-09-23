@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, ArrowLeft, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X } from "lucide-react";
+import { LayoutDashboard, Users, Heart, ArrowLeft, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -18,7 +18,10 @@ import { SHOW_PREMIUM } from "@/lib/featureFlags";
 // que casi nunca se tocan) en 2 destinos -- cada uno abre una pantalla con
 // pestañas o tarjetas (AdminCatalogoMedico.jsx / AdminConfigHub.jsx) que
 // lleva a las pantallas de siempre, sin perder nada, solo sacándolas de la
-// vista de reojo del día a día. Menú de 19 enlaces bajó a 12.
+// vista de reojo del día a día. Menú de 19 enlaces bajó a 12. "Guías"
+// (biblioteca de PDFs, entidad Guide) se queda como enlace propio -- no es
+// parte de los bancos de taxonomía (Specialty/Subspecialty/Condition) que
+// comparten useTaxonomyBank, así que no entra a esas pestañas.
 const adminNavSections = [
   {
     label: "Resumen",
@@ -45,6 +48,7 @@ const adminNavSections = [
     label: "Listas médicas",
     items: [
       { path: "/admin/catalogo-medico", label: "Catálogo médico", icon: Heart },
+      { path: "/admin/guias", label: "Guías", icon: BookOpen },
     ],
   },
   {
