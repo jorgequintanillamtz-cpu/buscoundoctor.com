@@ -4,6 +4,9 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Mail, Lock, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import GoogleIcon from "@/components/icons/GoogleIcon";
+import MicrosoftIcon from "@/components/icons/MicrosoftIcon";
+import { supabaseUrl, supabaseAnonKey } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 import { generateSlug } from "@/api/specialistForm";
 import { fileToWebP } from "@/lib/fileToWebP";
@@ -40,6 +43,16 @@ export default function RegistroMedico() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // "google" | "microsoft" | "" -- cuál de los dos botones está en curso,
+  // para deshabilitar ambos y mostrar su propio spinner mientras se abre
+  // la ventana del proveedor.
+  const [oauthLoading, setOauthLoading] = useState("");
+  // Qué botones de "Continuar con..." mostrar. Empieza en todo apagado
+  // (comportamiento de hoy, sin cambio visible) y se prende solo si
+  // Supabase confirma que esa llave ya está configurada -- ver el useEffect
+  // de abajo. Así el botón puede quedar ya construido en el código sin
+  // arriesgarse a que un doctor real lo vea antes de que funcione de verdad.
+  const [oauthProviders, setOauthProviders] = useState({ google: false, microsoft: false });
 
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
@@ -58,6 +71,27 @@ export default function RegistroMedico() {
       setSpecialties([...specs].sort((a, b) => a.name.localeCompare(b.name, "es")));
       setZones([...zoneList].sort((a, b) => a.name.localeCompare(b.name, "es")));
     });
+  }, []);
+
+  // ¿Ya están dadas de alta las llaves de Google/Microsoft en Supabase? Sin
+  // esto, un doctor que le diera clic a un botón "Continuar con Google" sin
+  // configurar caería en una pantalla de error en inglés de Supabase, fea y
+  // confusa. Este endpoint es público (no necesita sesión) y ya lo expone
+  // Supabase para exactamente este uso. Falla en silencio (se queda todo
+  // apagado, como hoy) si no se puede consultar.
+  useEffect(() => {
+    let active = true;
+    fetch(`${supabaseUrl}/auth/v1/settings`, { headers: { apikey: supabaseAnonKey } })
+      .then((r) => r.json())
+      .then((settings) => {
+        if (!active) return;
+        setOauthProviders({
+          google: !!settings?.external?.google,
+          microsoft: !!settings?.external?.azure,
+        });
+      })
+      .catch(() => {});
+    return () => { active = false; };
   }, []);
 
   // Si viene de la landing "/para-medicos" con lo básico ya lleno (título,
@@ -240,14 +274,24 @@ export default function RegistroMedico() {
 
       const pendingRaw = localStorage.getItem(PENDING_KEY);
       if (pendingRaw) {
+        let pending = null;
         try {
-          const pending = JSON.parse(pendingRaw);
+          pending = JSON.parse(pendingRaw);
           await createProfileFromData(pending);
           localStorage.removeItem(PENDING_KEY);
           if (active) setPhase("done");
         } catch (err) {
           localStorage.removeItem(PENDING_KEY);
-          if (active) { setError(err.message || "No se pudo crear tu perfil."); setPhase("wizard"); }
+          if (active) {
+            // No perder lo que ya había llenado: si algo truena al crear el
+            // perfil justo al volver de Google/Microsoft (ej. cédula
+            // duplicada), regresa al último paso con todo relleno en vez de
+            // mandarlo a un formulario en blanco.
+            if (pending) setData((prev) => ({ ...prev, ...pending }));
+            setStepIndex(STEP_KEYS.length - 1);
+            setError(err.message || "No se pudo crear tu perfil.");
+            setPhase("wizard");
+          }
         }
         return;
       }
@@ -324,6 +368,27 @@ export default function RegistroMedico() {
       setError(err.message || "No se pudo verificar el código");
     }
     setLoading(false);
+  };
+
+  // Arranca el inicio de sesión con Google o Microsoft en el último paso del
+  // registro. A diferencia del camino de correo+contraseña, aquí el
+  // navegador se va al proveedor y regresa a esta misma página ya
+  // autenticado -- por eso hay que guardar lo que se llevaba capturado en
+  // localStorage (PENDING_KEY) antes de salir, para que el efecto de arriba
+  // ("¿ya venimos autenticados?") lo recoja al volver y cree el perfil solo,
+  // sin pedir nada de nuevo. Nunca hace falta correo/contraseña ni el paso
+  // del código de verificación: Google/Microsoft ya confirmaron el correo.
+  const startOAuth = async (provider) => {
+    setError("");
+    setOauthLoading(provider);
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(data));
+      await base44.auth.loginWithProvider(provider, `${window.location.origin}/registro-medico`);
+    } catch (err) {
+      localStorage.removeItem(PENDING_KEY);
+      setError(err.message || `No se pudo continuar con ${provider === "google" ? "Google" : "Microsoft"}`);
+      setOauthLoading("");
+    }
   };
 
   const handleProfilePhotoUpload = async (e) => {
@@ -407,6 +472,35 @@ export default function RegistroMedico() {
 
             {stepKey === "cuenta" && (
               <StepShell title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
+                {oauthProviders.google && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => startOAuth("google")}
+                    disabled={!!oauthLoading}
+                    className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2.5 bg-white hover:bg-muted/40"
+                  >
+                    {oauthLoading === "google" ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
+                    Continuar con Google
+                  </Button>
+                )}
+                {oauthProviders.microsoft && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => startOAuth("microsoft")}
+                    disabled={!!oauthLoading}
+                    className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2.5 bg-white hover:bg-muted/40"
+                  >
+                    {oauthLoading === "microsoft" ? <Loader2 className="w-4 h-4 animate-spin" /> : <MicrosoftIcon />}
+                    Continuar con Microsoft
+                  </Button>
+                )}
+                {(oauthProviders.google || oauthProviders.microsoft) && (
+                  <div className="sm:col-span-2 flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="h-px flex-1 bg-border" /> o <div className="h-px flex-1 bg-border" />
+                  </div>
+                )}
                 <Button
                   type="button"
                   onClick={() => {
@@ -417,6 +511,7 @@ export default function RegistroMedico() {
                     setEmailForm((f) => ({ ...f, email: f.email || data.email }));
                     setPhase("email-form");
                   }}
+                  disabled={!!oauthLoading}
                   className="sm:col-span-2 w-full min-h-[44px] rounded-xl"
                 >
                   Registrarme con correo electrónico
