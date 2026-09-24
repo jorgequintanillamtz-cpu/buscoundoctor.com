@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Sparkles, Loader2 } from "lucide-react";
 import { byPosition } from "@/lib/storefrontUtils";
 
 /**
@@ -13,6 +13,10 @@ import { byPosition } from "@/lib/storefrontUtils";
  * - field: campo de texto ("text" o "name")
  * - label: título de la sección
  * - placeholder
+ * - onPrefill (opcional): función async que llena la lista desde el perfil
+ *   real. Solo se ofrece mientras la lista está vacía -- es una copia de
+ *   una sola vez, no una sincronización; después es una lista normal.
+ * - prefillLabel (opcional): texto del botón de prellenar
  */
 export default function SimpleListEditor({
   storefrontId,
@@ -22,8 +26,20 @@ export default function SimpleListEditor({
   placeholder,
   items,
   setItems,
+  onPrefill,
+  prefillLabel = "Prellenar desde tu perfil",
 }) {
   const [newVal, setNewVal] = useState("");
+  const [prefilling, setPrefilling] = useState(false);
+
+  const runPrefill = async () => {
+    setPrefilling(true);
+    try {
+      await onPrefill();
+    } finally {
+      setPrefilling(false);
+    }
+  };
 
   const reload = async () => {
     const data = await base44.entities[entityName].filter({ storefront_id: storefrontId });
@@ -61,6 +77,19 @@ export default function SimpleListEditor({
   return (
     <div>
       <h3 className="font-heading font-semibold text-sm text-foreground mb-3">{label}</h3>
+      {items.length === 0 && onPrefill && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={runPrefill}
+          disabled={prefilling}
+          className="rounded-lg mb-3 gap-1.5"
+        >
+          {prefilling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+          {prefillLabel}
+        </Button>
+      )}
       <div className="flex gap-2 mb-3">
         <Input
           value={newVal}

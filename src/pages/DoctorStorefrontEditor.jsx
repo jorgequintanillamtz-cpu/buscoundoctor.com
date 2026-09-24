@@ -6,18 +6,20 @@ import {
   ArrowLeft,
   Stethoscope,
   Globe,
-  Save,
   Sparkles,
   Plus,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StorefrontView from "@/components/storefront/StorefrontView";
 import StorefrontSettingsForm from "@/components/storefront/editor/StorefrontSettingsForm";
 import SimpleListEditor from "@/components/storefront/editor/SimpleListEditor";
+import StorefrontInsurerPicker from "@/components/storefront/editor/StorefrontInsurerPicker";
 import TimelineEditor from "@/components/storefront/editor/TimelineEditor";
 import FaqEditor from "@/components/storefront/editor/FaqEditor";
 import LocationEditor from "@/components/storefront/editor/LocationEditor";
 import SectionOrderEditor from "@/components/storefront/editor/SectionOrderEditor";
+import GuideLibraryStrip from "@/components/products/GuideLibraryStrip";
 import { generateUniqueSlug, byPosition } from "@/lib/storefrontUtils";
 import { DEFAULT_SECTION_ORDER } from "@/lib/storefrontSections";
 import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
@@ -31,7 +33,8 @@ export default function DoctorStorefrontEditor() {
   const [locations, setLocations] = useState([]);
   const [timeline, setTimeline] = useState([]);
   const [faqs, setFaqs] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]); // solo activos, para la vista previa pública
+  const [allProducts, setAllProducts] = useState([]); // todos (incluye borrador), para la biblioteca de guías
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -67,7 +70,7 @@ export default function DoctorStorefrontEditor() {
   }, []);
 
   const loadChildren = async (sfId, specialistId) => {
-    const [c, i, l, t, f, p] = await Promise.all([
+    const [c, i, l, t, f, p, ap] = await Promise.all([
       base44.entities.StorefrontCondition.filter({ storefront_id: sfId }).catch(() => []),
       base44.entities.StorefrontInsurance.filter({ storefront_id: sfId }).catch(() => []),
       base44.entities.StorefrontLocation.filter({ storefront_id: sfId }).catch(() => []),
@@ -76,6 +79,9 @@ export default function DoctorStorefrontEditor() {
       specialistId
         ? base44.entities.DoctorProduct.filter({ doctor_id: specialistId, status: "active" }).catch(() => [])
         : Promise.resolve([]),
+      specialistId
+        ? base44.entities.DoctorProduct.filter({ doctor_id: specialistId }).catch(() => [])
+        : Promise.resolve([]),
     ]);
     setConditions(c.sort(byPosition));
     setInsurances(i.sort(byPosition));
@@ -83,6 +89,7 @@ export default function DoctorStorefrontEditor() {
     setTimeline(t.sort(byPosition));
     setFaqs(f.sort(byPosition));
     setProducts(p);
+    setAllProducts(ap);
   };
 
   const createStorefront = async () => {
@@ -108,6 +115,44 @@ export default function DoctorStorefrontEditor() {
     setStorefront((prev) => ({ ...prev, ...values }));
   }, []);
 
+  // Prellenados desde el perfil real: copian una sola vez (no sincronizan)
+  // hacia las tablas propias del storefront, para que el doctor tenga un
+  // punto de partida y de ahí en adelante las edite independientes de su
+  // perfil del directorio. Cada uno se ofrece solo mientras la sección
+  // correspondiente del storefront está vacía.
+  const prefillConditions = async () => {
+    const ids = specialist.conditions_relation || [];
+    if (ids.length === 0) {
+      toast.error("Tu perfil no tiene enfermedades capturadas todavía");
+      return;
+    }
+    const all = await base44.entities.Condition.filter({});
+    const names = all.filter((c) => ids.includes(c.id)).map((c) => c.name);
+    const created = await Promise.all(
+      names.map((name, i) => base44.entities.StorefrontCondition.create({ storefront_id: storefront.id, text: name, position: i }))
+    );
+    setConditions(created);
+  };
+
+  const prefillLocation = async () => {
+    const offices = await base44.entities.Office.filter({ specialist_id: specialist.id }).catch(() => []);
+    if (offices.length === 0) {
+      toast.error("Tu perfil no tiene consultorios capturados todavía");
+      return;
+    }
+    const office = offices.find((o) => o.is_primary) || offices[0];
+    const created = await base44.entities.StorefrontLocation.create({
+      storefront_id: storefront.id,
+      place_name: office.name || "",
+      address: office.address_line || "",
+      maps_url: office.maps_url || "",
+      latitude: office.latitude ?? null,
+      longitude: office.longitude ?? null,
+      position: 0,
+    });
+    setLocations([created]);
+  };
+
   const saveToDb = useCallback(async () => {
     if (!storefront) return;
     setSaving(true);
@@ -117,6 +162,7 @@ export default function DoctorStorefrontEditor() {
         whatsapp_phone: values.whatsapp_phone,
         whatsapp_message: values.whatsapp_message,
         headline: values.headline,
+        cover_photo: values.cover_photo,
         status: values.status,
         section_order: values.section_order || [...DEFAULT_SECTION_ORDER],
       });
@@ -138,6 +184,7 @@ export default function DoctorStorefrontEditor() {
             whatsapp_phone: storefront.whatsapp_phone,
             whatsapp_message: storefront.whatsapp_message,
             headline: storefront.headline,
+            cover_photo: storefront.cover_photo,
             status: storefront.status,
             section_order: storefront.section_order || [...DEFAULT_SECTION_ORDER],
           });
@@ -145,7 +192,7 @@ export default function DoctorStorefrontEditor() {
       })();
     }, 1200);
     return () => clearTimeout(t);
-    }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.status, storefront?.section_order]);
+    }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.cover_photo, storefront?.status, storefront?.section_order]);
 
   const shell = (content) => (
     <div className="min-h-screen bg-background flex">
@@ -222,13 +269,6 @@ export default function DoctorStorefrontEditor() {
             />
           </div>
 
-          <div className="bg-card rounded-2xl border border-border/50 p-5">
-            <SectionOrderEditor
-              order={storefront.section_order || []}
-              onChange={(next) => updateStorefront({ section_order: next })}
-            />
-          </div>
-
           <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-6">
             <SimpleListEditor
               storefrontId={storefront.id}
@@ -238,16 +278,14 @@ export default function DoctorStorefrontEditor() {
               placeholder="Ej. Hipertensión"
               items={conditions}
               setItems={setConditions}
+              onPrefill={prefillConditions}
             />
             <div className="border-t border-border/30" />
-            <SimpleListEditor
+            <StorefrontInsurerPicker
               storefrontId={storefront.id}
-              entityName="StorefrontInsurance"
-              field="name"
-              label="Seguros que cubre"
-              placeholder="Ej. GNP"
               items={insurances}
               setItems={setInsurances}
+              specialistInsurerIds={specialist.insurers_relation || []}
             />
           </div>
 
@@ -256,6 +294,7 @@ export default function DoctorStorefrontEditor() {
               storefrontId={storefront.id}
               items={locations}
               setItems={setLocations}
+              onPrefill={prefillLocation}
             />
           </div>
 
@@ -268,10 +307,43 @@ export default function DoctorStorefrontEditor() {
           </div>
 
           <div className="bg-card rounded-2xl border border-border/50 p-5">
+            <GuideLibraryStrip
+              specialistId={specialist.id}
+              specialty={specialist.specialty}
+              products={allProducts}
+              onAdded={(created) => setAllProducts((prev) => [created, ...prev])}
+              emptyStateAction={
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="w-4 h-4 text-brand-blue" />
+                    <h2 className="font-heading font-bold text-base text-foreground">Guías y productos digitales</h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Todavía no hay guías preparadas para {specialist.specialty || "tu especialidad"}. Puedes crear tu propio producto digital para vender en tu página.
+                  </p>
+                  <Button variant="outline" className="rounded-xl gap-1.5" asChild>
+                    <Link to="/panel-medico/productos">
+                      <Plus className="w-4 h-4" />
+                      Crear producto
+                    </Link>
+                  </Button>
+                </div>
+              }
+            />
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
             <FaqEditor
               storefrontId={storefront.id}
               items={faqs}
               setItems={setFaqs}
+            />
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
+            <SectionOrderEditor
+              order={storefront.section_order || []}
+              onChange={(next) => updateStorefront({ section_order: next })}
             />
           </div>
         </div>

@@ -182,8 +182,13 @@ export default function StorefrontProductDetail() {
             {product.title}
           </h1>
           {hasPrice && (
-            <p className="font-heading font-bold text-2xl" style={{ color: CREAM }}>
+            <p className="font-heading font-bold text-2xl flex items-center gap-2" style={{ color: CREAM }}>
               ${product.price.toFixed(0)} MXN
+              {typeof product.compare_at_price === "number" && product.compare_at_price > 0 && (
+                <span className="text-base font-medium line-through text-white/50">
+                  ${product.compare_at_price.toFixed(0)}
+                </span>
+              )}
             </p>
           )}
           {product.description && (
