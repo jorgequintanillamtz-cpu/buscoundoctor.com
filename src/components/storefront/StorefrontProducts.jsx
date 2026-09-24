@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, ChevronRight } from "lucide-react";
-import { CREAM, INK } from "@/lib/storefrontThemes";
 
 /**
  * Sección pública de productos digitales del doctor.
@@ -12,8 +11,8 @@ import { CREAM, INK } from "@/lib/storefrontThemes";
 export default function StorefrontProducts({ items, theme, storefrontSlug }) {
   return (
     <section id="productos" className="scroll-mt-4">
-      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
-        <BookOpen className="w-5 h-5" style={{ color: CREAM }} />
+      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3" style={{ fontFamily: theme.fontHeading }}>
+        <BookOpen className="w-5 h-5" style={{ color: theme.accent }} />
         Guías y recursos
       </h2>
       <div className="space-y-3">
@@ -42,7 +41,7 @@ function ProductCard({ product, theme, storefrontSlug }) {
     <Link
       to={detailUrl}
       className="block rounded-2xl p-4 flex gap-3 items-center active:scale-[0.99] transition-transform"
-      style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+      style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
     >
       <div
         className="w-16 h-24 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm"
@@ -64,10 +63,13 @@ function ProductCard({ product, theme, storefrontSlug }) {
           </p>
         )}
         {hasPrice && (
-          <p className="text-sm font-bold mt-1 flex items-center gap-1.5" style={{ color: CREAM }}>
+          <p className="text-sm font-bold mt-1 flex items-center gap-1.5" style={{ color: theme.accent }}>
             ${product.price.toFixed(0)} MXN
             {hasCompareAt && (
-              <span className="text-xs font-medium line-through opacity-60" style={{ color: "white" }}>
+              <span
+                className="text-xs font-medium line-through opacity-60"
+                style={{ color: theme.textMode === "dark" ? "#1D1D1B" : "white" }}
+              >
                 ${product.compare_at_price.toFixed(0)}
               </span>
             )}
@@ -77,7 +79,7 @@ function ProductCard({ product, theme, storefrontSlug }) {
       <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
         <span
           className="text-[10px] font-semibold px-2.5 py-1 rounded-full opacity-90"
-          style={{ background: CREAM, color: INK }}
+          style={{ background: theme.accent, color: theme.accentText }}
         >
           Disponible pronto
         </span>

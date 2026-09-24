@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowLeft, BookOpen, Loader2 } from "lucide-react";
-import { getStorefrontTheme, CREAM, INK } from "@/lib/storefrontThemes";
+import { resolveStorefrontStyle, STOREFRONT_TEXT_OVERRIDE_CSS, CREAM, INK } from "@/lib/storefrontThemes";
 import ProductPurchaseBlock from "@/components/storefront/ProductPurchaseBlock";
 
 /**
@@ -103,7 +103,7 @@ export default function StorefrontProductDetail() {
     );
   }
 
-  const theme = getStorefrontTheme(storefront?.color_theme);
+  const theme = resolveStorefrontStyle(storefront);
   const images = product.images && product.images.length
     ? product.images
     : product.cover_image
@@ -112,16 +112,17 @@ export default function StorefrontProductDetail() {
   const hasPrice = typeof product.price === "number" && product.price >= 0;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: theme.bg }}>
+    <div className="sf-root min-h-screen flex flex-col" data-sf-text={theme.textMode} style={{ background: theme.bg, fontFamily: theme.fontBody }}>
+      <style>{STOREFRONT_TEXT_OVERRIDE_CSS}</style>
       {/* Header */}
       <header
         className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ background: CREAM }}
+        style={{ background: theme.accent }}
       >
         <Link
           to={`/dr/${slug}`}
           className="flex items-center gap-1.5 text-sm font-semibold"
-          style={{ color: INK }}
+          style={{ color: theme.accentText }}
         >
           <ArrowLeft className="w-4 h-4" />
           Volver
@@ -140,7 +141,7 @@ export default function StorefrontProductDetail() {
           <div className="space-y-3">
             <div
               className="rounded-2xl overflow-hidden aspect-square flex items-center justify-center"
-              style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+              style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
             >
               <img
                 src={images[activeImg]}
@@ -157,7 +158,7 @@ export default function StorefrontProductDetail() {
                     onClick={() => setActiveImg(i)}
                     className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 transition-opacity"
                     style={{
-                      border: i === activeImg ? `2px solid ${CREAM}` : `1px solid ${theme.border}`,
+                      border: i === activeImg ? `2px solid ${theme.accent}` : `1px solid ${theme.border}`,
                       opacity: i === activeImg ? 1 : 0.6,
                     }}
                   >
@@ -170,7 +171,7 @@ export default function StorefrontProductDetail() {
         ) : (
           <div
             className="rounded-2xl aspect-square flex items-center justify-center"
-            style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+            style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
           >
             <BookOpen className="w-16 h-16 text-white/40" />
           </div>
@@ -178,11 +179,11 @@ export default function StorefrontProductDetail() {
 
         {/* 2. Título, descripción y precio */}
         <div className="space-y-2">
-          <h1 className="font-heading font-bold text-xl text-white leading-tight">
+          <h1 className="font-heading font-bold text-xl text-white leading-tight" style={{ fontFamily: theme.fontHeading }}>
             {product.title}
           </h1>
           {hasPrice && (
-            <p className="font-heading font-bold text-2xl flex items-center gap-2" style={{ color: CREAM }}>
+            <p className="font-heading font-bold text-2xl flex items-center gap-2" style={{ color: theme.accent, fontFamily: theme.fontHeading }}>
               ${product.price.toFixed(0)} MXN
               {typeof product.compare_at_price === "number" && product.compare_at_price > 0 && (
                 <span className="text-base font-medium line-through text-white/50">
@@ -205,7 +206,7 @@ export default function StorefrontProductDetail() {
         <Link
           to={`/dr/${slug}`}
           className="w-full flex items-center justify-center gap-2 font-semibold py-3.5 rounded-2xl transition-colors"
-          style={{ background: CREAM, color: INK }}
+          style={{ background: theme.accent, color: theme.accentText }}
         >
           <ArrowLeft className="w-4 h-4" />
           Ver perfil del doctor

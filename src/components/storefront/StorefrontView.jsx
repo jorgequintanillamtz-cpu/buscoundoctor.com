@@ -7,7 +7,7 @@ import StorefrontTimeline from "./StorefrontTimeline";
 import StorefrontFAQ from "./StorefrontFAQ";
 import StorefrontProducts from "./StorefrontProducts";
 import { buildWhatsAppLink } from "@/lib/storefrontUtils";
-import { getStorefrontTheme, CREAM, INK, WA_GREEN } from "@/lib/storefrontThemes";
+import { resolveStorefrontStyle, STOREFRONT_TEXT_OVERRIDE_CSS, WA_GREEN } from "@/lib/storefrontThemes";
 import { resolveSections } from "@/lib/storefrontSections";
 
 /**
@@ -33,7 +33,7 @@ export default function StorefrontView({
   embedded = false,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const theme = getStorefrontTheme(storefront?.color_theme);
+  const theme = resolveStorefrontStyle(storefront);
   const doctorName = specialist?.full_name || "";
   // La página pública puede tener su propia foto de portada, independiente
   // de la del perfil real del directorio -- si no se ha subido una propia,
@@ -58,8 +58,8 @@ export default function StorefrontView({
       case "conditions":
         return (
           <section id="detalle" className="scroll-mt-4">
-            <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
-              <Stethoscope className="w-5 h-5" style={{ color: CREAM }} />
+            <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3" style={{ fontFamily: theme.fontHeading }}>
+              <Stethoscope className="w-5 h-5" style={{ color: theme.accent }} />
               Qué atiende
             </h2>
             <ul className="space-y-2">
@@ -67,11 +67,11 @@ export default function StorefrontView({
                 <li
                   key={c.id}
                   className="flex items-center gap-2.5 rounded-xl px-4 py-2.5"
-                  style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+                  style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
                 >
                   <span
                     className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: CREAM }}
+                    style={{ background: theme.accent }}
                   />
                   <span className="text-white/90 text-sm">{c.text}</span>
                 </li>
@@ -109,13 +109,20 @@ export default function StorefrontView({
 
   return (
     <div
-      className="relative flex flex-col min-h-screen"
-      style={{ background: theme.bg }}
+      className="sf-root relative flex flex-col min-h-screen"
+      data-sf-text={theme.textMode}
+      style={{ background: theme.bg, fontFamily: theme.fontBody }}
     >
+      {/* Con fondo claro, el texto blanco de siempre no se lee -- estas
+          reglas reemplazan las clases text-white/* SOLO dentro de esta
+          página (por el selector [data-sf-text="dark"]) cuando el doctor
+          elige letra oscura desde el editor de estilo. Ganan por
+          especificidad sobre la clase de Tailwind, sin necesitar !important. */}
+      <style>{STOREFRONT_TEXT_OVERRIDE_CSS}</style>
       {/* Header tipo app */}
       <header
         className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ background: CREAM }}
+        style={{ background: theme.accent }}
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <span
@@ -127,12 +134,15 @@ export default function StorefrontView({
           <div className="min-w-0">
             <p
               className="font-heading font-bold text-sm leading-tight truncate"
-              style={{ color: INK }}
+              style={{ color: theme.accentText, fontFamily: theme.fontHeading }}
             >
               {doctorName || "Mi página"}
             </p>
             {specialty && (
-              <p className="text-xs leading-tight truncate" style={{ color: "#6b6b66" }}>
+              <p
+                className="text-xs leading-tight truncate"
+                style={{ color: theme.accentText === "#FFFFFF" ? "rgba(255,255,255,0.75)" : "#6b6b66" }}
+              >
                 {specialty}
               </p>
             )}
@@ -143,7 +153,7 @@ export default function StorefrontView({
           className="p-1.5 rounded-lg flex-shrink-0"
           aria-label="Abrir menú"
         >
-          <Menu className="w-5 h-5" style={{ color: INK }} />
+          <Menu className="w-5 h-5" style={{ color: theme.accentText }} />
         </button>
       </header>
 
@@ -153,15 +163,15 @@ export default function StorefrontView({
           <div className="absolute inset-0 bg-black/30" />
           <div
             className="absolute right-0 top-0 h-full w-72 max-w-[85%] shadow-2xl p-5 flex flex-col"
-            style={{ background: CREAM }}
+            style={{ background: theme.accent }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <p className="font-heading font-bold text-base" style={{ color: INK }}>
+              <p className="font-heading font-bold text-base" style={{ color: theme.accentText, fontFamily: theme.fontHeading }}>
                 Secciones
               </p>
               <button onClick={() => setMenuOpen(false)} className="p-1.5 rounded-lg" aria-label="Cerrar menú">
-                <X className="w-5 h-5" style={{ color: INK }} />
+                <X className="w-5 h-5" style={{ color: theme.accentText }} />
               </button>
             </div>
             <nav className="space-y-1">
@@ -171,7 +181,7 @@ export default function StorefrontView({
                   href={`#${s.anchor}`}
                   onClick={() => setMenuOpen(false)}
                   className="block px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-black/5"
-                  style={{ color: INK }}
+                  style={{ color: theme.accentText }}
                 >
                   {s.label}
                 </a>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ import {
   Globe,
   Sparkles,
   Plus,
-  BookOpen,
+  Palette,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StorefrontView from "@/components/storefront/StorefrontView";
@@ -19,6 +19,7 @@ import TimelineEditor from "@/components/storefront/editor/TimelineEditor";
 import FaqEditor from "@/components/storefront/editor/FaqEditor";
 import LocationEditor from "@/components/storefront/editor/LocationEditor";
 import SectionOrderEditor from "@/components/storefront/editor/SectionOrderEditor";
+import StorefrontStyleEditor from "@/components/storefront/editor/StorefrontStyleEditor";
 import GuideLibraryStrip from "@/components/products/GuideLibraryStrip";
 import { generateUniqueSlug, byPosition } from "@/lib/storefrontUtils";
 import { DEFAULT_SECTION_ORDER } from "@/lib/storefrontSections";
@@ -37,6 +38,20 @@ export default function DoctorStorefrontEditor() {
   const [allProducts, setAllProducts] = useState([]); // todos (incluye borrador), para la biblioteca de guías
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [showStyleEditor, setShowStyleEditor] = useState(false);
+  const styleEditorDesktopRef = useRef(null);
+  const styleEditorMobileRef = useRef(null);
+
+  // Al abrir el panel, lleva la vista hasta él -- dentro del contenedor con
+  // scroll propio que le corresponda (desktop o móvil), no de toda la página.
+  useEffect(() => {
+    if (!showStyleEditor) return;
+    const t = setTimeout(() => {
+      styleEditorDesktopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      styleEditorMobileRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [showStyleEditor]);
 
   useEffect(() => {
     let active = true;
@@ -163,6 +178,10 @@ export default function DoctorStorefrontEditor() {
         whatsapp_message: values.whatsapp_message,
         headline: values.headline,
         cover_photo: values.cover_photo,
+        bg_color: values.bg_color,
+        accent_color: values.accent_color,
+        font_family: values.font_family,
+        text_color: values.text_color,
         status: values.status,
         section_order: values.section_order || [...DEFAULT_SECTION_ORDER],
       });
@@ -185,6 +204,10 @@ export default function DoctorStorefrontEditor() {
             whatsapp_message: storefront.whatsapp_message,
             headline: storefront.headline,
             cover_photo: storefront.cover_photo,
+            bg_color: storefront.bg_color,
+            accent_color: storefront.accent_color,
+            font_family: storefront.font_family,
+            text_color: storefront.text_color,
             status: storefront.status,
             section_order: storefront.section_order || [...DEFAULT_SECTION_ORDER],
           });
@@ -192,7 +215,7 @@ export default function DoctorStorefrontEditor() {
       })();
     }, 1200);
     return () => clearTimeout(t);
-    }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.cover_photo, storefront?.status, storefront?.section_order]);
+    }, [storefront?.whatsapp_phone, storefront?.whatsapp_message, storefront?.headline, storefront?.cover_photo, storefront?.bg_color, storefront?.accent_color, storefront?.font_family, storefront?.text_color, storefront?.status, storefront?.section_order]);
 
   const shell = (content) => (
     <div className="min-h-screen bg-background flex">
@@ -269,7 +292,7 @@ export default function DoctorStorefrontEditor() {
             />
           </div>
 
-          <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-6">
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
             <SimpleListEditor
               storefrontId={storefront.id}
               entityName="StorefrontCondition"
@@ -280,7 +303,20 @@ export default function DoctorStorefrontEditor() {
               setItems={setConditions}
               onPrefill={prefillConditions}
             />
-            <div className="border-t border-border/30" />
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
+            <GuideLibraryStrip
+              specialistId={specialist.id}
+              specialty={specialist.specialty}
+              products={allProducts}
+              onAdded={(created) => setAllProducts((prev) => [created, ...prev])}
+              createOwnHref="/panel-medico/productos"
+              title="Guías y productos digitales"
+            />
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
             <StorefrontInsurerPicker
               storefrontId={storefront.id}
               items={insurances}
@@ -307,32 +343,6 @@ export default function DoctorStorefrontEditor() {
           </div>
 
           <div className="bg-card rounded-2xl border border-border/50 p-5">
-            <GuideLibraryStrip
-              specialistId={specialist.id}
-              specialty={specialist.specialty}
-              products={allProducts}
-              onAdded={(created) => setAllProducts((prev) => [created, ...prev])}
-              emptyStateAction={
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="w-4 h-4 text-brand-blue" />
-                    <h2 className="font-heading font-bold text-base text-foreground">Guías y productos digitales</h2>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Todavía no hay guías preparadas para {specialist.specialty || "tu especialidad"}. Puedes crear tu propio producto digital para vender en tu página.
-                  </p>
-                  <Button variant="outline" className="rounded-xl gap-1.5" asChild>
-                    <Link to="/panel-medico/productos">
-                      <Plus className="w-4 h-4" />
-                      Crear producto
-                    </Link>
-                  </Button>
-                </div>
-              }
-            />
-          </div>
-
-          <div className="bg-card rounded-2xl border border-border/50 p-5">
             <FaqEditor
               storefrontId={storefront.id}
               items={faqs}
@@ -348,13 +358,21 @@ export default function DoctorStorefrontEditor() {
           </div>
         </div>
 
-        {/* Columna de preview (sticky en desktop) */}
+        {/* Columna de preview (sticky en desktop, con su propio scroll
+            interno -- independiente del scroll de la columna de edición, así
+            abrir "Editar estilo" no obliga a bajar por todo el formulario). */}
         <div className="hidden lg:block">
-          <div className="sticky top-20">
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              Vista previa
-            </p>
+          <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                Vista previa
+              </p>
+              <Button size="sm" className="rounded-lg h-7 px-2.5 text-xs gap-1.5 bg-brand-blue hover:bg-brand-blue/90 text-white" onClick={() => setShowStyleEditor((v) => !v)}>
+                <Palette className="w-3.5 h-3.5" />
+                Editar estilo
+              </Button>
+            </div>
             <div className="rounded-[2rem] border-8 border-gray-800 overflow-hidden shadow-2xl">
               <div className="h-[600px] overflow-y-auto">
                 <StorefrontView
@@ -370,15 +388,26 @@ export default function DoctorStorefrontEditor() {
                 />
               </div>
             </div>
+            {showStyleEditor && (
+              <div ref={styleEditorDesktopRef}>
+                <StorefrontStyleEditor storefront={storefront} onChange={updateStorefront} />
+              </div>
+            )}
           </div>
         </div>
 
         {/* Preview en móvil (debajo de todo) */}
         <div className="lg:hidden">
-          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            Vista previa
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              Vista previa
+            </p>
+            <Button size="sm" className="rounded-lg h-7 px-2.5 text-xs gap-1.5 bg-brand-blue hover:bg-brand-blue/90 text-white" onClick={() => setShowStyleEditor((v) => !v)}>
+              <Palette className="w-3.5 h-3.5" />
+              Editar estilo
+            </Button>
+          </div>
           <div className="rounded-2xl border-4 border-gray-800 overflow-hidden shadow-xl">
             <div className="h-[500px] overflow-y-auto">
               <StorefrontView
@@ -394,6 +423,11 @@ export default function DoctorStorefrontEditor() {
                 />
             </div>
           </div>
+          {showStyleEditor && (
+            <div ref={styleEditorMobileRef}>
+              <StorefrontStyleEditor storefront={storefront} onChange={updateStorefront} />
+            </div>
+          )}
         </div>
       </div>
     </div>

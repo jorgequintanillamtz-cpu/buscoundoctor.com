@@ -8,7 +8,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { buildWhatsAppLink, normalizePhone } from "@/lib/storefrontUtils";
+import { buildWhatsAppLink } from "@/lib/storefrontUtils";
 
 export default function StorefrontSettingsForm({ storefront, specialist, onChange }) {
   const [copied, setCopied] = useState(false);
@@ -23,7 +23,6 @@ export default function StorefrontSettingsForm({ storefront, specialist, onChang
     storefront.whatsapp_message,
     doctorName
   );
-  const normalized = normalizePhone(storefront.whatsapp_phone);
   const coverPhoto = storefront.cover_photo || specialist?.profile_photo || "";
 
   const copyUrl = () => {
@@ -111,21 +110,21 @@ export default function StorefrontSettingsForm({ storefront, specialist, onChang
       {/* WhatsApp */}
       <div>
         <Label className="text-sm font-medium">Teléfono de WhatsApp para citas</Label>
-        <Input
-          value={storefront.whatsapp_phone || ""}
-          onChange={(e) => onChange({ whatsapp_phone: e.target.value })}
-          placeholder="Ej. 55 1234 5678 o +52 55 1234 5678"
-          className="mt-1.5"
-        />
+        <div className="flex items-center gap-2 mt-1.5">
+          <span className="flex-shrink-0 h-10 px-3 rounded-lg border border-input bg-muted/50 flex items-center text-sm font-medium text-muted-foreground">
+            +52
+          </span>
+          <Input
+            value={storefront.whatsapp_phone || ""}
+            onChange={(e) => onChange({ whatsapp_phone: e.target.value })}
+            placeholder="Ej. 81 1234 5678"
+            className="flex-1"
+          />
+        </div>
         {storefront.whatsapp_phone && (
           <p className="text-xs text-muted-foreground mt-1.5">
             Link generado:{" "}
             <span className="font-mono text-[11px] break-all">{previewLink}</span>
-          </p>
-        )}
-        {normalized && storefront.whatsapp_phone && normalized !== storefront.whatsapp_phone.replace(/\D/g, "") && (
-          <p className="text-xs text-amber-600 mt-1">
-            Se normalizará a: {normalized}
           </p>
         )}
       </div>

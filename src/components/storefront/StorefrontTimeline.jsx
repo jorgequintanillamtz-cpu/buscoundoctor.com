@@ -1,12 +1,11 @@
 import React from "react";
 import { GraduationCap } from "lucide-react";
-import { CREAM } from "@/lib/storefrontThemes";
 
 export default function StorefrontTimeline({ items, theme }) {
   return (
     <section id="trayectoria" className="scroll-mt-4">
-      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
-        <GraduationCap className="w-5 h-5" style={{ color: CREAM }} />
+      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3" style={{ fontFamily: theme.fontHeading }}>
+        <GraduationCap className="w-5 h-5" style={{ color: theme.accent }} />
         Trayectoria
       </h2>
       <div className="relative pl-6 space-y-4">
@@ -15,10 +14,10 @@ export default function StorefrontTimeline({ items, theme }) {
           <div key={item.id} className="relative">
             <div
               className="absolute -left-[18px] top-1.5 w-3 h-3 rounded-full"
-              style={{ background: CREAM }}
+              style={{ background: theme.accent }}
             />
             {item.year && (
-              <span className="font-semibold text-sm" style={{ color: CREAM }}>
+              <span className="font-semibold text-sm" style={{ color: theme.accent }}>
                 {item.year}
               </span>
             )}

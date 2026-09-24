@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { BookOpen, FileText, Plus, CheckCircle2, X } from "lucide-react";
@@ -15,8 +16,10 @@ import { Button } from "@/components/ui/button";
  * - specialistId, specialty
  * - products: catálogo actual del doctor (para saber cuáles guías ya agregó)
  * - onAdded(newProduct): se llama al agregar una guía con éxito
- * - emptyStateAction: qué mostrar si no hay guías para la especialidad
- *   (ej. un botón/link para crear un producto propio). null = no mostrar nada.
+ * - createOwnHref: si se pasa, siempre se muestra un link "crear tu propio
+ *   producto" (con o sin guías en la biblioteca) apuntando ahí -- en
+ *   DoctorProducts.jsx no se pasa porque esa pantalla ya tiene su propia
+ *   tarjeta de "Crear producto" en la cuadrícula de abajo.
  * - title, description: textos del encabezado (opcionales)
  */
 export default function GuideLibraryStrip({
@@ -24,7 +27,7 @@ export default function GuideLibraryStrip({
   specialty,
   products,
   onAdded,
-  emptyStateAction = null,
+  createOwnHref = null,
   title = "Biblioteca de guías para tu especialidad",
   description,
 }) {
@@ -71,7 +74,8 @@ export default function GuideLibraryStrip({
   };
 
   if (!loaded) return null;
-  if (guides.length === 0) return emptyStateAction;
+  const hasGuides = guides.length > 0;
+  if (!hasGuides && !createOwnHref) return null;
 
   return (
     <div className="mb-7">
@@ -79,9 +83,13 @@ export default function GuideLibraryStrip({
         <BookOpen className="w-4 h-4 text-brand-blue" />
         <h2 className="font-heading font-bold text-base text-foreground">{title}</h2>
       </div>
+
       <p className="text-sm text-muted-foreground mb-3">
-        {description || `Preparadas por BuscoUnDoctor para ${specialty || "tu especialidad"}. Agrégalas a tu catálogo y ajusta precio o descripción antes de activarlas.`}
+        {hasGuides
+          ? (description || `Preparadas por BuscoUnDoctor para ${specialty || "tu especialidad"}. Agrégalas a tu catálogo y ajusta precio o descripción antes de activarlas.`)
+          : `Todavía no hay guías preparadas por BuscoUnDoctor para ${specialty || "tu especialidad"}.`}
       </p>
+
       <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
         {guides.map((g) => {
           const added = addedGuideIds.has(g.id);
@@ -121,6 +129,19 @@ export default function GuideLibraryStrip({
             </div>
           );
         })}
+
+        {/* "Producto fantasma": portada vacía con + para subir su propia guía,
+            en vez de un botón de texto -- se ve como una guía más de la fila. */}
+        {createOwnHref && (
+          <Link to={createOwnHref} className="flex-shrink-0 w-32 group">
+            <div className="w-32 h-44 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-1.5 group-hover:border-brand-blue group-hover:bg-accent/20 transition-colors">
+              <Plus className="w-7 h-7 text-muted-foreground/50 group-hover:text-brand-blue transition-colors" />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 leading-snug group-hover:text-foreground transition-colors">
+              Subir tu guía personalizada
+            </p>
+          </Link>
+        )}
       </div>
 
       {viewingGuide && (
