@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { loadPremiumStatuses, mergePremiumStatus } from "@/api/premiumStatus";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
-  Stethoscope, TrendingUp, BarChart3, Heart, MapPin, Filter,
+  Stethoscope, TrendingUp, BarChart3, Heart, MapPin,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -46,15 +46,6 @@ function SectionLabel({ icon: Icon, children }) {
 function weekLabel(weekStart) {
   return format(weekStart, "d MMM", { locale: es });
 }
-
-// El paso del formulario público (/registro-medico) en el que se guardó el
-// último avance -- lo escribe la RPC save_registration_draft cada vez que
-// alguien completa "Datos", "Ubicación" o "Fotos", antes incluso de tener
-// cuenta. Un doctor creado por otro camino (ej. el editor del admin) nunca
-// toca esta columna, así que sirve para aislar solo intentos de
-// autoregistro público del resto de la tabla specialist.
-const STEP_LABELS = { datos: "Datos", ubicacion: "Ubicación", fotos: "Fotos" };
-const STEP_ORDER = ["datos", "ubicacion", "fotos"];
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -128,37 +119,6 @@ export default function Dashboard() {
     });
   }, [specialists]);
 
-  // ---- Embudo de registro (últimos 30 días): cuántos empiezan a llenar
-  // /registro-medico, cuántos sí terminan (crean su cuenta), y en qué paso
-  // se quedan los que no. Un intento "termina" cuando queda con
-  // owner_user_id -- create_doctor_profile lo pone al reclamar el borrador;
-  // mientras tanto, el borrador vive con publication_status='draft' y sin
-  // dueño. Ojo: esto mide desde que alguien ya llenó nombre+WhatsApp+
-  // especialidad (lo mínimo para que se guarde el primer borrador) -- no
-  // sabemos cuánta gente solo abrió la página sin llegar a eso; para verlo
-  // haría falta Google Analytics/Search Console, que hoy no está conectado.
-  const registrationFunnel = useMemo(() => {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const attempts = specialists.filter(
-      (s) => s.registration_step && s.created_date && new Date(s.created_date) >= thirtyDaysAgo
-    );
-    const finished = attempts.filter((s) => s.owner_user_id);
-    const stuck = attempts.filter((s) => !s.owner_user_id);
-    const stuckByStep = STEP_ORDER.map((step) => ({
-      step,
-      label: STEP_LABELS[step],
-      count: stuck.filter((s) => s.registration_step === step).length,
-    }));
-    return {
-      started: attempts.length,
-      finished: finished.length,
-      stuckTotal: stuck.length,
-      conversionPct: attempts.length > 0 ? Math.round((finished.length / attempts.length) * 100) : null,
-      stuckByStep,
-    };
-  }, [specialists]);
-
   // ---- Doctores por especialidad: top 8, el resto agrupado en "Otras" ----
   const specialtyData = useMemo(() => {
     const totals = {};
@@ -223,47 +183,6 @@ export default function Dashboard() {
           <StatCard label="Doctores activos" value={business.activeDoctors} tone="navy" />
           <StatCard label="Doctores premium" value={business.premiumDoctors} tone="blue" />
           <StatCard label="Valor ventas al mes (cobrado)" value={fmtMoney(business.monthlyValue)} tone="navy" />
-        </div>
-      </section>
-
-      {/* Embudo de registro: no solo "cuántos", sino "dónde se quedan" los
-          que no terminan -- para saber si conviene simplificar el
-          formulario o si el problema es que casi nadie ni siquiera lo
-          empieza. */}
-      <section className="mb-6">
-        <SectionLabel icon={Filter}>Embudo de registro</SectionLabel>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3">
-          <StatCard label="Empezaron el registro (30 días)" value={registrationFunnel.started} tone="blue" />
-          <StatCard label="Crearon su cuenta" value={registrationFunnel.finished} tone="navy" />
-          <StatCard label="Tasa de conversión" value={registrationFunnel.conversionPct != null ? `${registrationFunnel.conversionPct}%` : "—"} tone="blue" />
-        </div>
-        <div className="bg-card border border-border/50 rounded-2xl p-4">
-          <p className="text-sm font-semibold text-foreground mb-1">¿En qué paso se quedan los que no terminan?</p>
-          <p className="text-xs text-muted-foreground mb-3">
-            Solo cuenta a quienes ya empezaron a escribir su nombre — no sabemos cuánta gente nomás abrió la página sin escribir nada.
-          </p>
-          {registrationFunnel.started === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Todavía no hay intentos de registro en los últimos 30 días.</p>
-          ) : registrationFunnel.stuckTotal === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Todos los que empezaron, terminaron. 🎉</p>
-          ) : (
-            <div className="space-y-2.5">
-              {registrationFunnel.stuckByStep.map((s) => (
-                <div key={s.step}>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-medium text-foreground">Se quedaron en "{s.label}"</span>
-                    <span className="text-muted-foreground">{s.count}</span>
-                  </div>
-                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 rounded-full"
-                      style={{ width: `${Math.round((s.count / registrationFunnel.stuckTotal) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

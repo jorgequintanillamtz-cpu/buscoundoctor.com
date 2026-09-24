@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { ClipboardList, Search, Eye, CheckCircle2, AlertTriangle, Stethoscope } from "lucide-react";
+import { ClipboardList, Search, Eye, CheckCircle2, AlertTriangle, Stethoscope, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePaginatedList } from "@/api/usePaginatedList";
@@ -20,6 +20,28 @@ const RANGE_OPTIONS = [
 function fmtDateTime(d) {
   if (!d) return "—";
   return new Date(d).toLocaleString("es-MX", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+// Mismo chip de título y tarjeta azul/navy que ya usaba el Dashboard --
+// "Embudo de registro" se mudó para acá (2026-09-23, a petición de Jorge)
+// porque encaja mejor junto al detalle de cada registro que arriba, en el
+// resumen general del negocio.
+const FUNNEL_STAT_TONES = { blue: "bg-brand-blue", navy: "bg-brand-navy" };
+function FunnelStatCard({ label, value, tone = "blue" }) {
+  return (
+    <div className={`rounded-xl p-3.5 ${FUNNEL_STAT_TONES[tone]}`}>
+      <p className="text-sm font-semibold text-white/90 mb-1">{label}</p>
+      <p className="font-heading font-extrabold text-4xl text-white leading-tight">{value}</p>
+    </div>
+  );
+}
+function SectionLabel({ icon: Icon, children }) {
+  return (
+    <h2 className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide bg-brand-bluePale text-brand-navy px-2.5 py-1 rounded-full mb-3">
+      {Icon && <Icon className="w-3 h-3" />}
+      {children}
+    </h2>
+  );
 }
 
 function EstadoBadge({ r }) {
@@ -147,6 +169,33 @@ export default function AdminRegistros() {
     abandonados: specialists.filter((s) => !s.owner_user_id).length,
   }), [specialists]);
 
+  // ---- Embudo de registro (últimos 30 días): cuántos empiezan, cuántos sí
+  // terminan (crean su cuenta), y en qué paso se quedan los que no. Mudado
+  // aquí desde el Dashboard (2026-09-23, a petición de Jorge). Ojo: mide
+  // desde que alguien ya llenó nombre+WhatsApp+especialidad (lo mínimo para
+  // que se guarde el primer borrador) -- no sabemos cuánta gente solo abrió
+  // la página sin llegar a eso; para verlo haría falta Google Analytics/
+  // Search Console, que hoy no está conectado.
+  const registrationFunnel = useMemo(() => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const attempts = specialists.filter((s) => s.created_date && new Date(s.created_date) >= thirtyDaysAgo);
+    const finished = attempts.filter((s) => s.owner_user_id);
+    const stuck = attempts.filter((s) => !s.owner_user_id);
+    const stuckByStep = STEP_ORDER.map((step) => ({
+      step,
+      label: STEP_LABELS[step],
+      count: stuck.filter((s) => s.registration_step === step).length,
+    }));
+    return {
+      started: attempts.length,
+      finished: finished.length,
+      stuckTotal: stuck.length,
+      conversionPct: attempts.length > 0 ? Math.round((finished.length / attempts.length) * 100) : null,
+      stuckByStep,
+    };
+  }, [specialists]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -164,6 +213,43 @@ export default function AdminRegistros() {
       <p className="text-sm text-muted-foreground mb-6">
         Todos los que han empezado a registrarse en <code className="text-xs">/registro-medico</code>, terminaron o no, con lo que alcanzaron a llenar y en qué paso se quedaron.
       </p>
+
+      <section className="mb-6">
+        <SectionLabel icon={Filter}>Embudo de registro</SectionLabel>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3">
+          <FunnelStatCard label="Empezaron el registro (30 días)" value={registrationFunnel.started} tone="blue" />
+          <FunnelStatCard label="Crearon su cuenta" value={registrationFunnel.finished} tone="navy" />
+          <FunnelStatCard label="Tasa de conversión" value={registrationFunnel.conversionPct != null ? `${registrationFunnel.conversionPct}%` : "—"} tone="blue" />
+        </div>
+        <div className="bg-card border border-border/50 rounded-2xl p-4">
+          <p className="text-sm font-semibold text-foreground mb-1">¿En qué paso se quedan los que no terminan?</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            Solo cuenta a quienes ya empezaron a escribir su nombre — no sabemos cuánta gente nomás abrió la página sin escribir nada.
+          </p>
+          {registrationFunnel.started === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Todavía no hay intentos de registro en los últimos 30 días.</p>
+          ) : registrationFunnel.stuckTotal === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Todos los que empezaron, terminaron. 🎉</p>
+          ) : (
+            <div className="space-y-2.5">
+              {registrationFunnel.stuckByStep.map((s) => (
+                <div key={s.step}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="font-medium text-foreground">Se quedaron en "{s.label}"</span>
+                    <span className="text-muted-foreground">{s.count}</span>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-500 rounded-full"
+                      style={{ width: `${Math.round((s.count / registrationFunnel.stuckTotal) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       <div className="grid grid-cols-3 gap-2.5 mb-5 max-w-md">
         <div className="bg-card border border-border/50 rounded-2xl p-3.5">
