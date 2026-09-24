@@ -3,10 +3,18 @@ import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ArrowUp, ArrowDown, Pencil, Check, X } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Pencil, Check, X, Sparkles } from "lucide-react";
 import { byPosition } from "@/lib/storefrontUtils";
 
 const MAX_FAQS = 5;
+
+// Sugerencias solo de pregunta -- sin respuesta, a propósito: cada doctor
+// responde según su propio precio, consultorio y horarios.
+const SUGGESTED_QUESTIONS = [
+  "¿Cuánto cuesta una consulta?",
+  "¿Dónde se ubica su consultorio?",
+  "¿Cuándo tiene disponibilidad?",
+];
 
 export default function FaqEditor({ storefrontId, items, setItems }) {
   const [newQ, setNewQ] = useState("");
@@ -76,6 +84,30 @@ export default function FaqEditor({ storefrontId, items, setItems }) {
           {items.length}/{MAX_FAQS}
         </span>
       </div>
+
+      {/* Sugerencias: solo la pregunta -- el doctor llena la respuesta con
+          su propio precio/consultorio/horario. */}
+      {!atLimit && SUGGESTED_QUESTIONS.some((q) => !items.some((i) => i.question === q)) && (
+        <div className="mb-3">
+          <p className="text-[11px] font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Sugerencias
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {SUGGESTED_QUESTIONS.filter((q) => !items.some((i) => i.question === q)).map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => setNewQ(q)}
+                className="text-xs font-medium px-2.5 py-1.5 rounded-full border border-border/60 text-muted-foreground hover:border-brand-blue hover:text-brand-blue transition-colors flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" />
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Agregar nuevo */}
       {!atLimit && (

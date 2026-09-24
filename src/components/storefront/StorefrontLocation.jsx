@@ -1,6 +1,5 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import { CREAM } from "@/lib/storefrontThemes";
 import { hasGoogleMaps, buildEmbedUrl } from "@/lib/googleMaps";
 
 export default function StorefrontLocation({ items, theme }) {
@@ -15,13 +14,13 @@ export default function StorefrontLocation({ items, theme }) {
 
   return (
     <section id="ubicacion" className="scroll-mt-4">
-      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
-        <MapPin className="w-5 h-5" style={{ color: CREAM }} />
+      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3" style={{ fontFamily: theme.fontHeading }}>
+        <MapPin className="w-5 h-5" style={{ color: theme.accent }} />
         Dónde encontrarme
       </h2>
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+        style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
       >
         {loc.place_name && (
           <p className="font-semibold text-white px-4 pt-4 text-sm">{loc.place_name}</p>

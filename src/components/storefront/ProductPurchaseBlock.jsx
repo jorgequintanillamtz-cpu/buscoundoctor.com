@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Lock, Loader2, CheckCircle2, Clock, Download, AlertCircle } from "lucide-react";
-import { CREAM, INK } from "@/lib/storefrontThemes";
 
 /**
  * Bloque de compra del detalle de producto (Fase 5).
@@ -114,7 +113,7 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
     if (saleStatus === "checking") {
       return (
         <Block theme={theme}>
-          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-3" style={{ color: CREAM }} />
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-3" style={{ color: theme.accent }} />
           <p className="font-heading font-semibold text-white text-sm">Confirmando tu pago…</p>
           <p className="text-white/60 text-xs mt-1">Esto toma unos segundos.</p>
         </Block>
@@ -124,14 +123,14 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
       return (
         <Block theme={theme}>
           <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: theme.deep }}>
-            <CheckCircle2 className="w-6 h-6" style={{ color: CREAM }} />
+            <CheckCircle2 className="w-6 h-6" style={{ color: theme.accent }} />
           </div>
           <p className="font-heading font-semibold text-white text-sm mb-1">¡Pago confirmado!</p>
           <p className="text-white/60 text-xs mb-4">Tu compra está lista para descargar.</p>
           <a
             href={downloadUrl}
             className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl transition-transform active:scale-95"
-            style={{ background: CREAM, color: INK }}
+            style={{ background: theme.accent, color: theme.accentText }}
           >
             <Download className="w-4 h-4" />
             Descargar guía
@@ -146,7 +145,7 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
       return (
         <Block theme={theme}>
           <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: theme.deep }}>
-            <Clock className="w-6 h-6" style={{ color: CREAM }} />
+            <Clock className="w-6 h-6" style={{ color: theme.accent }} />
           </div>
           <p className="font-heading font-semibold text-white text-sm mb-1">Estamos procesando tu pago</p>
           <p className="text-white/60 text-xs">
@@ -159,7 +158,7 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
       return (
         <Block theme={theme}>
           <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: theme.deep }}>
-            <AlertCircle className="w-6 h-6" style={{ color: CREAM }} />
+            <AlertCircle className="w-6 h-6" style={{ color: theme.accent }} />
           </div>
           <p className="font-heading font-semibold text-white text-sm mb-1">El link de descarga expiró</p>
           <p className="text-white/60 text-xs">Contacta al doctor para volver a recibirlo.</p>
@@ -187,7 +186,7 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
   if (stripeConnected === null) {
     return (
       <Block theme={theme}>
-        <Loader2 className="w-5 h-5 animate-spin mx-auto" style={{ color: CREAM }} />
+        <Loader2 className="w-5 h-5 animate-spin mx-auto" style={{ color: theme.accent }} />
       </Block>
     );
   }
@@ -233,7 +232,7 @@ export default function ProductPurchaseBlock({ product, slug, theme }) {
           type="submit"
           disabled={creating}
           className="w-full flex items-center justify-center gap-2 font-semibold py-3 rounded-xl transition-transform active:scale-95 disabled:opacity-60"
-          style={{ background: CREAM, color: INK }}
+          style={{ background: theme.accent, color: theme.accentText }}
         >
           {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : priceLabel}
         </button>
@@ -252,7 +251,7 @@ function Block({ theme, children }) {
   return (
     <div
       className="rounded-2xl p-5"
-      style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+      style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
     >
       {children}
     </div>

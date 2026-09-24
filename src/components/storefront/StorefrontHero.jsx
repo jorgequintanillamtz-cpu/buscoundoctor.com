@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { MessageCircle, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
-import { CREAM, INK } from "@/lib/storefrontThemes";
 import { buildWhatsAppLink } from "@/lib/storefrontUtils";
 
 const WEEKDAY_SHORT = ["Lun", "Mar", "Mié", "Jue", "Vie"];
@@ -40,7 +39,7 @@ function getWeekdays(weekOffset) {
  * "Agenda tu valoración". Los días de la semana actual que ya pasaron
  * quedan deshabilitados.
  */
-function WeekDayPicker({ selectedDate, onSelect }) {
+function WeekDayPicker({ theme, selectedDate, onSelect }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const days = useMemo(() => getWeekdays(weekOffset), [weekOffset]);
   const today = useMemo(() => { const t = new Date(); t.setHours(0, 0, 0, 0); return t; }, []);
@@ -83,9 +82,9 @@ function WeekDayPicker({ selectedDate, onSelect }) {
               onClick={() => onSelect(isSelected ? null : d)}
               className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-transform disabled:cursor-not-allowed disabled:opacity-40"
               style={{
-                background: CREAM,
-                color: INK,
-                boxShadow: isSelected ? `0 0 0 2px ${INK}` : "none",
+                background: theme.accent,
+                color: theme.accentText,
+                boxShadow: isSelected ? `0 0 0 2px ${theme.accentText}` : "none",
               }}
             >
               <span className="text-[10px] font-medium opacity-70">{WEEKDAY_SHORT[d.getDay() - 1]}</span>
@@ -139,12 +138,12 @@ export default function StorefrontHero({
           src={photo}
           alt={name}
           className="w-56 h-56 sm:w-60 sm:h-60 rounded-full object-cover mb-5"
-          style={{ boxShadow: `0 0 0 5px ${CREAM}, 0 12px 30px rgba(0,0,0,0.25)` }}
+          style={{ boxShadow: `0 0 0 5px ${theme.accent}, 0 12px 30px rgba(0,0,0,0.25)` }}
         />
       ) : (
         <div
           className="w-56 h-56 sm:w-60 sm:h-60 rounded-full mb-5 flex items-center justify-center"
-          style={{ background: theme.deep, boxShadow: `0 0 0 5px ${CREAM}` }}
+          style={{ background: theme.deep, boxShadow: `0 0 0 5px ${theme.accent}` }}
         >
           <span className="text-6xl font-bold text-white">
             {name ? name.charAt(0).toUpperCase() : "?"}
@@ -158,13 +157,13 @@ export default function StorefrontHero({
           className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-white px-3.5 py-1.5 rounded-full mb-5 uppercase"
           style={{ background: theme.pill }}
         >
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: CREAM }} />
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: theme.accent }} />
           {pillText}
         </span>
       )}
 
       {/* Título grande */}
-      <h1 className="font-heading font-bold text-2xl sm:text-3xl text-white leading-tight max-w-sm">
+      <h1 className="font-heading font-bold text-2xl sm:text-3xl text-white leading-tight max-w-sm" style={{ fontFamily: theme.fontHeading }}>
         {bigTitle}
       </h1>
 
@@ -180,13 +179,13 @@ export default function StorefrontHero({
 
       {/* Selector de día + CTA de WhatsApp */}
       <div className="w-full max-w-sm mt-7 flex flex-col items-center">
-        <WeekDayPicker selectedDate={selectedDate} onSelect={setSelectedDate} />
+        <WeekDayPicker theme={theme} selectedDate={selectedDate} onSelect={setSelectedDate} />
         <a
           href={whatsappLink}
           target="_blank"
           rel="noopener noreferrer"
           className="w-full flex items-center justify-center gap-2 font-semibold py-3.5 rounded-2xl active:scale-[0.98] transition-transform"
-          style={{ background: CREAM, color: INK }}
+          style={{ background: theme.accent, color: theme.accentText }}
         >
           <MessageCircle className="w-5 h-5" />
           Agenda tu valoración

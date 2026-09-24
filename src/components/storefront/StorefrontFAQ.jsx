@@ -6,13 +6,11 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { CREAM } from "@/lib/storefrontThemes";
-
 export default function StorefrontFAQ({ items, theme }) {
   return (
     <section id="preguntas" className="scroll-mt-4">
-      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3">
-        <HelpCircle className="w-5 h-5" style={{ color: CREAM }} />
+      <h2 className="flex items-center gap-2 font-heading font-bold text-lg text-white mb-3" style={{ fontFamily: theme.fontHeading }}>
+        <HelpCircle className="w-5 h-5" style={{ color: theme.accent }} />
         Preguntas frecuentes
       </h2>
       <Accordion type="single" collapsible className="space-y-2.5">
@@ -21,7 +19,7 @@ export default function StorefrontFAQ({ items, theme }) {
             key={item.id}
             value={`faq-${idx}`}
             className="border-0 px-4 rounded-xl"
-            style={{ background: theme.card, border: `1px solid ${theme.border}` }}
+            style={{ background: theme.card, border: `1px solid ${theme.border}`, boxShadow: theme.cardShadow }}
           >
             <AccordionTrigger className="text-sm font-medium text-white text-left [&>svg]:text-white/60">
               {item.question}
