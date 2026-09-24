@@ -1,11 +1,107 @@
-import React from "react";
-import { MessageCircle, ChevronDown } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { MessageCircle, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { CREAM, INK } from "@/lib/storefrontThemes";
+import { buildWhatsAppLink } from "@/lib/storefrontUtils";
+
+const WEEKDAY_SHORT = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+const WEEK_LABELS = ["Esta semana", "Próxima semana", "En 2 semanas"];
+const MAX_WEEK_OFFSET = 2; // semana actual + 2 siguientes
+
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Dom..6=Sáb
+  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Lunes a viernes de la semana de calendario (hoy + offset semanas).
+function getWeekdays(weekOffset) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const monday = addDays(getMonday(today), weekOffset * 7);
+  return Array.from({ length: 5 }, (_, i) => addDays(monday, i));
+}
+
+/**
+ * Selector de día (semana actual + próximas 2, solo lunes a viernes) para
+ * que el visitante indique en qué día le interesaría agendar. Al
+ * seleccionar uno, se agrega al mensaje prellenado de WhatsApp del botón
+ * "Agenda tu valoración". Los días de la semana actual que ya pasaron
+ * quedan deshabilitados.
+ */
+function WeekDayPicker({ selectedDate, onSelect }) {
+  const [weekOffset, setWeekOffset] = useState(0);
+  const days = useMemo(() => getWeekdays(weekOffset), [weekOffset]);
+  const today = useMemo(() => { const t = new Date(); t.setHours(0, 0, 0, 0); return t; }, []);
+
+  return (
+    <div className="w-full max-w-sm mb-4">
+      <div className="flex items-center justify-between mb-2.5">
+        <button
+          type="button"
+          onClick={() => setWeekOffset((w) => Math.max(0, w - 1))}
+          disabled={weekOffset === 0}
+          aria-label="Semana anterior"
+          className="p-1.5 rounded-full text-white/70 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-white/80 uppercase tracking-wide">
+          <Calendar className="w-3.5 h-3.5" />
+          {WEEK_LABELS[weekOffset]}
+        </p>
+        <button
+          type="button"
+          onClick={() => setWeekOffset((w) => Math.min(MAX_WEEK_OFFSET, w + 1))}
+          disabled={weekOffset === MAX_WEEK_OFFSET}
+          aria-label="Semana siguiente"
+          className="p-1.5 rounded-full text-white/70 disabled:opacity-20 disabled:cursor-not-allowed hover:bg-white/10 transition-colors"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+      <div className="grid grid-cols-5 gap-1.5">
+        {days.map((d) => {
+          const isSelected = selectedDate && sameDay(d, selectedDate);
+          const isPast = d < today;
+          return (
+            <button
+              key={d.toISOString()}
+              type="button"
+              disabled={isPast}
+              onClick={() => onSelect(isSelected ? null : d)}
+              className="flex flex-col items-center gap-1 py-2.5 rounded-xl transition-transform disabled:cursor-not-allowed disabled:opacity-40"
+              style={{
+                background: CREAM,
+                color: INK,
+                boxShadow: isSelected ? `0 0 0 2px ${INK}` : "none",
+              }}
+            >
+              <span className="text-[10px] font-medium opacity-70">{WEEKDAY_SHORT[d.getDay() - 1]}</span>
+              <span className="text-sm font-bold">{d.getDate()}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 /**
  * Hero del storefront: foto grande, pill de especialidad+ubicación,
- * título grande auto-generado, condiciones en línea, tagline en itálica
- * y dos CTAs apilados (Agenda / Conoce especialidades).
+ * título grande auto-generado, condiciones en línea, tagline en itálica,
+ * selector de día y el CTA de WhatsApp.
  */
 export default function StorefrontHero({
   name,
@@ -14,9 +110,12 @@ export default function StorefrontHero({
   city,
   headline,
   conditions = [],
-  whatsappLink,
+  whatsappPhone,
+  whatsappMessage,
   theme,
 }) {
+  const [selectedDate, setSelectedDate] = useState(null);
+
   const pillText = [specialty, city && `${city}, MX`].filter(Boolean).join(" · ");
   const bigTitle =
     specialty && city
@@ -25,6 +124,12 @@ export default function StorefrontHero({
       ? `Especialista en ${specialty}`
       : name || "";
   const conditionsLine = conditions.map((c) => c.text).filter(Boolean).join(" · ");
+
+  const baseMessage = (whatsappMessage && whatsappMessage.trim()) || `Hola, quiero agendar una cita con el/la Dr. ${name || ""}`;
+  const finalMessage = selectedDate
+    ? `${baseMessage} Me interesa una cita el ${selectedDate.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" })}.`
+    : baseMessage;
+  const whatsappLink = buildWhatsAppLink(whatsappPhone, finalMessage, name);
 
   return (
     <section className="flex flex-col items-center text-center px-5 pt-10 pb-8">
@@ -73,8 +178,9 @@ export default function StorefrontHero({
         <p className="text-white/70 text-sm italic mt-3 max-w-sm">{headline}</p>
       )}
 
-      {/* CTAs apilados */}
-      <div className="w-full max-w-sm mt-7 space-y-3">
+      {/* Selector de día + CTA de WhatsApp */}
+      <div className="w-full max-w-sm mt-7 flex flex-col items-center">
+        <WeekDayPicker selectedDate={selectedDate} onSelect={setSelectedDate} />
         <a
           href={whatsappLink}
           target="_blank"
@@ -84,14 +190,6 @@ export default function StorefrontHero({
         >
           <MessageCircle className="w-5 h-5" />
           Agenda tu valoración
-        </a>
-        <a
-          href="#detalle"
-          className="w-full flex items-center justify-center gap-2 font-semibold py-3.5 rounded-2xl border-2 text-white transition-colors"
-          style={{ borderColor: "rgba(255,255,255,0.6)" }}
-        >
-          Conoce mis especialidades
-          <ChevronDown className="w-4 h-4" />
         </a>
       </div>
     </section>

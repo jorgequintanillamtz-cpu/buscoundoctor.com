@@ -3,16 +3,29 @@ import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { MapPin, Save, Trash2, Loader2 } from "lucide-react";
+import { MapPin, Save, Trash2, Loader2, Sparkles } from "lucide-react";
 import { extractCoordsFromMapsUrl, geocodeAddress } from "@/lib/officeGeo";
 
-export default function LocationEditor({ storefrontId, items, setItems }) {
+// onPrefill (opcional): función async que llena el formulario desde el
+// consultorio real del perfil. Solo se ofrece mientras no hay ubicación
+// capturada -- es una copia de una sola vez, no sincronización.
+export default function LocationEditor({ storefrontId, items, setItems, onPrefill, prefillLabel = "Prellenar desde tu perfil" }) {
   const loc = items[0] || null;
   const [placeName, setPlaceName] = useState("");
   const [address, setAddress] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [coords, setCoords] = useState(null);
+  const [prefilling, setPrefilling] = useState(false);
+
+  const runPrefill = async () => {
+    setPrefilling(true);
+    try {
+      await onPrefill();
+    } finally {
+      setPrefilling(false);
+    }
+  };
 
   useEffect(() => {
     if (loc) {
@@ -72,6 +85,19 @@ export default function LocationEditor({ storefrontId, items, setItems }) {
   return (
     <div>
       <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Dónde encontrarlo</h3>
+      {!loc && onPrefill && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={runPrefill}
+          disabled={prefilling}
+          className="rounded-lg mb-3 gap-1.5"
+        >
+          {prefilling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+          {prefillLabel}
+        </Button>
+      )}
       <div className="space-y-3">
         <div>
           <Label className="text-xs">Nombre del lugar</Label>

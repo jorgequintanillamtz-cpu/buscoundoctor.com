@@ -35,7 +35,10 @@ export default function StorefrontView({
   const [menuOpen, setMenuOpen] = useState(false);
   const theme = getStorefrontTheme(storefront?.color_theme);
   const doctorName = specialist?.full_name || "";
-  const photo = specialist?.profile_photo;
+  // La página pública puede tener su propia foto de portada, independiente
+  // de la del perfil real del directorio -- si no se ha subido una propia,
+  // cae a la foto de perfil de siempre.
+  const photo = storefront?.cover_photo || specialist?.profile_photo;
   const specialty = specialist?.specialty || "";
   const city = specialist?.city || "";
   const whatsappLink = buildWhatsAppLink(
@@ -186,7 +189,8 @@ export default function StorefrontView({
         city={city}
         headline={storefront?.headline}
         conditions={conditions}
-        whatsappLink={whatsappLink}
+        whatsappPhone={storefront?.whatsapp_phone}
+        whatsappMessage={storefront?.whatsapp_message}
         theme={theme}
       />
 

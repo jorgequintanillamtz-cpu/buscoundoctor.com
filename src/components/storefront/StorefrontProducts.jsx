@@ -32,6 +32,7 @@ export default function StorefrontProducts({ items, theme, storefrontSlug }) {
 
 function ProductCard({ product, theme, storefrontSlug }) {
   const hasPrice = typeof product.price === "number" && product.price >= 0;
+  const hasCompareAt = typeof product.compare_at_price === "number" && product.compare_at_price > 0;
   const cover =
     Array.isArray(product.images) && product.images.length
       ? product.images[0]
@@ -44,7 +45,7 @@ function ProductCard({ product, theme, storefrontSlug }) {
       style={{ background: theme.card, border: `1px solid ${theme.border}` }}
     >
       <div
-        className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center"
+        className="w-16 h-24 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm"
         style={{ background: theme.deep }}
       >
         {cover ? (
@@ -63,8 +64,13 @@ function ProductCard({ product, theme, storefrontSlug }) {
           </p>
         )}
         {hasPrice && (
-          <p className="text-sm font-bold mt-1" style={{ color: CREAM }}>
+          <p className="text-sm font-bold mt-1 flex items-center gap-1.5" style={{ color: CREAM }}>
             ${product.price.toFixed(0)} MXN
+            {hasCompareAt && (
+              <span className="text-xs font-medium line-through opacity-60" style={{ color: "white" }}>
+                ${product.compare_at_price.toFixed(0)}
+              </span>
+            )}
           </p>
         )}
       </div>
