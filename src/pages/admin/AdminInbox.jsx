@@ -119,7 +119,7 @@ function PendingDoctorCard({ doc, onReviewed }) {
 // Tarjeta de una solicitud de enfermedad: a diferencia de las otras colas,
 // crearla o rechazarla necesita el modal completo del banco (nombre,
 // especialidad, contenido...), así que aquí solo se informa y se manda a
-// /admin/enfermedades para actuar -- mismo patrón que LatePaymentCard.
+// /admin/catalogo-medico/enfermedades para actuar -- mismo patrón que LatePaymentCard.
 function ConditionRequestCard({ req }) {
   return (
     <div className="bg-card border border-border/50 rounded-2xl p-4 sm:p-5 flex items-center gap-3">
@@ -131,7 +131,7 @@ function ConditionRequestCard({ req }) {
         <p className="text-xs text-muted-foreground truncate">Solicitada por {req.specialist_name || "un doctor"}</p>
       </div>
       <Button asChild size="sm" variant="outline" className="rounded-xl flex-shrink-0">
-        <Link to="/admin/enfermedades">Revisar</Link>
+        <Link to="/admin/catalogo-medico/enfermedades">Revisar</Link>
       </Button>
     </div>
   );

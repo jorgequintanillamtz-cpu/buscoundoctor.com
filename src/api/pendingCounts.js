@@ -47,7 +47,7 @@ export async function loadPendingCounts() {
     "/admin/verificaciones": pendingDocuments,
     "/admin/blog": pendingBlogPosts,
     "/admin/premium": lateDoctors,
-    "/admin/enfermedades": pendingConditionRequests,
+    "/admin/catalogo-medico": pendingConditionRequests,
     "/admin/bandeja": deletionRequests + pendingReferralRewards + pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
   };
 }

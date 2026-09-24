@@ -37,17 +37,17 @@ const AdminVerificaciones = lazy(() => import('./pages/admin/AdminVerificaciones
 const AdminSolicitudes = lazy(() => import('./pages/admin/AdminSolicitudes'));
 const AdminCorreos = lazy(() => import('./pages/admin/AdminCorreos'));
 const AdminCatalogos = lazy(() => import('./pages/admin/AdminCatalogos'));
-const AdminEnfermedades = lazy(() => import('./pages/admin/AdminEnfermedades'));
+const AdminCatalogoMedico = lazy(() => import('./pages/admin/AdminCatalogoMedico'));
 const AdminGuides = lazy(() => import('./pages/admin/AdminGuides'));
-const AdminSubespecialidades = lazy(() => import('./pages/admin/AdminSubespecialidades'));
 const AdminPremium = lazy(() => import('./pages/admin/AdminPremium'));
-const AdminSpecialties = lazy(() => import('./pages/admin/AdminSpecialties'));
 const AdminZones = lazy(() => import('./pages/admin/AdminZones'));
+const AdminConfigHub = lazy(() => import('./pages/admin/AdminConfigHub'));
 const AdminSiteImages = lazy(() => import('./pages/admin/AdminSiteImages'));
 const AdminBlog = lazy(() => import('./pages/admin/AdminBlog'));
 const BlogEditor = lazy(() => import('./pages/admin/BlogEditor.jsx'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
 const AdminDoctores = lazy(() => import('./pages/admin/AdminDoctores'));
+const AdminRegistros = lazy(() => import('./pages/admin/AdminRegistros'));
 const AdminReferidos = lazy(() => import('./pages/admin/AdminReferidos'));
 const AdminAccountSettings = lazy(() => import('./pages/admin/AdminAccountSettings'));
 const AdminHistorial = lazy(() => import('./pages/admin/AdminHistorial'));
@@ -171,20 +171,32 @@ const AuthenticatedApp = () => {
           <Route path="/admin/solicitudes" element={<AdminSolicitudes />} />
           <Route path="/admin/correos" element={<AdminCorreos />} />
           <Route path="/admin/catalogos" element={<AdminCatalogos />} />
-          <Route path="/admin/enfermedades" element={<AdminEnfermedades />} />
+          {/* Catálogo médico: junta especialidades/subespecialidades/enfermedades
+              (antes 3 enlaces sueltos) en una sola pantalla con pestañas. Las
+              rutas viejas se redirigen por si quedan enlaces guardados.
+              "Guías" (biblioteca de PDFs) es una entidad y pantalla aparte,
+              no entra a estas pestañas -- ver AdminLayout.jsx. */}
+          <Route path="/admin/catalogo-medico" element={<Navigate to="/admin/catalogo-medico/especialidades" replace />} />
+          <Route path="/admin/catalogo-medico/:tab" element={<AdminCatalogoMedico />} />
+          <Route path="/admin/especialidades" element={<Navigate to="/admin/catalogo-medico/especialidades" replace />} />
+          <Route path="/admin/subespecialidades" element={<Navigate to="/admin/catalogo-medico/subespecialidades" replace />} />
+          <Route path="/admin/enfermedades" element={<Navigate to="/admin/catalogo-medico/enfermedades" replace />} />
           <Route path="/admin/guias" element={<AdminGuides />} />
-          <Route path="/admin/subespecialidades" element={<AdminSubespecialidades />} />
           <Route path="/admin/premium" element={<AdminPremium />} />
-          <Route path="/admin/especialidades" element={<AdminSpecialties />} />
           <Route path="/admin/ciudades" element={<AdminZones />} />
           {/* Redirección: la página se renombró de "zonas" a "ciudades" */}
           <Route path="/admin/zonas" element={<Navigate to="/admin/ciudades" replace />} />
           <Route path="/admin/imagenes" element={<AdminSiteImages />} />
+          {/* Configuración: junta Ciudades/Catálogos/Planes/FAQs/Imágenes/Vista
+              previa (antes 6 enlaces sueltos, cosas que casi no se tocan) en
+              una sola pantalla de tarjetas. Sus rutas de siempre no cambiaron. */}
+          <Route path="/admin/configuracion" element={<AdminConfigHub />} />
           <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="/admin/blog/nuevo" element={<BlogEditor />} />
           <Route path="/admin/blog/editar/:id" element={<BlogEditor />} />
           <Route path="/admin/resenas" element={<AdminReviews />} />
           <Route path="/admin/doctores" element={<AdminDoctores />} />
+          <Route path="/admin/registros" element={<AdminRegistros />} />
           <Route path="/admin/doctores/nuevo" element={<AdminDoctorEditor />} />
           <Route path="/admin/doctores/editar/:id" element={<AdminDoctorEditor />} />
           <Route path="/admin/doctores/revisar/:id" element={<AdminDoctorReview />} />

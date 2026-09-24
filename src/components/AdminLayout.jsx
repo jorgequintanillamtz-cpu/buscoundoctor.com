@@ -1,22 +1,27 @@
+import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, MapPin, FileText, ArrowLeft, Star, HelpCircle, ImageIcon, Tag, ShieldCheck, Calendar, ShieldPlus, Crown, History, Inbox, Eye, Mail, ListChecks, GraduationCap, LogOut, BookOpen, Gift, UserRound } from "lucide-react";
+import { LayoutDashboard, Users, Heart, ArrowLeft, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
 
-// Agrupado por secciones (en vez de una lista plana de 13 links) para que
-// el menú se pueda escanear de un vistazo: Resumen primero; luego
-// Operación, con las 4 colas de revisión que alimentan la Bandeja de
-// entrada juntas y en el mismo orden que ahí (Doctores, Verificaciones,
-// Blog, Reseñas), Referidos justo después de Doctores (mismo panorama, sin
-// cola propia de aprobación), seguidas de lo operativo que no es cola de
-// aprobación (Solicitudes, Premium) y el Historial como bitácora al final; luego
-// Listas médicas, los catálogos de taxonomía médica que alimentan la
-// búsqueda (especialidades, subespecialidades, enfermedades, guías) -- viven
-// juntos y con nombre consistente a propósito, en vez de regados en otras
-// secciones;
-// después Contenido (solo texto/imagen del sitio, sin cola de revisión); y
-// Configuración al final (lo que casi nunca cambia).
+// Agrupado por secciones (en vez de una lista plana) para que el menú se
+// pueda escanear de un vistazo: Resumen primero; luego Operación, con las 4
+// colas de revisión que alimentan la Bandeja de entrada juntas y en el
+// mismo orden que ahí (Doctores, Verificaciones, Blog, Reseñas), Referidos
+// justo después de Doctores (mismo panorama, sin cola propia de
+// aprobación), seguidas de lo operativo que no es cola de aprobación
+// (Solicitudes, Premium) y el Historial como bitácora al final.
+//
+// "Catálogo médico" y "Configuración" juntan lo que antes eran 9 enlaces
+// sueltos (3 bancos de taxonomía + 6 pantallas de configuración/contenido
+// que casi nunca se tocan) en 2 destinos -- cada uno abre una pantalla con
+// pestañas o tarjetas (AdminCatalogoMedico.jsx / AdminConfigHub.jsx) que
+// lleva a las pantallas de siempre, sin perder nada, solo sacándolas de la
+// vista de reojo del día a día. Menú de 19 enlaces bajó a 12. "Guías"
+// (biblioteca de PDFs, entidad Guide) se queda como enlace propio -- no es
+// parte de los bancos de taxonomía (Specialty/Subspecialty/Condition) que
+// comparten useTaxonomyBank, así que no entra a esas pestañas.
 const adminNavSections = [
   {
     label: "Resumen",
@@ -29,6 +34,7 @@ const adminNavSections = [
     items: [
       { path: "/admin/bandeja", label: "Bandeja de entrada", icon: Inbox },
       { path: "/admin/doctores", label: "Doctores", icon: Users },
+      { path: "/admin/registros", label: "Registros", icon: ClipboardList },
       { path: "/admin/referidos", label: "Referidos", icon: Gift },
       { path: "/admin/verificaciones", label: "Verificar documentos", icon: ShieldCheck },
       { path: "/admin/blog", label: "Blog", icon: FileText },
@@ -42,26 +48,14 @@ const adminNavSections = [
   {
     label: "Listas médicas",
     items: [
-      { path: "/admin/especialidades", label: "Especialidades", icon: Heart },
-      { path: "/admin/subespecialidades", label: "Subespecialidades", icon: GraduationCap },
-      { path: "/admin/enfermedades", label: "Enfermedades", icon: ListChecks },
+      { path: "/admin/catalogo-medico", label: "Catálogo médico", icon: Heart },
       { path: "/admin/guias", label: "Guías", icon: BookOpen },
-    ],
-  },
-  {
-    label: "Contenido",
-    items: [
-      { path: "/admin/faqs", label: "Preguntas frecuentes", icon: HelpCircle },
-      { path: "/admin/imagenes", label: "Imágenes del sitio", icon: ImageIcon },
-      { path: "/admin/vista-registro", label: "Vista previa del registro", icon: Eye },
     ],
   },
   {
     label: "Configuración",
     items: [
-      { path: "/admin/ciudades", label: "Ciudades", icon: MapPin },
-      { path: "/admin/catalogos", label: "Catálogos", icon: ShieldPlus },
-      { path: "/admin/planes", label: "Planes y precios", icon: Tag },
+      { path: "/admin/configuracion", label: "Catálogos, planes y contenido", icon: Settings },
     ],
   },
 ];
@@ -96,10 +90,30 @@ function AdminLayoutContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const { pendingCounts } = useAdminBadges();
+  // Buscador arriba del menú (escritorio): para no tener que escanear los
+  // 12 enlaces a ojo, escribe y filtra en vivo; Enter salta directo si solo
+  // queda una coincidencia. Se limpia solo al cambiar de página, para que
+  // la próxima vez que abras el menú se vea completo de nuevo.
+  const [navFilter, setNavFilter] = useState("");
+  useEffect(() => { setNavFilter(""); }, [location.pathname]);
+
+  const filteredNavSections = useMemo(() => {
+    const q = navFilter.trim().toLowerCase();
+    if (!q) return adminNavSections;
+    return adminNavSections
+      .map((section) => ({ ...section, items: section.items.filter((item) => item.label.toLowerCase().includes(q)) }))
+      .filter((section) => section.items.length > 0);
+  }, [navFilter]);
 
   const isActive = (item) => {
     if (item.exact) return location.pathname === item.path;
     return location.pathname.startsWith(item.path);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+    const matches = filteredNavSections.flatMap((s) => s.items);
+    if (matches.length === 1) navigate(matches[0].path);
   };
 
   const handleLogout = () => base44.auth.logout(false).then(() => navigate("/"));
@@ -115,8 +129,28 @@ function AdminLayoutContent() {
             </Link>
             <h2 className="font-heading font-bold text-lg text-foreground">Panel de Administración</h2>
           </div>
+          <div className="px-3 pt-3">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-muted-foreground/60 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={navFilter}
+                onChange={(e) => setNavFilter(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Buscar en el menú..."
+                className="w-full text-sm bg-muted/60 rounded-xl pl-8 pr-7 py-2 outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/60"
+              />
+              {navFilter && (
+                <button type="button" onClick={() => setNavFilter("")} aria-label="Limpiar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted">
+                  <X className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+          </div>
           <nav className="flex-1 p-3 space-y-5">
-            {adminNavSections.map((section) => (
+            {filteredNavSections.length === 0 && (
+              <p className="px-3 text-sm text-muted-foreground">Sin resultados para "{navFilter}"</p>
+            )}
+            {filteredNavSections.map((section) => (
               <div key={section.label}>
                 <p className="px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground/70">
                   {section.label}
