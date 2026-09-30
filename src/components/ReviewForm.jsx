@@ -45,6 +45,11 @@ export default function ReviewForm({ specialist }) {
   const [comment, setComment] = useState("");
   const [consultationDate, setConsultationDate] = useState("");
   const [treatmentPerformed, setTreatmentPerformed] = useState("");
+  // Correo o teléfono con el que agendó -- solo se usa una vez, del lado del
+  // servidor, para cruzarlo contra sus citas y activar "Cliente verificado"
+  // automáticamente (trigger verify_review_client). Nunca se guarda ni se
+  // muestra en ningún lado, ver la migración review_auto_verify_from_appointment.
+  const [contactHint, setContactHint] = useState("");
   const [categoryRatings, setCategoryRatings] = useState({ ratingPunctuality: 0, ratingTreatment: 0, ratingFacilities: 0 });
   const [photoUrl, setPhotoUrl] = useState("");
   const [photoPreview, setPhotoPreview] = useState("");
@@ -97,6 +102,7 @@ export default function ReviewForm({ specialist }) {
       comment,
       consultation_date: consultationDate || undefined,
       treatment_performed: treatmentPerformed || undefined,
+      patient_contact_hint: contactHint || undefined,
       rating_punctuality: categoryRatings.ratingPunctuality || undefined,
       rating_treatment: categoryRatings.ratingTreatment || undefined,
       rating_facilities: categoryRatings.ratingFacilities || undefined,
@@ -215,7 +221,16 @@ export default function ReviewForm({ specialist }) {
 
       <div className="rounded-xl border border-dashed border-border/70 p-3 space-y-3 bg-muted/30">
         <p className="text-xs font-medium text-foreground">¿Quieres el sello "Cliente verificado"? (opcional)</p>
-        <p className="text-xs text-muted-foreground -mt-2">Compártenos estos datos para que nuestro equipo pueda confirmar tu visita.</p>
+        <p className="text-xs text-muted-foreground -mt-2">Compártenos estos datos para confirmar tu visita.</p>
+        <div>
+          <label className="text-xs font-medium text-foreground mb-1 block">Correo o teléfono con el que agendaste tu cita</label>
+          <Input
+            value={contactHint}
+            onChange={(e) => setContactHint(e.target.value)}
+            placeholder="Para verificar tu visita -- no se guarda ni se muestra"
+            className="rounded-xl"
+          />
+        </div>
         <div>
           <label className="text-xs font-medium text-foreground mb-1 block">Fecha de tu consulta</label>
           <Input
