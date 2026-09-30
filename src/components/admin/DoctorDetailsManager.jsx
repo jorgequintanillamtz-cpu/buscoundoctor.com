@@ -13,6 +13,13 @@ const PAYMENT_METHODS = [
   { value: "efectivo", label: "Efectivo" },
 ];
 
+const PATIENT_TYPES = [
+  { value: "ninos", label: "Niños" },
+  { value: "adolescentes", label: "Adolescentes" },
+  { value: "adultos", label: "Adultos" },
+  { value: "adultos_mayores", label: "Adultos mayores" },
+];
+
 // Mismos valores y etiquetas que el filtro de precio en /especialistas y
 // /especialidad/:slug (SpecialistList.jsx, SpecialtyPage.jsx) -- si cambian
 // ahí, cambiar también aquí para que coincidan.
@@ -65,6 +72,32 @@ export default function DoctorDetailsManager({ form, update, specialistId }) {
               ))}
             </select>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
+        <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Pacientes que atiendo</h2>
+        <p className="text-xs text-muted-foreground -mt-2">Se muestra en tu perfil público. Deja sin marcar lo que no atiendas — ej. si no ves niños, no lo marques.</p>
+        <div className="flex flex-wrap gap-2">
+          {PATIENT_TYPES.map((t) => {
+            const checked = (form.patient_types || []).includes(t.value);
+            return (
+              <label key={t.value} className={`flex items-center gap-2 text-sm px-3 py-2 rounded-xl border cursor-pointer transition-colors ${checked ? "border-primary bg-accent/40" : "border-border/60"}`}>
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={(e) => {
+                    const next = e.target.checked
+                      ? [...(form.patient_types || []), t.value]
+                      : (form.patient_types || []).filter((v) => v !== t.value);
+                    update("patient_types", next);
+                  }}
+                  className="w-4 h-4 accent-primary"
+                />
+                {t.label}
+              </label>
+            );
+          })}
         </div>
       </div>
 
