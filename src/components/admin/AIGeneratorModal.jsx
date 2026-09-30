@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { Sparkles, X, ChevronDown, ChevronRight, Zap, Clock, BarChart2, Target, CheckCircle2, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { generateBlogSlug } from "@/pages/admin/BlogEditor";
 
 const TIPOS = ["Guía", "Comparativa", "Top 10", "Preguntas frecuentes", "Informativo", "Tratamiento", "Síntomas"];
 const OBJETIVOS = ["SEO", "Leads", "Autoridad", "Comparativa", "Top Ranking"];
