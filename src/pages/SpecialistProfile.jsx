@@ -58,6 +58,7 @@ const NAV_SECTIONS = [
 const NAV_SECTION_IDS = NAV_SECTIONS.map((s) => s.id);
 
 const PAYMENT_LABELS = { tarjeta: "Tarjeta", transferencia: "Transferencia", efectivo: "Efectivo" };
+const PATIENT_TYPE_LABELS = { ninos: "Niños", adolescentes: "Adolescentes", adultos: "Adultos", adultos_mayores: "Adultos mayores" };
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -505,6 +506,17 @@ export default function SpecialistProfile() {
                 {specialist.certifications && (
                   <span><strong className="text-foreground font-medium">Cédula de especialidad / certificaciones:</strong> {specialist.certifications}</span>
                 )}
+              </div>
+            )}
+
+            {specialist.patient_types?.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-border/50">
+                <p className="text-sm font-semibold text-foreground mb-2">Pacientes que atiendo</p>
+                <div className="flex flex-wrap gap-2">
+                  {specialist.patient_types.map((t) => (
+                    <span key={t} className="text-xs font-medium bg-accent text-accent-foreground px-3 py-1.5 rounded-full">{PATIENT_TYPE_LABELS[t] || t}</span>
+                  ))}
+                </div>
               </div>
             )}
 
