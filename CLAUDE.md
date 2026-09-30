@@ -380,11 +380,14 @@ Este proyecto **no se construye desde cero**. Antes de agregar algo:
 4. Toda funcionalidad nueva se verifica con un caso real probado.
 5. Las cosas mal ordenadas o rotas que encuentres fuera del alcance: avísalas, no las arregles en silencio.
 
+## 13b. Analítica: Microsoft Clarity (2026-09-30)
+
+El script de [Clarity](https://clarity.microsoft.com) (mapas de calor y grabaciones de sesión) va directo en `index.html`, en el `<head>`, tal cual lo da Microsoft -- no pasa por React ni por ningún componente. Id. del proyecto de Clarity: `yqiu18iu8m`. No necesita variable de entorno ni configuración en Vercel; es un script público (su propio id no es secreto). Verificado que carga (`window.clarity` queda definido) sin errores en consola.
+
 ## 14. Pendientes y riesgos abiertos
 
 - Antes de lanzar, **auditar la tabla `specialist`** para quitar cuentas de prueba y confirmar con Jorge qué perfiles son reales.
 - No existe módulo propio de gestión de aseguradoras, analíticas avanzadas ni de roles/usuarios en el admin (no urgente).
 - No hay página dedicada de zona (`/zona/:slug`); la zona solo funciona como filtro.
 - No hay sistema de citas transaccional: el "contacto" es WhatsApp + formulario, **por diseño**.
-- `README.md` sigue describiendo Base44 y está desactualizado; esta guía es la referencia vigente.
 - Fases futuras (solo con tracción validada): citas transaccionales, página de hospital/clínica, página de autor médico, cobros con Stripe (hoy dormido).
