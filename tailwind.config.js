@@ -18,6 +18,7 @@ module.exports = {
   			13: '13',
   			14: '14',
   			15: '15',
+  			16: '16',
   		},
   		fontFamily: {
   			heading: ['var(--font-heading)'],
