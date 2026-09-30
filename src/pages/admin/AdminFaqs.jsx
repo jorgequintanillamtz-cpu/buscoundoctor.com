@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Filter, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap, Stethoscope } from "lucide-react";
+import { Plus, Search, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import FaqGeneratorModal from "@/components/admin/FaqGeneratorModal";
