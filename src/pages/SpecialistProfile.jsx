@@ -18,6 +18,7 @@ import ScrollSpyNav from "../components/profile/ScrollSpyNav";
 import { usePresentSectionIds } from "@/hooks/usePresentSectionIds";
 import EspecialidadesSection from "../components/profile/EspecialidadesSection";
 import ReviewsSection from "../components/profile/ReviewsSection";
+import QuestionsSection from "../components/profile/QuestionsSection";
 import FaqSection from "../components/profile/FaqSection";
 import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
@@ -655,6 +656,14 @@ export default function SpecialistProfile() {
               sobra; si esta sección quedaba fuera del grid, no contaba. */}
           <div className="order-15 lg:order-14">
             <SimilarSpecialists specialistId={specialist.id} specialty={specialist.specialty} zone={specialist.zone} />
+          </div>
+
+          {/* DUDAS SOLUCIONADAS: al final a propósito -- es contenido nuevo
+              (preguntas de pacientes ya respondidas), no algo que decida si
+              alguien contacta al doctor, así que no compite por espacio con
+              las secciones de arriba. order-16 nuevo en tailwind.config.js. */}
+          <div className="order-16 lg:order-15">
+            <QuestionsSection specialistId={specialist.id} specialist={specialist} />
           </div>
       </div>
 

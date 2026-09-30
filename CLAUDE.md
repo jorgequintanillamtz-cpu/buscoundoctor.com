@@ -331,6 +331,19 @@ En el último paso del registro (`/registro-medico`), además de "Registrarme co
 - **Nuevos archivos:** `src/components/icons/GoogleIcon.jsx` y `MicrosoftIcon.jsx` (los logos oficiales dibujados a mano, no existen en `lucide-react`, que solo trae íconos genéricos).
 - Probado de punta a punta en el navegador (con Google y con Microsoft): con el proveedor apagado, no aparece el botón (mismo comportamiento que antes de este cambio); con el proveedor prendido, aparece solo y lleva a la pantalla real de "Sign in" del proveedor sin ningún error.
 
+## 8j. "Dudas solucionadas" -- preguntas y respuestas en el perfil (2026-09-30)
+
+Sección nueva en el perfil público, inspirada en Doctoralia: un visitante pregunta algo sin necesidad de cuenta (igual que una reseña) y el doctor la responde desde su panel. **A diferencia de las reseñas, no hay aprobación de un admin de por medio** -- una pregunta nunca se hace pública hasta que el propio doctor la contesta, así que no le agrega trabajo al equipo de BuscoUnDoctor.
+
+- **Tabla `specialist_question`** (`specialist_id`, `patient_display_name`, `question`, `answer`, `answered_at`). RLS: cualquiera ve las ya respondidas (`answer is not null`) o el dueño/asistente/admin ve también las pendientes; cualquiera puede insertar una pregunta (nunca con una respuesta ya puesta); solo el admin puede borrar (para quitar algo inapropiado que el doctor nunca respondería).
+- **`answer_specialist_question(question_id, answer)`** (RPC, `SECURITY DEFINER`, mismo patrón que `reply_to_review`): el dueño o su asistente responde, edita o borra su respuesta (un `answer` vacío la vuelve a ocultar). Historial: `doctor_responde_pregunta` / `doctor_borra_respuesta_pregunta`.
+- **Aviso al doctor:** trigger `trg_notify_question()` en insert, tipo `pregunta_nueva`, **reusa la sección `resenas`** del panel a propósito -- así el numerito rojo que ya existe en el menú ("Reseñas") avisa de las preguntas también, sin agregar una opción nueva al menú (que ya tiene 7).
+- **Dónde vive en el panel:** no es pantalla aparte -- es una pestaña nueva ("Preguntas") dentro de la pantalla que ya existía de "Reseñas" (`DoctorReviews.jsx`), con su propio componente `DoctorQuestions.jsx`.
+- **Dónde vive en el perfil público:** sección "Dudas solucionadas" (`QuestionsSection.jsx` + `QuestionForm.jsx`), **al final de todo** (`order-16 lg:order-15`, valor nuevo agregado a `tailwind.config.js`) -- es contenido nuevo que no decide si alguien contacta al doctor, así que no compite por espacio con las secciones de arriba.
+- **Bug real encontrado y corregido antes de publicar:** el formulario público (`QuestionForm.jsx`) tronaba con "new row violates row-level security policy" al enviar una pregunta. La causa: el `create()` genérico de `base44Client.js` por default pide de vuelta la fila recién creada (`.select().single()`), y Postgres considera eso una violación de RLS cuando quien inserta no tiene permiso de *ver* la fila que acaba de crear (una pregunta pendinte de alguien sin sesión no es visible para nadie más que el dueño/admin) -- el mismo motivo por el que `Review`/`AppointmentRequest`/etc. ya estaban en la lista `NO_RETURNING_ENTITIES` de ese archivo. Arreglo: agregar `SpecialistQuestion` a esa misma lista.
+- Probado de punta a punta con una cuenta y perfil de prueba real: pregunta pública → aviso en la campana del doctor → el doctor la responde desde su panel → se ve en el perfil público con el nombre y la respuesta correctos. Datos de prueba borrados, confirmado en 0.
+- Migraciones aplicadas en Supabase (no están en git): `specialist_question_qa`, `fix_answer_specialist_question_activity_log`.
+
 ## 9. Cómo probar sin ensuciar producción
 
 Como no hay staging, el patrón acordado es: **crear datos de prueba, verificar, y borrarlos siempre al terminar**, confirmando con un `count(*)` que quedó en 0. Reglas:

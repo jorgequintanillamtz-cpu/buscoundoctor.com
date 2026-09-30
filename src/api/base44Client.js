@@ -31,6 +31,7 @@ const ENTITY_TABLE_MAP = {
   SpecialistLanguage: 'specialist_language',
   SpecialistSeoChecklist: 'specialist_seo_checklist',
   Review: 'review',
+  SpecialistQuestion: 'specialist_question',
   DoctorNotification: 'doctor_notification',
   AppointmentRequest: 'appointment_request',
   DoctorStorefront: 'doctor_storefront',
@@ -78,7 +79,7 @@ const FIELD_RENAMES = {
 // el INSERT en sí funciona pero el RETURNING lo tumba con un error de RLS
 // que parece (pero no es) un rechazo del insert. Ver memoria de la migración
 // para el mismo bug ya encontrado y corregido en v1.
-const NO_RETURNING_ENTITIES = new Set(['AppointmentRequest', 'Review', 'DoctorClick', 'DoctorContact', 'DoctorImpression', 'SpecialtyInterestSignup']);
+const NO_RETURNING_ENTITIES = new Set(['AppointmentRequest', 'Review', 'DoctorClick', 'DoctorContact', 'DoctorImpression', 'SpecialtyInterestSignup', 'SpecialistQuestion']);
 
 function toDb(entityName, data) {
   const renames = FIELD_RENAMES[entityName];
@@ -416,6 +417,7 @@ const FUNCTION_MAP = {
   inviteSpecialistAssistant: ({ email } = {}) => supabase.rpc('invite_specialist_assistant', { p_email: email }),
   removeSpecialistAssistant: () => supabase.rpc('remove_specialist_assistant'),
   replyToReview: ({ review_id, reply } = {}) => supabase.rpc('reply_to_review', { p_review_id: review_id, p_reply: reply }),
+  answerSpecialistQuestion: ({ question_id, answer } = {}) => supabase.rpc('answer_specialist_question', { p_question_id: question_id, p_answer: answer }),
   listMyReferrals: () => supabase.rpc('list_my_referrals'),
   creditReferralReward: ({ specialist_id } = {}) => supabase.rpc('credit_referral_reward', { p_specialist_id: specialist_id }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),

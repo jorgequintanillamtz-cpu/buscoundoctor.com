@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { Star, MessageSquareText, Stethoscope, ShieldCheck, Reply, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Star, MessageSquareText, Stethoscope, ShieldCheck, Reply, Loader2, Pencil, Trash2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import DoctorQuestions from "./DoctorQuestions";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -151,6 +152,11 @@ function StatCard({ label, value, tone = "navy" }) {
 // (y solo las ya aprobadas). Aquí ve todas — aprobadas y pendientes — junto
 // con su promedio y la distribución por estrellas, sin salir del panel.
 export default function DoctorReviews({ specialistId }) {
+  // "Preguntas" (Dudas solucionadas) vive aquí mismo como pestaña, en vez de
+  // agregar una opción nueva al menú del panel -- ya tiene 7 y no queremos
+  // subirlo. El numerito rojo del menú ("Reseñas") avisa de las dos cosas,
+  // porque el aviso de pregunta nueva usa la misma sección "resenas".
+  const [tab, setTab] = useState("resenas");
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -193,55 +199,81 @@ export default function DoctorReviews({ specialistId }) {
           Reseñas
         </h1>
         <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
-          Lo que tus pacientes opinan de ti. Las aprobadas son las que se ven en tu perfil público; las pendientes
-          las está revisando nuestro equipo antes de publicarlas.
+          Lo que tus pacientes opinan de ti, y las preguntas que te hacen desde tu perfil público.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2.5 max-w-md">
-        <StatCard label="Promedio" value={approvedReviews.length ? average.toFixed(1) : "—"} tone="navy" />
-        <StatCard label="Visibles" value={approvedReviews.length} tone="blue" />
-        <StatCard label="Pendientes" value={pendingReviews.length} tone="navy" />
+      <div className="inline-flex items-center bg-muted rounded-full p-1">
+        <button
+          type="button"
+          onClick={() => setTab("resenas")}
+          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            tab === "resenas" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+          }`}
+        >
+          <Star className="w-3.5 h-3.5" /> Reseñas
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("preguntas")}
+          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            tab === "preguntas" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+          }`}
+        >
+          <HelpCircle className="w-3.5 h-3.5" /> Preguntas
+        </button>
       </div>
 
-      {approvedReviews.length > 0 && (
-        <div className="bg-card rounded-2xl border border-border/50 p-5">
-          <h2 className="font-heading font-semibold text-sm text-foreground mb-4">Distribución de calificaciones</h2>
-          <div className="space-y-2">
-            {[5, 4, 3, 2, 1].map((n) => {
-              const count = distribution[n];
-              const pct = approvedReviews.length ? Math.round((count / approvedReviews.length) * 100) : 0;
-              return (
-                <div key={n} className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-10 flex-shrink-0">{n} ★</span>
-                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground w-6 text-right flex-shrink-0">{count}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {reviews.length === 0 ? (
-        <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
-          <MessageSquareText className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
-          <p className="text-sm font-medium text-foreground">Todavía no tienes reseñas de pacientes.</p>
-        </div>
+      {tab === "preguntas" ? (
+        <DoctorQuestions specialistId={specialistId} />
       ) : (
-        <div className="space-y-3 max-w-2xl">
-          {pagedReviews.map((r) => (
-            <ReviewCard
-              key={r.id}
-              review={r}
-              onReplySaved={(id, reply) => setReviews((prev) => prev.map((x) => (x.id === id ? { ...x, doctor_reply: reply } : x)))}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-3 gap-2.5 max-w-md">
+            <StatCard label="Promedio" value={approvedReviews.length ? average.toFixed(1) : "—"} tone="navy" />
+            <StatCard label="Visibles" value={approvedReviews.length} tone="blue" />
+            <StatCard label="Pendientes" value={pendingReviews.length} tone="navy" />
+          </div>
+
+          {approvedReviews.length > 0 && (
+            <div className="bg-card rounded-2xl border border-border/50 p-5">
+              <h2 className="font-heading font-semibold text-sm text-foreground mb-4">Distribución de calificaciones</h2>
+              <div className="space-y-2">
+                {[5, 4, 3, 2, 1].map((n) => {
+                  const count = distribution[n];
+                  const pct = approvedReviews.length ? Math.round((count / approvedReviews.length) * 100) : 0;
+                  return (
+                    <div key={n} className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground w-10 flex-shrink-0">{n} ★</span>
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-xs text-muted-foreground w-6 text-right flex-shrink-0">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {reviews.length === 0 ? (
+            <div className="bg-card border border-border/50 rounded-2xl p-8 text-center">
+              <MessageSquareText className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-medium text-foreground">Todavía no tienes reseñas de pacientes.</p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-w-2xl">
+              {pagedReviews.map((r) => (
+                <ReviewCard
+                  key={r.id}
+                  review={r}
+                  onReplySaved={(id, reply) => setReviews((prev) => prev.map((x) => (x.id === id ? { ...x, doctor_reply: reply } : x)))}
+                />
+              ))}
+            </div>
+          )}
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={reviews.length} pageSize={20} />
+        </>
       )}
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} total={reviews.length} pageSize={20} />
     </div>
   );
 }

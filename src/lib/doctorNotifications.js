@@ -1,4 +1,4 @@
-import { Calendar, Star, FileText, CheckCircle2, AlertTriangle, PauseCircle, BadgeCheck, Bell, Plane, Gift } from "lucide-react";
+import { Calendar, Star, FileText, CheckCircle2, AlertTriangle, PauseCircle, BadgeCheck, Bell, Plane, Gift, HelpCircle } from "lucide-react";
 
 // Cómo se ve cada tipo de aviso en el centro de notificaciones del médico.
 // Los tipos los crea la base de datos (ver la migración doctor_notifications).
@@ -14,6 +14,7 @@ export const NOTIFICATION_STYLES = {
   perfil_vacaciones: { icon: Plane, tone: "bg-sky-50 text-sky-600" },
   perfil_pausa: { icon: PauseCircle, tone: "bg-slate-100 text-slate-600" },
   cedula_verificada: { icon: BadgeCheck, tone: "bg-emerald-50 text-emerald-600" },
+  pregunta_nueva: { icon: HelpCircle, tone: "bg-indigo-50 text-indigo-600" },
 };
 
 export function notificationStyle(type) {
