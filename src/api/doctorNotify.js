@@ -8,6 +8,7 @@ import {
   stepRow,
   stepList,
   STEP_ICONS,
+  EMAIL_PHOTOS,
   esc,
   escMultiline,
 } from "@/api/emailTemplate";
@@ -109,6 +110,7 @@ export function notifyWelcome(doc) {
     ),
   ]);
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[1],
     preheader: "Bienvenido a BuscoUnDoctor. Sigue estos pasos para completar tu perfil.",
     hero: {
       eyebrow: "Cuenta creada",
@@ -131,6 +133,7 @@ export function notifyWelcome(doc) {
 export function notifyProfileApproved(doc) {
   const link = profileLink(doc);
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[2],
     preheader: "Tu perfil ya está aprobado y visible para pacientes.",
     badge: "Perfil aprobado",
     badgeTone: "green",
@@ -152,6 +155,7 @@ export function notifyProfileApproved(doc) {
 
 export function notifyProfileRejected(doc, reason) {
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[3],
     preheader: "Tu perfil necesita algunos ajustes antes de publicarse.",
     badge: "Cambios necesarios",
     badgeTone: "red",
@@ -170,6 +174,7 @@ export function notifyProfileRejected(doc, reason) {
 
 export function notifyDocumentApproved(doc, docTypeLabel) {
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[1],
     preheader: "Uno de tus documentos fue aprobado.",
     badge: "Documento aprobado",
     badgeTone: "green",
@@ -187,6 +192,7 @@ export function notifyDocumentApproved(doc, docTypeLabel) {
 
 export function notifyDocumentRejected(doc, docTypeLabel, reason) {
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[3],
     preheader: "Uno de tus documentos necesita revisarse de nuevo.",
     badge: "Cambios necesarios",
     badgeTone: "red",
@@ -207,6 +213,7 @@ export function notifyDocumentRejected(doc, docTypeLabel, reason) {
 export function notifyBlogApproved(doc, postTitle, postSlug) {
   const link = postSlug ? `${SITE_URL}/blog/${postSlug}` : null;
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[2],
     preheader: "Tu artículo ya está publicado en el blog.",
     badge: "Artículo publicado",
     badgeTone: "green",
@@ -227,6 +234,7 @@ export function notifyBlogApproved(doc, postTitle, postSlug) {
 
 export function notifyBlogRejected(doc, postTitle, reason) {
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[3],
     preheader: "Tu artículo necesita algunos cambios.",
     badge: "Cambios necesarios",
     badgeTone: "red",
@@ -249,6 +257,7 @@ export function notifyNewAppointmentRequest(doc, request) {
     ? `${esc(request.preferred_date)}${request.preferred_time ? ` a las ${esc(request.preferred_time)}` : ""}`
     : "";
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[1],
     preheader: "Tienes una nueva solicitud de cita.",
     badge: "Nueva solicitud",
     badgeTone: "neutral",
@@ -278,6 +287,7 @@ export function notifyNewAppointmentRequest(doc, request) {
 export function notifyNewReview(doc, review) {
   const stars = "★".repeat(review?.rating || 0) + "☆".repeat(5 - (review?.rating || 0));
   const html = renderEmail({
+    photo: EMAIL_PHOTOS[2],
     preheader: "Tienes una nueva reseña de un paciente.",
     badge: "Nueva reseña",
     badgeTone: "neutral",

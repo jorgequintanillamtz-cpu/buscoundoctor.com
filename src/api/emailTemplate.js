@@ -29,6 +29,16 @@ export const SITE_URL = "https://buscoundoctor.com";
 export const LOGO_URL =
   "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/email-logo.png";
 
+// Fotos genéricas (no son de ningún doctor registrado) que se muestran en
+// círculo arriba de los correos al doctor. Las mismas de los correos de
+// recuperación de registro (viven en Postgres, ver CLAUDE.md §8g).
+const PHOTOS_BASE = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets";
+export const EMAIL_PHOTOS = {
+  1: `${PHOTOS_BASE}/hero-registro-recuperacion-doctor-1.jpg`,
+  2: `${PHOTOS_BASE}/hero-registro-recuperacion-doctor-2.jpg`,
+  3: `${PHOTOS_BASE}/hero-registro-recuperacion-doctor-3.jpg`,
+};
+
 const INK = "#101828";
 const INK_MUTED = "#475467";
 const INK_FAINT = "#667085";
@@ -145,6 +155,8 @@ export function stepList(rowsHtml) {
 // detailTable, infoBox, stepRow, etc.) que se inserta dentro de la tarjeta.
 // `badge`/`badgeTone` se muestran como una pequeña etiqueta de texto (sin
 // fondo) encima del título, no como píldora de color.
+// `photo` (opcional): URL de una foto que se muestra en círculo justo debajo
+// del header (mismo estilo que los correos de recuperación de registro).
 // `hero` (opcional): franja de bienvenida justo debajo del header, para
 // correos que necesitan más presencia visual (ej. bienvenida) — el resto
 // de los correos no la usan.
@@ -157,6 +169,7 @@ export function renderEmail({
   ctaLabel,
   ctaUrl,
   hero,
+  photo,
 }) {
   const kickerColor = TONES[badgeTone] || TONES.neutral;
   const kickerHtml = badge
@@ -171,6 +184,14 @@ export function renderEmail({
           </td>
         </tr>
       </table>`
+    : "";
+  const photoHtml = photo
+    ? `
+      <tr>
+        <td style="padding:26px 40px 0;text-align:center;background:#ffffff;">
+          <img src="${photo}" alt="" width="140" height="140" style="width:140px;height:140px;border-radius:50%;object-fit:cover;display:inline-block;border:0;" />
+        </td>
+      </tr>`
     : "";
   const heroTitleHtml = esc(hero?.title || "");
   const heroHtml = hero
@@ -202,6 +223,7 @@ export function renderEmail({
                 <img src="${LOGO_URL}" alt="BuscoUnDoctor" height="39" style="height:39px;width:auto;display:inline-block;border:0;" />
               </td>
             </tr>
+            ${photoHtml}
             ${heroHtml}
             <tr>
               <td style="padding:36px 40px 4px;">
