@@ -359,16 +359,17 @@ export default function AdminDoctores() {
       )}
 
       {/* Pestañas */}
-      <div className="flex items-center gap-1 mb-6 border-b border-border/50">
+      {/* En celular las 4 pestañas no caben: se deslizan en una sola línea (sin partir el texto en renglones) */}
+      <div className="flex items-center gap-1 mb-6 border-b border-border/50 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
           onClick={() => setTab("todos")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${tab === "todos" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex-shrink-0 ${tab === "todos" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           Todos
         </button>
         <button
           onClick={() => setTab("pendientes")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5 ${tab === "pendientes" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 ${tab === "pendientes" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           Pendientes de revisión
           {pendientes.length > 0 && (
@@ -377,7 +378,7 @@ export default function AdminDoctores() {
         </button>
         <button
           onClick={() => setTab("progreso")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5 ${tab === "progreso" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 ${tab === "progreso" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           Registros en progreso
           {enProgreso.length > 0 && (
@@ -386,7 +387,7 @@ export default function AdminDoctores() {
         </button>
         <button
           onClick={() => setTab("papelera")}
-          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-1.5 ${tab === "papelera" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap flex-shrink-0 flex items-center gap-1.5 ${tab === "papelera" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           Papelera
           {enPapelera.length > 0 && (
@@ -466,10 +467,10 @@ export default function AdminDoctores() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <Link to={`/admin/doctores/revisar/${doc.id}`} className="font-medium text-foreground truncate hover:text-primary transition-colors block">
+                      <Link to={`/admin/doctores/revisar/${doc.id}`} className="font-medium text-foreground break-words sm:truncate hover:text-primary transition-colors block">
                         {doc.full_name}
                       </Link>
-                      <p className="text-sm text-muted-foreground truncate">
+                      <p className="text-sm text-muted-foreground break-words sm:truncate">
                         {doc.specialty} {doc.city ? `· ${doc.city}` : ""} {doc.professional_license_number ? `· Céd. ${doc.professional_license_number}` : ""}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -484,7 +485,8 @@ export default function AdminDoctores() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
+                    {/* En celular los botones van en su propia línea, para que el nombre no quede apretado */}
+                    <div className="flex items-center justify-end gap-3 w-full sm:w-auto sm:flex-shrink-0 pt-3 sm:pt-0 border-t border-border/40 sm:border-t-0">
                       {SHOW_PREMIUM && (
                         <button
                           type="button"
@@ -546,7 +548,7 @@ export default function AdminDoctores() {
         ) : (
           <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[720px] text-sm">
                 <thead>
                   <tr className="border-b border-border/50 bg-muted/50">
                     <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
@@ -605,7 +607,7 @@ export default function AdminDoctores() {
         ) : (
           <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[720px] text-sm">
                 <thead>
                   <tr className="border-b border-border/50 bg-muted/50">
                     <th className="text-left px-4 py-3 font-medium text-muted-foreground">Nombre</th>
@@ -670,7 +672,7 @@ export default function AdminDoctores() {
             )}
             <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[720px] text-sm">
                   <thead>
                     <tr className="border-b border-border/50 bg-muted/50">
                       <th className="text-left px-4 py-3 w-10">

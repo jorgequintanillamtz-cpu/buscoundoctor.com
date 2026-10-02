@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, ArrowLeft, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, Heart, ArrowLeft, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList, Menu } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -97,6 +97,22 @@ function AdminLayoutContent() {
   const [navFilter, setNavFilter] = useState("");
   useEffect(() => { setNavFilter(""); }, [location.pathname]);
 
+  // Cajón del menú en celular. Se cierra solo al cambiar de pantalla o con
+  // Escape, y mientras está abierto la página de atrás no se desplaza.
+  const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [menuOpen]);
+  // Total de pendientes para el puntito rojo del botón ☰ (así se ve que hay
+  // algo por atender sin tener que abrir el menú).
+  const totalPending = Object.values(pendingCounts || {}).reduce((a, n) => a + (Number(n) || 0), 0);
+
   const filteredNavSections = useMemo(() => {
     const q = navFilter.trim().toLowerCase();
     if (!q) return adminNavSections;
@@ -118,126 +134,138 @@ function AdminLayoutContent() {
 
   const handleLogout = () => base44.auth.logout(false).then(() => navigate("/"));
 
+  // Contenido del menú: el mismo en el escritorio (barra lateral fija) y en el
+  // celular (cajón que se abre con el botón ☰), para tener una sola lista que
+  // mantener. `onNavigate` cierra el cajón al elegir una opción.
+  const sidebarContent = (onNavigate) => (
+    <>
+            <div className="p-5 border-b border-border/50">
+              <Link to="/" onClick={onNavigate} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+                <ArrowLeft className="w-4 h-4" />
+                Volver al sitio
+              </Link>
+              <h2 className="font-heading font-bold text-lg text-foreground">Panel de Administración</h2>
+            </div>
+            <div className="px-3 pt-3">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-muted-foreground/60 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  value={navFilter}
+                  onChange={(e) => setNavFilter(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Buscar en el menú..."
+                  className="w-full text-sm bg-muted/60 rounded-xl pl-8 pr-7 py-2 outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/60"
+                />
+                {navFilter && (
+                  <button type="button" onClick={() => setNavFilter("")} aria-label="Limpiar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted">
+                    <X className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+            </div>
+            <nav className="flex-1 p-3 space-y-5">
+              {filteredNavSections.length === 0 && (
+                <p className="px-3 text-sm text-muted-foreground">Sin resultados para "{navFilter}"</p>
+              )}
+              {filteredNavSections.map((section) => (
+                <div key={section.label}>
+                  <p className="px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground/70">
+                    {section.label}
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {section.items.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={onNavigate}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                          isActive(item)
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span className="flex-1">{item.label}</span>
+                        <PendingBadge count={pendingCounts[item.path]} />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </nav>
+            <div className="p-3 border-t border-border/50 space-y-0.5">
+              <Link
+                to="/admin/cuenta"
+                onClick={onNavigate}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname === "/admin/cuenta"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                <UserRound className="w-4 h-4" />
+                Mi cuenta
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Cerrar sesión
+              </button>
+            </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <div className="flex">
         <aside className="hidden lg:flex w-64 flex-col border-r border-border/50 bg-card min-h-screen sticky top-0">
-          <div className="p-5 border-b border-border/50">
-            <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
-              <ArrowLeft className="w-4 h-4" />
-              Volver al sitio
-            </Link>
-            <h2 className="font-heading font-bold text-lg text-foreground">Panel de Administración</h2>
-          </div>
-          <div className="px-3 pt-3">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-muted-foreground/60 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                value={navFilter}
-                onChange={(e) => setNavFilter(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-                placeholder="Buscar en el menú..."
-                className="w-full text-sm bg-muted/60 rounded-xl pl-8 pr-7 py-2 outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/60"
-              />
-              {navFilter && (
-                <button type="button" onClick={() => setNavFilter("")} aria-label="Limpiar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted">
-                  <X className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-              )}
-            </div>
-          </div>
-          <nav className="flex-1 p-3 space-y-5">
-            {filteredNavSections.length === 0 && (
-              <p className="px-3 text-sm text-muted-foreground">Sin resultados para "{navFilter}"</p>
-            )}
-            {filteredNavSections.map((section) => (
-              <div key={section.label}>
-                <p className="px-3 mb-1.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground/70">
-                  {section.label}
-                </p>
-                <div className="flex flex-col gap-1">
-                  {section.items.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(item)
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      }`}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span className="flex-1">{item.label}</span>
-                      <PendingBadge count={pendingCounts[item.path]} />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </nav>
-          <div className="p-3 border-t border-border/50 space-y-0.5">
-            <Link
-              to="/admin/cuenta"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                location.pathname === "/admin/cuenta"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <UserRound className="w-4 h-4" />
-              Mi cuenta
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Cerrar sesión
-            </button>
-          </div>
+          {sidebarContent()}
         </aside>
 
-        <div className="flex-1 min-h-screen">
-          <div className="lg:hidden sticky top-0 z-40 bg-card/80 backdrop-blur-lg border-b border-border/50 px-4 py-3">
-            <div className="flex items-center justify-between mb-3">
-              <Link to="/" className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ArrowLeft className="w-4 h-4" />
-                Sitio
-              </Link>
-              <h2 className="font-heading font-bold text-foreground">Admin</h2>
-              <div className="flex items-center gap-3">
-                <Link to="/admin/cuenta" aria-label="Mi cuenta" className="flex items-center text-muted-foreground">
-                  <UserRound className="w-4 h-4" />
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  aria-label="Cerrar sesión"
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <div className="flex gap-1 overflow-x-auto pb-1 -mx-1 px-1">
-              {adminNavItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                    isActive(item)
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  <item.icon className="w-3.5 h-3.5" />
-                  {item.label}
-                  <PendingBadge count={pendingCounts[item.path]} />
-                </Link>
-              ))}
-            </div>
+        {/* min-w-0: sin él, esta columna (hija de un flex) se estira al ancho
+            de las pastillas del menú móvil (~1850px) en vez de quedarse del
+            ancho de la pantalla, y todo el contenido se sale por la derecha. */}
+        <div className="flex-1 min-w-0 min-h-screen">
+          <div className="lg:hidden sticky top-0 z-40 bg-card/90 backdrop-blur-lg border-b border-border/50 px-3 py-2 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Abrir menú"
+              className="relative p-2 -ml-1 rounded-lg text-foreground hover:bg-muted"
+            >
+              <Menu className="w-6 h-6" />
+              {totalPending > 0 && (
+                <span className="absolute top-1 right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                  {totalPending > 99 ? "99+" : totalPending}
+                </span>
+              )}
+            </button>
+            <h2 className="font-heading font-bold text-foreground truncate">
+              {(adminNavItems.find((i) => (i.exact ? location.pathname === i.path : location.pathname.startsWith(i.path))) || {}).label || "Admin"}
+            </h2>
+            <Link to="/admin/cuenta" aria-label="Mi cuenta" className="p-2 -mr-1 rounded-lg text-muted-foreground hover:bg-muted">
+              <UserRound className="w-5 h-5" />
+            </Link>
           </div>
+
+          {/* Cajón del menú (solo celular y tableta): panel desde la izquierda
+              con el mismo menú del escritorio, y un fondo oscuro que lo cierra. */}
+          {menuOpen && (
+            <div className="lg:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-label="Menú de administración">
+              <div className="w-[85%] max-w-sm bg-card h-full overflow-y-auto flex flex-col shadow-xl">
+                <div className="flex items-center justify-end px-3 pt-3">
+                  <button type="button" onClick={() => setMenuOpen(false)} aria-label="Cerrar menú" className="p-2 rounded-lg text-muted-foreground hover:bg-muted">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                {sidebarContent(() => setMenuOpen(false))}
+              </div>
+              <button type="button" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} className="flex-1 bg-black/50" />
+            </div>
+          )}
           <div className="p-4 sm:p-6 lg:p-8">
             <Outlet />
           </div>
