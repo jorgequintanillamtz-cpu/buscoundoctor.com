@@ -4,9 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Mail, Lock, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
-import GoogleIcon from "@/components/icons/GoogleIcon";
-import MicrosoftIcon from "@/components/icons/MicrosoftIcon";
-import { supabaseUrl, supabaseAnonKey } from "@/lib/supabaseClient";
+import OAuthButtons from "@/components/OAuthButtons";
+import useOAuthProviders from "@/hooks/useOAuthProviders";
 import { toast } from "sonner";
 import { generateSlug } from "@/api/specialistForm";
 import { fileToWebP } from "@/lib/fileToWebP";
@@ -47,12 +46,9 @@ export default function RegistroMedico() {
   // para deshabilitar ambos y mostrar su propio spinner mientras se abre
   // la ventana del proveedor.
   const [oauthLoading, setOauthLoading] = useState("");
-  // Qué botones de "Continuar con..." mostrar. Empieza en todo apagado
-  // (comportamiento de hoy, sin cambio visible) y se prende solo si
-  // Supabase confirma que esa llave ya está configurada -- ver el useEffect
-  // de abajo. Así el botón puede quedar ya construido en el código sin
-  // arriesgarse a que un doctor real lo vea antes de que funcione de verdad.
-  const [oauthProviders, setOauthProviders] = useState({ google: false, microsoft: false });
+  // Qué botones de "Continuar con..." mostrar: solo los de los proveedores
+  // que Supabase confirma que ya están configurados (ver useOAuthProviders).
+  const oauthProviders = useOAuthProviders();
 
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
@@ -71,27 +67,6 @@ export default function RegistroMedico() {
       setSpecialties([...specs].sort((a, b) => a.name.localeCompare(b.name, "es")));
       setZones([...zoneList].sort((a, b) => a.name.localeCompare(b.name, "es")));
     });
-  }, []);
-
-  // ¿Ya están dadas de alta las llaves de Google/Microsoft en Supabase? Sin
-  // esto, un doctor que le diera clic a un botón "Continuar con Google" sin
-  // configurar caería en una pantalla de error en inglés de Supabase, fea y
-  // confusa. Este endpoint es público (no necesita sesión) y ya lo expone
-  // Supabase para exactamente este uso. Falla en silencio (se queda todo
-  // apagado, como hoy) si no se puede consultar.
-  useEffect(() => {
-    let active = true;
-    fetch(`${supabaseUrl}/auth/v1/settings`, { headers: { apikey: supabaseAnonKey } })
-      .then((r) => r.json())
-      .then((settings) => {
-        if (!active) return;
-        setOauthProviders({
-          google: !!settings?.external?.google,
-          microsoft: !!settings?.external?.azure,
-        });
-      })
-      .catch(() => {});
-    return () => { active = false; };
   }, []);
 
   // Si viene de la landing "/para-medicos" con lo básico ya lleno (título,
@@ -472,35 +447,14 @@ export default function RegistroMedico() {
 
             {stepKey === "cuenta" && (
               <StepShell title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
-                {oauthProviders.google && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => startOAuth("google")}
-                    disabled={!!oauthLoading}
-                    className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2.5 bg-white hover:bg-muted/40"
-                  >
-                    {oauthLoading === "google" ? <Loader2 className="w-4 h-4 animate-spin" /> : <GoogleIcon />}
-                    Continuar con Google
-                  </Button>
-                )}
-                {oauthProviders.microsoft && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => startOAuth("microsoft")}
-                    disabled={!!oauthLoading}
-                    className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-2.5 bg-white hover:bg-muted/40"
-                  >
-                    {oauthLoading === "microsoft" ? <Loader2 className="w-4 h-4 animate-spin" /> : <MicrosoftIcon />}
-                    Continuar con Microsoft
-                  </Button>
-                )}
-                {(oauthProviders.google || oauthProviders.microsoft) && (
-                  <div className="sm:col-span-2 flex items-center gap-3 text-xs text-muted-foreground">
-                    <div className="h-px flex-1 bg-border" /> o <div className="h-px flex-1 bg-border" />
-                  </div>
-                )}
+                <OAuthButtons
+                  providers={oauthProviders}
+                  loadingProvider={oauthLoading}
+                  onSelect={startOAuth}
+                  itemClassName="sm:col-span-2"
+                  withDivider
+                />
+
                 <Button
                   type="button"
                   onClick={() => {
