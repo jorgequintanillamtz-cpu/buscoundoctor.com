@@ -5,7 +5,7 @@ import { Stethoscope, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SpecialistCard from "@/components/SpecialistCard";
 import CountdownBox from "@/components/CountdownBox";
-import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import { LAUNCH_DATE, LAUNCH_DAY_LABEL, useCountdown } from "@/lib/launchCountdown";
 import { slugify } from "@/lib/citySlug";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
@@ -189,7 +189,7 @@ export default function SubspecialtyPage() {
                 Esta página está en construcción
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Estamos incorporando especialistas en {displayName.toLowerCase()}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
+                Estamos incorporando especialistas en {displayName.toLowerCase()}. El directorio completo de BuscoUnDoctor sale el {LAUNCH_DAY_LABEL}.
               </p>
             </div>
           </div>

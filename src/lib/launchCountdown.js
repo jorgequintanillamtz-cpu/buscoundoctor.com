@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 // Vive aquí -- no repetida en cada página -- para que /para-medicos y
 // cualquier otra página con countdown (ej. especialidades sin doctores
 // todavía) no puedan desincronizarse si la fecha cambia.
-export const LAUNCH_DATE = new Date("2026-10-15T00:00:00-06:00");
+export const LAUNCH_DATE = new Date("2026-11-15T00:00:00-06:00");
+
+// "15 de noviembre", para textos corridos ("sale el 15 de noviembre"). Se
+// calcula de LAUNCH_DATE para que cambiar la fecha arriba baste.
+export const LAUNCH_DAY_LABEL = LAUNCH_DATE.toLocaleDateString("es-MX", {
+  day: "numeric",
+  month: "long",
+  timeZone: "America/Monterrey",
+});
 
 // Cuenta regresiva en vivo hasta `target`, actualizada cada segundo.
 export function useCountdown(target) {

@@ -438,7 +438,7 @@ export default function Home() {
 
           {/* Countdown de lanzamiento en el hero: refuerza que la página
               está a punto de arrancar de lleno (el directorio real de
-              especialistas llega el 15 de octubre). Píldora en blanco
+              especialistas llega el 15 de noviembre). Píldora en blanco
               translucido (mismo estilo que las pills de especialidades de
               arriba) para que se lea bien sobre el fondo navy, en vez de la
               versión bg-brand-bluePale que se usa en secciones con fondo
