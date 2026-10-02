@@ -101,6 +101,8 @@ Las tablas están en `snake_case`. Las principales:
 
 Guardados en `profiles.role`: `doctor` (por defecto, lo crea un trigger al registrarse en Auth) o `admin`. La función `is_admin()` solo reconoce `'admin'`. No hay un rol "superadmin" real aunque algún código lo mencione.
 
+**El rol solo lo cambia un admin, directo en la base de datos** (policy `profiles_update_admin_only`; el rol por defecto de una cuenta nueva ya es `doctor`). El código del sitio **nunca** debe escribir `profiles.role`: `updateMe()` en `base44Client.js` ignora el campo `role` a propósito. Antes, `RegistroMedico.jsx` llamaba `updateMe({ role: "doctor" })` al terminar el registro; para un doctor normal no hacía nada (la policy lo bloqueaba), pero a un **admin** que se registraba como doctor con su misma cuenta sí le cambiaba el rol a `doctor` y perdía el acceso a `/admin` (le pasó a Jorge el 2026-10-02; se le restauró a mano en Supabase). Una misma cuenta puede ser admin **y** dueña de un perfil de doctor: `is_admin()` se fija solo en `profiles.role`, no en si tiene perfil.
+
 ## 5. Seguridad: RLS y Storage
 
 Todo está protegido con **Row Level Security** en Postgres. Un doctor solo puede ver/editar filas cuyo `owner_user_id` sea el suyo (verificado con cuentas reales el 2026-09-17), o de tablas hijas vía `is_specialist_owner()`. El admin puede todo vía `is_admin()`.

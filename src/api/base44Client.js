@@ -376,14 +376,14 @@ async function updatePassword(newPassword) {
   if (error) throw error;
 }
 
+// Nunca cambia el rol (profiles.role) desde aquí: hacerlo desde el navegador
+// le permitía a un admin bajarse a "doctor" sin querer (le pasó a Jorge al
+// registrarse como doctor con su cuenta de admin, 2026-10-02). Los roles solo
+// los cambia un admin directo en la base de datos.
 async function updateMe(fields) {
-  if (fields?.role) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('profiles').update({ role: fields.role }).eq('id', user.id);
-    }
-  }
-  const { data, error } = await supabase.auth.updateUser({ data: fields });
+  // eslint-disable-next-line no-unused-vars
+  const { role, ...safeFields } = fields || {};
+  const { data, error } = await supabase.auth.updateUser({ data: safeFields });
   if (error) throw error;
   return data;
 }
