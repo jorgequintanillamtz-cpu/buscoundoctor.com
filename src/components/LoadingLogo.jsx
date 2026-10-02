@@ -5,9 +5,9 @@
 // defecto) o "lg" (ventanas de espera largas, p. ej. el generador con IA).
 // light: logo en blanco, para fondos de color (la tienda pública).
 const SIZES = {
-  sm: "h-7",
-  md: "h-10",
-  lg: "h-14",
+  sm: "h-[36px]",
+  md: "h-[52px]",
+  lg: "h-[73px]",
 };
 
 export default function LoadingLogo({ size = "md", light = false }) {
