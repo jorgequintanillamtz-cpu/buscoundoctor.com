@@ -387,6 +387,7 @@ Como no hay staging, el patrón acordado es: **crear datos de prueba, verificar,
 - **`SpecialistCard.jsx` es la única tarjeta de médico**; no crees otra.
 - Componentes de dominio del panel en `src/components/admin/`.
 - **Indicador de "cargando":** siempre `<LoadingLogo />` (`src/components/LoadingLogo.jsx`: el logo latiendo; `size="sm"` dentro de tarjetas, `light` para fondos de color). Antes eran ~60 estetoscopios rebotando copiados en cada pantalla (2026-10-02); no vuelvas a poner un ícono con `animate-bounce`. Los `Loader2` girando de los botones al guardar se dejaron igual.
+- **Ícono de la pestaña (2026-10-02):** la B cursiva del logo de BuscoUnDoctor en blanco sobre el azul de marca, como PNG (`public/favicon-32.png`, `favicon-192.png`, `apple-touch-icon.png`), enlazados en `index.html` con `?v=3`. Se recortó de `site-assets/email-logo.png` (1600×400) y se recoloreó; no hay SVG. **Si cambias el diseño, sube el número `?v=`**: Chrome guarda los íconos de pestaña mucho tiempo y sin eso el visitante sigue viendo el viejo.
 
 ### Bancos de taxonomía médica (Especialidades, Subespecialidades, Enfermedades)
 
