@@ -11,6 +11,7 @@ import TaxonomyTable from "@/components/admin/TaxonomyTable";
 import TaxonomyStatsBar from "@/components/admin/TaxonomyStatsBar";
 import SpecialtyGapList from "@/components/admin/SpecialtyGapList";
 import { useTaxonomyBank } from "@/hooks/useTaxonomyBank";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const EMPTY_FORM = { name: "", parent_specialty_id: "", slug: "", description: "", active: true };
 
@@ -79,7 +80,7 @@ export default function AdminSubespecialidades() {
   if (loading || !specialtiesLoaded) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <GraduationCap className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

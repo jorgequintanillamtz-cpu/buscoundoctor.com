@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { Star, MessageSquareText, Stethoscope, ShieldCheck, Reply, Loader2, Pencil, Trash2, HelpCircle } from "lucide-react";
+import { Star, MessageSquareText, ShieldCheck, Reply, Loader2, Pencil, Trash2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import DoctorQuestions from "./DoctorQuestions";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -186,7 +187,7 @@ export default function DoctorReviews({ specialistId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

@@ -13,7 +13,7 @@ import RequireAdmin from './components/RequireAdmin';
 import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
 import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
 import DoctorSupportWhatsApp from './components/DoctorSupportWhatsApp';
-import { Stethoscope } from 'lucide-react';
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Cada página se carga en su propio bloque de código, bajo demanda, en vez de
 // venir toda junta en un solo archivo de ~700KB que cualquier visitante
@@ -84,7 +84,7 @@ const OlvideContrasena = lazy(() => import('./pages/OlvideContrasena'));
 function RouteFallback() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+      <LoadingLogo />
     </div>
   );
 }

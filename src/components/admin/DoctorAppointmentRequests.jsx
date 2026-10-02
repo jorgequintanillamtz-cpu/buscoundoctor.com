@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Calendar, Phone, MessageCircle, User, Stethoscope } from "lucide-react";
+import { Calendar, Phone, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -105,7 +106,7 @@ export default function DoctorAppointmentRequests({ specialistId }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

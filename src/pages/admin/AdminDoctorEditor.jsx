@@ -18,6 +18,7 @@ import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM } from "@/api/specialistForm";
 import { notifyProfileApproved } from "@/api/doctorNotify";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Este editor ahora es exclusivo del panel de administración (/admin/doctores/editar/:id),
 // protegido por RequireAdmin. Los médicos administran su propio perfil en /panel-medico
@@ -138,7 +139,7 @@ export default function AdminDoctorEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

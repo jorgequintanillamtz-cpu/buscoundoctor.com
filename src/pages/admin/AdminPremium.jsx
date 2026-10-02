@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Crown, Plus, Loader2, Trash2,
-  ChevronDown, ChevronUp, Stethoscope, AlertTriangle, CheckCircle2, Ban, Power, Hourglass,
+  ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Ban, Power, Hourglass,
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -20,6 +20,7 @@ import { logActivity } from "@/api/activityLog";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const METHOD_LABELS = {
   transferencia: "Transferencia",
@@ -579,7 +580,7 @@ export default function AdminPremium() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Star, ExternalLink, ArrowUp, ArrowDown, Stethoscope } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, ExternalLink, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const emptyForm = {
   name: "", slug: "", tagline: "", price_monthly: "0", price_yearly: "0",
@@ -140,7 +141,7 @@ export default function AdminPlanes() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

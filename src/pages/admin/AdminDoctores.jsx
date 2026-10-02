@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   Plus, Pencil, Trash2, ShieldCheck, BadgeCheck, XCircle, MessageCircle, Clock,
-  Stethoscope, Crown, Search, ArrowUpDown, CheckSquare, Square, Calendar, Loader2, RotateCcw,
+  Crown, Search, ArrowUpDown, CheckSquare, Square, Calendar, Loader2, RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import Pagination from "@/components/admin/Pagination";
 import { useAdminBadges } from "@/components/adminBadges";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const VERIFICATION_LABELS = {
   pending: { label: "Cédula pendiente", icon: Clock, cls: "bg-amber-100 text-amber-700" },
@@ -330,7 +331,7 @@ export default function AdminDoctores() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

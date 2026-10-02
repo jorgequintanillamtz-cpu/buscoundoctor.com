@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import {
-  Inbox, Stethoscope, Users, ShieldCheck, FileText, Crown, ListChecks,
+  Inbox, Users, ShieldCheck, FileText, Crown, ListChecks,
   CheckCircle2, XCircle, Loader2, PartyPopper, UserMinus, Gift,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/a
 import { useAdminBadges } from "@/components/adminBadges";
 import { PendingDocCard } from "@/pages/admin/AdminVerificaciones";
 import { PendingBlogCard } from "@/pages/admin/AdminBlog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Tarjeta de un doctor esperando aprobación de su perfil: mismo patrón de
 // aprobar/rechazar (con motivo obligatorio) que ya usa AdminDoctores.jsx,
@@ -329,7 +330,7 @@ export default function AdminInbox() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

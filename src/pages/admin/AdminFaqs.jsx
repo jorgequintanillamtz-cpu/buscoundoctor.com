@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap, Stethoscope } from "lucide-react";
+import { Plus, Search, HelpCircle, CheckCircle, Clock, FileText, Trash2, Edit, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import FaqGeneratorModal from "@/components/admin/FaqGeneratorModal";
 import FaqBulkModal from "@/components/admin/FaqBulkModal";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const STATUS_CONFIG = {
   borrador: { label: "Borrador", className: "bg-amber-100 text-amber-700" },
@@ -161,7 +162,7 @@ export default function AdminFaqs() {
       <div className="bg-card border border-border/50 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+            <LoadingLogo />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">

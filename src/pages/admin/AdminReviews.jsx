@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Check, XCircle, RotateCcw, Star, Stethoscope, Loader2, ShieldCheck } from "lucide-react";
+import { Check, XCircle, RotateCcw, Star, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function StarDisplay({ rating }) {
   return (
@@ -130,7 +131,7 @@ export default function AdminReviews() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

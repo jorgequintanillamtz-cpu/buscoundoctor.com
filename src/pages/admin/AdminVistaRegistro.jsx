@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Eye, ArrowLeft, ArrowRight, RotateCcw, Stethoscope } from "lucide-react";
+import { Eye, ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { generateSlug } from "@/api/specialistForm";
 import { fileToWebP } from "@/lib/fileToWebP";
@@ -9,6 +9,7 @@ import { EMPTY_REGISTRO_DATA } from "@/lib/registroDefaults";
 import StepDatos from "@/components/registro/StepDatos";
 import StepUbicacion from "@/components/registro/StepUbicacion";
 import StepFotos from "@/components/registro/StepFotos";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Los 3 pasos que sí tiene sentido previsualizar aquí. El paso "cuenta"
 // (Google / correo + OTP) es exclusivo del registro real — crear una cuenta
@@ -94,7 +95,7 @@ export default function AdminVistaRegistro() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

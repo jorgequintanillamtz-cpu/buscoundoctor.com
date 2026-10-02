@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, Tooltip } from "recharts";
 import { eachDayOfInterval, subDays, format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Mini resumen de actividad para el tab "Inicio" del panel del médico:
 // últimos 7 días, en formato compacto (sin ejes, tipo sparkline).
@@ -41,7 +41,7 @@ export default function DoctorHomeSummary({ specialistId }) {
   if (loading) {
     return (
       <div className="bg-card rounded-2xl border border-border/50 p-5 flex items-center justify-center h-[140px]">
-        <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo size="sm" />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, BarChart3, ExternalLink, Stethoscope, Sparkles, ArrowRight, Circle, MessageCircle } from "lucide-react";
+import { TrendingUp, BarChart3, ExternalLink, Sparkles, ArrowRight, Circle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProfileStatusCard from "@/components/admin/ProfileStatusCard";
 import { PROFILE_CHECKLIST_ITEMS } from "@/lib/profileChecklistItems";
@@ -14,6 +14,7 @@ import {
   subDays, subMonths, startOfMonth, endOfMonth, format,
 } from "date-fns";
 import { es } from "date-fns/locale";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const SOURCE_PAGE_LABELS = {
   home: "Inicio",
@@ -122,7 +123,7 @@ export default function DoctorDashboardHome({ specialist, isOwnProfile = true, o
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

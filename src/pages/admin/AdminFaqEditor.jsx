@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Save, Globe, Clock, Trash2, Code2, Plus, GripVertical, Stethoscope } from "lucide-react";
+import { ChevronLeft, Save, Globe, Clock, Trash2, Code2, Plus, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const STATUS_OPTIONS = [
   { value: "borrador", label: "Borrador" },
@@ -278,7 +279,7 @@ export default function AdminFaqEditor() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[40vh]">
-      <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+      <LoadingLogo />
     </div>
   );
 

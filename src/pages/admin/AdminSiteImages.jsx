@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { Upload, X, Image as ImageIcon, Share2, Loader2, Stethoscope } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Share2, Loader2 } from "lucide-react";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Mismo orden que usa Home.jsx para elegir las 5 "Especialidades
 // destacadas" (tarjetas grandes) de la página de inicio — son las únicas
@@ -186,7 +187,7 @@ export default function AdminSiteImages() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

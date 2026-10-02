@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope } from "lucide-react";
 import { resolveCitySlug } from "@/lib/citySlug";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Redirige las URLs viejas /especialidad/:slug[/:zonaSlug] a las nuevas
 // /:professionSlug/:citySlug. El sitio ya no distingue por zona/colonia
@@ -29,7 +29,7 @@ export default function LegacySpecialtyRedirect() {
   if (target === undefined) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

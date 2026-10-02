@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Star, Stethoscope } from "lucide-react";
+import { ChevronLeft, Star } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import VerifiedSeal from "../components/profile/VerifiedSeal";
@@ -25,6 +25,7 @@ import MobileBookingBar from "../components/profile/MobileBookingBar";
 import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
 import { slugify } from "@/lib/citySlug";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -240,7 +241,7 @@ export default function SpecialistProfile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>);
   }
 

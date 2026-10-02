@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Calendar, Phone, Mail, MessageCircle, User, Stethoscope, CheckCircle2,
+  Calendar, Phone, Mail, MessageCircle, User, CheckCircle2,
   TrendingUp, Users, Search, ArrowUpDown,
 } from "lucide-react";
 import {
@@ -16,6 +16,7 @@ import {
 import { es } from "date-fns/locale";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -231,7 +232,7 @@ export default function AdminSolicitudes() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

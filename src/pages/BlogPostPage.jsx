@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Tag, ChevronDown, Stethoscope } from "lucide-react";
+import { ChevronLeft, Tag, ChevronDown } from "lucide-react";
 import moment from "moment";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,6 +11,7 @@ import BlogCard from "../components/BlogCard";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 import { resolveCitySlug } from "@/lib/citySlug";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Detecta si el contenido es HTML legado o Markdown puro
 function isHtmlContent(content) {
@@ -214,7 +215,7 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }
