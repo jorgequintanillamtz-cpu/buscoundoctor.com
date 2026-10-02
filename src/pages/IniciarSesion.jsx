@@ -55,7 +55,13 @@ export default function IniciarSesion() {
       await base44.auth.loginViaEmailPassword(email, password);
       window.location.href = returnUrl;
     } catch (err) {
-      setError(err.message || "No se pudo iniciar sesión. Revisa tu correo y contraseña.");
+      // Supabase responde en inglés ("Invalid login credentials") tanto si la
+      // contraseña está mal como si esa persona nunca se registró.
+      setError(
+        /invalid login credentials/i.test(err.message || "")
+          ? "Correo o contraseña incorrectos. Si aún no tienes cuenta, regístrate abajo."
+          : err.message || "No se pudo iniciar sesión. Revisa tu correo y contraseña."
+      );
       setLoading(false);
     }
   };

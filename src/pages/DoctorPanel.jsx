@@ -111,7 +111,12 @@ export default function DoctorPanel() {
         }
       }
       if (!specialist) {
-        setStatus("no-profile");
+        // Entró (ej. con Google) pero no tiene perfil de médico, no es admin
+        // (ya se atendió arriba) ni asistente de nadie (también arriba):
+        // se manda directo a terminar su registro en vez de dejarlo en una
+        // pantalla con un botón. `replace` para que "Atrás" no lo regrese
+        // aquí y lo vuelva a mandar al registro en bucle.
+        navigate("/registro-medico", { replace: true });
         return;
       }
       setIsAssistant(asAssistant);
@@ -320,18 +325,6 @@ export default function DoctorPanel() {
         <h1 className="font-heading font-bold text-xl text-foreground">Este panel es para médicos</h1>
         <p className="text-sm text-muted-foreground mt-2">Tu cuenta es de administrador. Administra a los médicos desde el panel de administración.</p>
         <Button variant="outline" className="mt-5 rounded-xl" onClick={() => navigate("/admin/doctores")}>Ir al panel de administración</Button>
-      </div>
-    );
-  }
-
-  if (status === "no-profile") {
-    return renderShell(
-      <div className="max-w-md mx-auto text-center py-16">
-        <h1 className="font-heading font-bold text-xl text-foreground">Aún no tienes un perfil de médico</h1>
-        <p className="text-sm text-muted-foreground mt-2">Regístrate para crear tu perfil y aparecer en el directorio.</p>
-        <Button className="mt-5 rounded-xl" asChild>
-          <Link to="/registro-medico">Registrarme como médico</Link>
-        </Button>
       </div>
     );
   }
