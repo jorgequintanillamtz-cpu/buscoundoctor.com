@@ -331,6 +331,17 @@ Correo aparte de la serie de recuperación del §8g: **no** es para quien abando
 - Probado con una cuenta y perfil de prueba (`QA-J...`) con `account_created_at` puesto 2 días atrás: la primera corrida mandó el correo (`email_log` con `status: 'sent'`), la segunda corrida inmediata mandó 0 (confirma que no se duplica). Datos de prueba borrados al terminar, confirmado en 0.
 - Migraciones aplicadas en Supabase (no están en git): `profile_completion_reminder_columns`, `create_doctor_profile_sets_account_created_at`, `send_transactional_email_add_profile_reminder_type`, `registration_recovery_email_html_neutral_footer`, `send_profile_completion_reminder_emails_fn`, `schedule_profile_completion_reminder_cron`.
 
+### Recordatorio "sube tu cédula" (2026-10-02)
+
+Tercer correo automático a doctores que ya terminaron su registro, aprobado por Jorge (texto y regla). A los **3 días** de `account_created_at`, **una sola vez**, si el doctor **no ha subido ninguna** `cedula_profesional` en `specialist_document` (ni siquiera una en revisión o rechazada: ese caso ya tiene su correo de "documento rechazado") y `license_verification_status` no es `verified`; no se manda a perfiles en la papelera. Pasa 1 día después del de "completa tu perfil" (§8h): son dos correos distintos.
+
+- **`public.send_cedula_reminder_emails()`**: la corre `pg_cron` cada hora al minuto 15 (job `send-cedula-reminder-emails`). Mismo patrón idempotente que §8g/§8h: primero `UPDATE ... SET cedula_reminder_sent_at = now() WHERE cedula_reminder_sent_at IS NULL`, y solo si esa actualización gana la fila manda el correo. Revocada de `public`/`anon`/`authenticated` (verificado con `has_function_privilege`: solo `postgres` y `service_role`).
+- **`specialist.cedula_reminder_sent_at`**: columna nueva. Tipo de correo nuevo `recordatorio_subir_cedula` en la lista blanca de `send_transactional_email` (respeta la preferencia "estado" del doctor). Reusa la plantilla `registration_recovery_email_html` con la foto 1 y el botón a `/panel-medico?seccion=documentos`.
+- **Enlace directo:** `DoctorPanel.jsx` ahora acepta `?seccion=documentos` en la URL (solo esa sección, a propósito) y abre directo en "Mi cédula y documentos". Antes la única forma de abrir una pantalla concreta era `location.state` desde dentro del sitio.
+- Probado con 5 casos de prueba (QA-J): solo mandó al elegible (3+ días, sin documento, sin verificar); no mandó a quien ya tenía documento, ya estaba verificado, llevaba 2 días o estaba en la papelera; la segunda corrida mandó 0; el correo llegó a Jorge (alias `+qa-j-cedula` de su Gmail). Al activarlo no había ningún doctor real que cumpliera, así que no salió ningún correo. Datos de prueba borrados, confirmado en 0.
+- `AdminCorreos.jsx` (`EMAIL_TYPE_LABELS`) ahora también tiene las etiquetas en español que faltaban de los 3 correos de recuperación y del de "completa tu perfil".
+- Migraciones aplicadas en Supabase (no están en git): `cedula_reminder_column_and_email_type`, `send_cedula_reminder_emails_fn`, `schedule_cedula_reminder_cron`.
+
 ## 8i. Registro con Google / Microsoft (2026-09-24)
 
 En el último paso del registro (`/registro-medico`), además de "Registrarme con correo electrónico", ahora hay botones **"Continuar con Google"** y **"Continuar con Microsoft"**. La mayor parte de esto ya existía a medias desde la época de Base44 (`base44.auth.loginWithProvider`, la lógica de "regresé autenticado, retoma el registro" en `RegistroMedico.jsx`) — nadie los había conectado a un botón real.

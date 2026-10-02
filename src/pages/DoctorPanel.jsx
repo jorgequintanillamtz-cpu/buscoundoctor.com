@@ -69,7 +69,12 @@ export default function DoctorPanel() {
   // Si se llega desde la barra estática de una página externa (Mi página
   // pública, Productos digitales) con una sección pedida en location.state,
   // abre ahí directo en vez de siempre en "Inicio".
-  const [section, setSection] = useState(() => location.state?.section || "resumen");
+  // También acepta ?seccion=documentos en la URL (solo esa, a propósito): es el
+  // enlace del correo "sube tu cédula", que debe caer directo en la pantalla.
+  const [section, setSection] = useState(() => {
+    if (location.state?.section) return location.state.section;
+    return new URLSearchParams(location.search).get("seccion") === "documentos" ? "documentos" : "resumen";
+  });
   const [completenessChecklist, setCompletenessChecklist] = useState(null);
   // Modo "paso a paso": recorre, una por una, las pantallas de lo que le falta
   // al médico. { steps: [{ target, labels, keys }], index } o null.
