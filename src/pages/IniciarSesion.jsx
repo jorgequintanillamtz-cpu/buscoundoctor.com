@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Mail, Lock, ArrowLeft } from "lucide-react";
 import StepShell from "@/components/registro/StepShell";
+import OAuthButtons from "@/components/OAuthButtons";
+import useOAuthProviders from "@/hooks/useOAuthProviders";
 
 // Página de inicio de sesión propia del sitio. Reemplaza la pantalla de
 // login que antes hosteaba Base44 (el "login de la plataforma"), que ya no
@@ -21,6 +23,28 @@ export default function IniciarSesion() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const oauthProviders = useOAuthProviders();
+  const [oauthLoading, setOauthLoading] = useState("");
+
+  // Entrar con Google/Microsoft: el navegador se va al proveedor y regresa
+  // directo a la pantalla a la que quería entrar (return_url). Si esa
+  // persona nunca había entrado así, Supabase le crea la cuenta sin perfil de
+  // médico, y DoctorPanel ya sabe qué mostrarle ("Aún no tienes un perfil").
+  const startOAuth = async (provider) => {
+    setError("");
+    setOauthLoading(provider);
+    // Un registro con Google/Microsoft que quedó a medias deja sus datos
+    // guardados (ver RegistroMedico.jsx); si se quedaran ahí, la próxima vez
+    // que esta persona abra el registro ya con sesión, se le crearía un perfil
+    // solo con datos viejos. Entrar a iniciar sesión es una decisión distinta.
+    localStorage.removeItem("buscoundoctor_pending_registro");
+    try {
+      await base44.auth.loginWithProvider(provider, new URL(returnUrl, window.location.origin).toString());
+    } catch (err) {
+      setError(err.message || "No se pudo iniciar sesión con ese proveedor.");
+      setOauthLoading("");
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -59,6 +83,15 @@ export default function IniciarSesion() {
             </Button>
             <Link to="/olvide-contrasena" className="text-center text-xs text-primary hover:underline">¿Olvidaste tu contraseña?</Link>
           </form>
+
+          {(oauthProviders.google || oauthProviders.microsoft) && (
+            <div className="sm:col-span-2 grid gap-3">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="h-px flex-1 bg-border" /> o <div className="h-px flex-1 bg-border" />
+              </div>
+              <OAuthButtons providers={oauthProviders} loadingProvider={oauthLoading} onSelect={startOAuth} />
+            </div>
+          )}
 
           <p className="sm:col-span-2 text-center text-xs text-muted-foreground">
             ¿Eres médico y aún no tienes cuenta?{" "}
