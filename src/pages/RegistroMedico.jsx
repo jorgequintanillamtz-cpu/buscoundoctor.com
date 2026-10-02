@@ -49,6 +49,9 @@ export default function RegistroMedico() {
   // Qué botones de "Continuar con..." mostrar: solo los de los proveedores
   // que Supabase confirma que ya están configurados (ver useOAuthProviders).
   const oauthProviders = useOAuthProviders();
+  // Quien ya tiene sesión iniciada (ver el useEffect de arriba): en el último
+  // paso solo falta crear su perfil, no su cuenta.
+  const [sessionUser, setSessionUser] = useState(null);
 
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
@@ -244,8 +247,12 @@ export default function RegistroMedico() {
       }
       const u = await base44.auth.me().catch(() => null);
       if (!active || !u) { setPhase("wizard"); return; }
+      // Ya tiene sesión pero todavía no perfil (ej. entró con Google desde
+      // "Iniciar sesión" sin haberse registrado): el último paso le ofrece
+      // crear su perfil directo, en vez de pedirle otra vez una cuenta.
+      setSessionUser(u);
 
-      const own = await base44.entities.Specialist.filter({ owner_user_id: u.id }).catch(() => []);
+      const own =await base44.entities.Specialist.filter({ owner_user_id: u.id }).catch(() => []);
       if (!active) return;
       if (own.length > 0) {
         navigate("/panel-medico", { replace: true });
@@ -276,9 +283,14 @@ export default function RegistroMedico() {
         return;
       }
 
-      // Autenticado pero sin datos guardados (caso raro, ej. enlace directo):
-      // arranca el wizard con lo que Google ya sabe.
-      setData((prev) => ({ ...prev, full_name: u.full_name || prev.full_name }));
+      // Autenticado pero sin datos guardados (ej. lo mandó el panel por no
+      // tener perfil): arranca el wizard con lo que Google/Microsoft ya sabe,
+      // incluido el correo, para no pedirle nada dos veces.
+      setData((prev) => ({
+        ...prev,
+        full_name: prev.full_name || u.full_name || "",
+        email: prev.email || u.email || "",
+      }));
       setPhase("wizard");
     })();
     return () => { active = false; };
@@ -330,6 +342,19 @@ export default function RegistroMedico() {
       setPhase("otp");
     } catch (err) {
       setError(err.message || "No se pudo registrar la cuenta. ¿El correo ya está registrado?");
+    }
+    setLoading(false);
+  };
+
+  // Último paso para quien ya inició sesión: crea su perfil con lo que llenó.
+  const createProfileWithSession = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      await createProfileFromData(data);
+      setPhase("done");
+    } catch (err) {
+      setError(err.message || "No se pudo crear tu perfil.");
     }
     setLoading(false);
   };
@@ -450,7 +475,21 @@ export default function RegistroMedico() {
               />
             )}
 
-            {stepKey === "cuenta" && (
+            {stepKey === "cuenta" && sessionUser && (
+              <StepShell title="Un último paso" subtitle={`Ya iniciaste sesión como ${sessionUser.email}. Falta crear tu perfil de médico.`} error={error}>
+                <Button
+                  type="button"
+                  onClick={createProfileWithSession}
+                  disabled={loading}
+                  className="sm:col-span-2 w-full min-h-[44px] rounded-xl gap-1.5"
+                >
+                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Crear mi perfil de médico
+                </Button>
+              </StepShell>
+            )}
+
+            {stepKey === "cuenta" && !sessionUser && (
               <StepShell title="Un último paso" subtitle="Crea tu cuenta para guardar tu perfil" error={error}>
                 <OAuthButtons
                   providers={oauthProviders}
