@@ -10,7 +10,7 @@ Guía para Claude (Claude Code u otra sesión) que trabaje en este proyecto. Lé
 
 - El negocio depende de **tráfico orgánico (SEO)**, no de publicidad. La arquitectura de URLs, páginas y contenido está pensada para Google.
 - El cuello de botella es **reclutar médicos**, no la tecnología. El registro (`/registro-medico`) es autoservicio con fricción mínima; la calidad se modera después.
-- **Prelanzamiento:** el lanzamiento público es el **15 de octubre de 2026** (`LAUNCH_DATE` en `src/lib/launchCountdown.js`). Todavía hay muy pocos médicos reales; cualquier dato que veas en producción puede ser de prueba, así que pregunta antes de borrar.
+- **Prelanzamiento:** el lanzamiento público es el **15 de noviembre de 2026** (se movió desde el 15 de octubre el 2026-10-02, a petición de Jorge) (`LAUNCH_DATE` en `src/lib/launchCountdown.js`). Todavía hay muy pocos médicos reales; cualquier dato que veas en producción puede ser de prueba, así que pregunta antes de borrar.
 
 ## 1b. Vocabulario: los dos tipos de "admin" (importante)
 

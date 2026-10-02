@@ -11,7 +11,7 @@ import SpecialistCard from "@/components/SpecialistCard";
 import SpecialistsMapPanel from "@/components/SpecialistsMapPanel";
 import SpecialtyInterestForm from "@/components/SpecialtyInterestForm";
 import CountdownBox from "@/components/CountdownBox";
-import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import { LAUNCH_DATE, LAUNCH_DAY_LABEL, useCountdown } from "@/lib/launchCountdown";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
   BreadcrumbPage, BreadcrumbSeparator,
@@ -353,7 +353,7 @@ export default function SpecialtyPage() {
                     Esta página está en construcción
                   </h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Estamos incorporando especialistas en {specialty.display_name || specialty.name} en {cityName}. El directorio completo de BuscoUnDoctor sale el 15 de octubre.
+                    Estamos incorporando especialistas en {specialty.display_name || specialty.name} en {cityName}. El directorio completo de BuscoUnDoctor sale el {LAUNCH_DAY_LABEL}.
                   </p>
                 </div>
               </div>
