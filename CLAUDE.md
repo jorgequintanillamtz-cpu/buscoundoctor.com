@@ -275,6 +275,14 @@ El menú lateral (`AdminLayout.jsx`) tenía 19 enlaces sueltos en 5 grupos — m
 - **"Configuración"** (`/admin/configuracion`, `AdminConfigHub.jsx`): mismo truco que "Mi perfil" del panel del doctor (`ProfileHub.jsx`) — tarjetas grandes en vez de enlaces sueltos, para Ciudades/Catálogos/Planes/Preguntas frecuentes/Imágenes del sitio/Vista previa del registro (antes 6 enlaces). **Estas 6 rutas NO cambiaron** (solo se les quitó su renglón del menú), así que no necesitaron redirección.
 - **El conteo pendiente de "Enfermedades"** (solicitudes de doctores) vive ahora bajo la llave `/admin/catalogo-medico` en `src/api/pendingCounts.js` (antes `/admin/enfermedades`) — si agregas otra cola pendiente a alguna de las 3 pestañas del catálogo, usa esa misma llave.
 
+### Admin dueños en el celular (2026-10-02)
+
+- **La causa de que "todo se viera cortado a la derecha"** era la trampa de `min-w-0` (§10) en la columna de contenido de `AdminLayout.jsx`: sin `min-w-0` se estiraba a ~1850px. Ya lleva `min-w-0`; si el admin vuelve a verse recortado en celular, revisa eso primero.
+- **Menú en celular:** la barra de 12 píldoras se cambió por una barra superior con ☰ (con el número rojo de pendientes), el nombre de la pantalla actual y "Mi cuenta"; el ☰ abre un cajón lateral con el mismo contenido que la barra lateral de escritorio (`sidebarContent(onNavigate)` en `AdminLayout.jsx`, una sola definición para los dos). Se cierra al navegar, con Escape o tocando fuera. No se usó `ui/sheet.jsx` a propósito (evita avisos de accesibilidad de `DialogTitle`).
+- **Doctores:** las pestañas se deslizan en una sola línea; los botones de cada doctor pasan a su propio renglón y los nombres largos se parten en vez de cortarse con "…".
+- **Tablas del admin** (Doctores, Registros, Correos, Preguntas frecuentes, Guías, bancos del Catálogo médico) llevan `min-w-[720px]` dentro de su contenedor `overflow-x-auto`: en celular se deslizan de lado en vez de apretar las columnas.
+- **Cómo auditar** (`html/body` usan `overflow-x: clip`, así que `scrollWidth` nunca delata el desborde): revisa `getBoundingClientRect().right > innerWidth` en los elementos "origen" que no estén dentro de un contenedor con scroll horizontal; ignora el contenedor de avisos (`.pointer-events-none.fixed`).
+
 ## 8f. Correo desde el paso 1 del registro y pantalla "Registros" (admin dueños, 2026-09-23)
 
 Decisión de Jorge: pedir el correo del médico **desde el primer paso** del registro (antes solo se pedía hasta el paso 4, al crear la cuenta), para armar una serie de correos que intente recuperar a quien empieza y no termina. Esa serie de correos ya está construida — ver §8g.

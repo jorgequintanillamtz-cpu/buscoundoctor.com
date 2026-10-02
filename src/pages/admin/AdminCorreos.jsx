@@ -294,7 +294,7 @@ function PatientEmailsPanel() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
                   <th className="text-left px-5 py-3 font-medium text-muted-foreground">Paciente</th>
@@ -497,7 +497,7 @@ function SentEmailsPanel() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
                   <th className="text-left px-5 py-3 font-medium text-muted-foreground">Fecha y hora</th>

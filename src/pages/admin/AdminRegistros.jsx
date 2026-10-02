@@ -312,10 +312,10 @@ export default function AdminRegistros() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[720px] text-sm">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium text-muted-foreground">Nombre</th>
+                  <th className="text-left px-5 py-3 font-medium text-muted-foreground min-w-[11rem]">Nombre</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Correo</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Especialidad</th>
                   <th className="text-left px-4 py-3 font-medium text-muted-foreground">Estado</th>
