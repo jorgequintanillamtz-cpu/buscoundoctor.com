@@ -10,6 +10,7 @@ import TaxonomyModal from "@/components/admin/TaxonomyModal";
 import TaxonomyTable from "@/components/admin/TaxonomyTable";
 import TaxonomyStatsBar from "@/components/admin/TaxonomyStatsBar";
 import { useTaxonomyBank } from "@/hooks/useTaxonomyBank";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const EMPTY_FORM = { name: "", slug: "", profession_slug: "", icon: "", description: "", active: true };
 
@@ -56,7 +57,7 @@ export default function AdminSpecialties() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Heart className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

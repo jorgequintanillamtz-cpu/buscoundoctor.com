@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope, Frown } from "lucide-react";
+import { Frown } from "lucide-react";
 import StorefrontView from "@/components/storefront/StorefrontView";
 import { byPosition } from "@/lib/storefrontUtils";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export default function StorefrontPublic() {
   const { slug } = useParams();
@@ -58,7 +59,7 @@ export default function StorefrontPublic() {
   if (state === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#2D7D72" }}>
-        <Stethoscope className="w-10 h-10 text-white animate-bounce" />
+        <LoadingLogo light />
       </div>
     );
   }

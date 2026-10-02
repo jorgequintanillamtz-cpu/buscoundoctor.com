@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { SlidersHorizontal, X, Search, Stethoscope } from "lucide-react";
+import { SlidersHorizontal, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import SpecialistCard from "../components/SpecialistCard";
 import SpecialistsMapPanel from "../components/SpecialistsMapPanel";
 import { Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export default function SpecialistList() {
   const [specialists, setSpecialists] = useState([]);
@@ -148,7 +149,7 @@ export default function SpecialistList() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Gift, Loader2, Users, CheckCircle2, Clock, Trophy, Stethoscope } from "lucide-react";
+import { Gift, Loader2, Users, CheckCircle2, Clock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAdminBadges } from "@/components/adminBadges";
 import { formatDateOnly } from "@/lib/dateLabels";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function KpiCard({ label, value, tone = "navy" }) {
   const bg = tone === "navy" ? "bg-brand-navy" : "bg-brand-blue";
@@ -83,7 +84,7 @@ export default function AdminReferidos() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

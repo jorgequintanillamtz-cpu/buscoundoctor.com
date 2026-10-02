@@ -4,7 +4,6 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  Stethoscope,
   Globe,
   Sparkles,
   Plus,
@@ -24,6 +23,7 @@ import GuideLibraryStrip from "@/components/products/GuideLibraryStrip";
 import { generateUniqueSlug, byPosition } from "@/lib/storefrontUtils";
 import { DEFAULT_SECTION_ORDER } from "@/lib/storefrontSections";
 import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export default function DoctorStorefrontEditor() {
   const [status, setStatus] = useState("loading"); // loading | no-profile | no-storefront | ready
@@ -240,7 +240,7 @@ export default function DoctorStorefrontEditor() {
   if (status === "loading") {
     return shell(
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-10 h-10 text-primary animate-bounce" />
+        <LoadingLogo size="sm" />
       </div>
     );
   }

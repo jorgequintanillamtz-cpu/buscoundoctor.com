@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Pencil, DollarSign, Stethoscope } from "lucide-react";
+import { Plus, Trash2, Pencil, DollarSign } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const FIRST_CONSULT_NAME = "Consulta por primera vez";
 const emptyService = () => ({ name: "", price: "", details: "" });
@@ -115,7 +116,7 @@ export default function ServicesManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
+          <LoadingLogo size="sm" />
         </div>
       ) : (
         <div className="space-y-3">

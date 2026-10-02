@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Check, Sparkles, Stethoscope } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { setOpenGraph } from "@/lib/seoMeta";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -107,7 +108,7 @@ export default function PricingPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+          <LoadingLogo />
         </div>
       ) : plans.length === 0 ? (
         <p className="text-center text-muted-foreground py-16">Los planes estarán disponibles muy pronto.</p>

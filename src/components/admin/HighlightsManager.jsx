@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Plus, Trash2, Pencil, Cpu, Sparkles, Stethoscope, X, Upload, Loader2, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Pencil, Cpu, Sparkles, X, Upload, Loader2, Image as ImageIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const TYPES = [
   { v: "tecnologia", label: "Tecnología / equipo", icon: Cpu },
@@ -244,7 +245,7 @@ export default function HighlightsManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
+          <LoadingLogo size="sm" />
         </div>
       ) : (
         <div className="space-y-3">

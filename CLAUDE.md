@@ -382,6 +382,7 @@ Como no hay staging, el patrón acordado es: **crear datos de prueba, verificar,
 - `src/components/ui/` tiene los componentes base tipo shadcn.
 - **`SpecialistCard.jsx` es la única tarjeta de médico**; no crees otra.
 - Componentes de dominio del panel en `src/components/admin/`.
+- **Indicador de "cargando":** siempre `<LoadingLogo />` (`src/components/LoadingLogo.jsx`: el logo latiendo; `size="sm"` dentro de tarjetas, `light` para fondos de color). Antes eran ~60 estetoscopios rebotando copiados en cada pantalla (2026-10-02); no vuelvas a poner un ícono con `animate-bounce`. Los `Loader2` girando de los botones al guardar se dejaron igual.
 
 ### Bancos de taxonomía médica (Especialidades, Subespecialidades, Enfermedades)
 

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
-import { History, Search, Stethoscope } from "lucide-react";
+import { History, Search } from "lucide-react";
 import { ACTIVITY_TYPE_LABELS, ACTIVITY_POSITIVE, ACTIVITY_NEGATIVE } from "@/api/activityLog";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import LoadingLogo from "@/components/LoadingLogo";
 
 function fmtDateTime(d) {
   if (!d) return "—";
@@ -83,7 +84,7 @@ export default function AdminHistorial() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

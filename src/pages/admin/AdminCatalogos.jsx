@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Stethoscope, Upload, Loader2, Shield, Languages } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Loader2, Shield, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const EMPTY_INSURER = { name: "", logo_url: "", is_active: true };
 const EMPTY_LANGUAGE = { name: "", iso_code: "" };
@@ -152,7 +153,7 @@ export default function AdminCatalogos() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

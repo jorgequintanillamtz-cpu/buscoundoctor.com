@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { supabase } from "@/lib/supabaseClient";
-import { Eye, Save, Clock, Stethoscope, ArrowLeft, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
+import { Eye, Save, Clock, ArrowLeft, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -34,6 +34,7 @@ import DoctorSettings from "@/components/admin/settings/DoctorSettings";
 import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
 import { SECTION_GROUPS, SIDE_LINKS } from "@/components/admin/DoctorPanelSidebar";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
 // autoguardado, recalcular score) vive en src/api/specialistForm.js,
@@ -314,7 +315,7 @@ export default function DoctorPanel() {
   if (status === "loading") {
     return renderShell(
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Languages, Plus, Stethoscope } from "lucide-react";
+import { Languages, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const LEVELS = [
   { value: "basico", label: "Básico" },
@@ -101,7 +102,7 @@ export default function LanguagesManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
+          <LoadingLogo size="sm" />
         </div>
       ) : (
         <>

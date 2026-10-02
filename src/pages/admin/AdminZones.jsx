@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, Stethoscope, Users, ChevronRight, Star, Crown } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ChevronRight, Star, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const STATUS_LABELS = {
   published: "Publicados",
@@ -163,7 +164,7 @@ export default function AdminZones() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }
@@ -294,7 +295,7 @@ export default function AdminZones() {
           </DialogHeader>
           {statsLoading || !detailStats ? (
             <div className="flex items-center justify-center py-10">
-              <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
+              <LoadingLogo size="sm" />
             </div>
           ) : (
             <div className="space-y-5 mt-2">

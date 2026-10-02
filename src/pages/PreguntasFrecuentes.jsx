@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, ChevronDown, ArrowRight, MessageCircleQuestion, Stethoscope } from "lucide-react";
+import { Sparkles, ChevronDown, ArrowRight, MessageCircleQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 import { resolveCitySlug } from "@/lib/citySlug";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export default function PreguntasFrecuentes() {
   const [faqs, setFaqs] = useState([]);
@@ -112,7 +113,7 @@ export default function PreguntasFrecuentes() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

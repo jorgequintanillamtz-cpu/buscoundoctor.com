@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import { Stethoscope } from "lucide-react";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const DefaultFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center">
-    <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+    <LoadingLogo />
   </div>
 );
 

@@ -2,11 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, FileText, CheckCircle2, XCircle, Loader2, ExternalLink, Stethoscope } from "lucide-react";
+import { ShieldCheck, FileText, CheckCircle2, XCircle, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
 import { notifyDocumentApproved, notifyDocumentRejected } from "@/api/doctorNotify";
 import { useAdminBadges } from "@/components/adminBadges";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Misma lista de tipos de documento que usa DocumentManager.jsx (el
 // componente que vive dentro del editor de cada doctor), para que las
@@ -193,7 +194,7 @@ export default function AdminVerificaciones() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

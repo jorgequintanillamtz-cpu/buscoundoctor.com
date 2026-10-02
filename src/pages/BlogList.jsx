@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import BlogCard from "../components/BlogCard";
-import { Stethoscope } from "lucide-react";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export default function BlogList() {
   const [posts, setPosts] = useState([]);
@@ -41,7 +41,7 @@ export default function BlogList() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loader2, Stethoscope } from "lucide-react";
+import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { resolveOfficeCoords } from "@/lib/officeGeo";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import { hasGoogleMaps, buildPlaceMapsUrl } from "@/lib/googleMaps";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const normalize = (t) => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
@@ -370,7 +371,7 @@ export default function OfficeManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
+          <LoadingLogo size="sm" />
         </div>
       ) : (
         <div className="space-y-3">

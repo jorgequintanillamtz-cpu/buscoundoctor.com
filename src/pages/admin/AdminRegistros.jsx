@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { ClipboardList, Search, Eye, CheckCircle2, AlertTriangle, Stethoscope, Filter } from "lucide-react";
+import { ClipboardList, Search, Eye, CheckCircle2, AlertTriangle, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const STEP_LABELS = { datos: "Datos", ubicacion: "Ubicación", fotos: "Fotos" };
 const STEP_ORDER = ["datos", "ubicacion", "fotos"];
@@ -199,7 +200,7 @@ export default function AdminRegistros() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

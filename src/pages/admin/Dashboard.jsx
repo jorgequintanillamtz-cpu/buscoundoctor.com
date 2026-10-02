@@ -3,13 +3,14 @@ import { base44 } from "@/api/base44Client";
 import { loadPremiumStatuses, mergePremiumStatus } from "@/api/premiumStatus";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
-  Stethoscope, TrendingUp, BarChart3, Heart, MapPin,
+  TrendingUp, BarChart3, Heart, MapPin,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 import { eachWeekOfInterval, subWeeks, startOfWeek, endOfWeek, isWithinInterval, parseISO, format } from "date-fns";
 import { es } from "date-fns/locale";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const fmtMoney = (n) => `$${(n || 0).toLocaleString("es-MX", { maximumFractionDigits: 0 })}`;
 
@@ -161,7 +162,7 @@ export default function Dashboard() {
   if (loading || !data) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

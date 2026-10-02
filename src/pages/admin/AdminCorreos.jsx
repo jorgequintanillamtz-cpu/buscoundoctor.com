@@ -2,10 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import {
-  Mail, Search, Download, Copy, Stethoscope, Users, MapPin, Heart, Send, CheckCircle2, XCircle,
+  Mail, Search, Download, Copy, Users, MapPin, Heart, Send, CheckCircle2, XCircle,
 } from "lucide-react";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Etiquetas en español para cada "type" de EmailLog — se usan tanto en la
 // tabla de "Correos enviados" como en su filtro por tipo.
@@ -204,7 +205,7 @@ function PatientEmailsPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }
@@ -414,7 +415,7 @@ function SentEmailsPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

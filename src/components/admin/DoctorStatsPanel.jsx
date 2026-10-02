@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Stethoscope } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
@@ -10,6 +10,7 @@ import {
   eachDayOfInterval, eachMonthOfInterval, subDays, subMonths, format,
 } from "date-fns";
 import { es } from "date-fns/locale";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const SOURCE_PAGE_LABELS = {
   home: "Inicio",
@@ -143,7 +144,7 @@ export default function DoctorStatsPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Stethoscope className="w-8 h-8 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo size="sm" />
       </div>
     );
   }

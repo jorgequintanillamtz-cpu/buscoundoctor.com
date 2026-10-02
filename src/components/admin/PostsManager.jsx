@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Trash2, Loader2, Image as ImageIcon, Send, Stethoscope } from "lucide-react";
+import { Trash2, Loader2, Image as ImageIcon, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export default function PostsManager({ specialistId }) {
   const [posts, setPosts] = useState([]);
@@ -106,7 +107,7 @@ export default function PostsManager({ specialistId }) {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Stethoscope className="w-9 h-9 text-primary animate-bounce" strokeWidth={1.75} />
+          <LoadingLogo size="sm" />
         </div>
       ) : posts.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">Aún no tienes publicaciones.</p>

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { ArrowLeft, Stethoscope, Plus, Pencil, Trash2, FileText, Package, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, FileText, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductForm from "@/components/products/ProductForm";
 import GuideLibraryStrip from "@/components/products/GuideLibraryStrip";
 import DoctorPanelSidebar from "@/components/admin/DoctorPanelSidebar";
+import LoadingLogo from "@/components/LoadingLogo";
 
 const STATUS_META = {
   draft: { label: "Borrador", cls: "bg-amber-100 text-amber-700" },
@@ -120,7 +121,7 @@ export default function DoctorProducts() {
   if (status === "loading") {
     return shell(
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-10 h-10 text-primary animate-bounce" />
+        <LoadingLogo size="sm" />
       </div>
     );
   }

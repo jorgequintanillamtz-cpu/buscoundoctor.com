@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Clock, Stethoscope, CheckCircle2, XCircle, Loader2, UserRound } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Clock, CheckCircle2, XCircle, Loader2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import moment from "moment";
@@ -12,6 +12,7 @@ import Pagination from "@/components/admin/Pagination";
 import { useAdminBadges } from "@/components/adminBadges";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Tarjeta de un artículo enviado por un doctor y esperando revisión: mismo
 // patrón de aprobar/rechazar (con motivo obligatorio) que ya usamos para
@@ -186,7 +187,7 @@ export default function AdminBlog() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

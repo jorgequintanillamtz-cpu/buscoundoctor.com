@@ -16,6 +16,7 @@ import {
 import {
   Accordion, AccordionItem, AccordionTrigger, AccordionContent,
 } from "@/components/ui/accordion";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Toma la primera oración de un texto largo (hasta ~110 caracteres) para
 // usarla como meta description sin repetir el párrafo completo. Si no hay
@@ -270,7 +271,7 @@ export default function ConditionDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

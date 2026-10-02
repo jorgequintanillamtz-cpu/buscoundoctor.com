@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Crown, Check, Stethoscope, Hourglass, AlertTriangle } from "lucide-react";
+import { Crown, Check, Hourglass, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { computeLateDoctors } from "@/api/premiumStatus";
+import LoadingLogo from "@/components/LoadingLogo";
 
 // Mismo número de WhatsApp del negocio que se usa en /contacto y
 // /para-medicos, para que "Actualizar a Premium" abra el mismo canal de
@@ -56,7 +57,7 @@ export default function DoctorPremiumStatus({ specialistId, specialistName }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }

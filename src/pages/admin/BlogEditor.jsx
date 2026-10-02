@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Save, FileEdit, Clock, Sparkles, Stethoscope } from "lucide-react";
+import { ChevronLeft, Save, FileEdit, Clock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import BlogEditorMain from "@/components/admin/BlogEditorMain";
 import BlogEditorSidebar from "@/components/admin/BlogEditorSidebar";
 import AIGeneratorModal from "@/components/admin/AIGeneratorModal";
+import LoadingLogo from "@/components/LoadingLogo";
 
 export function generateBlogSlug(title) {
   return (title || "")
@@ -204,7 +205,7 @@ export default function BlogEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <Stethoscope className="w-12 h-12 text-primary animate-bounce" strokeWidth={1.75} />
+        <LoadingLogo />
       </div>
     );
   }
