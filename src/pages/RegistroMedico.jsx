@@ -196,7 +196,12 @@ export default function RegistroMedico() {
     if (created?.specialist?.id && !created.already_existed) {
       await createOfficeFromData(created.specialist.id, finalData);
     }
-    try { await base44.auth.updateMe({ role: "doctor" }); } catch {}
+    // Aquí antes se llamaba updateMe({ role: "doctor" }). Sobraba: el rol por
+    // defecto de una cuenta nueva ya es "doctor" (ver profiles.role) y la base
+    // de datos solo deja cambiar roles a un admin, así que para un doctor
+    // normal no hacía nada. Pero para un ADMIN que se registraba como doctor
+    // con su misma cuenta (le pasó a Jorge el 2026-10-02) sí funcionaba, y le
+    // quitaba el acceso al panel de administración.
     localStorage.removeItem(DRAFT_ID_KEY);
   };
 
