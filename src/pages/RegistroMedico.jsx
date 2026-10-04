@@ -12,6 +12,7 @@ import { fileToWebP } from "@/lib/fileToWebP";
 import { EMPTY_REGISTRO_DATA } from "@/lib/registroDefaults";
 import { buildPlaceMapsUrl } from "@/lib/googleMaps";
 import { resolveOfficeCoords } from "@/lib/officeGeo";
+import { notifyWelcome } from "@/api/doctorNotify";
 import Logo from "@/components/Logo";
 import StepShell from "@/components/registro/StepShell";
 import StepDatos from "@/components/registro/StepDatos";
@@ -206,6 +207,14 @@ export default function RegistroMedico() {
     const created = res?.data;
     if (created?.specialist?.id && !created.already_existed) {
       await createOfficeFromData(created.specialist.id, finalData);
+      // Correo de bienvenida ("completa tu perfil paso a paso"). Se manda desde
+      // aquí -- el único punto por el que pasan los 3 caminos del registro
+      // (correo + código, Google/Microsoft y sesión ya iniciada) -- y solo la
+      // primera vez (already_existed lo evita si se reintenta). Nunca debe
+      // tumbar el registro: notifyWelcome atrapa sus propios errores. Este
+      // correo nunca se había mandado a un doctor real: la función existía
+      // en doctorNotify.js pero nadie la llamaba.
+      await notifyWelcome(created.specialist);
     }
     // Aquí antes se llamaba updateMe({ role: "doctor" }). Sobraba: el rol por
     // defecto de una cuenta nueva ya es "doctor" (ver profiles.role) y la base
