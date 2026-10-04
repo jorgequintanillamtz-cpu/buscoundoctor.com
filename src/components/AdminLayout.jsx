@@ -251,7 +251,7 @@ function AdminLayoutContent() {
               con el mismo menú del escritorio, y un fondo oscuro que lo cierra. */}
           {menuOpen && (
             <div className="lg:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-label="Menú de administración">
-              <div className="w-[85%] max-w-sm bg-card h-full overflow-y-auto flex flex-col shadow-xl">
+              <div className="w-[85%] max-w-sm bg-card h-full overflow-y-auto overscroll-contain flex flex-col shadow-xl">
                 <div className="flex items-center justify-end px-3 pt-3">
                   <button type="button" onClick={() => setMenuOpen(false)} aria-label="Cerrar menú" className="p-2 rounded-lg text-muted-foreground hover:bg-muted">
                     <X className="w-5 h-5" />
