@@ -5,7 +5,11 @@ import Footer from "./Footer";
 import { applyDefaultOG, setOpenGraph, setCanonical } from "@/lib/seoMeta";
 import { base44 } from "@/api/base44Client";
 
-export default function Layout() {
+// `minimal`: mismo manejo de SEO, pero sin menú, buscador, aviso ni pie de página.
+// Lo usan las pantallas de conversión (hoy /registro-medico) donde esos
+// elementos distraen y, en celular, el menú pegado arriba le quita ~1/4 de la
+// pantalla al formulario.
+export default function Layout({ minimal = false }) {
   const location = useLocation();
   const [customOgImage, setCustomOgImage] = useState("");
 
@@ -34,6 +38,16 @@ export default function Layout() {
     if (customOgImage) setOpenGraph({ image: customOgImage });
     setCanonical(location.pathname);
   }, [location.pathname, customOgImage]);
+
+  if (minimal) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
