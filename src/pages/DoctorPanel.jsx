@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { supabase } from "@/lib/supabaseClient";
-import { Eye, Save, Clock, ArrowLeft, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
+import { Eye, Save, Clock, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -284,10 +284,6 @@ export default function DoctorPanel() {
     <div className="min-h-screen bg-background flex">
       <aside className="hidden lg:flex w-64 flex-col bg-brand-navy h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
-          <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            Volver al sitio
-          </Link>
           <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
           <p className="text-xs text-white/50 mt-1">Administra tu perfil en BuscoUnDoctor.</p>
         </div>
@@ -305,10 +301,7 @@ export default function DoctorPanel() {
       </aside>
       <div className="flex-1 min-w-0 min-h-screen">
         <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
-            <ArrowLeft className="w-4 h-4" />
-            Sitio
-          </Link>
+          <div className="w-10" />
           <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
           <div className="w-10" />
         </div>
@@ -344,10 +337,6 @@ export default function DoctorPanel() {
 
       <aside className="hidden lg:flex w-72 flex-col bg-brand-navy h-screen sticky top-0">
         <div className="p-5 border-b border-white/10">
-          <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            Volver al sitio
-          </Link>
           <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
           <p className="text-xs text-white/50 mt-1">
             {isAssistant ? "Entraste como asistente de este médico." : "Administra tu perfil en BuscoUnDoctor."}
@@ -398,10 +387,14 @@ export default function DoctorPanel() {
       <div className="flex-1 min-w-0 min-h-screen">
         {/* Barra superior en móvil: título + botón de hamburguesa que despliega el mismo menú lateral que en escritorio */}
         <div className="lg:hidden sticky top-0 z-40 bg-brand-navy px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-sm text-white/70">
-            <ArrowLeft className="w-4 h-4" />
-            Sitio
-          </Link>
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="Abrir menú"
+            className="w-10 h-10 -ml-2 flex items-center justify-center text-white/80 hover:text-white"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
           <h2 className="font-heading font-bold text-white">Panel de Médico</h2>
           <div className="flex items-center -mr-2">
             <NotificationBell
@@ -412,30 +405,18 @@ export default function DoctorPanel() {
               onMarkAllRead={() => markRead()}
               onViewAll={() => setSection("notificaciones")}
             />
-            <button
-              type="button"
-              onClick={() => setMobileNavOpen(true)}
-              aria-label="Abrir menú"
-              className="w-10 h-10 flex items-center justify-center text-white/80 hover:text-white"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
           </div>
         </div>
 
         {/* Menú lateral en móvil: mismas secciones que la barra lateral de escritorio */}
         <div
           className={`lg:hidden fixed inset-0 z-[60] bg-brand-navy flex flex-col transform transition-transform duration-300 ease-in-out will-change-transform ${
-            mobileNavOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+            mobileNavOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
           }`}
           aria-hidden={!mobileNavOpen}
         >
           <div className="p-5 border-b border-white/10 flex items-start justify-between flex-shrink-0">
             <div>
-              <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4" onClick={() => setMobileNavOpen(false)}>
-                <ArrowLeft className="w-4 h-4" />
-                Volver al sitio
-              </Link>
               <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
               <p className="text-xs text-white/50 mt-1">
                 {isAssistant ? "Entraste como asistente de este médico." : "Administra tu perfil en BuscoUnDoctor."}
