@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { supabase } from "@/lib/supabaseClient";
-import { Eye, Clock, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
+import { Clock, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -489,14 +489,6 @@ export default function DoctorPanel() {
                     onViewAll={() => setSection("notificaciones")}
                   />
                 </div>
-                {form.slug && (
-                  <Button variant="outline" size="sm" className="rounded-xl gap-1.5" asChild>
-                    <a href={`/especialista/${form.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Eye className="w-4 h-4" />
-                      Vista previa
-                    </a>
-                  </Button>
-                )}
               </div>
             </div>
 

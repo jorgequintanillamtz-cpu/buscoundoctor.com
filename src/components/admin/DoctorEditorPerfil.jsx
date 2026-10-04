@@ -1,12 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Upload, X, Eye, Edit3, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
+import { Upload, X, Bold, Italic, Link, List, Quote, Image, Video } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 function ToolbarBtn({ onClick, title, children, active }) {
   return (
@@ -65,7 +63,6 @@ export default function DoctorEditorPerfil({ form, update, simple = false }) {
   const [uploadingGaleria, setUploadingGaleria] = useState(false);
 
   const [uploadingVideo, setUploadingVideo] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const [showEspecialidadList, setShowEspecialidadList] = useState(false);
   const [especialidades, setEspecialidades] = useState([]);
   const [zones, setZones] = useState([]);
@@ -280,20 +277,9 @@ export default function DoctorEditorPerfil({ form, update, simple = false }) {
       <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Descripción profesional</h2>
-          <div className="flex gap-1">
-            <button type="button" onClick={() => setShowPreview(false)}
-              className={`text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${!showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-              <Edit3 className="w-3 h-3" /> Editar
-            </button>
-            <button type="button" onClick={() => setShowPreview(true)}
-              className={`text-xs px-3 py-1 rounded-lg flex items-center gap-1 transition-colors ${showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-              <Eye className="w-3 h-3" /> Vista previa
-            </button>
-          </div>
         </div>
 
-        {!showPreview ? (
-          <>
+        <>
             <div className="px-5">
               <MarkdownToolbar textareaRef={contentRef} value={form.description || ""}
                 onChange={v => update("description", v)} onInsertImage={() => imageInsertRef.current?.click()} />
@@ -309,13 +295,6 @@ export default function DoctorEditorPerfil({ form, update, simple = false }) {
             </div>
             <input ref={imageInsertRef} type="file" accept="image/*" className="hidden" onChange={handleInlineImageUpload} />
           </>
-        ) : (
-          <div className="px-5 pb-4">
-            <div className="w-full min-h-[380px] p-4 bg-white border border-border/50 rounded-xl prose prose-slate max-w-none prose-headings:font-heading prose-img:rounded-xl prose-blockquote:border-l-4 prose-blockquote:border-primary">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{form.description || "*Sin contenido aún*"}</ReactMarkdown>
-            </div>
-          </div>
-        )}
 
         <div className="px-5 py-2.5 border-t border-border/30 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-3">

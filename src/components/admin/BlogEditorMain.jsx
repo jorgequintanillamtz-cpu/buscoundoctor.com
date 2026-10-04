@@ -1,10 +1,8 @@
 import { useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Upload, Eye, Edit3, Bold, Italic, Link, List, ListOrdered, Quote, Image, Minus } from "lucide-react";
+import { Upload, Bold, Italic, Link, List, ListOrdered, Quote, Image, Minus } from "lucide-react";
 import { toast } from "sonner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 function TBtn({ onClick, title, children, active }) {
   return (
@@ -79,7 +77,6 @@ export default function BlogEditorMain({ form, update }) {
   const inlineImageRef = useRef(null);
   const [uploadingFeatured, setUploadingFeatured] = useState(false);
   const [uploadingInline, setUploadingInline] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
   const words = (form.content || "").trim().split(/\s+/).filter(Boolean).length;
@@ -200,20 +197,9 @@ export default function BlogEditorMain({ form, update }) {
       <div className="bg-white rounded-2xl border border-border/50 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-4 pt-3 pb-0">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Contenido</span>
-          <div className="flex gap-1">
-            <button type="button" onClick={() => setShowPreview(false)}
-              className={`text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors ${!showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-              <Edit3 className="w-3 h-3" /> Editar
-            </button>
-            <button type="button" onClick={() => setShowPreview(true)}
-              className={`text-xs px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors ${showPreview ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-              <Eye className="w-3 h-3" /> Vista previa
-            </button>
-          </div>
         </div>
 
-        {!showPreview ? (
-          <>
+        <>
             <Toolbar
               textareaRef={contentRef}
               value={form.content || ""}
@@ -230,11 +216,6 @@ export default function BlogEditorMain({ form, update }) {
             />
             <input ref={inlineImageRef} type="file" accept="image/*" className="hidden" onChange={handleInlineImageUpload} />
           </>
-        ) : (
-          <div className="px-5 py-4 min-h-[480px] prose prose-slate max-w-none prose-headings:font-heading prose-img:rounded-xl prose-blockquote:border-l-4 prose-blockquote:border-primary prose-a:text-primary">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{form.content || "*Sin contenido aún*"}</ReactMarkdown>
-          </div>
-        )}
 
         <div className="px-5 py-2.5 border-t border-border/30 flex items-center justify-between text-xs text-muted-foreground">
           <span>{words} palabras · {readTime} min lectura</span>
