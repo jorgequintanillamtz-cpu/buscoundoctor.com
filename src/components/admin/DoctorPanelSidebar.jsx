@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, MessageCircle, Home, Calendar, Star, Sparkles, UserCog, FileText, Globe, Settings, Package } from "lucide-react";
+import { LogOut, MessageCircle, Home, Calendar, Star, Sparkles, UserCog, FileText, Globe, Settings, Package } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 
@@ -45,10 +45,6 @@ export default function DoctorPanelSidebar({ activePath, completitud = null, isA
   return (
     <aside className={`hidden lg:flex ${width} flex-col bg-brand-navy h-screen sticky top-0`}>
       <div className="p-5 border-b border-white/10">
-        <Link to="/" className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-4">
-          <ArrowLeft className="w-4 h-4" />
-          Volver al sitio
-        </Link>
         <h2 className="font-heading font-bold text-lg text-white">Panel de Médico</h2>
         <p className="text-xs text-white/50 mt-1">
           {isAssistant ? "Entraste como asistente de este médico." : "Administra tu perfil en BuscoUnDoctor."}

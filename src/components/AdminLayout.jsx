@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, ArrowLeft, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList, Menu } from "lucide-react";
+import { LayoutDashboard, Users, Heart, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList, Menu } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -140,10 +140,6 @@ function AdminLayoutContent() {
   const sidebarContent = (onNavigate) => (
     <>
             <div className="p-5 border-b border-border/50">
-              <Link to="/" onClick={onNavigate} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
-                <ArrowLeft className="w-4 h-4" />
-                Volver al sitio
-              </Link>
               <h2 className="font-heading font-bold text-lg text-foreground">Panel de Administración</h2>
             </div>
             <div className="px-3 pt-3">
