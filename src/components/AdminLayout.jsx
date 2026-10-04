@@ -4,6 +4,7 @@ import { LayoutDashboard, Users, Heart, Star, FileText, ShieldCheck, Calendar, C
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 
 // Agrupado por secciones (en vez de una lista plana) para que el menú se
 // pueda escanear de un vistazo: Resumen primero; luego Operación, con las 4
@@ -105,10 +106,9 @@ function AdminLayoutContent() {
     if (!menuOpen) return;
     const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+    return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
+  useBodyScrollLock(menuOpen);
   // Total de pendientes para el puntito rojo del botón ☰ (así se ve que hay
   // algo por atender sin tener que abrir el menú).
   const totalPending = Object.values(pendingCounts || {}).reduce((a, n) => a + (Number(n) || 0), 0);
@@ -259,7 +259,7 @@ function AdminLayoutContent() {
                 </div>
                 {sidebarContent(() => setMenuOpen(false))}
               </div>
-              <button type="button" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} className="flex-1 bg-black/50" />
+              <button type="button" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)} className="flex-1 bg-black/50 touch-none" />
             </div>
           )}
           <div className="p-4 sm:p-6 lg:p-8">

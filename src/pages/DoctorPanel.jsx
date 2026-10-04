@@ -35,6 +35,7 @@ import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
 import { SECTION_GROUPS, SIDE_LINKS } from "@/components/admin/DoctorPanelSidebar";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 import LoadingLogo from "@/components/LoadingLogo";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
 // autoguardado, recalcular score) vive en src/api/specialistForm.js,
@@ -144,10 +145,7 @@ export default function DoctorPanel() {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = mobileNavOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileNavOpen]);
+  useBodyScrollLock(mobileNavOpen);
 
   useAutoSaveSpecialist({
     enabled: status === "ready",
