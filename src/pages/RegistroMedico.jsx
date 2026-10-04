@@ -447,7 +447,7 @@ export default function RegistroMedico() {
   const progressPct = Math.round(((stepIndex + 1) / STEP_KEYS.length) * 100);
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className={`w-full ${phase === "wizard" ? "max-w-md sm:max-w-xl lg:max-w-2xl" : "max-w-md"}`}>
         <Link to="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver al inicio
@@ -641,6 +641,13 @@ export default function RegistroMedico() {
             </Button>
           </div>
         )}
+
+        {/* Enlaces legales (antes venían en el pie del sitio, que aquí ya no se muestra). */}
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          <Link to="/aviso-de-privacidad" className="hover:text-foreground underline-offset-2 hover:underline">Aviso de privacidad</Link>
+          <span className="mx-2">·</span>
+          <Link to="/terminos-y-condiciones" className="hover:text-foreground underline-offset-2 hover:underline">Términos y condiciones</Link>
+        </p>
       </div>
     </div>
   );

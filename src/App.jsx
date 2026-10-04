@@ -101,6 +101,11 @@ const AuthenticatedApp = () => {
     {isDoctorPanel && <DoctorSupportWhatsApp />}
     <Suspense fallback={<RouteFallback />}>
       <Routes>
+      {/* Registro de médicos: sin menú, buscador ni pie (ver Layout minimal). */}
+      <Route element={<Layout minimal />}>
+        <Route path="/registro-medico" element={<RegistroMedico />} />
+      </Route>
+
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
@@ -120,7 +125,6 @@ const AuthenticatedApp = () => {
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/nosotros" element={<About />} />
         <Route path="/contacto" element={<Contact />} />
-        <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/iniciar-sesion" element={<IniciarSesion />} />
         <Route path="/olvide-contrasena" element={<OlvideContrasena />} />
         <Route path="/preguntas-frecuentes" element={<PreguntasFrecuentes />} />
