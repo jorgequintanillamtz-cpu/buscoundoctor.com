@@ -53,6 +53,14 @@ export default function RegistroMedico() {
   // paso solo falta crear su perfil, no su cuenta.
   const [sessionUser, setSessionUser] = useState(null);
 
+  // Cada paso del registro (y cada pantalla: correo, código, listo) empieza
+  // desde arriba. Sin esto, en el celular el botón "Siguiente" está al fondo
+  // de una pantalla larga y la siguiente pantalla se abría ya recorrida hacia
+  // abajo, dejando el formulario a medias fuera de vista.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [stepIndex, phase]);
+
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
