@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { supabase } from "@/lib/supabaseClient";
-import { Eye, Save, Clock, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
+import { Eye, Clock, LogOut, Menu, X, MessageCircle, ChevronLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -33,7 +33,7 @@ import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 import DoctorSettings from "@/components/admin/settings/DoctorSettings";
 import WelcomeTourModal from "@/components/admin/WelcomeTourModal";
 import { SECTION_GROUPS, SIDE_LINKS } from "@/components/admin/DoctorPanelSidebar";
-import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
+import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 import LoadingLogo from "@/components/LoadingLogo";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 
@@ -65,8 +65,6 @@ export default function DoctorPanel() {
   const [isAssistant, setIsAssistant] = useState(false);
   const { form, setForm, formRef, update, buildData } = useSpecialistForm({ stripFields: DOCTOR_RESTRICTED_FIELDS });
   const originalContactRef = useRef({ email: "", whatsapp: "" });
-  const [saving, setSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState(null);
   // Si se llega desde la barra estática de una página externa (Mi página
   // pública, Productos digitales) con una sección pedida en location.state,
   // abre ahí directo en vez de siempre en "Inicio".
@@ -147,28 +145,19 @@ export default function DoctorPanel() {
 
   useBodyScrollLock(mobileNavOpen);
 
-  useAutoSaveSpecialist({
+  // Guardado automático (ver useAutoSaveSpecialist): no hay botón "Guardar
+  // cambios". `flush` guarda ya lo pendiente (se usa al cambiar de pantalla).
+  const { saveState, lastSaved, hasUnsaved, flush: saveNow } = useAutoSaveSpecialist({
     enabled: status === "ready",
     specialistId,
+    form,
     formRef,
     buildData,
     contactRef: originalContactRef,
-    onSaved: () => { setLastSaved(new Date()); recalculateScore(); },
+    onSaved: () => { recalculateScore(); },
   });
-
-  const handleSaveChanges = async () => {
-    setSaving(true);
-    try {
-      await base44.entities.Specialist.update(specialistId, buildData(formRef.current));
-      trackContactChanges(originalContactRef, formRef.current, { specialistId });
-      toast.success("Cambios guardados");
-      recalculateScore();
-      setLastSaved(new Date());
-    } catch (e) {
-      toast.error("Error al guardar: " + e.message);
-    }
-    setSaving(false);
-  };
+  // Al cambiar de pantalla dentro del panel, guarda de inmediato lo pendiente.
+  useEffect(() => { saveNow(); }, [section]);
 
   // Junta lo pendiente de "Llena tu perfil" por pantalla (varios puntos viven
   // en la misma, como foto y presentación) y arranca el paso a paso.
@@ -187,7 +176,7 @@ export default function DoctorPanel() {
   };
 
   const goGuided = async (nextIndex) => {
-    await handleSaveChanges();
+    await saveNow();
     if (nextIndex >= guided.steps.length) {
       setGuided(null);
       setSection("completar");
@@ -479,12 +468,16 @@ export default function DoctorPanel() {
             <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
               <div>
                 <h1 className="font-heading font-bold text-2xl text-foreground leading-tight">{form.full_name}</h1>
-                {lastSaved && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                    <Clock className="w-3 h-3" />
-                    Guardado a las {lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                )}
+                <p className={`text-xs flex items-center gap-1 mt-0.5 ${saveState === "error" ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
+                  <Clock className="w-3 h-3" />
+                  {saveState === "error"
+                    ? "No se pudo guardar. Reintentando… (revisa tu conexión)"
+                    : saveState === "saving" || hasUnsaved
+                      ? "Guardando…"
+                      : lastSaved
+                        ? `Guardado a las ${lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}`
+                        : "Tus cambios se guardan solos"}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="hidden lg:block">
@@ -504,10 +497,6 @@ export default function DoctorPanel() {
                     </a>
                   </Button>
                 )}
-                <Button variant="outline" size="sm" onClick={handleSaveChanges} disabled={saving} className="rounded-xl gap-1.5">
-                  {saving ? <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-                  Guardar cambios
-                </Button>
               </div>
             </div>
 

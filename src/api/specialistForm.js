@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { logActivity } from "@/api/activityLog";
+import { toast } from "sonner";
 
 // Compara el email/whatsapp que se está por guardar contra el último valor
 // conocido (guardado en `contactRef`) y deja constancia en el historial si
@@ -163,21 +164,149 @@ export function useRecalculateScore(setForm) {
   }, [setForm]);
 }
 
-// Autoguardado cada 30s mientras haya un perfil ya guardado. `onSaved` se
-// dispara después de cada guardado exitoso (para refrescar "Guardado a
-// las..." y, si aplica, recalcular el score).
-export function useAutoSaveSpecialist({ enabled, specialistId, formRef, buildData, onSaved, contactRef, byAdmin = false }) {
+// Campos que el servidor calcula o que el formulario nunca debe mandar de
+// vuelta: si cambian en pantalla (p. ej. el porcentaje de perfil completo que
+// devuelve la base de datos tras guardar) NO cuentan como un cambio del usuario.
+const SERVER_MANAGED_FIELDS = new Set([
+  "id", "created_date", "updated_date", "owner_user_id",
+  "completeness_score", "seo_score",
+  "referral_code", "referred_by_id", "referral_rewarded_at",
+  "account_created_at", "registration_step",
+  "recovery_email_1_sent_at", "recovery_email_2_sent_at", "recovery_email_3_sent_at",
+  "profile_reminder_sent_at", "cedula_reminder_sent_at", "deleted_at",
+]);
+
+const ser = (v) => JSON.stringify(v === undefined ? null : v);
+
+// Autoguardado de verdad: guarda SOLO lo que cambió, unos 1.5 s después de que
+// quien edita deja de escribir, y de inmediato al salir de la pantalla, cambiar
+// de sección, apagar el celular o cerrar la pestaña. Sustituye al botón
+// "Guardar cambios" y al guardado cada 30 s, que (1) en el celular no corría si
+// la pantalla se apagaba o se cambiaba de app, (2) tragaba los errores en
+// silencio y (3) mandaba el formulario COMPLETO cada vez, pisando lo que el
+// otro (doctor o asistente) hubiera escrito en otro campo y moviendo siempre
+// "Perfil actualizado". `onSaved` se dispara tras cada guardado exitoso.
+//
+// Devuelve { saveState, lastSaved, errorMessage, hasUnsaved, flush }:
+//   saveState: "idle" | "saving" | "saved" | "error"
+//   flush(): guarda ya lo pendiente (devuelve true si quedó todo guardado).
+export function useAutoSaveSpecialist({ enabled, specialistId, form, formRef, buildData, onSaved, contactRef, byAdmin = false }) {
+  const flushRef = useRef(null);
+  const baselineRef = useRef(null); // { campo: JSON del último valor guardado/cargado }
+  const savingRef = useRef(false);
+  const queuedRef = useRef(false);
+  const retryTimerRef = useRef(null);
+  const warnedRef = useRef(false);
+  const onSavedRef = useRef(onSaved);
+  onSavedRef.current = onSaved;
+  // buildData puede cambiar de identidad entre renders: se lee por ref para no
+  // reiniciar los temporizadores ni los listeners cada vez.
+  const buildDataRef = useRef(buildData);
+  buildDataRef.current = buildData;
+  const [saveState, setSaveState] = useState("idle");
+  const [lastSaved, setLastSaved] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [hasUnsaved, setHasUnsaved] = useState(false);
+
+  // Lo que cambió respecto a lo último guardado: { campo: valor }.
+  const computeDiff = useCallback((f) => {
+    const baseline = baselineRef.current;
+    if (!baseline) return {};
+    const data = buildDataRef.current(f);
+    const diff = {};
+    for (const key of Object.keys(data)) {
+      if (SERVER_MANAGED_FIELDS.has(key)) continue;
+      const value = data[key] === undefined ? null : data[key];
+      if (ser(value) !== baseline[key]) diff[key] = value;
+    }
+    return diff;
+  }, []);
+
+  // La "foto" inicial: lo que ya estaba guardado cuando se abrió el perfil.
   useEffect(() => {
-    if (!enabled || !specialistId) return;
-    const interval = setInterval(async () => {
-      const f = formRef.current;
-      if (!f.full_name) return;
-      try {
-        await base44.entities.Specialist.update(specialistId, buildData(f));
-        if (contactRef) trackContactChanges(contactRef, f, { specialistId, byAdmin });
-        onSaved?.();
-      } catch {}
-    }, 30000);
-    return () => clearInterval(interval);
+    if (!enabled || !specialistId) { baselineRef.current = null; return; }
+    if (baselineRef.current) return;
+    const data = buildDataRef.current(formRef.current);
+    const baseline = {};
+    for (const key of Object.keys(data)) baseline[key] = ser(data[key]);
+    baselineRef.current = baseline;
   }, [enabled, specialistId]);
+
+  const flush = useCallback(async () => {
+    if (!enabled || !specialistId || !baselineRef.current) return true;
+    if (savingRef.current) { queuedRef.current = true; return false; }
+    const f = formRef.current;
+    if (!f.full_name || !f.full_name.trim()) return true; // nunca guardar un perfil sin nombre
+    const diff = computeDiff(f);
+    if (Object.keys(diff).length === 0) { setHasUnsaved(false); return true; }
+    savingRef.current = true;
+    setSaveState("saving");
+    let ok = false;
+    try {
+      await base44.entities.Specialist.update(specialistId, diff);
+      for (const key of Object.keys(diff)) baselineRef.current[key] = ser(diff[key]);
+      if (contactRef) trackContactChanges(contactRef, f, { specialistId, byAdmin });
+      setLastSaved(new Date());
+      setSaveState("saved");
+      setErrorMessage("");
+      warnedRef.current = false;
+      setHasUnsaved(Object.keys(computeDiff(formRef.current)).length > 0);
+      onSavedRef.current?.();
+      ok = true;
+    } catch (e) {
+      setSaveState("error");
+      // "Failed to fetch" / "Network request failed" = sin internet: se dice en
+      // español sencillo; cualquier otro error (ej. cédula repetida) se muestra tal cual.
+      const isNetwork = e instanceof TypeError || /failed to fetch|network|load failed/i.test(e?.message || "");
+      const reason = isNetwork ? "revisa tu conexión a internet" : (e?.message || "error desconocido");
+      setErrorMessage(reason);
+      setHasUnsaved(true);
+      // Un solo aviso por falla (no uno cada reintento) y un reintento solo.
+      if (!warnedRef.current) {
+        warnedRef.current = true;
+        toast.error("No se pudieron guardar tus cambios (" + reason + "). Reintentando…");
+      }
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = setTimeout(() => { flushRef.current(); }, 10000);
+    } finally {
+      savingRef.current = false;
+      if (queuedRef.current) { queuedRef.current = false; flushRef.current(); }
+    }
+    return ok;
+  }, [enabled, specialistId, computeDiff, contactRef, byAdmin]);
+
+  flushRef.current = flush;
+
+  // Cada cambio en el formulario programa un guardado corto.
+  useEffect(() => {
+    if (!enabled || !specialistId || !baselineRef.current) return undefined;
+    const dirty = Object.keys(computeDiff(form)).length > 0;
+    setHasUnsaved(dirty);
+    if (!dirty) return undefined;
+    const t = setTimeout(() => { flushRef.current(); }, 1500);
+    return () => clearTimeout(t);
+  }, [form, enabled, specialistId, computeDiff]);
+
+  // Salir de la pantalla: guardar ya. En el celular, "hidden" es lo último que
+  // dispara el navegador antes de congelar la pestaña o cerrarla.
+  useEffect(() => {
+    if (!enabled || !specialistId) return undefined;
+    const onHidden = () => { if (document.visibilityState === "hidden") flushRef.current(); };
+    const onPageHide = () => { flushRef.current(); };
+    const onBeforeUnload = (e) => {
+      if (Object.keys(computeDiff(formRef.current)).length > 0) { flushRef.current(); e.preventDefault(); e.returnValue = ""; }
+    };
+    document.addEventListener("visibilitychange", onHidden);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      document.removeEventListener("visibilitychange", onHidden);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      clearTimeout(retryTimerRef.current);
+      flushRef.current(); // al salir de la página (ej. otra ruta de la app)
+    };
+  }, [enabled, specialistId, computeDiff]);
+
+  return { saveState, lastSaved, errorMessage, hasUnsaved, flush };
 }
