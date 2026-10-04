@@ -410,7 +410,7 @@ export default function DoctorPanel() {
 
         {/* Menú lateral en móvil: mismas secciones que la barra lateral de escritorio */}
         <div
-          className={`lg:hidden fixed inset-0 z-[60] bg-brand-navy flex flex-col transform transition-transform duration-300 ease-in-out will-change-transform ${
+          className={`lg:hidden fixed inset-0 z-[60] bg-brand-navy flex flex-col overflow-y-auto overscroll-contain transform transition-transform duration-300 ease-in-out will-change-transform ${
             mobileNavOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
           }`}
           aria-hidden={!mobileNavOpen}
@@ -445,7 +445,10 @@ export default function DoctorPanel() {
             </div>
           </div>
 
-          <nav className="flex-1 p-3 overflow-y-auto">{renderNavGroups(() => setMobileNavOpen(false))}</nav>
+          {/* Un solo desplazamiento para todo el menú: lo hace el contenedor de arriba,
+              no esta lista por separado (antes la lista tenía su propio scroll y
+              se sentían varios a la vez). */}
+          <nav className="flex-1 p-3">{renderNavGroups(() => setMobileNavOpen(false))}</nav>
 
           <div className="px-3 pb-2 space-y-0.5 flex-shrink-0">
             {SIDE_LINKS.map((l) => (
