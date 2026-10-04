@@ -15,7 +15,7 @@ export const DOCTOR_HELP = [
     items: [
       { q: "¿Cómo agrego mi consultorio y mis horarios?", a: "En \"Mi perfil\" → \"Mis consultorios\". Agrega la dirección y los horarios en los que atiendes. Si tienes más de un consultorio, puedes agregar varios." },
       { q: "¿Dónde pongo mis servicios y mis precios?", a: "En \"Mi perfil\" → \"Detalles y servicios\". Ahí agregas lo que ofreces, tu precio de consulta, tu modalidad y las formas de pago que aceptas." },
-      { q: "¿Cómo cambio mi foto o mi presentación?", a: "En \"Mi perfil\" → \"Mis datos y presentación\". Tus cambios se guardan solos, y también puedes usar el botón \"Guardar cambios\" de arriba." },
+      { q: "¿Cómo cambio mi foto o mi presentación?", a: "En \"Mi perfil\" → \"Mis datos y presentación\". Tus cambios se guardan solos mientras escribes; arriba verás \"Guardando…\" y luego \"Guardado a las…\"." },
       { q: "¿Cómo se ve mi perfil para los pacientes?", a: "Usa el botón \"Vista previa\" de arriba: abre tu perfil público tal como lo ven los pacientes." },
     ],
   },

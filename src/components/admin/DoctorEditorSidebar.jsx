@@ -175,7 +175,7 @@ export default function DoctorEditorSidebar({ form, update, specialistId }) {
             </div>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">Los distintivos se guardan con "Guardar cambios" (o solos, cada 30 segundos).</p>
+        <p className="text-xs text-muted-foreground">Los distintivos se guardan solos.</p>
       </div>
 
       {/* Avanzado: la dirección web casi nunca se toca */}

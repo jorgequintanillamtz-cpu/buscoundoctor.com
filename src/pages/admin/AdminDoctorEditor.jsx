@@ -67,32 +67,30 @@ export default function AdminDoctorEditor() {
     return () => { active = false; };
   }, [id, isEditing]);
 
-  useAutoSaveSpecialist({
-    enabled: isEditing,
+  // Doctores ya creados: se guardan solos (ver useAutoSaveSpecialist), sin botón.
+  // `enabled` espera a que termine de cargar para tomar la "foto" inicial.
+  const { saveState, lastSaved: autoLastSaved, hasUnsaved } = useAutoSaveSpecialist({
+    enabled: isEditing && !loading,
     specialistId: id,
+    form,
     formRef,
     buildData,
     contactRef: originalContactRef,
     byAdmin: true,
-    onSaved: () => { setLastSaved(new Date()); recalculateScore(id); },
+    onSaved: () => { recalculateScore(id); },
   });
 
+  // Solo para un doctor NUEVO ("Guardar como borrador"): todavía no existe en la
+  // base, así que no hay autoguardado hasta que se crea.
   const handleSaveChanges = async () => {
     setSaving(true);
     try {
       const data = buildData(formRef.current);
-      if (isEditing) {
-        await base44.entities.Specialist.update(id, data);
-        trackContactChanges(originalContactRef, formRef.current, { specialistId: id, byAdmin: true });
-        toast.success("Cambios guardados");
-        recalculateScore(id);
-      } else {
-        if (!data.full_name) { toast.error("El nombre es obligatorio"); setSaving(false); return; }
-        const created = await base44.entities.Specialist.create(data);
-        toast.success("Perfil creado");
-        recalculateScore(created.id);
-        navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
-      }
+      if (!data.full_name) { toast.error("El nombre es obligatorio"); setSaving(false); return; }
+      const created = await base44.entities.Specialist.create(data);
+      toast.success("Perfil creado");
+      recalculateScore(created.id);
+      navigate(`/admin/doctores/editar/${created.id}`, { replace: true });
       setLastSaved(new Date());
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 3000);
@@ -184,11 +182,24 @@ export default function AdminDoctorEditor() {
           <h1 className="font-heading font-bold text-2xl text-foreground leading-tight">
             {form.full_name || (isEditing ? "Editar doctor" : "Nuevo doctor")}
           </h1>
-          {lastSaved && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+          {isEditing ? (
+            <p className={`text-xs flex items-center gap-1 mt-0.5 ${saveState === "error" ? "text-red-600 font-medium" : "text-muted-foreground"}`}>
               <Clock className="w-3 h-3" />
-              Guardado a las {lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+              {saveState === "error"
+                ? "No se pudo guardar. Reintentando… (revisa tu conexión)"
+                : saveState === "saving" || hasUnsaved
+                  ? "Guardando…"
+                  : autoLastSaved
+                    ? `Guardado a las ${autoLastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}`
+                    : "Los cambios se guardan solos"}
             </p>
+          ) : (
+            lastSaved && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                <Clock className="w-3 h-3" />
+                Guardado a las {lastSaved.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+              </p>
+            )
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -200,6 +211,7 @@ export default function AdminDoctorEditor() {
               </a>
             </Button>
           )}
+          {!isEditing && (
           <Button variant="outline" size="sm" onClick={handleSaveChanges} disabled={saving} className="rounded-xl gap-1.5">
             {saving ? (
               <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
@@ -208,8 +220,9 @@ export default function AdminDoctorEditor() {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {justSaved ? "¡Guardado!" : isEditing ? "Guardar cambios" : "Guardar como borrador"}
+            {justSaved ? "¡Guardado!" : "Guardar como borrador"}
           </Button>
+          )}
           {!isEditing && (
             <Button onClick={handlePublish} disabled={saving} className="rounded-xl gap-1.5">
               {saving ? (
