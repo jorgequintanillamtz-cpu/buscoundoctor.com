@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Eye, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, ListChecks, Cpu } from "lucide-react";
+import { ChevronLeft, Save, Clock, User, Stethoscope, GraduationCap, Languages, MapPin, ShieldCheck, FileText, Globe, Lock, Home, Check, ListChecks, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import DoctorEditorPerfil from "@/components/admin/DoctorEditorPerfil";
@@ -203,14 +203,6 @@ export default function AdminDoctorEditor() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {form.slug && isEditing && (
-            <Button variant="outline" size="sm" className="rounded-xl gap-1.5" asChild>
-              <a href={`/especialista/${form.slug}`} target="_blank" rel="noopener noreferrer">
-                <Eye className="w-4 h-4" />
-                Vista previa
-              </a>
-            </Button>
-          )}
           {!isEditing && (
           <Button variant="outline" size="sm" onClick={handleSaveChanges} disabled={saving} className="rounded-xl gap-1.5">
             {saving ? (
