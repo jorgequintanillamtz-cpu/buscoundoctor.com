@@ -67,6 +67,7 @@ const AdminPlanes = lazy(() => import('./pages/admin/AdminPlanes'));
 const LandingMedicos = lazy(() => import('./pages/LandingMedicos'));
 const DoctoresRegistro = lazy(() => import('./pages/DoctoresRegistro'));
 const LandingRegistroGratis = lazy(() => import('./pages/LandingRegistroGratis'));
+const BajaCorreos = lazy(() => import('./pages/BajaCorreos'));
 const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
 const StorefrontProductDetail = lazy(() => import('./pages/StorefrontProductDetail'));
 const DoctorStorefrontEditor = lazy(() => import('./pages/DoctorStorefrontEditor'));
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
       {/* Registro de médicos: sin menú, buscador ni pie (ver Layout minimal). */}
       <Route element={<Layout minimal />}>
         <Route path="/registro-medico" element={<RegistroMedico />} />
+        <Route path="/baja-correos" element={<BajaCorreos />} />
       </Route>
 
       <Route element={<Layout />}>

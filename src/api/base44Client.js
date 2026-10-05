@@ -130,6 +130,28 @@ function applyEqFilters(query, filterObj) {
   return q;
 }
 
+// Columnas de `specialist` que un VISITANTE (sin sesión) puede leer. La base de datos solo le concede estas
+// al rol `anon` (columnas privadas como email, owner_user_id, referral_code o suspension_reason no salen a
+// la API pública), así que un visitante no puede pedir `select *`. Quien tiene sesión (doctor o admin) lee
+// todo con `*`. Si agregas una columna pública a `specialist`, agrégala aquí Y concédesela a `anon` en
+// Supabase (`grant select (columna) on public.specialist to anon`) o la página pública dejará de cargar.
+export const SPECIALIST_PUBLIC_COLUMNS = [
+  'id', 'full_name', 'slug', 'profile_photo', 'specialty_id', 'specialty', 'subspecialty',
+  'subspecialties_relation', 'conditions_relation', 'description', 'years_experience', 'rating',
+  'location', 'city', 'zone', 'address', 'address_street', 'address_neighborhood', 'address_ext_number',
+  'address_int_number', 'address_floor', 'address_postal_code', 'whatsapp', 'instagram', 'modality',
+  'schedule', 'services', 'insurers_relation', 'gallery', 'video_url', 'certifications', 'featured',
+  'active', 'price_range', 'professional_license_number', 'license_verification_status',
+  'license_verified_at', 'publication_status', 'completeness_score', 'seo_score', 'created_date',
+  'updated_date', 'payment_methods', 'patient_types',
+].join(',');
+
+async function selectColumnsFor(entityName) {
+  if (entityName !== 'Specialist') return '*';
+  const { data } = await supabase.auth.getSession();
+  return data?.session ? '*' : SPECIALIST_PUBLIC_COLUMNS;
+}
+
 function makeEntity(entityName) {
   if (STRIPE_ENTITIES.has(entityName)) {
     // Rechaza como promesa (no lanza sincrono) porque todo el código real
@@ -177,7 +199,7 @@ function makeEntity(entityName) {
       let from = 0;
       for (;;) {
         const pageEnd = limitNum ? Math.min(from + PAGE_SIZE, limitNum) : from + PAGE_SIZE;
-        let q = supabase.from(table).select('*');
+        let q = supabase.from(table).select(await selectColumnsFor(entityName));
         q = applyEqFilters(q, filterObj);
         q = applySort(q, effectiveSort);
         q = q.range(from, pageEnd - 1);
@@ -196,7 +218,7 @@ function makeEntity(entityName) {
     },
 
     async get(id) {
-      const { data, error } = await supabase.from(table).select('*').eq('id', id).single();
+      const { data, error } = await supabase.from(table).select(await selectColumnsFor(entityName)).eq('id', id).single();
       if (error) throw error;
       return fromDb(entityName, data);
     },
@@ -420,6 +442,7 @@ const FUNCTION_MAP = {
   answerSpecialistQuestion: ({ question_id, answer } = {}) => supabase.rpc('answer_specialist_question', { p_question_id: question_id, p_answer: answer }),
   listMyReferrals: () => supabase.rpc('list_my_referrals'),
   creditReferralReward: ({ specialist_id } = {}) => supabase.rpc('credit_referral_reward', { p_specialist_id: specialist_id }),
+  unsubscribeRegistrationEmails: ({ draft_id } = {}) => supabase.rpc('unsubscribe_registration_emails', { p_draft_id: draft_id }),
   submitContactMessage: ({ name, email, message } = {}) => supabase.rpc('submit_contact_message', { p_name: name, p_email: email, p_message: message }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
