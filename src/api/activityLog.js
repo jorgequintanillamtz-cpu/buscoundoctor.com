@@ -65,8 +65,10 @@ export async function logActivity({ type, description, specialistId = "", specia
     await base44.entities.ActivityLog.create({
       type,
       description,
-      specialist_id: specialistId || "",
-      specialist_name: specialistName || "",
+      // null, no "": specialist_id es uuid y "" lo rechaza la base (el movimiento
+      // se perdía en silencio cuando no había doctor asociado).
+      specialist_id: specialistId || null,
+      specialist_name: specialistName || null,
     });
   } catch (e) {
     console.error("No se pudo registrar el movimiento en el historial:", e);
