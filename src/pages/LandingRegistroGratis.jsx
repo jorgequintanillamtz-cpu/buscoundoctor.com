@@ -31,9 +31,11 @@ const ACQUISITION_KEY = "buscoundoctor_acquisition";
 const ORIGIN = "https://buscoundoctor.com";
 const PAGE_URL = `${ORIGIN}/registro-gratis`;
 const HERO_IMAGE = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/hero-para-medicos.png";
-// Foto de ejemplo (banco de imágenes, licencia Unsplash) solo para ilustrar cómo
-// se ve un perfil; el perfil completo es ficticio. Misma que /para-medicos.
-const EXAMPLE_DOCTOR_PHOTO = "https://images.unsplash.com/photo-1642975967602-653d378f3b5b?w=200&h=200&fit=crop&crop=faces&auto=format&q=80";
+// Foto de ejemplo, solo para ilustrar cómo se ve un perfil (el perfil completo es
+// ficticio y la sección lo dice). Es una de las 3 fotos genéricas que Jorge dio
+// para los correos (no es de ningún doctor registrado); está cerrada en la cara,
+// a diferencia de la de Unsplash que usa /para-medicos, que se veía muy chica.
+const EXAMPLE_DOCTOR_PHOTO = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/hero-registro-recuperacion-doctor-3.jpg";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -143,8 +145,8 @@ export default function LandingRegistroGratis() {
     <div className="min-h-screen bg-background">
       {/* Header mínimo: solo logo (y una barra con el lanzamiento), nada que distraiga del formulario */}
       <header className="border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-center">
-          <Logo to="/" className="h-[34px]" />
+        <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-center">
+          <Logo to="/" className="h-[30px]" />
         </div>
         {!countdown.done && (
           <div className="bg-brand-bluePale/60 border-t border-brand-blue/10 py-1.5 px-2">
@@ -158,37 +160,31 @@ export default function LandingRegistroGratis() {
 
       <main>
         {/* ============ TÍTULO + FORMULARIO (en la primera pantalla del celular) ============ */}
-        <section aria-labelledby="hero-heading" className="max-w-2xl mx-auto px-4 pt-6 sm:pt-10 pb-10">
+        <section aria-labelledby="hero-heading" className="max-w-2xl mx-auto px-4 pt-4 sm:pt-10 pb-10">
           <div className="text-center">
             <h1 id="hero-heading" className="font-heading font-extrabold text-[1.65rem] sm:text-4xl leading-[1.15] text-foreground tracking-tight">
               Aparece cuando busquen un especialista en <span className="text-brand-blue">Monterrey</span>
             </h1>
-            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-              Crea tu perfil verificado, gratis. Tus pacientes te contactan directo por WhatsApp.
+            <p className="mt-1.5 text-sm sm:text-base text-muted-foreground">
+              Perfil verificado y gratis. Te contactan por WhatsApp.
             </p>
-            <p className="mt-3 inline-flex items-start gap-2 text-left text-xs sm:text-sm font-medium text-foreground bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+            <p className="mt-2.5 inline-flex items-start gap-2 text-left text-xs sm:text-sm font-medium text-foreground bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-1.5">
               <Crown className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <span>Miembro Fundador: 1 año gratis de Premium (ahorras $23,988 MXN) para los primeros 10 doctores de cada especialidad.</span>
+              <span>Miembro Fundador: 1 año de Premium gratis ($23,988 MXN) para los primeros 10 de cada especialidad.</span>
             </p>
           </div>
 
-          <div id="registro" className="mt-5 bg-card border border-border/50 rounded-3xl p-5 sm:p-7 shadow-sm scroll-mt-4">
-            <div className="text-center mb-4">
-              <span className="inline-block text-[11px] font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1 rounded-full">
-                Empieza aquí · unos 3 minutos en total
-              </span>
-            </div>
-
-            <div className="grid gap-4">
+          <div id="registro" className="mt-3 bg-card border border-border/50 rounded-3xl p-4 sm:p-7 shadow-sm scroll-mt-4">
+            <div className="grid gap-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre completo</label>
-                <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="grid grid-cols-2 gap-2 mb-1.5">
                   <button type="button" onClick={() => updateStep1("title", "Dr.")}
-                    className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${step1.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                    className={`h-9 rounded-xl border text-sm font-semibold transition-colors ${step1.title === "Dr." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
                     Dr.
                   </button>
                   <button type="button" onClick={() => updateStep1("title", "Dra.")}
-                    className={`h-10 rounded-xl border text-sm font-semibold transition-colors ${step1.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
+                    className={`h-9 rounded-xl border text-sm font-semibold transition-colors ${step1.title === "Dra." ? "bg-primary text-primary-foreground border-primary" : "border-border text-foreground hover:bg-accent"}`}>
                     Dra.
                   </button>
                 </div>
@@ -219,15 +215,15 @@ export default function LandingRegistroGratis() {
 
             {step1Error && <p className="text-sm text-red-500 text-center mt-4">{step1Error}</p>}
 
-            <Button type="button" onClick={handleContinueStep1} className="w-full min-h-[48px] rounded-xl gap-1.5 mt-5 bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold">
+            <Button type="button" onClick={handleContinueStep1} className="w-full min-h-[48px] rounded-xl gap-1.5 mt-4 bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold">
               Empezar mi registro gratis <ArrowRight className="w-4 h-4" />
             </Button>
-            <p className="text-xs text-muted-foreground text-center mt-3 flex items-center justify-center gap-1.5">
+            <p className="text-xs text-muted-foreground text-center mt-2.5 flex items-center justify-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
               Gratis · sin tarjeta · tu cédula se verifica antes de publicar
             </p>
             <p className="text-[11px] text-muted-foreground/80 text-center mt-1.5">
-              En la siguiente pantalla te pedimos tu correo, cédula y precio de consulta.
+              Unos 3 minutos en total. En la siguiente pantalla te pedimos tu correo, cédula y precio de consulta.
             </p>
           </div>
         </section>
