@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { formErrorMessage } from "@/lib/formErrors";
 import { fileToWebP } from "@/lib/fileToWebP";
 
 const CATEGORY_RATINGS = [
@@ -92,21 +93,27 @@ export default function ReviewForm({ specialist }) {
       return;
     }
     setLoading(true);
-    await base44.entities.Review.create({
-      specialist_id: specialist.id,
-      specialist_name: specialist.full_name,
-      patient_name: name,
-      rating,
-      comment,
-      consultation_date: consultationDate || undefined,
-      treatment_performed: treatmentPerformed || undefined,
-      patient_contact_hint: contactHint || undefined,
-      rating_punctuality: categoryRatings.ratingPunctuality || undefined,
-      rating_treatment: categoryRatings.ratingTreatment || undefined,
-      rating_facilities: categoryRatings.ratingFacilities || undefined,
-      photo_url: photoUrl || undefined,
-      approved: false,
-    });
+    try {
+      await base44.entities.Review.create({
+        specialist_id: specialist.id,
+        specialist_name: specialist.full_name,
+        patient_name: name,
+        rating,
+        comment,
+        consultation_date: consultationDate || undefined,
+        treatment_performed: treatmentPerformed || undefined,
+        patient_contact_hint: contactHint || undefined,
+        rating_punctuality: categoryRatings.ratingPunctuality || undefined,
+        rating_treatment: categoryRatings.ratingTreatment || undefined,
+        rating_facilities: categoryRatings.ratingFacilities || undefined,
+        photo_url: photoUrl || undefined,
+        approved: false,
+      });
+    } catch (err) {
+      toast.error(formErrorMessage(err, "No se pudo enviar tu reseña. Intenta de nuevo."));
+      setLoading(false);
+      return;
+    }
     // El correo al doctor lo manda la base de datos sola al guardar la reseña
     // (trigger review_email_insert); el navegador ya no arma ni manda correos.
     setLoading(false);
