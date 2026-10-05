@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { formErrorMessage } from "@/lib/formErrors";
 
 // Formulario público para preguntarle algo a un doctor, sin necesidad de
 // cuenta -- mismo patrón que ReviewForm.jsx (honeypot anti-bot incluido, ver
@@ -34,8 +35,8 @@ export default function QuestionForm({ specialist, onSubmitted }) {
       });
       setSubmitted(true);
       onSubmitted?.();
-    } catch {
-      toast.error("No se pudo enviar tu pregunta, intenta de nuevo");
+    } catch (err) {
+      toast.error(formErrorMessage(err, "No se pudo enviar tu pregunta, intenta de nuevo"));
     }
     setLoading(false);
   };

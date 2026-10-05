@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formErrorMessage } from "@/lib/formErrors";
 import { Mail, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export default function SpecialtyInterestForm({ specialtyName, cityName }) {
       // El aviso por correo al equipo lo manda la base de datos sola al guardar (trigger
       // specialty_interest_email); aquí ya no se arma ni se manda ningún correo.
     } catch (err) {
-      setError("No se pudo guardar tu correo. Intenta de nuevo.");
+      setError(formErrorMessage(err, "No se pudo guardar tu correo. Intenta de nuevo."));
     }
     setSubmitting(false);
   };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formErrorMessage } from "@/lib/formErrors";
 import { Link } from "react-router-dom";
 import { Mail, MapPin, Clock, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,7 @@ export default function Contact() {
       if (!res?.data?.success) throw new Error(res?.data?.reason || "No se pudo enviar");
       setSent(true);
     } catch (err) {
-      toast.error("No se pudo enviar tu mensaje. Intenta de nuevo.");
+      toast.error(formErrorMessage(err, "No se pudo enviar tu mensaje. Intenta de nuevo."));
     }
     setSending(false);
   };

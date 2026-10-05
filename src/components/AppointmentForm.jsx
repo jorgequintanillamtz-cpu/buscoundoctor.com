@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { toast } from "sonner";
+import { formErrorMessage } from "@/lib/formErrors";
 import { base44 } from "@/api/base44Client";
 import { X, MessageCircle, Star, ShieldCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,13 +53,18 @@ export default function AppointmentForm({ specialist, onClose, initialDate = "" 
     if (website) { onClose(); return; }
 
     // Save the appointment request
-    await base44.entities.AppointmentRequest.create({
-      ...form,
-      specialty: specialist.specialty,
-      city: specialist.zone || specialist.location,
-      specialist_id: specialist.id,
-      specialist_name: specialist.full_name,
-    });
+    try {
+      await base44.entities.AppointmentRequest.create({
+        ...form,
+        specialty: specialist.specialty,
+        city: specialist.zone || specialist.location,
+        specialist_id: specialist.id,
+        specialist_name: specialist.full_name,
+      });
+    } catch (err) {
+      toast.error(formErrorMessage(err, "No se pudo enviar tu solicitud. Intenta de nuevo."));
+      return;
+    }
     trackDoctorContact(specialist);
 
     // Build WhatsApp message
