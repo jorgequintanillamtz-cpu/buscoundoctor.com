@@ -68,11 +68,12 @@ export default function DoctorPanel() {
   // Si se llega desde la barra estática de una página externa (Mi página
   // pública, Productos digitales) con una sección pedida en location.state,
   // abre ahí directo en vez de siempre en "Inicio".
-  // También acepta ?seccion=documentos en la URL (solo esa, a propósito): es el
-  // enlace del correo "sube tu cédula", que debe caer directo en la pantalla.
+  // También acepta ?seccion=documentos (enlace del correo "sube tu cédula") y
+  // ?seccion=ajustes&tab=correos (enlace de los recordatorios para apagarlos) en la URL; solo esas, a propósito.
   const [section, setSection] = useState(() => {
     if (location.state?.section) return location.state.section;
-    return new URLSearchParams(location.search).get("seccion") === "documentos" ? "documentos" : "resumen";
+    const wanted = new URLSearchParams(location.search).get("seccion");
+    return wanted === "documentos" || wanted === "ajustes" ? wanted : "resumen";
   });
   const [completenessChecklist, setCompletenessChecklist] = useState(null);
   // Modo "paso a paso": recorre, una por una, las pantallas de lo que le falta
@@ -497,7 +498,7 @@ export default function DoctorPanel() {
               <DoctorNotifications notifications={notifications} unread={unread} onOpenItem={openNotification} onMarkAllRead={() => markRead()} />
             )}
             {section === "ajustes" && (
-              <DoctorSettings specialist={{ ...form, id: specialistId }} isAssistant={isAssistant} onStatusChange={(fields) => Object.entries(fields).forEach(([k, v]) => update(k, v))} />
+              <DoctorSettings specialist={{ ...form, id: specialistId }} isAssistant={isAssistant} initialTab={new URLSearchParams(location.search).get("tab") === "correos" ? "correos" : "cuenta"} onStatusChange={(fields) => Object.entries(fields).forEach(([k, v]) => update(k, v))} />
             )}
             {section === "mi-perfil" && <ProfileHub checklist={completenessChecklist} onNavigate={setSection} />}
             {PROFILE_SUB_KEYS.includes(section) && !guided && (

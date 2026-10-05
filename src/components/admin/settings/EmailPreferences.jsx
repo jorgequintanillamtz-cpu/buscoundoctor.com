@@ -22,6 +22,11 @@ const OPTIONS = [
     label: "Estado de mi perfil y documentos",
     desc: "Correos cuando aprobamos tu perfil, verificamos tu cédula o necesitamos que corrijas algo. Te recomendamos dejarlo activado.",
   },
+  {
+    key: "recordatorios",
+    label: "Recordatorios para completar mi perfil",
+    desc: "Un par de correos para recordarte subir tu cédula y llenar tu perfil. Puedes apagarlos sin perder los avisos importantes de arriba.",
+  },
 ];
 
 const EMAIL_RE = /^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/;
@@ -36,7 +41,7 @@ export default function EmailPreferences({ specialistId }) {
     let active = true;
     getEmailPreferences(specialistId)
       .then((p) => { if (active) { setPrefs(p); setNotice(p.aviso_email || ""); } })
-      .catch(() => { if (active) setPrefs({ citas: true, resenas: true, estado: true, aviso_email: "" }); });
+      .catch(() => { if (active) setPrefs({ citas: true, resenas: true, estado: true, recordatorios: true, aviso_email: "" }); });
     return () => { active = false; };
   }, [specialistId]);
 

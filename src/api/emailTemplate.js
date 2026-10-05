@@ -240,7 +240,7 @@ export function renderEmail({
             <tr>
               <td style="padding:36px 40px 32px;">
                 <div style="border-top:1px solid ${BORDER};padding-top:16px;font-size:12px;line-height:1.7;color:#98A2B3;">
-                  Este es un correo automático de BuscoUnDoctor — no es necesario responderlo.<br/>
+                  ¿Dudas? Responde este correo y te ayudamos.<br/>
                   <a href="${SITE_URL}" style="color:#98A2B3;text-decoration:underline;">buscoundoctor.com</a> · Monterrey, Nuevo León
                 </div>
               </td>
