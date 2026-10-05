@@ -66,6 +66,7 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));
 const AdminPlanes = lazy(() => import('./pages/admin/AdminPlanes'));
 const LandingMedicos = lazy(() => import('./pages/LandingMedicos'));
 const DoctoresRegistro = lazy(() => import('./pages/DoctoresRegistro'));
+const LandingRegistroGratis = lazy(() => import('./pages/LandingRegistroGratis'));
 const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
 const StorefrontProductDetail = lazy(() => import('./pages/StorefrontProductDetail'));
 const DoctorStorefrontEditor = lazy(() => import('./pages/DoctorStorefrontEditor'));
@@ -149,6 +150,11 @@ const AuthenticatedApp = () => {
           contenido. Shell propio, sin Header/Footer del sitio, igual que
           /para-medicos. */}
       <Route path="/doctores-registro" element={<DoctoresRegistro />} />
+
+      {/* Versión mejorada para anuncios: formulario en la primera pantalla, un
+          solo countdown, título honesto y seguimiento de campaña (utm). Shell
+          propio, sin Header/Footer del sitio. noindex. */}
+      <Route path="/registro-gratis" element={<LandingRegistroGratis />} />
 
       {/* Storefront público del doctor: mini página web personal, sin branding
           de BuscoUnDoctor, que el doctor comparte desde sus redes. Vive fuera
