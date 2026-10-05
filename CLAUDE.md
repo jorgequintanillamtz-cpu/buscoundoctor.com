@@ -147,6 +147,7 @@ Las migraciones **viven solo en Supabase**, no en este repo (no hay carpeta `sup
 ## 7b. Rutas principales
 
 Públicas: `/`, `/especialistas`, `/especialista/:slug`, `/especialidad/:slug[/:zonaSlug]`, `/:professionSlug/:citySlug[/:zonaSlug]` (páginas SEO), `/enfermedades[/:slug[/:citySlug]]`, `/blog[/:slug]`, `/planes`, `/para-medicos`, `/chequeos-medicos`, `/nosotros`, `/contacto`, `/preguntas-frecuentes`, `/registro-medico`, `/iniciar-sesion`, `/olvide-contrasena`.
+Landing de anuncios (`noindex`, shell propio sin Header/Footer): `/para-medicos` (completa), `/doctores-registro` (versión corta, se dejó intacta) y `/registro-gratis` (ver §8k).
 Privadas (no indexables): `/panel-medico/*` (doctor) y `/admin/*` (admin, incluye `/admin/registros` — ver §8f). El mismo formulario de `/iniciar-sesion` sirve a ambos y **siempre** manda a `/panel-medico`; si la cuenta es admin, esa pantalla muestra un aviso ("Este panel es para médicos") con un botón hacia el panel de administración, o se entra directo a `/admin`.
 
 Reglas SEO que ya existen (no las rompas): `/especialistas` es `noindex` cuando trae filtros en la URL; `/especialidad/:slug/:zona` solo es indexable si hay ≥1 médico; el perfil incluye schema `Physician` + `AggregateRating` + `FAQPage`; el perfil `noindex` si no está publicado.
@@ -376,6 +377,17 @@ Sección nueva en el perfil público, inspirada en Doctoralia: un visitante preg
 - **Bug real encontrado y corregido antes de publicar:** el formulario público (`QuestionForm.jsx`) tronaba con "new row violates row-level security policy" al enviar una pregunta. La causa: el `create()` genérico de `base44Client.js` por default pide de vuelta la fila recién creada (`.select().single()`), y Postgres considera eso una violación de RLS cuando quien inserta no tiene permiso de *ver* la fila que acaba de crear (una pregunta pendinte de alguien sin sesión no es visible para nadie más que el dueño/admin) -- el mismo motivo por el que `Review`/`AppointmentRequest`/etc. ya estaban en la lista `NO_RETURNING_ENTITIES` de ese archivo. Arreglo: agregar `SpecialistQuestion` a esa misma lista.
 - Probado de punta a punta con una cuenta y perfil de prueba real: pregunta pública → aviso en la campana del doctor → el doctor la responde desde su panel → se ve en el perfil público con el nombre y la respuesta correctos. Datos de prueba borrados, confirmado en 0.
 - Migraciones aplicadas en Supabase (no están en git): `specialist_question_qa`, `fix_answer_specialist_question_activity_log`.
+
+## 8k. Landing de anuncios `/registro-gratis` (2026-10-04)
+
+Versión mejorada de `/doctores-registro` para tráfico de anuncios (`src/pages/LandingRegistroGratis.jsx`; la anterior se dejó igual por si ya hay anuncios apuntando ahí). Decidido con Jorge:
+
+- **Formulario en la primera pantalla del celular** (a 375×812 el botón queda a 768 px; antes el formulario aparecía casi dos pantallas más abajo). Un solo countdown (barra de arriba, sin segundos); se quitó el de cajas grandes.
+- **Título:** "Aparece cuando busquen un especialista en Monterrey". Se evitó a propósito "ya te está buscando en Google y ChatGPT" (hoy no se puede demostrar: el directorio aún no lanza). Si algún día hay un dato real (búsquedas al mes), se puede volver a un título más fuerte.
+- **Oferta "Miembro Fundador"** (1 año gratis de Premium, primeros 10 de cada especialidad): se mantiene el texto **sin contador** de lugares (decisión de Jorge). Ojo: el sitio no cuenta ni limita eso, y Premium está apagado (`SHOW_PREMIUM=false`, sin cobros); si se promete en anuncios hay que cumplirlo a mano.
+- **Expectativa honesta:** "unos 3 minutos en total" y, bajo el botón, "En la siguiente pantalla te pedimos tu correo, cédula y precio de consulta". El registro (`/registro-medico`) recibe el prefill de la landing (`buscoundoctor_landing_prefill`), que precarga nombre, WhatsApp y especialidad pero **sigue en su paso 1** porque ahí se pide el correo, la cédula y el precio. Si el enlace del anuncio trae `?ref=CODIGO`, se conserva hacia `/registro-medico?ref=…`.
+- **Atribución de campaña:** guarda en `localStorage` (`buscoundoctor_acquisition`, solo la primera vez) `utm_source/medium/campaign/content/term`, si vino con `gclid`/`fbclid`, el referrer y la fecha, y los manda a **Microsoft Clarity** como etiquetas (`clarity("set", …)`) para comparar grabaciones por campaña. **Todavía no se guarda en la base de datos** (por doctor): requeriría una columna en `specialist` y tocar `save_registration_draft`/`create_doctor_profile`; queda pendiente. Enlace de ejemplo para un anuncio: `https://buscoundoctor.com/registro-gratis?utm_source=facebook&utm_medium=cpc&utm_campaign=nombre_de_la_campana`.
+- **Lo que NO se hizo, a propósito:** un botón "Continuar con Google" al inicio. El registro con Google/Microsoft ya soporta entrar con sesión, pero así se perdería el borrador (WhatsApp, especialidad, correo) de quien abandona, que es lo que alimenta los 3 correos de recuperación (§8g) y la pantalla "Registros". Evaluar el cambio con datos de conversión reales antes de hacerlo.
 
 ## 9. Cómo probar sin ensuciar producción
 
