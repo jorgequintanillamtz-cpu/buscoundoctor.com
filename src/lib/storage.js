@@ -29,7 +29,19 @@ export async function uploadFile(file, bucket = 'specialist-photos', folder = ''
     cacheControl: '3600',
     upsert: false,
   });
-  if (error) throw error;
+  if (error) {
+    // Los buckets tienen tamaño máximo y tipos permitidos (ver CLAUDE.md §5);
+    // Storage responde en inglés, y algunas pantallas muestran error.message tal cual.
+    const code = String(error.statusCode || error.status || '');
+    const msg = String(error.message || '');
+    if (code === '413' || /maximum allowed size|too large/i.test(msg)) {
+      throw new Error('El archivo pesa demasiado. Prueba con uno más ligero.');
+    }
+    if (code === '415' || /mime type/i.test(msg)) {
+      throw new Error('Este tipo de archivo no está permitido.');
+    }
+    throw error;
+  }
 
   if (bucket === 'specialist-documents' || bucket === 'admin-guides' || bucket === 'doctor-products') {
     // Buckets privados: no hay URL pública -- se entrega una firmada de larga

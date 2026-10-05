@@ -124,6 +124,7 @@ function DocTypeCard({ type, doc, isAdmin, user, specialist, onUploaded, onRevie
       <div className="flex flex-wrap items-center gap-2 pt-1">
         <input
           type="file"
+          accept="application/pdf,image/*"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
           className="text-xs flex-1 min-w-[160px] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-accent file:text-accent-foreground file:text-xs"
         />

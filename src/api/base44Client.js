@@ -79,7 +79,7 @@ const FIELD_RENAMES = {
 // el INSERT en sí funciona pero el RETURNING lo tumba con un error de RLS
 // que parece (pero no es) un rechazo del insert. Ver memoria de la migración
 // para el mismo bug ya encontrado y corregido en v1.
-const NO_RETURNING_ENTITIES = new Set(['AppointmentRequest', 'Review', 'DoctorClick', 'DoctorContact', 'DoctorImpression', 'SpecialtyInterestSignup', 'SpecialistQuestion']);
+const NO_RETURNING_ENTITIES = new Set(['AppointmentRequest', 'Review', 'DoctorClick', 'DoctorContact', 'DoctorImpression', 'SpecialtyInterestSignup', 'SpecialistQuestion', 'ActivityLog']);
 
 function toDb(entityName, data) {
   const renames = FIELD_RENAMES[entityName];
