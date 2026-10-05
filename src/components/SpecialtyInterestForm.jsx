@@ -3,7 +3,6 @@ import { Mail, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
-import { renderEmail, detailTable, detailRow, esc } from "@/api/emailTemplate";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -34,23 +33,8 @@ export default function SpecialtyInterestForm({ specialtyName, cityName }) {
         city_name: cityName,
       });
       setSubmitted(true);
-      // Best-effort: si falla el correo al admin, el registro ya quedó
-      // guardado y el paciente igual ve el mensaje de éxito.
-      const html = renderEmail({
-        preheader: `Interés en ${specialtyName} en ${cityName}`,
-        badge: "Interés de paciente",
-        title: "Nuevo interés en una especialidad sin médicos aún",
-        bodyHtml: detailTable([
-          detailRow("Especialidad", esc(specialtyName)),
-          detailRow("Ciudad", esc(cityName)),
-          detailRow("Correo", esc(email)),
-        ]),
-      });
-      base44.integrations.Core.SendEmail({
-        type: "nuevo_interes_especialidad",
-        subject: `Nuevo interés: ${specialtyName} en ${cityName}`,
-        body: html,
-      }).catch(() => {});
+      // El aviso por correo al equipo lo manda la base de datos sola al guardar (trigger
+      // specialty_interest_email); aquí ya no se arma ni se manda ningún correo.
     } catch (err) {
       setError("No se pudo guardar tu correo. Intenta de nuevo.");
     }

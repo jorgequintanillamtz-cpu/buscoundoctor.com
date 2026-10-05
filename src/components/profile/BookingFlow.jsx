@@ -2,7 +2,6 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { CheckCircle2, RotateCcw, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { notifyNewAppointmentRequest } from "@/api/doctorNotify";
 import { trackDoctorContact } from "@/utils/trackDoctorStats";
 
 // Ícono de WhatsApp (glifo real, no la burbuja genérica de lucide) para que
@@ -105,7 +104,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         insurer_name: insuranceLabel,
         preferred_date: dateMode === "asap" ? "Lo antes posible" : specificDate,
       });
-      notifyNewAppointmentRequest(specialist, { patient_name: name, age, email, reason: reasonText });
       trackDoctorContact(specialist);
 
       const lines = [

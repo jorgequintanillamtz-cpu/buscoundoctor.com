@@ -420,6 +420,7 @@ const FUNCTION_MAP = {
   answerSpecialistQuestion: ({ question_id, answer } = {}) => supabase.rpc('answer_specialist_question', { p_question_id: question_id, p_answer: answer }),
   listMyReferrals: () => supabase.rpc('list_my_referrals'),
   creditReferralReward: ({ specialist_id } = {}) => supabase.rpc('credit_referral_reward', { p_specialist_id: specialist_id }),
+  submitContactMessage: ({ name, email, message } = {}) => supabase.rpc('submit_contact_message', { p_name: name, p_email: email, p_message: message }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>

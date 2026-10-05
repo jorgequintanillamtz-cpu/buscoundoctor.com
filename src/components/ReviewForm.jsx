@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { notifyNewReview } from "@/api/doctorNotify";
 import { Star, ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,9 +108,8 @@ export default function ReviewForm({ specialist }) {
       photo_url: photoUrl || undefined,
       approved: false,
     });
-    // Review.create no regresa la fila (quien reseña no tiene sesión, sin
-    // permiso de lectura); se avisa con los datos que ya se tienen en el formulario.
-    notifyNewReview(specialist, { rating, patient_name: name, comment });
+    // El correo al doctor lo manda la base de datos sola al guardar la reseña
+    // (trigger review_email_insert); el navegador ya no arma ni manda correos.
     setLoading(false);
     setSubmitted(true);
   };

@@ -4,7 +4,6 @@ import { X, MessageCircle, Star, ShieldCheck, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { notifyNewAppointmentRequest } from "@/api/doctorNotify";
 import { trackDoctorContact } from "@/utils/trackDoctorStats";
 import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 
@@ -59,7 +58,6 @@ export default function AppointmentForm({ specialist, onClose, initialDate = "" 
       specialist_id: specialist.id,
       specialist_name: specialist.full_name,
     });
-    notifyNewAppointmentRequest(specialist, form);
     trackDoctorContact(specialist);
 
     // Build WhatsApp message

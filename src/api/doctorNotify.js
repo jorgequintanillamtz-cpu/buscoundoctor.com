@@ -252,62 +252,9 @@ export function notifyBlogRejected(doc, postTitle, reason) {
   return sendNotification(doc, `Tu artículo necesita cambios — Blog de ${SITE_NAME}`, html, "articulo_rechazado");
 }
 
-export function notifyNewAppointmentRequest(doc, request) {
-  const preferredDate = request?.preferred_date
-    ? `${esc(request.preferred_date)}${request.preferred_time ? ` a las ${esc(request.preferred_time)}` : ""}`
-    : "";
-  const html = renderEmail({
-    photo: EMAIL_PHOTOS[1],
-    preheader: "Tienes una nueva solicitud de cita.",
-    badge: "Nueva solicitud",
-    badgeTone: "neutral",
-    title: "Tienes una nueva solicitud de cita",
-    bodyHtml: `
-      <p>Hola ${greet(doc)},</p>
-      <p>Un paciente acaba de solicitar una cita contigo en ${SITE_NAME}.</p>
-      ${detailTable([
-        detailRow("Paciente", esc(request?.patient_name)),
-        request?.age ? detailRow("Edad", `${esc(request.age)} años`) : "",
-        request?.phone ? detailRow("Teléfono", esc(request.phone)) : "",
-        request?.email ? detailRow("Correo", esc(request.email)) : "",
-        detailRow("Motivo", esc(request?.reason)),
-        detailRow("Fecha preferida", preferredDate),
-        request?.comments ? detailRow("Comentarios", escMultiline(request.comments)) : "",
-      ])}
-    `,
-    ctaLabel: "Ver mis solicitudes",
-    ctaUrl: PANEL_URL,
-  });
-  return sendNotification(doc, `Nueva solicitud de cita — ${SITE_NAME}`, html, "nueva_solicitud_cita");
-}
-
 // El doctor que envía un artículo desde su panel no siempre tiene su email
 // a la mano en el componente que aprueba/rechaza (BlogPost solo guarda su
 // nombre como autor). Esta función lo busca por su id de Specialist.
-export function notifyNewReview(doc, review) {
-  const stars = "★".repeat(review?.rating || 0) + "☆".repeat(5 - (review?.rating || 0));
-  const html = renderEmail({
-    photo: EMAIL_PHOTOS[2],
-    preheader: "Tienes una nueva reseña de un paciente.",
-    badge: "Nueva reseña",
-    badgeTone: "neutral",
-    title: "Tienes una nueva reseña",
-    bodyHtml: `
-      <p>Hola ${greet(doc)},</p>
-      <p>Un paciente dejó una reseña en tu perfil de ${SITE_NAME}.</p>
-      ${detailTable([
-        detailRow("Calificación", `${stars} (${esc(review?.rating)}/5)`),
-        review?.patient_name ? detailRow("Paciente", esc(review.patient_name)) : "",
-        review?.comment ? detailRow("Comentario", escMultiline(review.comment)) : "",
-      ])}
-      <p>La revisamos antes de que se vea en tu perfil; te avisaremos cuando esté publicada.</p>
-    `,
-    ctaLabel: "Ver mis reseñas",
-    ctaUrl: PANEL_URL,
-  });
-  return sendNotification(doc, `Nueva reseña — ${SITE_NAME}`, html, "nueva_resena");
-}
-
 export async function findSpecialistById(specialistId) {
   if (!specialistId) return null;
   try {

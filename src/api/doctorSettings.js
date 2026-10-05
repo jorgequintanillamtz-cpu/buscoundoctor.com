@@ -3,13 +3,13 @@ import { base44 } from "@/api/base44Client";
 
 // Datos de la pantalla "Ajustes" del admin doctores (panel del médico).
 
-const DEFAULT_PREFS = { citas: true, resenas: true, estado: true, aviso_email: "" };
+const DEFAULT_PREFS = { citas: true, resenas: true, estado: true, recordatorios: true, aviso_email: "" };
 
 // Preferencias de correo. Si el doctor nunca las tocó, todo está activado.
 export async function getEmailPreferences(specialistId) {
   const { data } = await supabase
     .from("doctor_email_preference")
-    .select("citas, resenas, estado, aviso_email")
+    .select("citas, resenas, estado, recordatorios, aviso_email")
     .eq("specialist_id", specialistId)
     .maybeSingle();
   return { ...DEFAULT_PREFS, ...(data || {}), aviso_email: data?.aviso_email || "" };
@@ -23,6 +23,7 @@ export async function saveEmailPreferences(specialistId, prefs) {
       citas: !!prefs.citas,
       resenas: !!prefs.resenas,
       estado: !!prefs.estado,
+      recordatorios: prefs.recordatorios !== false,
       aviso_email: (prefs.aviso_email || "").trim().toLowerCase() || null,
       updated_date: new Date().toISOString(),
     });
