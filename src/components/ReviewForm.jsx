@@ -95,7 +95,6 @@ export default function ReviewForm({ specialist }) {
     await base44.entities.Review.create({
       specialist_id: specialist.id,
       specialist_name: specialist.full_name,
-      owner_user_id: specialist.owner_user_id || null,
       patient_name: name,
       rating,
       comment,
