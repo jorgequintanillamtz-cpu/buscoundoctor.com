@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import Logo from "@/components/Logo";
 import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import GoogleIcon from "@/components/icons/GoogleIcon";
 
 // Landing de conversión para tráfico de anuncios (versión mejorada de
 // /doctores-registro, que se dejó intacta por si ya hay anuncios apuntando ahí).
@@ -81,6 +82,36 @@ const HOW_IT_WORKS = [
   { n: "2", title: "Verificamos tu cédula", text: "Nuestro equipo la revisa antes de publicar, normalmente en menos de 24 horas." },
   { n: "3", title: "Los pacientes te encuentran", text: "Apareces en búsquedas por especialidad y zona, y te escriben directo por WhatsApp." },
 ];
+
+// Los 4 pasos reales del registro (/registro-medico: datos -> consultorio -> fotos
+// -> cuenta). En esta página el médico está en el paso 1; mostrarlos desde aquí
+// le dice cuánto falta y que es corto (cada paso es una pantalla).
+const REGISTRO_STEPS = ["Tus datos", "Tu consultorio", "Tus fotos", "Tu cuenta"];
+
+function RegistroSteps({ current = 0 }) {
+  return (
+    <ol aria-label="Pasos del registro" className="flex items-start justify-between max-w-md mx-auto">
+      {REGISTRO_STEPS.map((label, i) => {
+        const active = i === current;
+        return (
+          <li key={label} className="flex-1 flex flex-col items-center relative" aria-current={active ? "step" : undefined}>
+            {i > 0 && <span aria-hidden="true" className="absolute top-[15px] right-1/2 w-full h-px bg-border" />}
+            <span
+              className={`relative z-10 w-[30px] h-[30px] rounded-full flex items-center justify-center text-sm font-semibold border-2 ${
+                active ? "border-brand-blue text-brand-blue bg-card" : "border-border text-muted-foreground bg-card"
+              }`}
+            >
+              {i + 1}
+            </span>
+            <span className={`mt-1.5 text-[11px] leading-tight text-center ${active ? "font-semibold text-brand-blue" : "text-muted-foreground"}`}>
+              {label}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function LandingRegistroGratis() {
   const navigate = useNavigate();
@@ -161,6 +192,9 @@ export default function LandingRegistroGratis() {
       <main>
         {/* ============ TÍTULO + FORMULARIO (en la primera pantalla del celular) ============ */}
         <section aria-labelledby="hero-heading" className="max-w-2xl mx-auto px-4 pt-4 sm:pt-10 pb-10">
+          <div className="mb-4 sm:mb-7">
+            <RegistroSteps current={0} />
+          </div>
           <div className="text-center">
             <h1 id="hero-heading" className="font-heading font-extrabold text-[1.65rem] sm:text-4xl leading-[1.15] text-foreground tracking-tight">
               Aparece cuando busquen un especialista en <span className="text-brand-blue">Monterrey</span>
@@ -174,7 +208,16 @@ export default function LandingRegistroGratis() {
             </p>
           </div>
 
-          <div id="registro" className="mt-3 bg-card border border-border/50 rounded-3xl p-4 sm:p-7 shadow-sm scroll-mt-4">
+          {/* Lo que SÍ es cierto hoy: el perfil publicado es una página pública que
+              Google puede mostrar. No prometemos posición ni tráfico. */}
+          <p className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm font-medium text-foreground">
+            <span className="w-7 h-7 rounded-full bg-card border border-border/70 shadow-sm flex items-center justify-center flex-shrink-0">
+              <GoogleIcon className="w-4 h-4" />
+            </span>
+            Tu perfil puede aparecer en Google
+          </p>
+
+          <div id="registro" className="mt-4 sm:mt-6 bg-card border border-border/50 rounded-3xl p-4 sm:p-7 shadow-sm scroll-mt-4">
             <div className="grid gap-3">
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre completo</label>
