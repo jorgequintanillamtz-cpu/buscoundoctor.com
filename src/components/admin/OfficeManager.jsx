@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { fileToWebP } from "@/lib/fileToWebP";
-import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, Pencil, MapPin, Star, Clock, Image as ImageIcon, X, Loader2, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { resolveOfficeCoords } from "@/lib/officeGeo";
 import PlaceAutocomplete from "@/components/PlaceAutocomplete";
 import { hasGoogleMaps, buildPlaceMapsUrl } from "@/lib/googleMaps";
 import LoadingLogo from "@/components/LoadingLogo";
+import { HOSPITAL_STATUS_UI } from "@/lib/hospitals";
 
 const normalize = (t) => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 
@@ -32,9 +33,9 @@ const emptyHours = () =>
     is_closed: d.v === 0 || d.v === 6,
   }));
 
-const emptyOffice = () => ({ name: "", zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false, photos: [] });
+const emptyOffice = () => ({ name: "", zone_id: "", address_line: "", phone: "", maps_url: "", is_primary: false, photos: [], hospital_id: null, suite: "" });
 
-function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, saving }) {
+function OfficeForm({ initial, zones, hospitals = [], hours: initialHours, onCancel, onSave, saving }) {
   const [office, setOffice] = useState(initial || emptyOffice());
   const [hours, setHours] = useState(initialHours ? initialHours.map((h) => ({ ...h })) : emptyHours());
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -76,6 +77,29 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
     }));
   };
 
+  const selectedHospital = hospitals.find((h) => h.id === office.hospital_id) || null;
+
+  // Elegir un hospital del catálogo llena nombre, ciudad, dirección y el punto
+  // exacto del mapa; el doctor solo agrega su torre, piso o consultorio.
+  const pickHospital = (id) => {
+    if (!id) {
+      setOffice((prev) => ({ ...prev, hospital_id: null, suite: "" }));
+      return;
+    }
+    const h = hospitals.find((x) => x.id === id);
+    if (!h) return;
+    setOffice((prev) => ({
+      ...prev,
+      hospital_id: h.id,
+      name: h.name,
+      zone_id: h.zone_id || prev.zone_id,
+      address_line: h.address_line || prev.address_line,
+      latitude: h.latitude,
+      longitude: h.longitude,
+      maps_url: "",
+    }));
+  };
+
   const submit = () => {
     if (!office.zone_id) { toast.error("Selecciona una zona"); return; }
     if (!office.address_line.trim()) { toast.error("La dirección es obligatoria"); return; }
@@ -85,6 +109,39 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
   return (
     <div className="border border-primary/30 rounded-xl p-4 bg-accent/20 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {hospitals.length > 0 && (
+          <div className="sm:col-span-3">
+            <label className="text-xs font-medium mb-1 block flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-primary" /> ¿Atiendes en uno de estos hospitales?</label>
+            <select
+              value={office.hospital_id || ""}
+              onChange={(e) => pickHospital(e.target.value)}
+              className="w-full h-9 px-3 text-sm bg-background border border-input rounded-xl"
+            >
+              <option value="">No, es un consultorio independiente u otro lugar</option>
+              {hospitals.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
+            </select>
+            <p className="text-[11px] text-muted-foreground mt-1">La dirección se llena sola. Antes de mostrarte en la página del hospital, el equipo de BuscoUnDoctor confirmará que atiendes ahí.</p>
+          </div>
+        )}
+        {selectedHospital && (
+          <>
+            <div className="sm:col-span-3 rounded-xl border border-primary/20 bg-card px-3 py-2.5">
+              <p className="text-sm font-semibold text-foreground">{selectedHospital.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{selectedHospital.address_line}</p>
+            </div>
+            <div className="sm:col-span-3">
+              <label className="text-xs font-medium mb-1 block">Torre, piso o consultorio (opcional)</label>
+              <Input
+                value={office.suite || ""}
+                onChange={(e) => setOffice({ ...office, suite: e.target.value })}
+                className="rounded-xl text-sm"
+                maxLength={120}
+                placeholder="Ej: Torre de Especialidades, piso 6, consultorio 615"
+              />
+            </div>
+          </>
+        )}
+        {!selectedHospital && (<>
         <div className="sm:col-span-3">
           <label className="text-xs font-medium mb-1 block">Nombre del hospital o consultorio</label>
           <Input
@@ -128,6 +185,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
             placeholder="Calle, número, colonia"
           />
         </div>
+        </>)}
         <div>
           <label className="text-xs font-medium mb-1 block">Teléfono</label>
           <Input
@@ -137,6 +195,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
             placeholder="8123456789"
           />
         </div>
+        {!selectedHospital && (
         <div className="sm:col-span-3">
           <label className="text-xs font-medium mb-1 block">Enlace de Google Maps (opcional)</label>
           <Input
@@ -147,6 +206,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
           />
           <p className="text-[11px] text-muted-foreground mt-1">Se llena solo al buscar tu dirección arriba. También puedes pegar aquí el enlace de "Compartir" de Google Maps.</p>
         </div>
+        )}
         <label className="flex items-center gap-2 sm:col-span-2 text-sm cursor-pointer">
           <input
             type="checkbox"
@@ -231,6 +291,7 @@ function OfficeForm({ initial, zones, hours: initialHours, onCancel, onSave, sav
 export default function OfficeManager({ specialistId }) {
   const [offices, setOffices] = useState([]);
   const [zones, setZones] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -240,9 +301,10 @@ export default function OfficeManager({ specialistId }) {
     if (!specialistId) { setLoading(false); return; }
     setLoading(true);
     try {
-      const [offList, zoneList] = await Promise.all([
+      const [offList, zoneList, hospitalList] = await Promise.all([
         base44.entities.Office.filter({ specialist_id: specialistId }),
         base44.entities.Zone.list("name", 50),
+        base44.entities.Hospital.filter({ active: true }).catch(() => []),
       ]);
       const withHours = await Promise.all(
         offList.map(async (o) => {
@@ -252,6 +314,7 @@ export default function OfficeManager({ specialistId }) {
       );
       setOffices(withHours);
       setZones(zoneList);
+      setHospitals([...hospitalList].sort((a, b) => (a.display_order - b.display_order) || a.name.localeCompare(b.name, "es")));
     } catch {
       toast.error("Error al cargar consultorios");
     }
@@ -281,6 +344,8 @@ export default function OfficeManager({ specialistId }) {
           maps_url: data.maps_url,
           is_primary: data.is_primary,
           photos: data.photos || [],
+          hospital_id: data.hospital_id || null,
+          suite: data.hospital_id ? (data.suite || null) : null,
           ...geoFields,
         });
         officeId = data.id;
@@ -295,6 +360,8 @@ export default function OfficeManager({ specialistId }) {
           maps_url: data.maps_url,
           is_primary: data.is_primary,
           photos: data.photos || [],
+          hospital_id: data.hospital_id || null,
+          suite: data.hospital_id ? (data.suite || null) : null,
           ...geoFields,
         });
         officeId = created.id;
@@ -376,7 +443,7 @@ export default function OfficeManager({ specialistId }) {
       ) : (
         <div className="space-y-3">
           {editingId === "new" && (
-            <OfficeForm zones={zones} onCancel={() => setEditingId(null)} onSave={saveOffice} saving={saving} />
+            <OfficeForm zones={zones} hospitals={hospitals} onCancel={() => setEditingId(null)} onSave={saveOffice} saving={saving} />
           )}
 
           {offices.length === 0 && editingId !== "new" && (
@@ -389,6 +456,7 @@ export default function OfficeManager({ specialistId }) {
                 <OfficeForm
                   initial={{ ...office }}
                   zones={zones}
+                  hospitals={hospitals}
                   hours={hours}
                   onCancel={() => setEditingId(null)}
                   onSave={saveOffice}
@@ -407,6 +475,12 @@ export default function OfficeManager({ specialistId }) {
                           </span>
                         )}
                       </div>
+                      {office.suite && <p className="text-xs text-foreground font-medium">{office.suite}</p>}
+                      {office.hospital_id && HOSPITAL_STATUS_UI[office.hospital_status] && (
+                        <p className={`text-[11px] rounded-lg px-2 py-1 w-fit max-w-full ${HOSPITAL_STATUS_UI[office.hospital_status].tone}`}>
+                          {HOSPITAL_STATUS_UI[office.hospital_status].label}
+                        </p>
+                      )}
                       {office.name && (
                         <p className="text-xs text-muted-foreground">{office.address_line}</p>
                       )}

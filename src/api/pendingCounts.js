@@ -9,13 +9,14 @@ import { SHOW_PREMIUM } from "@/lib/featureFlags";
 // AdminBlog, AdminPremium, AdminEnfermedades). "/admin/bandeja" es la suma
 // de las 5 colas, para la Bandeja de entrada unificada.
 export async function loadPendingCounts() {
-  const [specialists, docs, posts, payments, premiumStatuses, conditionRequests] = await Promise.all([
+  const [specialists, docs, posts, payments, premiumStatuses, conditionRequests, hospitalOffices] = await Promise.all([
     base44.entities.Specialist.list(),
     base44.entities.SpecialistDocument.list("-created_date", 500),
     base44.entities.BlogPost.list("-created_date", 500),
     base44.entities.PremiumPayment.list("-payment_date", 1000),
     loadPremiumStatuses(),
     base44.entities.ConditionRequest.filter({ status: "pendiente" }).catch(() => []),
+    base44.entities.Office.filter({ hospital_status: "pending" }).catch(() => []),
   ]);
 
   // Los doctores en la papelera no cuentan para ninguna cola: ya no son
@@ -41,6 +42,8 @@ export async function loadPendingCounts() {
 
   const lateDoctors = SHOW_PREMIUM ? computeLateDoctors(mergePremiumStatus(activeSpecialists, premiumStatuses), payments).length : 0;
   const pendingConditionRequests = conditionRequests.length;
+  // Consultorios que dicen atender en un hospital del catálogo y el equipo aún no confirma.
+  const pendingHospitals = hospitalOffices.filter((o) => !specialistsById[o.specialist_id]?.deleted_at).length;
 
   return {
     "/admin/doctores": pendingDoctors,
@@ -48,6 +51,6 @@ export async function loadPendingCounts() {
     "/admin/blog": pendingBlogPosts,
     "/admin/premium": lateDoctors,
     "/admin/catalogo-medico": pendingConditionRequests,
-    "/admin/bandeja": deletionRequests + pendingReferralRewards + pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
+    "/admin/bandeja": deletionRequests + pendingReferralRewards + pendingHospitals + pendingDoctors + pendingDocuments + pendingBlogPosts + lateDoctors + pendingConditionRequests,
   };
 }

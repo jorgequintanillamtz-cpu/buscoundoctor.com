@@ -5,6 +5,7 @@ import { MapPin, ArrowRight, Search, ShieldCheck, Star, Users, Stethoscope, Chev
 import { useNavigate } from "react-router-dom";
 import SearchableSelect from "../components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
+import { hospitalPath } from "@/lib/hospitals";
 import BlogCard from "../components/BlogCard";
 import { resolveCitySlug } from "@/lib/citySlug";
 import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
@@ -186,6 +187,7 @@ export default function Home() {
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
   const [subspecialties, setSubspecialties] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [posts, setPosts] = useState([]);
   const [zones, setZones] = useState([]);
   // Especialidades, subespecialidades y enfermedades combinadas en un solo
@@ -195,7 +197,7 @@ export default function Home() {
   // `heroSpecialty` guarda el id combinado ("spec:...", "sub:..." o
   // "cond:...") pese al nombre, para no tocar el resto de las referencias a
   // esa variable.
-  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties, hospitals), [specialties, conditions, subspecialties, hospitals]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
   const [loading, setLoading] = useState(true);
   const [heroSpecialty, setHeroSpecialty] = useState("");
@@ -216,6 +218,11 @@ export default function Home() {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
     // del filtro genérico /especialistas?..., que lleva noindex a propósito (Sprint 11).
     const picked = searchOptions.find((o) => o.id === heroSpecialty);
+    if (picked?.type === "hospital") {
+      // Página del hospital con sus médicos (/hospital/:slug); no depende de la ciudad.
+      navigate(hospitalPath(picked.ref.slug));
+      return;
+    }
     if (picked?.type === "subspecialty") {
       // Página SEO dedicada (/subespecialidad/:slug/:citySlug), mismo patrón
       // que specialty: arranca noindex y se indexa sola en cuanto haya
@@ -266,7 +273,7 @@ export default function Home() {
 
   useEffect(() => {
     async function load() {
-      const [specs, blogPosts, zoneList, siteSettings, conditionList, subspecialtyList] = await Promise.all([
+      const [specs, blogPosts, zoneList, siteSettings, conditionList, subspecialtyList, hospitalList] = await Promise.all([
       base44.entities.Specialty.filter({ active: true }),
       base44.entities.BlogPost.filter({ published: true }, "-created_date", 100),
       base44.entities.Zone.filter({ active: true }),
@@ -275,11 +282,13 @@ export default function Home() {
       // default del backend se queda corto ahí (mismo bug que se corrigió
       // en /admin/enfermedades y en SearchBar.jsx).
       base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
-      base44.entities.Subspecialty.filter({ active: true }).catch(() => [])]
+      base44.entities.Subspecialty.filter({ active: true }).catch(() => []),
+      base44.entities.Hospital.filter({ active: true }).catch(() => [])]
       );
       setSpecialties(specs);
       setConditions(conditionList);
       setSubspecialties(subspecialtyList);
+      setHospitals(hospitalList);
       setPosts(blogPosts);
       setZones(zoneList);
       setFamilyPhotoUrl(siteSettings[0]?.family_photo_url || "");
@@ -367,7 +376,7 @@ export default function Home() {
                   options={searchOptions}
                   value={heroSpecialty}
                   onChange={setHeroSpecialty}
-                  placeholder="¿Qué especialidad o enfermedad buscas?"
+                  placeholder="¿Qué especialidad, enfermedad u hospital buscas?"
                   animatedPlaceholders={HERO_SPECIALTY_PLACEHOLDERS}
                   placeholderPrefix="Busca:"
                   icon={Stethoscope}

@@ -26,6 +26,9 @@ export const EMPTY_REGISTRO_DATA = {
   address_lat: null,
   address_lng: null,
   address_place_id: "",
+  // Hospital del catálogo elegido (opcional; ver StepUbicacion y CLAUDE.md §8n)
+  hospital_id: "",
+  hospital_name: "",
   profile_photo: "",
   gallery: [],
   referral_code: "",

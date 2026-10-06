@@ -1,13 +1,15 @@
 import { useParams, useNavigate, Navigate } from "react-router-dom";
-import { Heart, GraduationCap, ListChecks } from "lucide-react";
+import { Heart, GraduationCap, ListChecks, Building2 } from "lucide-react";
 import AdminSpecialties from "./AdminSpecialties";
 import AdminSubespecialidades from "./AdminSubespecialidades";
 import AdminEnfermedades from "./AdminEnfermedades";
+import AdminHospitales from "./AdminHospitales";
 
 const TABS = [
   { key: "especialidades", label: "Especialidades", icon: Heart, Component: AdminSpecialties },
   { key: "subespecialidades", label: "Subespecialidades", icon: GraduationCap, Component: AdminSubespecialidades },
   { key: "enfermedades", label: "Enfermedades", icon: ListChecks, Component: AdminEnfermedades },
+  { key: "hospitales", label: "Hospitales", icon: Building2, Component: AdminHospitales },
 ];
 
 // Cascarón que junta los 3 bancos de taxonomía médica (antes 3 enlaces
@@ -30,7 +32,7 @@ export default function AdminCatalogoMedico() {
       <div>
         <h1 className="font-heading font-bold text-2xl text-foreground">Catálogo médico</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Los tres bancos de los que se arma la búsqueda del sitio: especialidades, subespecialidades y enfermedades.
+          Los bancos de los que se arma la búsqueda del sitio: especialidades, subespecialidades, enfermedades y hospitales.
         </p>
       </div>
 

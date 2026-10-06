@@ -6,6 +6,7 @@ import SearchableSelect from "@/components/SearchableSelect";
 import Logo from "@/components/Logo";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import { resolveCitySlug } from "@/lib/citySlug";
+import { hospitalPath } from "@/lib/hospitals";
 import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
 
 const triggerClass =
@@ -22,6 +23,7 @@ export default function Header() {
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
   const [subspecialties, setSubspecialties] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [searchPick, setSearchPick] = useState("");
   const [searchZone, setSearchZone] = useState("");
   const location = useLocation();
@@ -107,18 +109,24 @@ export default function Header() {
       // del backend se queda corto ahí (mismo bug corregido en /admin/enfermedades).
       base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
       base44.entities.Subspecialty.filter({ active: true }).catch(() => []),
-    ]).then(([z, s, c, sub]) => { setZones(z); setSpecialties(s); setConditions(c); setSubspecialties(sub); });
+      base44.entities.Hospital.filter({ active: true }).catch(() => []),
+    ]).then(([z, s, c, sub, h]) => { setZones(z); setSpecialties(s); setConditions(c); setSubspecialties(sub); setHospitals(h); });
   }, []);
 
   // Especialidades, subespecialidades y enfermedades combinadas en un solo
   // buscador (como el de Doctoralia): el usuario puede escribir tanto
   // "dermatólogo" como "cirugía maxilofacial" o "acné".
-  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties, hospitals), [specialties, conditions, subspecialties, hospitals]);
   const zoneOptions = useMemo(() => zones.map((z) => ({ id: z.name, name: z.name })), [zones]);
 
   const submitSearch = (e) => {
     e?.preventDefault?.();
     const picked = searchOptions.find((o) => o.id === searchPick);
+    if (picked?.type === "hospital") {
+      // Página del hospital con sus médicos (/hospital/:slug); no depende de la ciudad.
+      navigate(hospitalPath(picked.ref.slug));
+      return;
+    }
     if (picked?.type === "subspecialty") {
       // Página SEO dedicada (/subespecialidad/:slug/:citySlug), mismo patrón
       // que specialty: arranca noindex y se indexa sola en cuanto haya
@@ -201,12 +209,12 @@ export default function Header() {
             <div className="siri-glow-border relative hidden lg:block rounded-full flex-1 max-w-xl">
               <div className="relative z-10 flex items-center bg-white rounded-full shadow-sm overflow-hidden">
                 <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
-                  <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad o enfermedad</label>
+                  <label className="text-[10px] font-semibold text-muted-foreground leading-none mb-0.5">Especialidad, enfermedad u hospital</label>
                   <SearchableSelect
                     options={searchOptions}
                     value={searchPick}
                     onChange={setSearchPick}
-                    placeholder="Especialidad o enfermedad"
+                    placeholder="Especialidad, enfermedad u hospital"
                     animatedPlaceholders={HERO_SPECIALTY_PLACEHOLDERS}
                     placeholderPrefix="Busca:"
                     icon={Stethoscope}
