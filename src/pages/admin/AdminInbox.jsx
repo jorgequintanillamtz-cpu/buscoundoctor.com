@@ -4,10 +4,11 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import {
   Inbox, Users, ShieldCheck, FileText, Crown, ListChecks,
-  CheckCircle2, XCircle, Loader2, PartyPopper, UserMinus, Gift,
+  CheckCircle2, XCircle, Loader2, PartyPopper, UserMinus, Gift, Building2, BadgeCheck, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
+import { logActivity } from "@/api/activityLog";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
 import { useAdminBadges } from "@/components/adminBadges";
@@ -224,6 +225,72 @@ function ReferralRewardCard({ doc, referrerName, onCredited }) {
   );
 }
 
+// Un consultorio que dice estar en un hospital del catálogo: el médico lo
+// elige solo, pero NO aparece en la página del hospital hasta que el equipo
+// lo confirma aquí (la regla vive en la base: trigger office_hospital_guard).
+// El médico recibe un aviso en su campana con el resultado.
+function PendingHospitalCard({ office, doc, hospital, onReviewed }) {
+  const [busy, setBusy] = useState(false);
+  const { refresh: refreshBadges } = useAdminBadges();
+
+  const decide = async (status) => {
+    setBusy(true);
+    try {
+      await base44.entities.Office.update(office.id, { hospital_status: status });
+      logActivity({
+        type: status === "confirmed" ? "hospital_confirmado" : "hospital_rechazado",
+        description: `${status === "confirmed" ? "Se confirmó" : "No se confirmó"} el consultorio de ${doc?.full_name || "un doctor"} en ${hospital?.name || "un hospital"}`,
+        specialistId: doc?.id || "",
+        specialistName: doc?.full_name || "",
+      });
+      toast.success(status === "confirmed" ? "Consultorio confirmado" : "Marcado como no confirmado");
+      onReviewed();
+      refreshBadges();
+    } catch (e) {
+      toast.error("Error: " + e.message);
+    }
+    setBusy(false);
+  };
+
+  const cedulaOk = doc?.license_verification_status === "verified";
+  const wa = (doc?.whatsapp || "").replace(/\D/g, "");
+
+  return (
+    <div className="bg-card rounded-2xl border border-indigo-200 p-4 space-y-3">
+      <div className="flex items-start gap-3 flex-wrap">
+        <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+          <Building2 className="w-5 h-5 text-indigo-600" />
+        </div>
+        <div className="flex-1 min-w-[220px]">
+          <Link to={`/admin/doctores/revisar/${doc?.id}`} className="text-sm font-semibold text-foreground hover:underline">{doc?.full_name || "Doctor"}</Link>
+          <p className="text-xs text-muted-foreground">
+            Dice que atiende en <span className="font-medium text-foreground">{hospital?.name || "un hospital"}</span>
+            {office.suite ? ` · ${office.suite}` : ""}
+          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+            <span className={`text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1 ${cedulaOk ? "text-emerald-700 bg-emerald-50" : "text-amber-700 bg-amber-50"}`}>
+              {cedulaOk ? <BadgeCheck className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+              {cedulaOk ? "Cédula verificada" : "Cédula sin verificar"}
+            </span>
+            {wa && <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer" className="text-[11px] text-brand-blue hover:underline">WhatsApp {doc.whatsapp}</a>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button size="sm" className="rounded-xl gap-1.5" disabled={busy} onClick={() => decide("confirmed")}>
+            {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />} Confirmar
+          </Button>
+          <Button size="sm" variant="outline" className="rounded-xl gap-1.5" disabled={busy} onClick={() => decide("rejected")}>
+            <XCircle className="w-3.5 h-3.5" /> No confirmar
+          </Button>
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground leading-relaxed">
+        Antes de confirmar, comprueba que de verdad atiende ahí (por ejemplo, en el directorio de médicos del hospital o llamando al hospital). Así nadie aparece en un hospital donde no está.
+      </p>
+    </div>
+  );
+}
+
 // Sección genérica de la bandeja: título, ícono, contador y lista (o el
 // estado "nada pendiente aquí").
 function InboxSection({ icon: Icon, title, count, emptyLabel, children }) {
@@ -260,17 +327,21 @@ export default function AdminInbox() {
   const [payments, setPayments] = useState([]);
   const [premiumStatuses, setPremiumStatuses] = useState([]);
   const [conditionRequests, setConditionRequests] = useState([]);
+  const [hospitalOffices, setHospitalOffices] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const [specs, allDocs, allPosts, allPayments, statuses, allConditionRequests, me] = await Promise.all([
+    const [specs, allDocs, allPosts, allPayments, statuses, allConditionRequests, pendingOffices, hospitalList, me] = await Promise.all([
       base44.entities.Specialist.list(),
       base44.entities.SpecialistDocument.list("-created_date", 500),
       base44.entities.BlogPost.list("-created_date", 500),
       base44.entities.PremiumPayment.list("-payment_date", 1000),
       loadPremiumStatuses(),
       base44.entities.ConditionRequest.filter({ status: "pendiente" }, "-created_date").catch(() => []),
+      base44.entities.Office.filter({ hospital_status: "pending" }, "-created_date").catch(() => []),
+      base44.entities.Hospital.list("display_order", 200).catch(() => []),
       base44.auth.me().catch(() => null),
     ]);
     setSpecialists(specs);
@@ -279,6 +350,8 @@ export default function AdminInbox() {
     setPayments(allPayments);
     setPremiumStatuses(statuses);
     setConditionRequests(allConditionRequests);
+    setHospitalOffices(pendingOffices);
+    setHospitals(hospitalList);
     setUser(me);
     setLoading(false);
   };
@@ -310,6 +383,12 @@ export default function AdminInbox() {
     [specialists]
   );
 
+  // Consultorios por confirmar en un hospital del catálogo (sin doctores en la papelera).
+  const pendingHospitalOffices = useMemo(
+    () => hospitalOffices.filter((o) => specialistsById[o.specialist_id] && !specialistsById[o.specialist_id].deleted_at),
+    [hospitalOffices, specialistsById]
+  );
+
   const pendingDocs = useMemo(
     () => docs.filter((d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at),
     [docs, specialistsById]
@@ -325,7 +404,7 @@ export default function AdminInbox() {
     [specialists, premiumStatuses, payments]
   );
 
-  const totalPending = deletionRequests.length + pendingReferralRewards.length + pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
+  const totalPending = deletionRequests.length + pendingReferralRewards.length + pendingHospitalOffices.length + pendingDoctors.length + pendingDocs.length + pendingPosts.length + lateDoctors.length + conditionRequests.length;
 
   if (loading) {
     return (
@@ -343,7 +422,7 @@ export default function AdminInbox() {
       </div>
       <p className="text-sm text-muted-foreground mb-6">
         Lo que necesita tu atención, junto en un solo lugar: doctores por aprobar, documentos por
-        verificar, artículos de blog por revisar, premios de referidos y solicitudes de enfermedades nuevas.
+        verificar, artículos de blog por revisar, consultorios en hospitales por confirmar, premios de referidos y solicitudes de enfermedades nuevas.
       </p>
 
       {totalPending === 0 ? (
@@ -369,6 +448,20 @@ export default function AdminInbox() {
                   doc={doc}
                   referrerName={specialistsById[doc.referred_by_id]?.full_name}
                   onCredited={load}
+                />
+              ))}
+            </InboxSection>
+          )}
+
+          {pendingHospitalOffices.length > 0 && (
+            <InboxSection icon={Building2} title="Consultorios en hospitales por confirmar" count={pendingHospitalOffices.length} emptyLabel="">
+              {pendingHospitalOffices.map((office) => (
+                <PendingHospitalCard
+                  key={office.id}
+                  office={office}
+                  doc={specialistsById[office.specialist_id]}
+                  hospital={hospitals.find((h) => h.id === office.hospital_id)}
+                  onReviewed={load}
                 />
               ))}
             </InboxSection>

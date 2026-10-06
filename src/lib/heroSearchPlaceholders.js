@@ -13,4 +13,5 @@ export const HERO_SPECIALTY_PLACEHOLDERS = [
   "Dermatólogo",
   "Chequeo general",
   "Psicólogo",
+  "Hospital Zambrano Hellion",
 ];

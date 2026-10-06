@@ -26,6 +26,8 @@ const SpecialistList = lazy(() => import('./pages/SpecialistList'));
 const SpecialistProfile = lazy(() => import('./pages/SpecialistProfile'));
 const SpecialtyPage = lazy(() => import('./pages/SpecialtyPage'));
 const SpecialtyZonePage = lazy(() => import('./pages/SpecialtyZonePage'));
+const HospitalPage = lazy(() => import('./pages/HospitalPage'));
+const HospitalsPage = lazy(() => import('./pages/HospitalsPage'));
 const SubspecialtyPage = lazy(() => import('./pages/SubspecialtyPage'));
 const ConditionsPage = lazy(() => import('./pages/ConditionsPage'));
 const ConditionDetailPage = lazy(() => import('./pages/ConditionDetailPage'));
@@ -113,6 +115,8 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
+        <Route path="/hospital/:slug" element={<HospitalPage />} />
+        <Route path="/hospitales" element={<HospitalsPage />} />
         <Route path="/:professionSlug/:citySlug" element={<SpecialtyPage />} />
         <Route path="/:professionSlug/:citySlug/:zonaSlug" element={<SpecialtyZonePage />} />
         <Route path="/subespecialidad/:slug/:citySlug" element={<SubspecialtyPage />} />

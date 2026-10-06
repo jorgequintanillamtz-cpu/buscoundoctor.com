@@ -39,6 +39,8 @@ export const ACTIVITY_TYPE_LABELS = {
   resena_rechazada: "Reseña rechazada",
   blog_aprobado: "Artículo de blog aprobado",
   blog_rechazado: "Artículo de blog rechazado",
+  hospital_confirmado: "Consultorio en hospital confirmado",
+  hospital_rechazado: "Consultorio en hospital no confirmado",
   cambio_email: "Email de contacto modificado",
   cambio_telefono: "WhatsApp modificado",
   acceso_admin_denegado: "Intento de acceso admin denegado",
@@ -48,12 +50,12 @@ export const ACTIVITY_TYPE_LABELS = {
 // fila en la página de historial sin tener que repetir esta lista ahí.
 export const ACTIVITY_POSITIVE = new Set([
   "premium_activado", "prueba_iniciada", "perfil_activado", "destacado_activado",
-  "pago_registrado", "doctor_aprobado", "doctor_restaurado", "documento_aprobado", "resena_aprobada", "blog_aprobado",
+  "pago_registrado", "doctor_aprobado", "doctor_restaurado", "documento_aprobado", "resena_aprobada", "blog_aprobado", "hospital_confirmado",
 ]);
 export const ACTIVITY_NEGATIVE = new Set([
   "premium_desactivado", "perfil_desactivado", "destacado_desactivado", "pago_eliminado",
   "doctor_rechazado", "doctor_solicita_baja", "doctor_eliminado", "doctor_papelera", "registro_eliminado", "registro_papelera",
-  "documento_rechazado", "resena_eliminada", "resena_rechazada", "blog_rechazado", "acceso_admin_denegado",
+  "documento_rechazado", "resena_eliminada", "resena_rechazada", "blog_rechazado", "acceso_admin_denegado", "hospital_rechazado",
 ]);
 
 // Registra un movimiento en el historial. Es "best effort": si falla, no

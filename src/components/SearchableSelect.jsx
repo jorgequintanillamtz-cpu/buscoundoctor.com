@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// Para comparar sin importar mayúsculas ni acentos ("angeles" encuentra "Ángeles").
+const norm = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 /**
  * Campo de texto con autocompletado: escribes directo en el recuadro y la
@@ -95,8 +98,11 @@ export default function SearchableSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filtered = query.trim()
-    ? options.filter((o) => o.name.toLowerCase().includes(query.trim().toLowerCase()))
+  // Una opción puede traer `keywords` (otros nombres con los que también se
+  // busca, p. ej. el nombre anterior de un hospital).
+  const q = norm(query.trim());
+  const filtered = q
+    ? options.filter((o) => norm(o.name).includes(q) || (o.keywords || []).some((k) => norm(k).includes(q)))
     : options;
 
   const selectOption = (o) => {
@@ -168,7 +174,9 @@ export default function SearchableSelect({
           {filtered.length === 0 ? (
             <p className="px-3 py-4 text-sm text-muted-foreground text-center">{emptyText}</p>
           ) : (
-            filtered.map((o) => (
+            filtered.map((o) => {
+              const OptIcon = o.type === "hospital" ? Building2 : Icon;
+              return (
               <button
                 key={o.id}
                 type="button"
@@ -178,18 +186,19 @@ export default function SearchableSelect({
                   o.id === value && "bg-brand-bluePale text-brand-navy"
                 )}
               >
-                {Icon && (
+                {OptIcon && (
                   <span className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                    o.type === "condition" ? "bg-emerald-100" : "bg-brand-bluePale"
+                    o.type === "condition" ? "bg-emerald-100" : o.type === "hospital" ? "bg-indigo-100" : "bg-brand-bluePale"
                   )}>
-                    <Icon className={cn("w-4 h-4", o.type === "condition" ? "text-emerald-600" : "text-brand-blue")} />
+                    <OptIcon className={cn("w-4 h-4", o.type === "condition" ? "text-emerald-600" : o.type === "hospital" ? "text-indigo-600" : "text-brand-blue")} />
                   </span>
                 )}
                 <span className="flex-1 min-w-0 leading-snug">{o.name}</span>
                 {(o.hint || hint) && <span className="text-xs text-muted-foreground flex-shrink-0 pt-0.5">{o.hint || hint}</span>}
               </button>
-            ))
+              );
+            })
           )}
         </div>,
         document.body

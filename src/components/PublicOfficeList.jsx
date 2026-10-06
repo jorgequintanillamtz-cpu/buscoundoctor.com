@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { MapPin, Clock, Star, Phone, ExternalLink } from "lucide-react";
+import { MapPin, Clock, Star, Phone, ExternalLink, BadgeCheck } from "lucide-react";
+import { hospitalPath } from "@/lib/hospitals";
 import { GOOGLE_MAPS_API_KEY, hasGoogleMaps, buildEmbedUrl, buildPlaceMapsUrl } from "@/lib/googleMaps";
 
 const DAYS = [
@@ -40,14 +42,16 @@ function buildMapsLink(office) {
 export default function PublicOfficeList({ specialistId }) {
   const [offices, setOffices] = useState([]);
   const [zones, setZones] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const [offList, zoneList] = await Promise.all([
+        const [offList, zoneList, hospitalList] = await Promise.all([
           base44.entities.Office.filter({ specialist_id: specialistId }),
           base44.entities.Zone.list("name", 50),
+          base44.entities.Hospital.filter({ active: true }).catch(() => []),
         ]);
         const withHours = await Promise.all(
           offList.map(async (o) => {
@@ -65,6 +69,7 @@ export default function PublicOfficeList({ specialistId }) {
         withHours.sort((a, b) => (b.office.is_primary ? 1 : 0) - (a.office.is_primary ? 1 : 0));
         setOffices(withHours);
         setZones(zoneList);
+        setHospitals(hospitalList);
       } catch {}
       setLoading(false);
     }
@@ -75,6 +80,8 @@ export default function PublicOfficeList({ specialistId }) {
   if (!offices.length) return null;
 
   const zoneName = (zid) => zones.find((z) => z.id === zid)?.name || "";
+  // Solo un hospital CONFIRMADO por el equipo enlaza a su página (CLAUDE.md §8n).
+  const hospitalOf = (office) => (office.hospital_id && office.hospital_status === "confirmed" ? hospitals.find((h) => h.id === office.hospital_id) : null);
 
   return (
     <div id="hospitales" className="mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
@@ -86,13 +93,27 @@ export default function PublicOfficeList({ specialistId }) {
               <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-foreground">{office.name || office.address_line}</p>
+                  {hospitalOf(office) ? (
+                    <Link to={hospitalPath(hospitalOf(office).slug)} className="text-sm font-semibold text-foreground hover:text-primary hover:underline">
+                      {office.name || hospitalOf(office).name}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-semibold text-foreground">{office.name || office.address_line}</p>
+                  )}
+                  {hospitalOf(office) && (
+                    <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
+                      <BadgeCheck className="w-3 h-3" /> Consultorio confirmado
+                    </span>
+                  )}
                   {office.is_primary && (
                     <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full flex items-center gap-1 font-medium">
                       <Star className="w-3 h-3" /> Principal
                     </span>
                   )}
                 </div>
+                {office.suite && (
+                  <p className="text-xs text-foreground mt-0.5 font-medium">{office.suite}</p>
+                )}
                 {office.name && (
                   <p className="text-xs text-muted-foreground mt-0.5">{office.address_line}</p>
                 )}

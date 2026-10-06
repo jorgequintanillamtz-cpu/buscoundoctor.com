@@ -16,6 +16,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 // `config`:
 //   entity            - el entity de base44 (ej. base44.entities.Specialty)
 //   entityLabel       - nombre en español para los mensajes ("especialidad")
+//   entityGender      - "f" (default: "especialidad agregada") o "m" ("hospital agregado")
 //   sortField         - campo para ordenar el list() inicial (default "name")
 //   listLimit         - límite del list() (default 500)
 //   emptyForm         - forma vacía del formulario
@@ -30,6 +31,7 @@ export function useTaxonomyBank(config) {
   const {
     entity,
     entityLabel,
+    entityGender = "f",
     sortField = "name",
     listLimit = 500,
     emptyForm,
@@ -41,6 +43,8 @@ export function useTaxonomyBank(config) {
   } = config;
 
   const { confirm, dialogProps } = useConfirmDialog();
+  const o = entityGender === "m" ? "o" : "a"; // terminación de agregad_/actualizad_/eliminad_
+  const article = entityGender === "m" ? "un" : "una";
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -91,7 +95,7 @@ export function useTaxonomyBank(config) {
     if (extraError) { toast.error(extraError); return null; }
     const slug = (form.slug || slugify(form.name)).trim();
     const duplicate = items.some((i) => i.slug === slug && i.id !== editing?.id);
-    if (duplicate) { toast.error(`Ya existe una ${entityLabel} con ese slug. Cámbialo para que sea único.`); return null; }
+    if (duplicate) { toast.error(`Ya existe ${article} ${entityLabel} con ese slug. Cámbialo para que sea único.`); return null; }
 
     setSaving(true);
     let created = null;
@@ -100,11 +104,11 @@ export function useTaxonomyBank(config) {
       if (editing?.id) {
         await entity.update(editing.id, payload);
         setItems((prev) => prev.map((i) => (i.id === editing.id ? { ...i, ...payload } : i)));
-        toast.success(`${entityLabel[0].toUpperCase()}${entityLabel.slice(1)} actualizada`);
+        toast.success(`${entityLabel[0].toUpperCase()}${entityLabel.slice(1)} actualizad${o}`);
       } else {
         created = await entity.create(payload);
         setItems((prev) => [...prev, created]);
-        toast.success(`${entityLabel[0].toUpperCase()}${entityLabel.slice(1)} agregada`);
+        toast.success(`${entityLabel[0].toUpperCase()}${entityLabel.slice(1)} agregad${o}`);
         if (afterCreate) await afterCreate(created, form);
       }
       closeModal();
@@ -125,7 +129,7 @@ export function useTaxonomyBank(config) {
     try {
       await entity.delete(item.id);
       setItems((prev) => prev.filter((i) => i.id !== item.id));
-      toast.success(`${entityLabel[0].toUpperCase()}${entityLabel.slice(1)} eliminada`);
+      toast.success(`${entityLabel[0].toUpperCase()}${entityLabel.slice(1)} eliminad${o}`);
     } catch (e) {
       toast.error("No se pudo eliminar: " + e.message);
     }

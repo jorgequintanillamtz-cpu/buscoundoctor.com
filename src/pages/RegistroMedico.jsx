@@ -157,10 +157,14 @@ export default function RegistroMedico() {
     try {
       const zones = await base44.entities.Zone.list().catch(() => []);
       const zone = zones.find((z) => z.name === finalData.zone);
+      // Si eligió un hospital del catálogo, el consultorio y el piso no van en la
+      // dirección (es la del hospital): van en "suite", y el consultorio queda
+      // enlazado al hospital para aparecer en su página.
+      const atHospital = Boolean(finalData.hospital_id);
       const line = [
         [finalData.address_street, finalData.address_ext_number].filter(Boolean).join(" "),
-        finalData.address_int_number && `Int. ${finalData.address_int_number}`,
-        finalData.address_floor && `Piso ${finalData.address_floor}`,
+        !atHospital && finalData.address_int_number && `Int. ${finalData.address_int_number}`,
+        !atHospital && finalData.address_floor && `Piso ${finalData.address_floor}`,
         finalData.address_neighborhood && `Col. ${finalData.address_neighborhood}`,
         finalData.address_postal_code && `CP ${finalData.address_postal_code}`,
       ].filter(Boolean).join(", ");
@@ -172,6 +176,15 @@ export default function RegistroMedico() {
         address_line: line,
         is_primary: true,
       };
+      if (atHospital) {
+        office.hospital_id = finalData.hospital_id;
+        if (finalData.hospital_name) office.name = finalData.hospital_name;
+        const suite = [
+          finalData.address_int_number && `Consultorio ${finalData.address_int_number}`,
+          finalData.address_floor && `Piso ${finalData.address_floor}`,
+        ].filter(Boolean).join(", ");
+        if (suite) office.suite = suite;
+      }
       if (finalData.address_lat != null && finalData.address_lng != null) {
         office.latitude = finalData.address_lat;
         office.longitude = finalData.address_lng;

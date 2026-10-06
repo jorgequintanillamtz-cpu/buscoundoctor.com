@@ -25,6 +25,7 @@ const ENTITY_TABLE_MAP = {
   ConditionRequest: 'condition_request',
   Specialist: 'specialist',
   Office: 'office',
+  Hospital: 'hospital',
   OfficeHours: 'office_hours',
   SpecialistDocument: 'specialist_document',
   SpecialistEducation: 'specialist_education',

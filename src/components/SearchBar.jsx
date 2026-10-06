@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import SearchableSelect from "@/components/SearchableSelect";
 import { buildSearchOptions } from "@/lib/searchOptions";
 import { resolveCitySlug } from "@/lib/citySlug";
+import { hospitalPath } from "@/lib/hospitals";
 
 
 export default function SearchBar({ className = "" }) {
   const [specialties, setSpecialties] = useState([]);
   const [conditions, setConditions] = useState([]);
   const [subspecialties, setSubspecialties] = useState([]);
+  const [hospitals, setHospitals] = useState([]);
   const [zones, setZones] = useState([]);
   const [pickId, setPickId] = useState("");
   const [zoneId, setZoneId] = useState("");
@@ -28,13 +30,14 @@ export default function SearchBar({ className = "" }) {
       // enfermedades reales que sí están en el catálogo.
       base44.entities.Condition.filter({ active: true }, "name", 2000).catch(() => []),
       base44.entities.Subspecialty.filter({ active: true }).catch(() => []),
-    ]).then(([s, z, c, sub]) => { setSpecialties(s); setZones(z); setConditions(c); setSubspecialties(sub); });
+      base44.entities.Hospital.filter({ active: true }).catch(() => []),
+    ]).then(([s, z, c, sub, h]) => { setSpecialties(s); setZones(z); setConditions(c); setSubspecialties(sub); setHospitals(h); });
   }, []);
 
   // Especialidades, subespecialidades y enfermedades combinadas en un solo
   // buscador (como el de Doctoralia): el usuario puede escribir tanto
   // "dermatólogo" como "cirugía maxilofacial" o "acné".
-  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties), [specialties, conditions, subspecialties]);
+  const searchOptions = useMemo(() => buildSearchOptions(specialties, conditions, subspecialties, hospitals), [specialties, conditions, subspecialties, hospitals]);
   const picked = searchOptions.find((o) => o.id === pickId);
   const zone = zones.find((z) => z.id === zoneId);
   const onListPage = location.pathname.startsWith("/especialistas");
@@ -47,6 +50,11 @@ export default function SearchBar({ className = "" }) {
 
   const handleBuscar = () => {
     if (!canBuscar) return;
+    if (picked?.type === "hospital") {
+      // Página del hospital con sus médicos (/hospital/:slug); no depende de la ciudad.
+      navigate(hospitalPath(picked.ref.slug));
+      return;
+    }
     if (picked?.type === "subspecialty") {
       // Página SEO dedicada (/subespecialidad/:slug/:citySlug), mismo patrón
       // que specialty: arranca noindex y se indexa sola en cuanto haya
@@ -88,7 +96,7 @@ export default function SearchBar({ className = "" }) {
           options={searchOptions}
           value={pickId}
           onChange={setPickId}
-          placeholder="¿Qué especialidad o enfermedad buscas?"
+          placeholder="¿Qué especialidad, enfermedad u hospital buscas?"
           icon={Stethoscope}
           triggerClassName="w-full h-12 sm:h-14 px-4 rounded-2xl border border-border/80 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
         />
