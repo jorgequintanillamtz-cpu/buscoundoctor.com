@@ -10,6 +10,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import PasswordInput from "@/components/PasswordInput";
+import PasswordChecklist from "@/components/PasswordChecklist";
+import { passwordProblem } from "@/lib/passwordRules";
 
 function Card({ icon: Icon, title, children }) {
   return (
@@ -54,7 +57,8 @@ export default function AdminAccountSettings() {
     e.preventDefault();
     setPasswordError("");
     if (!current) { setPasswordError("Escribe tu contraseña actual"); return; }
-    if (next.length < 8) { setPasswordError("La nueva contraseña debe tener al menos 8 caracteres"); return; }
+    const problem = passwordProblem(next, email);
+    if (problem) { setPasswordError(problem); return; }
     if (next !== confirm) { setPasswordError("Las contraseñas nuevas no coinciden"); return; }
     if (next === current) { setPasswordError("La nueva contraseña debe ser distinta a la actual"); return; }
     setSavingPassword(true);
@@ -105,11 +109,12 @@ export default function AdminAccountSettings() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">Contraseña nueva</label>
-                  <Input type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} placeholder="Mínimo 8 caracteres" className="rounded-xl" />
+                  <PasswordInput value={next} onChange={(e) => setNext(e.target.value)} placeholder="Contraseña nueva" />
+                  <PasswordChecklist password={next} email={email} className="mt-2" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">Repite la nueva</label>
-                  <Input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="rounded-xl" />
+                  <PasswordInput value={confirm} onChange={(e) => setConfirm(e.target.value)} />
                 </div>
               </div>
               {passwordError && <p className="text-sm text-destructive" role="alert">{passwordError}</p>}
