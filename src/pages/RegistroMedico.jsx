@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Mail, Lock, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { Loader2, Mail, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import OAuthButtons from "@/components/OAuthButtons";
 import useOAuthProviders from "@/hooks/useOAuthProviders";
 import { toast } from "sonner";
@@ -18,6 +18,11 @@ import StepShell from "@/components/registro/StepShell";
 import StepDatos from "@/components/registro/StepDatos";
 import StepUbicacion from "@/components/registro/StepUbicacion";
 import StepFotos from "@/components/registro/StepFotos";
+import PasswordInput from "@/components/PasswordInput";
+import PasswordChecklist from "@/components/PasswordChecklist";
+import { checkPassword, passwordProblem } from "@/lib/passwordRules";
+
+const passwordRulesOk = (pw, email) => checkPassword(pw, email).valid;
 
 const PENDING_KEY = "buscoundoctor_pending_registro";
 const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
@@ -40,6 +45,7 @@ export default function RegistroMedico() {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState(EMPTY_DATA);
   const [emailForm, setEmailForm] = useState({ email: "", password: "" });
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -365,7 +371,9 @@ export default function RegistroMedico() {
     e.preventDefault();
     setError("");
     if (!emailForm.email || !emailForm.password) { setError("Completa correo y contraseña"); return; }
-    if (emailForm.password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return; }
+    const problem = passwordProblem(emailForm.password, emailForm.email);
+    if (problem) { setError(problem); return; }
+    if (emailForm.password !== passwordConfirm) { setError("Las contraseñas no coinciden"); return; }
     setLoading(true);
     try {
       await base44.auth.register({ email: emailForm.email, password: emailForm.password });
@@ -580,12 +588,16 @@ export default function RegistroMedico() {
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
               <Input type="email" value={emailForm.email} onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })} placeholder="Correo electrónico" className="rounded-xl pl-9" />
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-              <Input type="password" value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })} placeholder="Contraseña (mín. 8 caracteres)" className="rounded-xl pl-9" />
+            <div className="space-y-2">
+              <PasswordInput withLockIcon value={emailForm.password} onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })} placeholder="Crea tu contraseña" />
+              <PasswordChecklist password={emailForm.password} email={emailForm.email} />
             </div>
+            <PasswordInput withLockIcon value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} placeholder="Repite tu contraseña" />
+            {passwordConfirm && emailForm.password !== passwordConfirm && (
+              <p className="text-xs text-red-500 -mt-2">Las contraseñas no coinciden todavía.</p>
+            )}
             {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
+            <Button type="submit" disabled={loading || !passwordRulesOk(emailForm.password, emailForm.email) || emailForm.password !== passwordConfirm} className="w-full min-h-[44px] rounded-xl gap-1.5">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Crear cuenta
             </Button>

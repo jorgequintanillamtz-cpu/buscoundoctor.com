@@ -3,8 +3,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Mail, Lock, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Loader2, Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
 import StepShell from "@/components/registro/StepShell";
+import PasswordInput from "@/components/PasswordInput";
+import PasswordChecklist from "@/components/PasswordChecklist";
+import { checkPassword, passwordProblem } from "@/lib/passwordRules";
 
 // Recuperación de contraseña con código de 6 dígitos -- igual que la
 // verificación de correo del registro (RegistroMedico.jsx) y por la misma
@@ -54,7 +57,8 @@ export default function OlvideContrasena() {
   const submitPassword = async (e) => {
     e.preventDefault();
     setError("");
-    if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres"); return; }
+    const problem = passwordProblem(password, email);
+    if (problem) { setError(problem); return; }
     if (password !== confirmPassword) { setError("Las contraseñas no coinciden"); return; }
     setLoading(true);
     try {
@@ -103,15 +107,15 @@ export default function OlvideContrasena() {
         {phase === "password" && (
           <StepShell title="Crea tu nueva contraseña" error={error}>
             <form onSubmit={submitPassword} className="sm:col-span-2 grid gap-3">
-              <div className="relative">
-                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-                <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña nueva (mín. 8 caracteres)" className="rounded-xl pl-9" />
+              <div className="space-y-2">
+                <PasswordInput withLockIcon value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña nueva" />
+                <PasswordChecklist password={password} email={email} />
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
-                <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repite la contraseña" className="rounded-xl pl-9" />
-              </div>
-              <Button type="submit" disabled={loading} className="w-full min-h-[44px] rounded-xl gap-1.5">
+              <PasswordInput withLockIcon value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repite la contraseña" />
+              {confirmPassword && password !== confirmPassword && (
+                <p className="text-xs text-red-500 -mt-1">Las contraseñas no coinciden todavía.</p>
+              )}
+              <Button type="submit" disabled={loading || !checkPassword(password, email).valid || password !== confirmPassword} className="w-full min-h-[44px] rounded-xl gap-1.5">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Guardar contraseña
               </Button>
