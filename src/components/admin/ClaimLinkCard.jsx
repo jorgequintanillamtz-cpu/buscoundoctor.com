@@ -55,6 +55,9 @@ export default function ClaimLinkCard({ specialistId, form }) {
     catch { toast.error("No se pudo copiar; selecciónalo y cópialo a mano."); }
   };
 
+  // Hay un enlace activo de una visita anterior a esta pantalla (el texto en claro ya no se puede ver).
+  const existing = !revoked && !link && !!form?.claim_token_expires_at && new Date(form.claim_token_expires_at) > new Date();
+
   const wa = `https://wa.me/?text=${encodeURIComponent(`Hola ${form.full_name || ""}, armamos tu perfil en BuscoUnDoctor. Reclámalo aquí (el enlace dura 30 días): ${link}`)}`;
 
   return (
@@ -89,8 +92,11 @@ export default function ClaimLinkCard({ specialistId, form }) {
             {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />} Generar enlace
           </Button>
           {revoked && <p className="text-[11px] text-muted-foreground">El enlace anterior ya no sirve. Genera uno nuevo cuando quieras.</p>}
-          {!revoked && form.claim_token_expires_at && (
-            <p className="text-[11px] text-muted-foreground">Ya hay un enlace generado (vence el {new Date(form.claim_token_expires_at).toLocaleDateString("es-MX", { day: "numeric", month: "long" })}). Si generas otro, el anterior deja de servir.</p>
+          {existing && (
+            <div className="flex items-center gap-3 flex-wrap">
+              <p className="text-[11px] text-muted-foreground">Ya hay un enlace activo (vence el {new Date(form.claim_token_expires_at).toLocaleDateString("es-MX", { day: "numeric", month: "long" })}). No se puede volver a ver; si generas otro, el anterior deja de servir.</p>
+              <Button type="button" size="sm" variant="ghost" onClick={revoke} disabled={busy} className="rounded-xl gap-1.5 text-red-600"><Ban className="w-3.5 h-3.5" /> Desactivar enlace</Button>
+            </div>
           )}
         </div>
       )}
