@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import ServicesManager from "./ServicesManager";
+import { PATIENT_TYPES } from "@/lib/patientTypes";
 
 const MODALIDADES = [
   { value: "presencial", label: "Presencial" },
@@ -11,13 +12,6 @@ const PAYMENT_METHODS = [
   { value: "tarjeta", label: "Tarjeta" },
   { value: "transferencia", label: "Transferencia" },
   { value: "efectivo", label: "Efectivo" },
-];
-
-const PATIENT_TYPES = [
-  { value: "ninos", label: "Niños" },
-  { value: "adolescentes", label: "Adolescentes" },
-  { value: "adultos", label: "Adultos" },
-  { value: "adultos_mayores", label: "Adultos mayores" },
 ];
 
 // Mismos valores y etiquetas que el filtro de precio en /especialistas y
@@ -77,7 +71,7 @@ export default function DoctorDetailsManager({ form, update, specialistId }) {
 
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-3">
         <h2 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">Pacientes que atiendo</h2>
-        <p className="text-xs text-muted-foreground -mt-2">Se muestra en tu perfil público. Deja sin marcar lo que no atiendas — ej. si no ves niños, no lo marques.</p>
+        <p className="text-xs text-muted-foreground -mt-2">Se muestra al inicio de tu perfil público, en "Sobre el especialista". Marca todos los que atiendas y deja sin marcar los que no — ej. si no ves bebés, no lo marques.</p>
         <div className="flex flex-wrap gap-2">
           {PATIENT_TYPES.map((t) => {
             const checked = (form.patient_types || []).includes(t.value);
