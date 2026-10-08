@@ -445,6 +445,10 @@ const FUNCTION_MAP = {
   creditReferralReward: ({ specialist_id } = {}) => supabase.rpc('credit_referral_reward', { p_specialist_id: specialist_id }),
   unsubscribeRegistrationEmails: ({ draft_id } = {}) => supabase.rpc('unsubscribe_registration_emails', { p_draft_id: draft_id }),
   submitContactMessage: ({ name, email, message } = {}) => supabase.rpc('submit_contact_message', { p_name: name, p_email: email, p_message: message }),
+  generateClaimLink: ({ specialist_id } = {}) => supabase.rpc('generate_claim_link', { p_specialist_id: specialist_id }),
+  revokeClaimLink: ({ specialist_id } = {}) => supabase.rpc('revoke_claim_link', { p_specialist_id: specialist_id }),
+  getClaimPreview: ({ token } = {}) => supabase.rpc('get_claim_preview', { p_token: token }),
+  claimProfile: ({ token, cedula } = {}) => supabase.rpc('claim_profile', { p_token: token, p_cedula: cedula || null }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>
