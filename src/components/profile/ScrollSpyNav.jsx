@@ -65,8 +65,8 @@ export default function ScrollSpyNav({ sections }) {
     // metía parcialmente debajo (mismo bug que tenía la tarjeta de Agendar
     // cita). Usa --header-h (medido en vivo por Header.jsx) igual que ella.
     <nav
-      className="hidden lg:flex items-center gap-1 mt-8 mb-2 sticky z-30 bg-background/95 backdrop-blur-sm py-3 border-b border-border/50 text-sm overflow-x-auto"
-      style={{ top: "var(--header-h, 5rem)" }}
+      className="hidden lg:flex items-center gap-1 mt-6 mb-2 sticky z-30 bg-card rounded-3xl border border-border/50 px-3 py-2.5 text-sm overflow-x-auto"
+      style={{ top: "calc(var(--header-h, 5rem) + 0.5rem)" }}
       aria-label="Navegación del perfil"
     >
       {sections.filter((s) => presentIds.has(s.id)).map((s) => (
