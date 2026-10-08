@@ -271,11 +271,13 @@ export default function SpecialistProfile() {
 
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
 
+  // Contenedor de 1400 px (antes 1280) y tarjeta de cita de 400 px (antes 460): la tarjeta queda más
+  // cerca del borde derecho y el contenido de la izquierda gana ancho (Jorge, 2026-10-08).
   return (
     // Fondo gris frío a todo lo ancho (solo en el perfil); las tarjetas se distinguen de él
     // por borde y sombra (ver .profile-surface en index.css).
     <div className="bg-brand-canvas profile-surface">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 lg:pb-10">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 lg:pb-10">
       <Breadcrumb className="mb-4">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -325,7 +327,7 @@ export default function SpecialistProfile() {
           hacer scroll. Dejando el stretch por default, la celda del aside se
           estira para igualar el alto de la columna izquierda (mucho más
           alta), dándole al Agendar cita todo ese rango para quedarse fijo. */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_460px] gap-8">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_400px] gap-8">
       <div className="flex flex-col min-w-0">
 
       {/* HERO */}
