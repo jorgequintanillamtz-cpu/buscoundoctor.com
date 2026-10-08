@@ -11,6 +11,27 @@ export default async function handler(req, res) {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
 
+  // Enlace para reclamar un perfil armado por el equipo (/reclamar/:token, CLAUDE.md §8o):
+  // tarjeta fija con el logo. NO consulta la base ni muestra ningún dato del doctor: el
+  // perfil es privado y el enlace puede reenviarse; el token solo se repite en la dirección.
+  if (req.query.tipo === "reclamar") {
+    const token = String(req.query.token || "");
+    const url = /^[A-Za-z0-9_-]{20,80}$/.test(token) ? `${SITE}/reclamar/${token}` : `${SITE}/`;
+    res.status(200).send(
+      renderHtml({
+        title: "Reclama tu perfil en BuscoUnDoctor",
+        description: "Armamos tu perfil médico en el directorio verificado de Monterrey y San Pedro. Reclámalo en un minuto con tu cuenta.",
+        url,
+        image: `${SITE}/api/og-image`,
+        imageAlt: "BuscoUnDoctor",
+        heading: "Reclama tu perfil en BuscoUnDoctor",
+        bodyText: "Armamos tu perfil médico en el directorio verificado de Monterrey y San Pedro.",
+        noindex: true,
+      })
+    );
+    return;
+  }
+
   let page = null;
   try {
     if (validSlug(slug)) {
