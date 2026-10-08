@@ -257,8 +257,8 @@ export default function AdminDoctores() {
 
   const STEP_LABELS = {
     datos: "Datos básicos",
-    ubicacion: "Ubicación",
-    fotos: "Datos completos (falta crear cuenta)",
+    ubicacion: "Datos completos (falta crear cuenta)",
+    fotos: "Datos completos (falta crear cuenta)", // registros hechos antes de quitar el paso de fotos (2026-10-08)
   };
 
   const waLink = (whatsapp) => {

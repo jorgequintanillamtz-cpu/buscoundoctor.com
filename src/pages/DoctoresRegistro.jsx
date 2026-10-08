@@ -269,7 +269,7 @@ export default function DoctoresRegistro() {
         <section id="paso1" aria-labelledby="paso1-heading" className="max-w-2xl mx-auto px-4 sm:px-6 pb-14 sm:pb-18 scroll-mt-28 sm:scroll-mt-32">
           <div className="text-center mb-6">
             <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
-              Paso 1 de 4
+              Paso 1 de 3
             </span>
             <h2 id="paso1-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
               Empieza tu registro ahora mismo

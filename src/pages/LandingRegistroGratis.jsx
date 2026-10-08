@@ -83,10 +83,10 @@ const HOW_IT_WORKS = [
   { n: "3", title: "Los pacientes te encuentran", text: "Apareces en búsquedas por especialidad y zona, y te escriben directo por WhatsApp." },
 ];
 
-// Los 4 pasos reales del registro (/registro-medico: datos -> consultorio -> fotos
-// -> cuenta). En esta página el médico está en el paso 1; mostrarlos desde aquí
+// Los 3 pasos reales del registro (/registro-medico: datos -> consultorio -> cuenta;
+// las fotos se suben después, desde el panel). En esta página el médico está en el paso 1; mostrarlos desde aquí
 // le dice cuánto falta y que es corto (cada paso es una pantalla).
-const REGISTRO_STEPS = ["Tus datos", "Tu consultorio", "Tus fotos", "Tu cuenta"];
+const REGISTRO_STEPS = ["Tus datos", "Tu consultorio", "Tu cuenta"];
 
 function RegistroSteps({ current = 0 }) {
   return (
