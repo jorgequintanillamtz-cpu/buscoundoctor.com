@@ -3,12 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Mail, CheckCircle2, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { Loader2, Mail, CheckCircle2, ArrowLeft, ArrowRight, Sparkles, Camera } from "lucide-react";
 import OAuthButtons from "@/components/OAuthButtons";
 import useOAuthProviders from "@/hooks/useOAuthProviders";
-import { toast } from "sonner";
-import { generateSlug } from "@/api/specialistForm";
-import { fileToWebP } from "@/lib/fileToWebP";
 import { EMPTY_REGISTRO_DATA } from "@/lib/registroDefaults";
 import { buildPlaceMapsUrl } from "@/lib/googleMaps";
 import { resolveOfficeCoords } from "@/lib/officeGeo";
@@ -17,7 +14,6 @@ import Logo from "@/components/Logo";
 import StepShell from "@/components/registro/StepShell";
 import StepDatos from "@/components/registro/StepDatos";
 import StepUbicacion from "@/components/registro/StepUbicacion";
-import StepFotos from "@/components/registro/StepFotos";
 import PasswordInput from "@/components/PasswordInput";
 import PasswordChecklist from "@/components/PasswordChecklist";
 import { checkPassword, passwordProblem } from "@/lib/passwordRules";
@@ -30,7 +26,15 @@ const DRAFT_ID_KEY = "buscoundoctor_draft_specialist_id";
 // alguien llena el paso 1 embebido ahí y da clic en "Continuar".
 const LANDING_PREFILL_KEY = "buscoundoctor_landing_prefill";
 
-const STEP_KEYS = ["datos", "ubicacion", "fotos", "cuenta"];
+// Los pasos del registro. El paso de fotos se quitó (2026-10-08, a petición de
+// Jorge): el médico sube su foto y las del consultorio después, desde su panel,
+// y al terminar el registro se le recomienda hacerlo (pantalla "¡Cuenta creada!").
+const STEP_KEYS = ["datos", "ubicacion", "cuenta"];
+
+// A qué paso mandar a quien retoma un registro desde el enlace de un correo de
+// recuperación, según el último paso que completó (registration_step). "fotos"
+// ya no existe, pero hay borradores viejos con ese valor: también van a "cuenta".
+const RESUME_AFTER_STEP = { datos: "ubicacion", ubicacion: "cuenta", fotos: "cuenta" };
 
 const EMPTY_DATA = EMPTY_REGISTRO_DATA;
 
@@ -70,8 +74,6 @@ export default function RegistroMedico() {
 
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [uploadingGallery, setUploadingGallery] = useState(false);
   // Id del perfil Specialist en borrador que se va guardando paso a paso,
   // antes incluso de que exista una cuenta. Persistido en localStorage para
   // sobrevivir el redirect de Google OAuth y recargas de página.
@@ -271,8 +273,8 @@ export default function RegistroMedico() {
               }));
               setDraftId(draft.id);
               localStorage.setItem(DRAFT_ID_KEY, draft.id);
-              const resumeIndex = STEP_KEYS.indexOf(draft.registration_step);
-              setStepIndex(resumeIndex >= 0 ? Math.min(resumeIndex + 1, STEP_KEYS.length - 1) : 0);
+              const resumeIndex = STEP_KEYS.indexOf(RESUME_AFTER_STEP[draft.registration_step]);
+              setStepIndex(resumeIndex >= 0 ? resumeIndex : 0);
             }
           } catch {
             // Silencioso: si falla, el registro sigue como si no hubiera venido de un enlace.
@@ -434,37 +436,6 @@ export default function RegistroMedico() {
     }
   };
 
-  const handleProfilePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingPhoto(true);
-    try {
-      const slug = generateSlug(data.full_name) || "doctor";
-      const webpFile = await fileToWebP(file, `${slug}-foto-perfil.webp`);
-      // Este paso del wizard va ANTES de crear la cuenta (datos -> ubicacion
-      // -> fotos -> cuenta), así que todavía no hay sesión ni auth.uid().
-      // "pending-registro" es una carpeta fija habilitada para subir sin
-      // sesión -- ver migración allow_anon_photo_upload_during_registration.
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: webpFile, folder: "pending-registro" });
-      update("profile_photo", file_url);
-    } catch (err) { console.error(err); toast.error("Error al subir la foto"); }
-    setUploadingPhoto(false);
-  };
-
-  const handleGalleryUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    setUploadingGallery(true);
-    try {
-      const slug = generateSlug(data.full_name) || "doctor";
-      const startIndex = (data.gallery || []).length;
-      const webpFiles = await Promise.all(files.map((f, i) => fileToWebP(f, `${slug}-foto-${startIndex + i + 1}.webp`)));
-      const urls = await Promise.all(webpFiles.map((f) => base44.integrations.Core.UploadFile({ file: f, folder: "pending-registro" }).then((r) => r.file_url)));
-      update("gallery", [...(data.gallery || []), ...urls]);
-    } catch (err) { console.error(err); toast.error("Error al subir las fotos"); }
-    setUploadingGallery(false);
-  };
-
   const progressPct = Math.round(((stepIndex + 1) / STEP_KEYS.length) * 100);
 
   return (
@@ -501,17 +472,6 @@ export default function RegistroMedico() {
               <StepUbicacion data={data} update={update} error={error} zones={zones} />
             )}
 
-            {stepKey === "fotos" && (
-              <StepFotos
-                data={data}
-                update={update}
-                error={error}
-                uploadingPhoto={uploadingPhoto}
-                uploadingGallery={uploadingGallery}
-                handleProfilePhotoUpload={handleProfilePhotoUpload}
-                handleGalleryUpload={handleGalleryUpload}
-              />
-            )}
 
             {stepKey === "cuenta" && sessionUser && (
               <StepShell title="Un último paso" subtitle={`Ya iniciaste sesión como ${sessionUser.email}. Falta crear tu perfil de médico.`} error={error}>
@@ -638,6 +598,15 @@ export default function RegistroMedico() {
             <p className="text-sm text-muted-foreground">
               Tu perfil ya tiene tu información básica y va a pasar a revisión. Esto apenas empieza.
             </p>
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-left">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-1">
+                <Camera className="w-4 h-4 text-primary flex-shrink-0" />
+                Lo siguiente que más ayuda: sube tu foto
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Los perfiles con foto generan más confianza y reciben más contactos. Toma menos de un minuto; también puedes agregar fotos de tu consultorio.
+              </p>
+            </div>
             <div className="bg-accent/40 border border-accent rounded-2xl p-4 text-left">
               <p className="text-sm font-medium text-foreground flex items-center gap-2 mb-2.5">
                 <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
@@ -661,9 +630,14 @@ export default function RegistroMedico() {
                 Un perfil completo les genera más confianza a tus pacientes. En tu panel, entra a "Llena tu perfil" para ver exactamente qué te falta.
               </p>
             </div>
-            <Button onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl">
-              Terminar mi perfil
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button onClick={() => navigate("/panel-medico?seccion=perfil")} className="min-h-[44px] rounded-xl gap-1.5">
+                <Camera className="w-4 h-4" /> Subir mi foto de perfil
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/panel-medico")} className="min-h-[44px] rounded-xl text-muted-foreground">
+                Ir a mi panel
+              </Button>
+            </div>
           </div>
         )}
 

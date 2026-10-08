@@ -8,8 +8,12 @@ import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import LoadingLogo from "@/components/LoadingLogo";
 
-const STEP_LABELS = { datos: "Datos", ubicacion: "Ubicación", fotos: "Fotos" };
-const STEP_ORDER = ["datos", "ubicacion", "fotos"];
+// registration_step guarda el ÚLTIMO PASO COMPLETADO. Desde 2026-10-08 el registro ya
+// no tiene paso de fotos: tras "Ubicación" lo que sigue es crear la cuenta. "fotos" solo
+// existe en registros hechos antes de ese cambio (se muestra únicamente si hay alguno).
+const STEP_LABELS = { datos: "Datos", ubicacion: "Ubicación (falta crear la cuenta)", fotos: "Fotos (paso que ya no existe)" };
+const STEP_ORDER = ["datos", "ubicacion"];
+const STEP_ORDER_WITH_LEGACY = ["datos", "ubicacion", "fotos"];
 
 const RANGE_OPTIONS = [
   { key: "todo", label: "Todo" },
@@ -177,13 +181,18 @@ export default function AdminRegistros() {
   // que se guarde el primer borrador) -- no sabemos cuánta gente solo abrió
   // la página sin llegar a eso; para verlo haría falta Google Analytics/
   // Search Console, que hoy no está conectado.
+  const stepOrder = useMemo(
+    () => (specialists.some((s) => s.registration_step === "fotos") ? STEP_ORDER_WITH_LEGACY : STEP_ORDER),
+    [specialists]
+  );
+
   const registrationFunnel = useMemo(() => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const attempts = specialists.filter((s) => s.created_date && new Date(s.created_date) >= thirtyDaysAgo);
     const finished = attempts.filter((s) => s.owner_user_id);
     const stuck = attempts.filter((s) => !s.owner_user_id);
-    const stuckByStep = STEP_ORDER.map((step) => ({
+    const stuckByStep = stepOrder.map((step) => ({
       step,
       label: STEP_LABELS[step],
       count: stuck.filter((s) => s.registration_step === step).length,
@@ -195,7 +204,7 @@ export default function AdminRegistros() {
       conversionPct: attempts.length > 0 ? Math.round((finished.length / attempts.length) * 100) : null,
       stuckByStep,
     };
-  }, [specialists]);
+  }, [specialists, stepOrder]);
 
   if (loading) {
     return (
@@ -279,7 +288,7 @@ export default function AdminRegistros() {
         </select>
         <select value={stepFilter} onChange={(e) => setStepFilter(e.target.value)} className="h-10 rounded-xl border border-input bg-background px-3 text-sm">
           <option value="">Cualquier último paso</option>
-          {STEP_ORDER.map((s) => <option key={s} value={s}>Último paso: {STEP_LABELS[s]}</option>)}
+          {stepOrder.map((s) => <option key={s} value={s}>Último paso: {STEP_LABELS[s]}</option>)}
         </select>
         <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-10 rounded-xl border border-input bg-background px-3 text-sm" aria-label="Registros por página">
           <option value={30}>30 por página</option>

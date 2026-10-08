@@ -68,12 +68,13 @@ export default function DoctorPanel() {
   // Si se llega desde la barra estática de una página externa (Mi página
   // pública, Productos digitales) con una sección pedida en location.state,
   // abre ahí directo en vez de siempre en "Inicio".
-  // También acepta ?seccion=documentos (enlace del correo "sube tu cédula") y
+  // También acepta ?seccion=documentos (enlace del correo "sube tu cédula"), ?seccion=perfil
+  // (donde se sube la foto; lo usa la pantalla final del registro) y
   // ?seccion=ajustes&tab=correos (enlace de los recordatorios para apagarlos) en la URL; solo esas, a propósito.
   const [section, setSection] = useState(() => {
     if (location.state?.section) return location.state.section;
     const wanted = new URLSearchParams(location.search).get("seccion");
-    return wanted === "documentos" || wanted === "ajustes" ? wanted : "resumen";
+    return wanted === "documentos" || wanted === "ajustes" || wanted === "perfil" ? wanted : "resumen";
   });
   const [completenessChecklist, setCompletenessChecklist] = useState(null);
   // Modo "paso a paso": recorre, una por una, las pantallas de lo que le falta

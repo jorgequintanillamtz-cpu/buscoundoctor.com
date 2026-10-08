@@ -54,7 +54,8 @@ function profileLink(doc) {
 
 // Correo de bienvenida: se manda una sola vez, justo cuando se crea el
 // perfil del doctor (createDoctorProfile). El wizard de registro ya pidió
-// nombre, especialidad, WhatsApp, cédula y zona/modalidad — estos 4 pasos
+// nombre, especialidad, WhatsApp, cédula y zona/modalidad (la foto se quitó del
+// registro el 2026-10-08 y se pide aquí y en la pantalla final) — estos 4 pasos
 // son justo lo que falta para que el perfil compita bien en el directorio
 // y para desbloquear el sello de "Verificado". El orden importa: primero
 // lo que genera más confianza (cédula).
@@ -71,9 +72,9 @@ export function notifyWelcome(doc) {
     stepRow(
       2,
       STEP_ICONS.biografia,
-      "Completa tu biografía",
-      "Escribe al menos 50 palabras sobre tu experiencia y enfoque. Es lo que más ayuda a que tus pacientes confíen en tu perfil.",
-      "Escribir biografía",
+      "Sube tu foto y completa tu biografía",
+      "Los perfiles con foto generan más confianza. Súbela y escribe al menos 50 palabras sobre tu experiencia y enfoque: es lo que más ayuda a que tus pacientes confíen en ti.",
+      "Subir foto y escribir biografía",
       PANEL_URL
     ),
     stepRow(

@@ -1,5 +1,5 @@
 // Forma vacía de los datos que se van llenando en el wizard de registro de
-// médicos (pasos "datos", "ubicacion", "fotos"). Vive aparte para que tanto
+// médicos (pasos "datos" y "ubicacion"). Vive aparte para que tanto
 // RegistroMedico.jsx (registro real) como AdminVistaRegistro.jsx (vista de
 // previsualización del admin) arranquen del mismo estado inicial — si se
 // agrega un campo nuevo al wizard, se agrega aquí una sola vez.
