@@ -60,9 +60,10 @@ export default function PublicOfficeList({ specialistId }) {
             hours.forEach((h) => { map[h.day_of_week] = h; });
             return {
               office: o,
-              hours: DAYS.map((d) =>
-                map[d.v] || { day_of_week: d.v, is_closed: true, open_time: null, close_time: null }
-              ),
+              // Solo los días que el médico SÍ capturó. Antes, los días sin registro se pintaban como
+              // "Cerrado" en rojo (un doctor sin horario salía cerrado los 7 días): era información
+              // inventada. Sin horarios capturados, no se muestra el bloque.
+              hours: DAYS.filter((d) => map[d.v]).map((d) => map[d.v]),
             };
           })
         );
@@ -154,6 +155,7 @@ export default function PublicOfficeList({ specialistId }) {
                 ))}
               </div>
             )}
+            {hours.length > 0 && (
             <div className="ml-8 mt-3">
               <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
                 <Clock className="w-3 h-3" /> Horarios
@@ -165,13 +167,14 @@ export default function PublicOfficeList({ specialistId }) {
                     <div key={h.day_of_week} className="flex items-center justify-between text-xs py-0.5">
                       <span className="text-muted-foreground">{dayLabel}</span>
                       <span className={`font-medium ${h.is_closed ? "text-red-500" : "text-foreground"}`}>
-                        {h.is_closed ? "Cerrado" : `${h.open_time} – ${h.close_time}`}
+                        {h.is_closed ? "Cerrado" : `${h.open_time?.slice(0, 5)} – ${h.close_time?.slice(0, 5)}`}
                       </span>
                     </div>
                   );
                 })}
               </div>
             </div>
+            )}
           </div>
         ))}
       </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Star, BadgeCheck, BriefcaseMedical, Building2, MapPin, ShieldPlus, Stethoscope, Video } from "lucide-react";
+import { ChevronLeft, Star, BriefcaseMedical, Building2, MapPin, ShieldPlus, Stethoscope, Video } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import VerifiedSeal from "../components/profile/VerifiedSeal";
@@ -364,12 +364,9 @@ export default function SpecialistProfile() {
                 chips de aseguradoras y una línea de dirección sueltas): cédula verificada, años de
                 experiencia, hospital/consultorio, dirección, modalidad y seguros. "¿Acepta mi
                 seguro?" es de lo primero que decide un paciente. */}
-            {(specialist.license_verification_status === "verified" || specialist.years_experience > 0 || primaryOffice?.name || primaryOffice?.address_line || MODALITY_LABELS[specialist.modality] || resolvedInsurers.length > 0) && (
+            {(specialist.years_experience > 0 || primaryOffice?.name || primaryOffice?.address_line || MODALITY_LABELS[specialist.modality] || resolvedInsurers.length > 0) && (
               <div className="w-fit mx-auto lg:mx-0 mt-5 max-w-full">
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left text-sm font-medium text-foreground/90">
-                  {specialist.license_verification_status === "verified" && (
-                    <TrustItem icon={BadgeCheck} tone="green">Cédula profesional verificada</TrustItem>
-                  )}
                   {specialist.years_experience > 0 && (
                     <TrustItem icon={BriefcaseMedical}>{specialist.years_experience} años de experiencia</TrustItem>
                   )}
