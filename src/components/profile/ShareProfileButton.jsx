@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Share2, Check } from "lucide-react";
 import { toast } from "sonner";
+import { buildAbsoluteUrl } from "@/lib/seoMeta";
 
 export default function ShareProfileButton({ specialist, className = "" }) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const url = window.location.href;
+    // Enlace limpio del perfil (sin #ancla ni parámetros): es el que las apps de mensajes
+    // convierten en tarjeta con foto (ver api/og.js).
+    const url = specialist.slug ? buildAbsoluteUrl(`/especialista/${specialist.slug}`) : window.location.href;
     const shareData = {
       title: `${specialist.full_name} — ${specialist.specialty}`,
       text: `Encontré a ${specialist.full_name} en BuscoUnDoctor`,
