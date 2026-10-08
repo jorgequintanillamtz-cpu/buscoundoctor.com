@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Star } from "lucide-react";
+import { ChevronLeft, Star, BadgeCheck, BriefcaseMedical, Building2, MapPin, ShieldPlus, Stethoscope, Video } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import VerifiedSeal from "../components/profile/VerifiedSeal";
@@ -32,6 +32,20 @@ function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
   if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
   el.setAttribute("content", content);
+}
+
+// Un dato de confianza del encabezado: ícono en cuadrito de color + texto (más peso visual que
+// las etiquetas grises de antes). `tone` pinta el cuadrito ("green" para la cédula verificada).
+function TrustItem({ icon: Icon, tone = "blue", className = "", children }) {
+  const toneCls = tone === "green" ? "bg-emerald-50 text-emerald-600" : "bg-brand-bluePale text-brand-blue";
+  return (
+    <li className={`flex items-center gap-2.5 ${className}`}>
+      <span className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${toneCls}`}>
+        <Icon className="w-4 h-4" aria-hidden="true" />
+      </span>
+      <span className="min-w-0">{children}</span>
+    </li>
+  );
 }
 
 function fmtLongDate(d) {
@@ -309,7 +323,7 @@ export default function SpecialistProfile() {
           confianza tanto para el paciente como para Google (contenido
           vigente). */}
       {((specialist.license_verification_status === "verified" && specialist.license_verified_at) || specialist.updated_date) && (
-        <p className="text-xs text-muted-foreground mb-3">
+        <p className="text-xs font-medium text-foreground/70 mb-3">
           {[
             specialist.license_verification_status === "verified" && specialist.license_verified_at
               && `Última verificación: ${fmtLongDate(specialist.license_verified_at)}`,
@@ -346,39 +360,36 @@ export default function SpecialistProfile() {
               {specialtyDisplay || specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
             </p>
-            {MODALITY_LABELS[specialist.modality] && (
-              <span className="inline-block text-xs font-semibold text-brand-blue bg-brand-bluePale rounded-full px-2.5 py-1 mt-2">
-                {MODALITY_LABELS[specialist.modality]}
-              </span>
-            )}
-            {specialist.years_experience > 0 && (
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
-                <span className="inline-flex items-center text-xs font-semibold text-foreground bg-muted rounded-full px-3 py-1.5 whitespace-nowrap">
-                  {specialist.years_experience} años de experiencia
-                </span>
+            {/* Datos de confianza JUNTOS y con más peso visual (antes eran una etiqueta gris de años,
+                chips de aseguradoras y una línea de dirección sueltas): cédula verificada, años de
+                experiencia, hospital/consultorio, dirección, modalidad y seguros. "¿Acepta mi
+                seguro?" es de lo primero que decide un paciente. */}
+            {(specialist.license_verification_status === "verified" || specialist.years_experience > 0 || primaryOffice?.name || primaryOffice?.address_line || MODALITY_LABELS[specialist.modality] || resolvedInsurers.length > 0) && (
+              <div className="w-fit mx-auto lg:mx-0 mt-5 max-w-full">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left text-sm font-medium text-foreground/90">
+                  {specialist.license_verification_status === "verified" && (
+                    <TrustItem icon={BadgeCheck} tone="green">Cédula profesional verificada</TrustItem>
+                  )}
+                  {specialist.years_experience > 0 && (
+                    <TrustItem icon={BriefcaseMedical}>{specialist.years_experience} años de experiencia</TrustItem>
+                  )}
+                  {primaryOffice?.name && (
+                    <TrustItem icon={Building2}>{primaryOffice.name}{primaryOffice.suite ? ` · ${primaryOffice.suite}` : ""}</TrustItem>
+                  )}
+                  {primaryOffice?.address_line && (
+                    <TrustItem icon={MapPin}>{primaryOffice.address_line}</TrustItem>
+                  )}
+                  {MODALITY_LABELS[specialist.modality] && (
+                    <TrustItem icon={specialist.modality === "presencial" ? Stethoscope : Video}>{MODALITY_LABELS[specialist.modality]}</TrustItem>
+                  )}
+                  {resolvedInsurers.length > 0 && (
+                    <TrustItem icon={ShieldPlus} className="sm:col-span-2">
+                      Acepta {resolvedInsurers.slice(0, 3).map((i) => i.name).join(", ")}
+                      {resolvedInsurers.length > 3 && ` y ${resolvedInsurers.length - 3} más`}
+                    </TrustItem>
+                  )}
+                </ul>
               </div>
-            )}
-            {/* Aseguradoras arriba en el hero (no solo dentro de "Agendar
-                cita"): "¿acepta mi seguro?" es de lo primero que decide un
-                paciente, y antes solo se veía si bajaba hasta el bloque de
-                agendar (o hasta el bloque extra en móvil). */}
-            {resolvedInsurers.length > 0 && (
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-1.5 mt-2">
-                {resolvedInsurers.slice(0, 4).map((ins) => (
-                  <span key={ins.id} className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground bg-muted rounded-full px-2.5 py-1">
-                    {ins.logo_url && <img src={ins.logo_url} alt="" loading="lazy" className="w-3.5 h-3.5 object-contain" />}
-                    {ins.name}
-                  </span>
-                ))}
-                {resolvedInsurers.length > 4 && (
-                  <span className="text-xs text-muted-foreground">+{resolvedInsurers.length - 4} más</span>
-                )}
-              </div>
-            )}
-            {primaryOffice?.address_line && (
-              <p className="text-muted-foreground text-sm mt-1">
-                {primaryOffice.address_line}
-              </p>
             )}
 
             {allReviews.length > 0 && (

@@ -24,6 +24,25 @@ export default function QuestionsSection({ specialistId, specialist }) {
 
   if (loading) return null;
 
+  // Sin preguntas (y sin el formulario abierto): una franja delgada en vez de una tarjeta entera
+  // vacía. En cuanto haya una pregunta respondida, o se abra el formulario, sale la tarjeta completa.
+  if (questions.length === 0 && !showForm) {
+    return (
+      <div id="dudas" className="mt-6 bg-card rounded-2xl border border-border/50 px-5 py-4 flex items-center justify-between gap-3 flex-wrap scroll-mt-32">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-heading font-semibold text-foreground">Dudas solucionadas</span>
+          {" · "}Aún no hay preguntas respondidas por este especialista.
+        </p>
+        <button
+          onClick={() => setShowForm(true)}
+          className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors"
+        >
+          🙋 Hacer una pregunta
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div id="dudas" className="mt-6 bg-card rounded-3xl border border-border/50 p-7 sm:p-9 scroll-mt-32">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
