@@ -15,7 +15,7 @@ export default function MobileBookingBar({ specialist, offices, services, insure
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex items-center justify-center gap-2 w-full bg-brand-navy hover:bg-brand-navy/90 text-white text-sm font-bold px-5 py-3.5 min-h-[44px] rounded-full shadow-sm transition-colors"
+          className="flex items-center justify-center gap-2 w-full bg-brand-augusta hover:bg-brand-augusta/90 text-white text-sm font-bold px-5 py-3.5 min-h-[44px] rounded-full shadow-sm transition-colors"
         >
           <Calendar className="w-4 h-4" />
           Agendar cita
@@ -25,7 +25,7 @@ export default function MobileBookingBar({ specialist, offices, services, insure
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl max-h-[88vh] overflow-y-auto pb-8">
           <SheetHeader>
-            <SheetTitle className="font-heading text-left">Agendar cita con {specialist.full_name}</SheetTitle>
+            <SheetTitle className="font-heading text-left text-brand-augusta">Agendar cita con {specialist.full_name}</SheetTitle>
           </SheetHeader>
           <div className="mt-4">
             <BookingFlow specialist={specialist} offices={offices} services={services} insurers={insurers} onConfirmed={() => setOpen(false)} />

@@ -4,6 +4,10 @@ const brand = {
 	blue: '#2F6FED',
 	blueLight: '#EAF2FF',
 	bluePale: '#DCE9FF',
+	// Verde Augusta (el del Masters): encabezado y selecciones de la tarjeta "Agendar cita".
+	augusta: '#006747',
+	augustaDark: '#00432E',
+	augustaLight: '#E3F1EA',
 };
 
 module.exports = {
