@@ -5,6 +5,8 @@ import BookingFlow from "./BookingFlow";
 // de BookingFlow, porque es el que arma el mensaje con todo el contexto que
 // el paciente fue llenando (tipo de paciente, consulta, seguro, nombre).
 export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [] }) {
+  // Primer nombre sin el título ("Dra. Ana Pérez" → "Ana"): antes salía "con Dra.."
+  const firstName = (specialist.full_name || "").replace(/^\s*(dr\.?|dra\.?|doctora?)\s+/i, "").split(" ")[0] || "el doctor";
   return (
     // El offset ya no es un número fijo (antes top-24): usa --header-h, la
     // altura REAL del header (que varía según si el banner "¿Eres médico?"
@@ -18,20 +20,16 @@ export default function BookingSidebar({ specialist, offices, services, resolved
         className="bg-card rounded-3xl border border-border/50 shadow-lg flex flex-col overflow-hidden"
         style={{ maxHeight: "calc(100vh - var(--header-h, 6rem) - 2rem)" }}
       >
-        {/* pt/px por separado (nunca "p-8" + "pb-0"): mezclar un shorthand
-            responsivo (sm:p-8) con un override de un solo lado (pb-0) es un
-            error clásico de Tailwind — en pantallas sm+ el sm:p-8 termina
-            ganando y regresa el padding-bottom que se quería quitar, dejando
-            un espacio de sobra enorme antes de "Selecciona un hospital".
-            Escribiendo solo pt/px aquí (sin ningún pb) se evita el choque. */}
-        <div className="pt-7 sm:pt-8 px-7 sm:px-8 flex-shrink-0">
-          <h2 className="font-heading font-extrabold text-2xl text-foreground">Agendar cita</h2>
-          <p className="text-sm text-muted-foreground mt-1.5 mb-4">
-            Contacto directo y gratuito con {specialist.full_name?.split(" ")[0]}.
+        {/* Franja verde Augusta (como la franja morada de Doctoralia): hace que esta tarjeta,
+            la que convierte pacientes, destaque del resto de la página. */}
+        <div className="bg-brand-augusta text-white px-7 sm:px-8 py-5 sm:py-6 flex-shrink-0">
+          <h2 className="font-heading font-extrabold text-2xl">Agendar cita</h2>
+          <p className="text-sm text-white/80 mt-1">
+            Contacto directo y gratuito con {firstName}.
           </p>
         </div>
 
-        <div className="px-7 sm:px-8 pb-7 sm:pb-8 overflow-y-auto">
+        <div className="px-7 sm:px-8 pt-6 pb-7 sm:pb-8 overflow-y-auto">
           <BookingFlow specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
 
           <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
