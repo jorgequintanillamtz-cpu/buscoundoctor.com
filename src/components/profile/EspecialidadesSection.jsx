@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Stethoscope, ChevronRight } from "lucide-react";
+import { Stethoscope, ChevronRight, ChevronDown } from "lucide-react";
 import { slugify } from "@/lib/citySlug";
 
 // Sección "Especialidades": no repite solo lo del hero, suma valor real
@@ -76,10 +76,16 @@ export default function EspecialidadesSection({ specialist }) {
             )}
       </div>
 
+      {/* Enfermedades que trata: cerradas por defecto, el paciente las abre si quiere (a petición
+          de Jorge). Se usa <details>: el contenido sigue en la página (y sus enlaces internos a
+          /enfermedades siguen siendo visibles para Google), solo está plegado. */}
       {conditions.length > 0 && (
-        <div className="mt-5 pt-5 border-t border-border/50">
-          <p className="text-sm font-semibold text-foreground mb-3">Enfermedades y padecimientos que trata</p>
-          <div className="flex flex-wrap gap-2">
+        <details className="group mt-5 pt-5 border-t border-border/50">
+          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
+            <span>Ver enfermedades y padecimientos que trata ({conditions.length})</span>
+            <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="flex flex-wrap gap-2 mt-3">
             {conditions.map((c) => (
               <Link
                 key={c.id}
@@ -91,7 +97,7 @@ export default function EspecialidadesSection({ specialist }) {
               </Link>
             ))}
           </div>
-        </div>
+        </details>
       )}
     </div>
   );

@@ -25,7 +25,7 @@ import MobileBookingBar from "../components/profile/MobileBookingBar";
 import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
 import { buildProfileMetaText } from "@/lib/profileMeta";
-import { slugify } from "@/lib/citySlug";
+import { PATIENT_TYPE_LABELS } from "@/lib/patientTypes";
 import LoadingLogo from "@/components/LoadingLogo";
 
 function setMeta(name, content) {
@@ -45,10 +45,10 @@ const MODALITY_LABELS = {
 };
 
 const NAV_SECTIONS = [
+  { id: "informacion", label: "Sobre el especialista" },
   { id: "especialidades", label: "Especialidades" },
   { id: "hospitales", label: "Hospitales" },
   { id: "servicios", label: "Servicios" },
-  { id: "informacion", label: "Información" },
   { id: "experiencia", label: "Experiencia" },
   { id: "estudios", label: "Estudios" },
   { id: "tecnologia-tratamientos", label: "Tecnología y tratamientos" },
@@ -61,7 +61,6 @@ const NAV_SECTIONS = [
 const NAV_SECTION_IDS = NAV_SECTIONS.map((s) => s.id);
 
 const PAYMENT_LABELS = { tarjeta: "Tarjeta", transferencia: "Transferencia", efectivo: "Efectivo" };
-const PATIENT_TYPE_LABELS = { ninos: "Niños", adolescentes: "Adolescentes", adultos: "Adultos", adultos_mayores: "Adultos mayores" };
 
 export default function SpecialistProfile() {
   const { slug } = useParams();
@@ -73,11 +72,6 @@ export default function SpecialistProfile() {
   const [languageNames, setLanguageNames] = useState([]);
   const [allReviews, setAllReviews] = useState([]);
   const [services, setServices] = useState([]);
-  // Vista rápida en el hero: años de experiencia + primeras enfermedades que
-  // trata, para que se vean sin tener que bajar hasta "Especialidades". Es
-  // un resumen -- el detalle completo (con enlaces a /enfermedades) sigue
-  // viviendo en EspecialidadesSection más abajo.
-  const [topConditions, setTopConditions] = useState([]);
   // Nombre "como lo busca el paciente" (ej. "Ginecólogo") de la especialidad
   // del doctor, resuelto contra el banco de especialidades. Cae de regreso
   // al nombre formal (specialist.specialty) si no hay match.
@@ -135,17 +129,6 @@ export default function SpecialistProfile() {
         try {
           const svcList = await base44.entities.SpecialistService.filter({ specialist_id: specialist.id });
           setServices(svcList.sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
-        } catch {}
-
-        try {
-          const curated = specialist.conditions_relation || [];
-          if (curated.length > 0) {
-            const all = await base44.entities.Condition.list("name", 2000);
-            setTopConditions(curated.map((id) => all.find((c) => c.id === id)).filter(Boolean).slice(0, 4));
-          } else if (specialist.specialty) {
-            const list = await base44.entities.Condition.filter({ specialty: specialist.specialty, active: true });
-            setTopConditions(list.slice(0, 4));
-          }
         } catch {}
 
         // JSON-LD Physician. El teléfono llevaba un bug: specialist.whatsapp
@@ -279,6 +262,13 @@ export default function SpecialistProfile() {
     .filter((r) => r.comment?.trim())
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
 
+  // ¿Hay algo que mostrar en "Sobre el especialista"?
+  const hasAbout = !!(
+    specialist.description || specialist.video_url || specialist.patient_types?.length > 0 ||
+    languageNames.length > 0 || specialist.gallery?.length > 0 ||
+    specialist.professional_license_number || specialist.certifications
+  );
+
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
 
   return (
@@ -359,22 +349,11 @@ export default function SpecialistProfile() {
                 {MODALITY_LABELS[specialist.modality]}
               </span>
             )}
-            {(specialist.years_experience > 0 || topConditions.length > 0) && (
+            {specialist.years_experience > 0 && (
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mt-3">
-                {specialist.years_experience > 0 && (
-                  <span className="inline-flex items-center text-xs font-semibold text-foreground bg-muted rounded-full px-3 py-1.5 whitespace-nowrap">
-                    {specialist.years_experience} años de experiencia
-                  </span>
-                )}
-                {topConditions.map((c) => (
-                  <Link
-                    key={c.id}
-                    to={`/enfermedades/${c.slug}/${slugify(specialist.zone || specialist.location || "Monterrey")}`}
-                    className="text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/70 rounded-full px-3 py-1.5 transition-colors"
-                  >
-                    {c.name}
-                  </Link>
-                ))}
+                <span className="inline-flex items-center text-xs font-semibold text-foreground bg-muted rounded-full px-3 py-1.5 whitespace-nowrap">
+                  {specialist.years_experience} años de experiencia
+                </span>
               </div>
             )}
             {/* Aseguradoras arriba en el hero (no solo dentro de "Agendar
@@ -436,33 +415,6 @@ export default function SpecialistProfile() {
               </div>
             )}
 
-            {specialist.description && (
-              <div className="text-sm text-muted-foreground leading-relaxed mt-4">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                    strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                    em: ({ children }) => <em className="italic">{children}</em>,
-                    ul: ({ children }) => <ul className="list-disc pl-5 mb-2">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal pl-5 mb-2">{children}</ol>,
-                    li: ({ children }) => <li className="mb-0.5">{children}</li>,
-                    a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-brand-blue underline">{children}</a>,
-                    h1: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
-                    h2: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
-                    h3: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
-                    img: ({ src, alt }) => <img src={src} alt={alt || ""} loading="lazy" className="rounded-xl max-w-full my-2" />,
-                  }}
-                >
-                  {shownDescription}
-                </ReactMarkdown>
-                {isLongDescription && (
-                  <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium hover:underline">
-                    {descExpanded ? "Leer menos" : "Leer más"}
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="relative flex justify-center order-1">
@@ -499,8 +451,39 @@ export default function SpecialistProfile() {
         ))}
       </nav>
 
-          <div id="informacion" className="order-6 lg:order-4 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
+          {/* SOBRE EL ESPECIALISTA: va PRIMERO (a petición de Jorge, 2026-10-08): es donde el médico
+              cuenta qué hace y quién es. Antes su descripción vivía en el encabezado y esta tarjeta
+              no la traía. Si no tiene nada que mostrar, la tarjeta no se dibuja. */}
+          {hasAbout && (
+          <div id="informacion" className="order-2 lg:order-1 mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 scroll-mt-32">
             <h2 className="font-heading font-bold text-lg text-foreground mb-3">Sobre el especialista</h2>
+              {specialist.description && (
+                <div className="text-[15px] text-foreground/80 leading-relaxed mb-1">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      ul: ({ children }) => <ul className="list-disc pl-5 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal pl-5 mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                      a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-brand-blue underline">{children}</a>,
+                      h1: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
+                      h2: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
+                      h3: ({ children }) => <p className="font-heading font-semibold text-foreground mt-2 mb-1">{children}</p>,
+                      img: ({ src, alt }) => <img src={src} alt={alt || ""} loading="lazy" className="rounded-xl max-w-full my-2" />,
+                    }}
+                  >
+                    {shownDescription}
+                  </ReactMarkdown>
+                  {isLongDescription && (
+                    <button onClick={() => setDescExpanded(v => !v)} className="text-brand-blue font-medium hover:underline">
+                      {descExpanded ? "Leer menos" : "Leer más"}
+                    </button>
+                  )}
+                </div>
+              )}
             {specialist.video_url && (
               <div className="mt-0 mb-5">
                 <video src={specialist.video_url} controls className="w-full rounded-2xl max-h-64 bg-black" playsInline />
@@ -552,9 +535,10 @@ export default function SpecialistProfile() {
               </div>
             )}
           </div>
+          )}
 
           {/* ESPECIALIDADES */}
-          <div className="order-2 lg:order-1">
+          <div className="order-3 lg:order-2">
             <EspecialidadesSection specialist={specialist} />
           </div>
 
@@ -579,12 +563,12 @@ export default function SpecialistProfile() {
           </div>
 
           {/* HOSPITALES */}
-          <div className="order-3 lg:order-2">
+          <div className="order-4 lg:order-3">
             <PublicOfficeList specialistId={specialist.id} />
           </div>
 
           {/* SERVICIOS */}
-          <div className="order-4 lg:order-3">
+          <div className="order-5 lg:order-4">
             <SpecialistServices specialistId={specialist.id} />
           </div>
 
@@ -593,7 +577,7 @@ export default function SpecialistProfile() {
               que en móvil no se renderiza — así el contenido sigue presente
               e indexable en el HTML que ve el rastreador mobile-first. */}
           {showMobileExtras && (
-            <div className="order-5 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
+            <div className="order-6 lg:hidden mt-6 bg-card rounded-3xl border border-border/50 p-6 sm:p-8 space-y-5">
               {resolvedInsurers.length > 0 && (
                 <div>
                   <h3 className="text-sm font-heading font-semibold text-foreground mb-2">Acepta seguros</h3>
