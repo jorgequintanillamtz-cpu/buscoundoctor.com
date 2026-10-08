@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { setDoctorState } from "@/api/doctorReview";
 import { notifyProfileApproved } from "@/api/doctorNotify";
 import VerifiedSeal from "@/components/profile/VerifiedSeal";
+import ClaimLinkCard from "@/components/admin/ClaimLinkCard";
 
 // Sección "Estado y visibilidad" del editor del admin (solo se renderiza para
 // administradores). Un solo control de estado con tres opciones claras en vez
@@ -85,6 +86,9 @@ export default function DoctorEditorSidebar({ form, update, specialistId }) {
 
   return (
     <div className="space-y-4">
+      {/* Perfil armado por el equipo: enlace para que el doctor lo reclame */}
+      {specialistId && <ClaimLinkCard specialistId={specialistId} form={form} />}
+
       {/* Estado del perfil */}
       <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-4">
         <div>

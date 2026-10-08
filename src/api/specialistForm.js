@@ -174,6 +174,7 @@ const SERVER_MANAGED_FIELDS = new Set([
   "account_created_at", "registration_step",
   "recovery_email_1_sent_at", "recovery_email_2_sent_at", "recovery_email_3_sent_at",
   "profile_reminder_sent_at", "cedula_reminder_sent_at", "deleted_at",
+  "claim_token_hash", "claim_token_expires_at", "claimed_at", "seeded_by_admin",
 ]);
 
 const ser = (v) => JSON.stringify(v === undefined ? null : v);

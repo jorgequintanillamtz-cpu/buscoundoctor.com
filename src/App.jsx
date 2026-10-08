@@ -70,6 +70,7 @@ const LandingMedicos = lazy(() => import('./pages/LandingMedicos'));
 const DoctoresRegistro = lazy(() => import('./pages/DoctoresRegistro'));
 const LandingRegistroGratis = lazy(() => import('./pages/LandingRegistroGratis'));
 const BajaCorreos = lazy(() => import('./pages/BajaCorreos'));
+const ReclamarPerfil = lazy(() => import('./pages/ReclamarPerfil'));
 const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
 const StorefrontProductDetail = lazy(() => import('./pages/StorefrontProductDetail'));
 const DoctorStorefrontEditor = lazy(() => import('./pages/DoctorStorefrontEditor'));
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
       <Route element={<Layout minimal />}>
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/baja-correos" element={<BajaCorreos />} />
+        <Route path="/reclamar/:token" element={<ReclamarPerfil />} />
       </Route>
 
       <Route element={<Layout />}>
