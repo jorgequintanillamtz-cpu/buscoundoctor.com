@@ -1,4 +1,4 @@
-import { SITE, GENERIC, loadPublicSpecialist, buildProfileMeta, renderHtml, validSlug } from "./_lib/og.js";
+import { SITE, GENERIC, loadPublicSpecialist, buildProfileMeta, renderHtml, validSlug, hasUsablePhoto } from "./_lib/og.js";
 
 // Vista previa al compartir un perfil (WhatsApp, Facebook, iMessage, Telegram, LinkedIn,
 // X, Slack, Discord). Esas apps leen la página SIN ejecutar código, y el sitio es una
@@ -43,7 +43,10 @@ export default async function handler(req, res) {
           title: meta.title,
           description: meta.description,
           url: `${SITE}/especialista/${s.slug}`,
-          image: `${SITE}/api/og-image?slug=${encodeURIComponent(s.slug)}&v=${v}`,
+          // d = versión del diseño de la imagen: al cambiarlo, CDN y apps de mensajes la vuelven a pedir.
+          image: `${SITE}/api/og-image?slug=${encodeURIComponent(s.slug)}&v=${v}&d=3`,
+          // con foto la imagen es cuadrada (1200×1200); sin foto, la tarjeta del logo (1200×630)
+          imageHeight: hasUsablePhoto(s) ? 1200 : 630,
           imageAlt: `${s.full_name}, ${meta.specialtyName} en ${meta.zoneLabel}`,
           heading: s.full_name,
           bodyText: meta.description,

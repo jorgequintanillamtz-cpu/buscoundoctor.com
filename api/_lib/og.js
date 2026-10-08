@@ -7,6 +7,11 @@ export const SITE = "https://buscoundoctor.com";
 export const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://iiklgyzyvbrtrxjfucoc.supabase.co";
 const ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || "";
 
+export const PUBLIC_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/`;
+
+// ¿La foto del perfil es de nuestro Storage público? (la única que se procesa; ver og-image.js)
+export const hasUsablePhoto = (s) => !!s?.profile_photo && s.profile_photo.startsWith(PUBLIC_PREFIX);
+
 export const GENERIC = {
   title: "BuscoUnDoctor — Directorio Médico Verificado en Monterrey",
   description:
@@ -64,7 +69,7 @@ export async function buildProfileMeta(s) {
   return { title, description, specialtyName, zoneLabel };
 }
 
-export function renderHtml({ title, description, url, image, imageAlt, heading, bodyText, noindex }) {
+export function renderHtml({ title, description, url, image, imageAlt, heading, bodyText, noindex, imageWidth = 1200, imageHeight = 630 }) {
   return `<!doctype html>
 <html lang="es"><head>
 <meta charset="utf-8" />
@@ -79,8 +84,8 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow" />\n' : ""}<link re
 <meta property="og:url" content="${esc(url)}" />
 <meta property="og:image" content="${esc(image)}" />
 <meta property="og:image:type" content="image/jpeg" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
+<meta property="og:image:width" content="${imageWidth}" />
+<meta property="og:image:height" content="${imageHeight}" />
 <meta property="og:image:alt" content="${esc(imageAlt)}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${esc(title)}" />

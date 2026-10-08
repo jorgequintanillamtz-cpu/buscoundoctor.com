@@ -1,15 +1,18 @@
 import sharp from "sharp";
-import { SUPABASE_URL, loadPublicSpecialist, validSlug } from "./_lib/og.js";
+import { PUBLIC_PREFIX, loadPublicSpecialist, validSlug } from "./_lib/og.js";
 
-// Imagen 1200×630 para la vista previa al compartir (la foto del doctor, ligera). Las
-// fotos que suben los doctores pueden pesar varios MB (una real pesaba 2 MB) y WhatsApp
-// no muestra imágenes pesadas, por eso se reduce aquí. La foto va completa y centrada
-// (no recortada, para no cortar la cara) sobre una versión difuminada de ella misma.
-// Sin foto, o si algo falla, sale el logo de BuscoUnDoctor. Solo lee fotos de nuestro
-// propio Storage público. CLAUDE.md §8p.
+// Imagen para la vista previa al compartir un perfil. Las fotos que suben los doctores
+// pueden pesar varios MB (una real pesaba 2 MB) y WhatsApp no muestra imágenes pesadas,
+// por eso se reduce aquí.
+//  - Con foto: CUADRADA 1200×1200 que ocupa toda la tarjeta (como Doctoralia), con el logo
+//    de BuscoUnDoctor en una esquina. Si la foto es vertical se recorta anclada ARRIBA (la
+//    cabeza casi siempre queda arriba; el recorte automático "por atención" llegó a cortarle
+//    la cabeza a una foto real); si es horizontal, centrada.
+//  - Sin foto, o si algo falla: tarjeta 1200×630 con el logo sobre blanco.
+// Solo lee fotos de nuestro propio Storage público. CLAUDE.md §8p.
+const S = 1200;
 const W = 1200;
 const H = 630;
-const PUBLIC_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/`;
 const LOGO_URL = `${PUBLIC_PREFIX}site-assets/email-logo.png`;
 const MAX_BYTES = 12 * 1024 * 1024;
 
@@ -25,14 +28,41 @@ async function download(url) {
 
 const toJpeg = (img) => img.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
 
+// El logo es una imagen con fondo transparente; se recorta el espacio vacío una sola vez.
+let tightLogo = null;
+async function getTightLogo() {
+  if (!tightLogo) tightLogo = await sharp(await download(LOGO_URL)).trim().toBuffer();
+  return tightLogo;
+}
+
 async function photoCard(buf) {
-  const bg = await sharp(buf).rotate().resize(W, H, { fit: "cover" }).blur(40).modulate({ brightness: 0.7 }).toBuffer();
-  const fg = await sharp(buf).rotate().resize({ width: W, height: H, fit: "inside", withoutEnlargement: false }).toBuffer();
-  return toJpeg(sharp(bg).composite([{ input: fg, gravity: "center" }]));
+  const upright = await sharp(buf).rotate().toBuffer(); // aplica la orientación EXIF antes de medir
+  const { width, height } = await sharp(upright).metadata();
+  const photo = await sharp(upright)
+    .resize(S, S, { fit: "cover", position: height > width ? "top" : "centre" })
+    .toBuffer();
+
+  // Logo en una "píldora" blanca semitransparente abajo a la izquierda.
+  const logo = await sharp(await getTightLogo()).resize({ width: 300 }).toBuffer();
+  const lm = await sharp(logo).metadata();
+  const padX = 34;
+  const padY = 22;
+  const pw = lm.width + padX * 2;
+  const ph = lm.height + padY * 2;
+  const margin = 36;
+  const pill = Buffer.from(
+    `<svg width="${pw}" height="${ph}"><rect width="${pw}" height="${ph}" rx="${ph / 2}" fill="white" fill-opacity="0.94"/></svg>`
+  );
+  return toJpeg(
+    sharp(photo).composite([
+      { input: pill, left: margin, top: S - ph - margin },
+      { input: logo, left: margin + padX, top: S - ph - margin + padY },
+    ])
+  );
 }
 
 async function logoCard() {
-  const logo = await sharp(await download(LOGO_URL)).resize({ width: 900 }).toBuffer();
+  const logo = await sharp(await getTightLogo()).resize({ width: 900 }).toBuffer();
   return toJpeg(
     sharp({ create: { width: W, height: H, channels: 3, background: "#ffffff" } }).composite([{ input: logo, gravity: "center" }])
   );
