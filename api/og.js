@@ -41,6 +41,7 @@ export default async function handler(req, res) {
         const v = s.updated_date ? Date.parse(s.updated_date) || 0 : 0;
         page = renderHtml({
           title: meta.title,
+          ogTitle: meta.cardTitle, // la tarjeta no repite "| BuscoUnDoctor": WhatsApp ya muestra el dominio
           description: meta.description,
           url: `${SITE}/especialista/${s.slug}`,
           // d = versión del diseño de la imagen: al cambiarlo, CDN y apps de mensajes la vuelven a pedir.

@@ -24,6 +24,7 @@ import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
 import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
+import { buildProfileMetaText } from "@/lib/profileMeta";
 import { slugify } from "@/lib/citySlug";
 import LoadingLogo from "@/components/LoadingLogo";
 
@@ -198,20 +199,22 @@ export default function SpecialistProfile() {
         script.innerHTML = JSON.stringify(schema);
         document.head.appendChild(script);
 
-        const zoneLabel = specialist.zone || specialist.location || "Monterrey";
-        const pageTitle = `${specialist.full_name} — ${specialtyDisplayName} en ${zoneLabel} | BuscoUnDoctor`;
-
-        // Descripción para redes/WhatsApp: cuando hay reseñas reales se antepone
-        // el rating (la señal que más empuja el clic en una tarjeta compartida),
-        // seguido de la propia descripción del doctor o, si no escribió una, un
-        // fallback genérico. Se recorta a 160 caracteres en total (límite usual
-        // de las tarjetas de WhatsApp/Facebook antes de truncar con "...").
-        const ratingPrefix = reviewsForSchema.length > 0 && specialist.rating
-          ? `⭐ ${Number(specialist.rating).toFixed(1)} (${reviewsForSchema.length} reseña${reviewsForSchema.length !== 1 ? "s" : ""}) · `
-          : "";
-        const baseDescription = specialist.description
-          || `Especialista en ${specialtyDisplayName} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
-        const pageDescription = `${ratingPrefix}${baseDescription}`.slice(0, 160);
+        // Título y descripción para la pestaña, Google y las tarjetas al compartir. La lógica
+        // vive en src/lib/profileMeta.js (la misma que usa api/og.js): especialidad en femenino
+        // para "Dra.", "cédula verificada" solo si de verdad lo está, y corte con "…".
+        const meta = buildProfileMetaText({
+          fullName: specialist.full_name,
+          specialty: specialist.specialty,
+          specialtyDisplay: specialtyDisplayName,
+          zone: specialist.zone,
+          location: specialist.location,
+          description: specialist.description,
+          rating: specialist.rating,
+          reviewCount: reviewsForSchema.length,
+          verified: specialist.license_verification_status === "verified",
+        });
+        const pageTitle = meta.title;
+        const pageDescription = meta.description;
         const pageUrl = buildAbsoluteUrl(`/especialista/${specialist.slug}`);
 
         // Cada perfil necesita su propio <title> y meta description únicos — sin
@@ -224,7 +227,7 @@ export default function SpecialistProfile() {
         setMeta("robots", specialist.publication_status === "published" ? "index,follow" : "noindex,follow");
 
         setOpenGraph({
-          title: pageTitle,
+          title: meta.cardTitle,
           description: pageDescription,
           image: specialist.profile_photo || SITE_OG.image,
           imageAlt: `Foto de perfil de ${specialist.full_name}, ${specialtyDisplayName}`,

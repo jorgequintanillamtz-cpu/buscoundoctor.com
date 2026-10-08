@@ -3,6 +3,8 @@
 // usan la llave anon de Supabase, así que la base de datos misma garantiza que
 // un perfil que no está publicado y activo (borrador, en revisión, en pausa,
 // armado por el equipo sin reclamar) nunca devuelve nada.
+import { buildProfileMetaText } from "../../src/lib/profileMeta.js";
+
 export const SITE = "https://buscoundoctor.com";
 export const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://iiklgyzyvbrtrxjfucoc.supabase.co";
 const ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || "";
@@ -21,7 +23,6 @@ export const GENERIC = {
 export const esc = (s) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const plain = (s) => String(s ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
 async function rest(path, extraHeaders = {}) {
   if (!ANON_KEY) throw new Error("sin llave anon");
@@ -36,40 +37,41 @@ export const validSlug = (slug) => /^[a-z0-9][a-z0-9-]{0,150}$/.test(slug || "")
 // Devuelve null si el perfil no existe o no es público (la base lo filtra sola).
 export async function loadPublicSpecialist(slug) {
   if (!validSlug(slug)) return null;
-  const cols = "id,full_name,slug,specialty,zone,location,description,rating,profile_photo,updated_date";
+  const cols = "id,full_name,slug,specialty,zone,location,description,rating,profile_photo,updated_date,license_verification_status";
   const r = await rest(`specialist?slug=eq.${encodeURIComponent(slug)}&select=${cols}&limit=1`);
   if (!r.ok) return null;
   const rows = await r.json();
   return rows[0] || null;
 }
 
-// Mismas reglas de texto que la página del perfil (SpecialistProfile.jsx), para que la
-// tarjeta compartida diga lo mismo que ve el paciente al abrirla.
+// Mismas reglas de texto que la página del perfil: viven en src/lib/profileMeta.js (un solo lugar).
 export async function buildProfileMeta(s) {
-  let specialtyName = s.specialty || "Especialista";
+  let specialtyDisplay = null;
   let reviewCount = 0;
   try {
     const [sp, rv] = await Promise.all([
       rest(`specialty?name=eq.${encodeURIComponent(s.specialty || "")}&select=display_name&limit=1`),
       rest(`review?specialist_id=eq.${s.id}&approved=eq.true&select=id`, { Range: "0-0", Prefer: "count=exact" }),
     ]);
-    if (sp.ok) { const row = (await sp.json())[0]; if (row?.display_name) specialtyName = row.display_name; }
+    if (sp.ok) { const row = (await sp.json())[0]; if (row?.display_name) specialtyDisplay = row.display_name; }
     const range = rv.headers.get("content-range") || "";
     reviewCount = Number(range.split("/")[1]) || 0;
   } catch { /* texto sin esos extras */ }
 
-  const zoneLabel = s.zone || s.location || "Monterrey";
-  const title = `${s.full_name} — ${specialtyName} en ${zoneLabel} | BuscoUnDoctor`;
-  const ratingPrefix = reviewCount > 0 && s.rating
-    ? `⭐ ${Number(s.rating).toFixed(1)} (${reviewCount} reseña${reviewCount !== 1 ? "s" : ""}) · `
-    : "";
-  const base = plain(s.description)
-    || `Especialista en ${specialtyName} en ${zoneLabel}. Cédula profesional verificada. Contacta directo y agenda tu cita.`;
-  const description = `${ratingPrefix}${base}`.slice(0, 160);
-  return { title, description, specialtyName, zoneLabel };
+  return buildProfileMetaText({
+    fullName: s.full_name,
+    specialty: s.specialty,
+    specialtyDisplay,
+    zone: s.zone,
+    location: s.location,
+    description: s.description,
+    rating: s.rating,
+    reviewCount,
+    verified: s.license_verification_status === "verified",
+  });
 }
 
-export function renderHtml({ title, description, url, image, imageAlt, heading, bodyText, noindex, imageWidth = 1200, imageHeight = 630 }) {
+export function renderHtml({ title, description, url, image, imageAlt, heading, bodyText, noindex, imageWidth = 1200, imageHeight = 630, ogTitle }) {
   return `<!doctype html>
 <html lang="es"><head>
 <meta charset="utf-8" />
@@ -79,7 +81,7 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow" />\n' : ""}<link re
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="BuscoUnDoctor" />
 <meta property="og:locale" content="es_MX" />
-<meta property="og:title" content="${esc(title)}" />
+<meta property="og:title" content="${esc(ogTitle || title)}" />
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:url" content="${esc(url)}" />
 <meta property="og:image" content="${esc(image)}" />
@@ -88,7 +90,7 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow" />\n' : ""}<link re
 <meta property="og:image:height" content="${imageHeight}" />
 <meta property="og:image:alt" content="${esc(imageAlt)}" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="${esc(title)}" />
+<meta name="twitter:title" content="${esc(ogTitle || title)}" />
 <meta name="twitter:description" content="${esc(description)}" />
 <meta name="twitter:image" content="${esc(image)}" />
 </head><body>
