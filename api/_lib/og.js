@@ -64,13 +64,13 @@ export async function buildProfileMeta(s) {
   return { title, description, specialtyName, zoneLabel };
 }
 
-export function renderHtml({ title, description, url, image, imageAlt, heading, bodyText }) {
+export function renderHtml({ title, description, url, image, imageAlt, heading, bodyText, noindex }) {
   return `<!doctype html>
 <html lang="es"><head>
 <meta charset="utf-8" />
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}" />
-<link rel="canonical" href="${esc(url)}" />
+${noindex ? '<meta name="robots" content="noindex, nofollow" />\n' : ""}<link rel="canonical" href="${esc(url)}" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="BuscoUnDoctor" />
 <meta property="og:locale" content="es_MX" />

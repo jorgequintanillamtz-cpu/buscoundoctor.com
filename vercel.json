@@ -43,6 +43,17 @@
       "destination": "/api/og?slug=:slug"
     },
     {
+      "source": "/reclamar/:token",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Slack-ImgProxy|Discordbot|Pinterest|SkypeUriPreview|Applebot|redditbot).*"
+        }
+      ],
+      "destination": "/api/og?tipo=reclamar&token=:token"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
