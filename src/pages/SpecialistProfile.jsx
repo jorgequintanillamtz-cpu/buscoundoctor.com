@@ -282,6 +282,9 @@ export default function SpecialistProfile() {
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
 
   return (
+    // Fondo gris frío a todo lo ancho (solo en el perfil); las tarjetas se distinguen de él
+    // por borde y sombra (ver .profile-surface en index.css).
+    <div className="bg-brand-canvas profile-surface">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 lg:pb-10">
       <Breadcrumb className="mb-4">
         <BreadcrumbList>
@@ -684,6 +687,7 @@ export default function SpecialistProfile() {
 
       {/* Botón fijo "Agendar cita" + Bottom Sheet (móvil) */}
       <MobileBookingBar specialist={specialist} offices={offices} services={services} insurers={resolvedInsurers} />
+    </div>
     </div>
   );
 }

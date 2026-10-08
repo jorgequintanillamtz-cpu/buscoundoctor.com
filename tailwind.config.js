@@ -4,6 +4,9 @@ const brand = {
 	blue: '#2F6FED',
 	blueLight: '#EAF2FF',
 	bluePale: '#DCE9FF',
+	// Fondo de la página del perfil (un poco más marcado que el fondo general) y borde de sus tarjetas.
+	canvas: '#F0F3F8',
+	canvasBorder: '#DFE5EE',
 	// Verde Augusta (el del Masters): encabezado y selecciones de la tarjeta "Agendar cita".
 	augusta: '#006747',
 	augustaDark: '#00432E',
@@ -23,6 +26,10 @@ module.exports = {
   			14: '14',
   			15: '15',
   			16: '16',
+  		},
+  		boxShadow: {
+  			// Sombra suave de las tarjetas del perfil.
+  			card: '0 1px 3px rgba(11, 30, 77, 0.07)',
   		},
   		fontFamily: {
   			heading: ['var(--font-heading)'],

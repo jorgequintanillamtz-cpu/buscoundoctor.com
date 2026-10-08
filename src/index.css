@@ -114,3 +114,12 @@
   border-radius: inherit;
   background: conic-gradient(from 0deg, #34d3ff, #5b7cfa, #a86bff, #ff5fa8, #ff9f5a, #ffe169, #34d3ff);
 }
+/* Página del perfil del médico: el fondo es un gris frío un poco más marcado que el general
+   (bg-brand-canvas) y sus secciones, que son tarjetas blancas (bg-card + rounded-3xl), se despegan
+   de él con un borde más visible y una sombra suave. Va aquí, con alcance solo a .profile-surface,
+   para no repetir esas clases en cada sección ni cambiar las tarjetas del resto del sitio. La tarjeta
+   "Agendar cita" ya trae su propia sombra (shadow-lg) y se respeta. */
+.profile-surface .bg-card.rounded-3xl:not(.shadow-lg) {
+  border-color: theme('colors.brand.canvasBorder');
+  box-shadow: theme('boxShadow.card');
+}
