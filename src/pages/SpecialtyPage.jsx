@@ -38,7 +38,6 @@ export default function SpecialtyPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const [filterModality, setFilterModality] = useState("");
-  const [filterPrice, setFilterPrice] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [subspecialties, setSubspecialties] = useState([]);
   const [faqs, setFaqs] = useState([]);
@@ -144,7 +143,6 @@ export default function SpecialtyPage() {
     if (!specialty || !cityName) return [];
     let result = specialists.filter((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
     if (filterModality) result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
-    if (filterPrice) result = result.filter((s) => s.price_range === filterPrice);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -155,7 +153,7 @@ export default function SpecialtyPage() {
       );
     }
     return rankSpecialists(result);
-  }, [specialty, specialists, cityName, filterModality, filterPrice, searchQuery]);
+  }, [specialty, specialists, cityName, filterModality, searchQuery]);
 
   // Especialidades con muchas enfermedades cargadas (ej. Cardiología con 30+)
   // saturaban la página con una pared de pills. Ahora se muestran primero
@@ -171,8 +169,8 @@ export default function SpecialtyPage() {
   const topConditions = sortedConditions.slice(0, CONDITIONS_PREVIEW_COUNT);
   const restConditions = sortedConditions.slice(CONDITIONS_PREVIEW_COUNT);
 
-  const activeFilters = [filterModality, filterPrice].filter(Boolean).length;
-  const clearFilters = () => { setFilterModality(""); setFilterPrice(""); };
+  const activeFilters = [filterModality].filter(Boolean).length;
+  const clearFilters = () => { setFilterModality(""); };
 
   // min-h-[100dvh] (no un valor chico como 60vh) a propósito: mientras carga,
   // esta pantalla debe ocupar por lo menos toda la altura visible, para que
@@ -310,18 +308,6 @@ export default function SpecialtyPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio</label>
-                <Select value={filterPrice} onValueChange={setFilterPrice}>
-                  <SelectTrigger className="h-10 rounded-xl text-sm"><SelectValue placeholder="Todos" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="$">$ Económico</SelectItem>
-                    <SelectItem value="$$">$$ Moderado</SelectItem>
-                    <SelectItem value="$$$">$$$ Alto</SelectItem>
-                    <SelectItem value="$$$$">$$$$ Premium</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </div>
         </div>
@@ -332,11 +318,6 @@ export default function SpecialtyPage() {
               {filterModality && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
                   {filterModality}<button onClick={() => setFilterModality("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              {filterPrice && (
-                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                  {filterPrice}<button onClick={() => setFilterPrice("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
             </div>
