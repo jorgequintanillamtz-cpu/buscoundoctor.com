@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { rankSpecialists } from "@/lib/specialistRanking";
-import SearchBar from "../components/SearchBar";
+import { loadCardExtras } from "@/lib/cardExtras";
 import SpecialistCard from "../components/SpecialistCard";
 import SpecialistsMapPanel from "../components/SpecialistsMapPanel";
 import { hasGoogleMaps } from "@/lib/googleMaps";
@@ -20,6 +20,11 @@ export default function SpecialistList() {
   const [insurers, setInsurers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  // Orden de la lista (pedido de Jorge, 2026-10-09). "recomendados" es el orden de siempre
+  // (destacados, perfil más completo, quien se registró primero; ver specialistRanking.js).
+  const [sortBy, setSortBy] = useState("recomendados");
+  // Opiniones y precio de cada médico (los mismos datos de las tarjetas, en un solo lote).
+  const [extrasMap, setExtrasMap] = useState({});
 
   const urlParams = new URLSearchParams(window.location.search);
   const [filterSpecialty, setFilterSpecialty] = useState(urlParams.get("specialty") || "");
@@ -60,6 +65,15 @@ export default function SpecialistList() {
     }
     load();
   }, []);
+
+  useEffect(() => {
+    if (specialists.length === 0) return;
+    let active = true;
+    Promise.all(specialists.map((sp) => loadCardExtras(sp.id).then((e) => [sp.id, e]))).then((pairs) => {
+      if (active) setExtrasMap(Object.fromEntries(pairs));
+    });
+    return () => { active = false; };
+  }, [specialists]);
 
   useEffect(() => {
     if (!filterConditionSlug) { setConditionRecord(null); return; }
@@ -130,8 +144,37 @@ export default function SpecialistList() {
       );
     }
 
-    return rankSpecialists(result);
-  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, conditionRecord, subspecialtyRecord, searchQuery]);
+    const ranked = rankSpecialists(result);
+    if (sortBy === "recomendados") return ranked;
+    // Los que no tienen el dato (sin opiniones, sin precio, sin años) van al final y conservan el orden recomendado.
+    const num = (v) => (v == null || Number.isNaN(Number(v)) ? null : Number(v));
+    const cmp = {
+      calificados: (a, b) => {
+        const ea = extrasMap[a.id], eb = extrasMap[b.id];
+        const ra = ea?.review_count > 0 ? num(ea.review_avg) : null;
+        const rb = eb?.review_count > 0 ? num(eb.review_avg) : null;
+        if (ra == null && rb == null) return 0;
+        if (ra == null) return 1;
+        if (rb == null) return -1;
+        return rb - ra || (eb.review_count - ea.review_count);
+      },
+      experiencia: (a, b) => {
+        const ya = num(a.years_experience), yb = num(b.years_experience);
+        if (!ya && !yb) return 0;
+        if (!ya) return 1;
+        if (!yb) return -1;
+        return yb - ya;
+      },
+      precio: (a, b) => {
+        const pa = num(extrasMap[a.id]?.consult_price), pb = num(extrasMap[b.id]?.consult_price);
+        if (pa == null && pb == null) return 0;
+        if (pa == null) return 1;
+        if (pb == null) return -1;
+        return pa - pb;
+      },
+    }[sortBy];
+    return cmp ? [...ranked].sort(cmp) : ranked; // sort es estable: empates quedan en el orden recomendado
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, conditionRecord, subspecialtyRecord, searchQuery, sortBy, extrasMap]);
 
   const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, filterConditionSlug, filterSubspecialtySlug].filter(Boolean).length;
 
@@ -168,13 +211,30 @@ export default function SpecialistList() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="mb-5">
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
-          {subspecialtyRecord?.name || conditionRecord?.name || filterSpecialty || "Todos los especialistas"}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
-        </p>
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          {/* El título dice lo que se está viendo: "Cardiología en Monterrey", "Ansiedad y estrés"… */}
+          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">
+            {(subspecialtyRecord?.name || conditionRecord?.name || filterSpecialty || "Todos los especialistas") + (filterZone ? ` en ${filterZone}` : "")}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {filtered.length} especialista{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-sm text-muted-foreground">Ordenar por</span>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-10 w-[200px] rounded-xl text-sm bg-card">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recomendados">Recomendados</SelectItem>
+              <SelectItem value="calificados">Mejor calificados</SelectItem>
+              <SelectItem value="experiencia">Más experiencia</SelectItem>
+              <SelectItem value="precio">Precio: menor a mayor</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -292,10 +352,6 @@ export default function SpecialistList() {
 
         {/* Results */}
         <div className="flex-1">
-          <div className="mb-6">
-            <SearchBar placeholder="Buscar por nombre, especialidad o zona..." />
-          </div>
-
           {/* Active filter tags */}
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
@@ -341,6 +397,9 @@ export default function SpecialistList() {
                   <button onClick={() => setFilterSubspecialtySlug("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
+              <button onClick={clearFilters} className="text-xs text-muted-foreground underline hover:text-foreground px-1">
+                Limpiar todo
+              </button>
             </div>
           )}
 
