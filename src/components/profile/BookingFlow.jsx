@@ -22,7 +22,10 @@ function WhatsAppIcon({ className = "w-4 h-4" }) {
 // consultorio, ese paso se auto-completa sin pedirle nada extra al paciente.
 export default function BookingFlow({ specialist, offices = [], services = [], insurers = [], onConfirmed }) {
   const [officeId, setOfficeId] = useState(offices.length === 1 ? offices[0].id : "");
-  const [modality, setModality] = useState(specialist.modality === "online" ? "videoconsulta" : "presencial");
+  // Ya no se le pregunta al paciente (pedido de Jorge, 2026-10-08). Si el médico atiende de una sola
+  // forma, se manda ese dato solo; si atiende de las dos ("ambas"), no se manda modalidad y se
+  // acuerda por WhatsApp.
+  const modality = specialist.modality === "online" ? "videoconsulta" : specialist.modality === "presencial" ? "presencial" : undefined;
   const [serviceId, setServiceId] = useState(services.length === 1 ? services[0].id : "");
   const [isOtro, setIsOtro] = useState(services.length === 0);
   const [consultaOpen, setConsultaOpen] = useState(false);
@@ -39,7 +42,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
   const [website, setWebsite] = useState("");
 
   const showOfficeStep = offices.length > 1;
-  const showModalityStep = specialist.modality === "ambas";
 
   const office = offices.length === 1 ? offices[0] : offices.find((o) => o.id === officeId);
   const service = services.length === 1 && !isOtro ? services[0] : services.find((s) => s.id === serviceId && !isOtro);
@@ -113,7 +115,7 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
         age ? `Edad: ${age} años` : null,
         `Correo: ${email}`,
         office ? `Hospital/consultorio: ${office.name || office.address_line}` : null,
-        `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}`,
+        modality ? `Modalidad: ${modality === "videoconsulta" ? "Videoconsulta" : "Presencial"}` : null,
         service ? `Servicio: ${service.name} ($${service.price?.toLocaleString("es-MX")} MXN)` : null,
         `Fecha preferida: ${preferredDateLabel}`,
         isOtro && reason.trim() ? `Motivo de consulta: ${reason.trim()}` : null,
@@ -178,26 +180,6 @@ export default function BookingFlow({ specialist, offices = [], services = [], i
                 }`}
               >
                 {o.name || o.address_line}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {showModalityStep && (
-        <div>
-          <label className="text-sm font-medium text-foreground mb-2 block">Selecciona la modalidad</label>
-          <div className="grid grid-cols-2 gap-2">
-            {[{ v: "presencial", label: "Presencial" }, { v: "videoconsulta", label: "Videoconsulta" }].map((m) => (
-              <button
-                type="button"
-                key={m.v}
-                onClick={() => setModality(m.v)}
-                className={`px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
-                  modality === m.v ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark" : "border-border/50 hover:border-brand-augusta/40"
-                }`}
-              >
-                {m.label}
               </button>
             ))}
           </div>

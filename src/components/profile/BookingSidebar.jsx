@@ -5,8 +5,6 @@ import BookingFlow from "./BookingFlow";
 // de BookingFlow, porque es el que arma el mensaje con todo el contexto que
 // el paciente fue llenando (tipo de paciente, consulta, seguro, nombre).
 export default function BookingSidebar({ specialist, offices, services, resolvedInsurers = [] }) {
-  // Primer nombre sin el título ("Dra. Ana Pérez" → "Ana"): antes salía "con Dra.."
-  const firstName = (specialist.full_name || "").replace(/^\s*(dr\.?|dra\.?|doctora?)\s+/i, "").split(" ")[0] || "el doctor";
   return (
     // El offset ya no es un número fijo (antes top-24): usa --header-h, la
     // altura REAL del header (que varía según si el banner "¿Eres médico?"
@@ -24,9 +22,6 @@ export default function BookingSidebar({ specialist, offices, services, resolved
             la que convierte pacientes, destaque del resto de la página. */}
         <div className="bg-brand-augusta text-white px-7 sm:px-8 py-5 sm:py-6 flex-shrink-0">
           <h2 className="font-heading font-extrabold text-2xl">Agendar cita</h2>
-          <p className="text-sm text-white/80 mt-1">
-            Contacto directo y gratuito con {firstName}.
-          </p>
         </div>
 
         <div className="px-7 sm:px-8 pt-6 pb-7 sm:pb-8 overflow-y-auto">
