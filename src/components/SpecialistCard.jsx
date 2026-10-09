@@ -160,7 +160,6 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
       {showForm && (
         <AppointmentForm
           specialist={specialist}
-          initialDate={null}
           onClose={() => setShowForm(false)}
         />
       )}
