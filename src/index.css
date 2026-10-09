@@ -123,3 +123,12 @@
   border-color: theme('colors.brand.canvasBorder');
   box-shadow: theme('boxShadow.card');
 }
+
+/* En escritorio, la barra de secciones del perfil se queda fija arriba (ocupa ~7 rem con el menú):
+   las secciones a las que se salta con un ancla (#opiniones, #servicios…) dejan ese espacio para
+   que su título no quede tapado. En celular esa barra no es fija y basta el margen normal. */
+@media (min-width: 1024px) {
+  .profile-surface .scroll-mt-32 {
+    scroll-margin-top: 12rem;
+  }
+}

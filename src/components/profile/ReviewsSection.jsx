@@ -33,6 +33,13 @@ export default function ReviewsSection({ specialistId, specialist }) {
   const [sortBy, setSortBy] = useState("recientes");
   const [showForm, setShowForm] = useState(false);
 
+  // El botón "Escribir opinión" del encabezado del perfil abre este formulario (SpecialistProfile.jsx).
+  useEffect(() => {
+    const open = () => setShowForm(true);
+    window.addEventListener("open-review-form", open);
+    return () => window.removeEventListener("open-review-form", open);
+  }, []);
+
   useEffect(() => {
     let active = true;
     base44.entities.Review.filter({ specialist_id: specialistId, approved: true }, "-created_date")

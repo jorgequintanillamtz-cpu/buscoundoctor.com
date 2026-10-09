@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { base44 } from "@/api/base44Client";
-import { ChevronLeft, Star, BriefcaseMedical, Building2, MapPin, ShieldPlus, Stethoscope, Video } from "lucide-react";
+import { ChevronLeft, Star, BriefcaseMedical, Building2, ShieldPlus, Stethoscope, Video, Calendar, PenLine } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import VerifiedSeal from "../components/profile/VerifiedSeal";
@@ -32,20 +32,6 @@ function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
   if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
   el.setAttribute("content", content);
-}
-
-// Un dato de confianza del encabezado: ícono en cuadrito de color + texto (más peso visual que
-// las etiquetas grises de antes). `tone` pinta el cuadrito ("green" para la cédula verificada).
-function TrustItem({ icon: Icon, tone = "blue", className = "", children }) {
-  const toneCls = tone === "green" ? "bg-emerald-50 text-emerald-600" : "bg-brand-bluePale text-brand-blue";
-  return (
-    <li className={`flex items-center gap-2.5 ${className}`}>
-      <span className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${toneCls}`}>
-        <Icon className="w-4 h-4" aria-hidden="true" />
-      </span>
-      <span className="min-w-0">{children}</span>
-    </li>
-  );
 }
 
 function fmtLongDate(d) {
@@ -280,8 +266,47 @@ export default function SpecialistProfile() {
   const hasAbout = !!(
     specialist.description || specialist.video_url || specialist.patient_types?.length > 0 ||
     languageNames.length > 0 || specialist.gallery?.length > 0 ||
-    specialist.professional_license_number || specialist.certifications
+    specialist.certifications
   );
+
+  // Renglones de "A un vistazo" (solo los que tienen dato).
+  const glanceRows = [];
+  if (specialist.years_experience > 0) {
+    glanceRows.push({ icon: BriefcaseMedical, title: `${specialist.years_experience} años de experiencia` });
+  }
+  const placeTitle = primaryOffice?.name || primaryOffice?.address_line;
+  if (placeTitle) {
+    glanceRows.push({
+      icon: Building2,
+      title: placeTitle,
+      detail: [primaryOffice.suite, primaryOffice.name ? primaryOffice.address_line : null].filter(Boolean).join(" · "),
+    });
+  }
+  if (resolvedInsurers.length > 0) {
+    const n = resolvedInsurers.length;
+    glanceRows.push({
+      icon: ShieldPlus,
+      title: `Acepta ${n} seguro${n !== 1 ? "s" : ""} médico${n !== 1 ? "s" : ""}`,
+      detail: resolvedInsurers.slice(0, 3).map((i) => i.name).join(", ") + (n > 3 ? ` y ${n - 3} más` : ""),
+    });
+  }
+  if (MODALITY_LABELS[specialist.modality]) {
+    glanceRows.push({ icon: specialist.modality === "presencial" ? Stethoscope : Video, title: MODALITY_LABELS[specialist.modality] });
+  }
+
+  // Botones del encabezado: "Agendar cita" lleva a la tarjeta de cita (escritorio) o abre la hoja
+  // de celular; "Escribir opinión" baja a Opiniones y abre el formulario.
+  const goToBooking = () => {
+    if (window.matchMedia("(min-width: 1024px)").matches) {
+      document.getElementById("agendar-cita")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      document.getElementById("mobile-booking-trigger")?.click();
+    }
+  };
+  const openReviewForm = () => {
+    document.getElementById("opiniones")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(() => window.dispatchEvent(new Event("open-review-form")), 350);
+  };
 
   const showMobileExtras = resolvedInsurers.length > 0 || specialist.payment_methods?.length > 0 || languageNames.length > 0;
 
@@ -312,27 +337,7 @@ export default function SpecialistProfile() {
           <ChevronLeft className="w-3.5 h-3.5" />
           Especialistas
         </Link>
-        <ShareProfileButton specialist={specialist} className="!min-h-0 !py-1.5 !px-3 text-xs" />
       </div>
-
-      {/* "Perfil actualizado" usa specialist.updated_date, que hasta hace poco
-          nunca cambiaba después de crear el perfil (era la única tabla del
-          sitio sin el trigger estándar touch_updated_date() -- ver migración
-          agregada junto con esto). Con el trigger ya puesto, esta fecha sí
-          refleja la última vez que se guardó algo del perfil -- una señal de
-          confianza tanto para el paciente como para Google (contenido
-          vigente). */}
-      {((specialist.license_verification_status === "verified" && specialist.license_verified_at) || specialist.updated_date) && (
-        <p className="text-xs font-medium text-foreground/70 mb-3">
-          {[
-            specialist.license_verification_status === "verified" && specialist.license_verified_at
-              && `Última verificación: ${fmtLongDate(specialist.license_verified_at)}`,
-            specialist.updated_date && `Perfil actualizado: ${fmtLongDate(specialist.updated_date)}`,
-            specialist.license_verification_status === "verified" && specialist.license_verified_at
-              && "Verificamos manualmente cada cédula profesional",
-          ].filter(Boolean).join(" · ")}
-        </p>
-      )}
 
       {/* Nota sobre items-start: aquí NO se usa items-start a propósito. Si el
           contenedor grid alinea sus hijos a start, la celda del <aside> solo
@@ -344,10 +349,25 @@ export default function SpecialistProfile() {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_400px] gap-8">
       <div className="flex flex-col min-w-0">
 
-      {/* HERO */}
-      <div className="pb-2">
-        <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6 lg:gap-10 items-start">
-          <div className="text-center lg:text-left order-2">
+      {/* HERO (B4, elegido por Jorge 2026-10-09): tarjeta blanca con foto, nombre + sello azul
+          "Verificado", botones (Agendar cita / Escribir opinión / Compartir), el bloque de opiniones
+          en grande con una opinión escrita y "A un vistazo" (renglones ícono + dato en negrita +
+          detalle en gris). Cada renglón solo sale si hay dato. */}
+      <div className="bg-card rounded-3xl border border-border/50 p-5 sm:p-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center lg:items-start">
+          <div className="relative w-36 h-44 sm:w-40 sm:h-48 flex-shrink-0 rounded-[2rem] overflow-hidden border border-border/50 shadow-md bg-muted">
+            {specialist.profile_photo ? (
+              <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center">
+                <span className="font-heading font-bold text-4xl text-brand-navy/30">
+                  {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1 text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start gap-2.5 flex-wrap">
               <h1 className="font-heading font-extrabold text-3xl sm:text-[2.6rem] leading-[1.1] text-brand-navy">
                 {specialist.full_name}
@@ -359,88 +379,114 @@ export default function SpecialistProfile() {
             <p className="text-brand-navy/70 font-semibold text-base sm:text-lg mt-2">
               {specialtyDisplay || specialist.specialty}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
+              {specialist.zone && <> {'·'} {specialist.zone}</>}
             </p>
-            {/* Datos de confianza JUNTOS y con más peso visual (antes eran una etiqueta gris de años,
-                chips de aseguradoras y una línea de dirección sueltas): cédula verificada, años de
-                experiencia, hospital/consultorio, dirección, modalidad y seguros. "¿Acepta mi
-                seguro?" es de lo primero que decide un paciente. */}
-            {(specialist.years_experience > 0 || primaryOffice?.name || primaryOffice?.address_line || MODALITY_LABELS[specialist.modality] || resolvedInsurers.length > 0) && (
-              <div className="w-fit mx-auto lg:mx-0 mt-5 max-w-full">
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-left text-sm font-medium text-foreground/90">
-                  {specialist.years_experience > 0 && (
-                    <TrustItem icon={BriefcaseMedical}>{specialist.years_experience} años de experiencia</TrustItem>
-                  )}
-                  {primaryOffice?.name && (
-                    <TrustItem icon={Building2}>{primaryOffice.name}{primaryOffice.suite ? ` · ${primaryOffice.suite}` : ""}</TrustItem>
-                  )}
-                  {primaryOffice?.address_line && (
-                    <TrustItem icon={MapPin}>{primaryOffice.address_line}</TrustItem>
-                  )}
-                  {MODALITY_LABELS[specialist.modality] && (
-                    <TrustItem icon={specialist.modality === "presencial" ? Stethoscope : Video}>{MODALITY_LABELS[specialist.modality]}</TrustItem>
-                  )}
-                  {resolvedInsurers.length > 0 && (
-                    <TrustItem icon={ShieldPlus} className="sm:col-span-2">
-                      Acepta {resolvedInsurers.slice(0, 3).map((i) => i.name).join(", ")}
-                      {resolvedInsurers.length > 3 && ` y ${resolvedInsurers.length - 3} más`}
-                    </TrustItem>
-                  )}
-                </ul>
-              </div>
+            {/* Número de cédula (a petición de Jorge, 2026-10-09; Doctoralia también lo muestra). Si la
+                cédula ya está verificada se muestra tal cual (junto al sello azul); si aún no, dice
+                "en verificación" para no afirmar algo que no se ha comprobado; si fue rechazada, no se
+                muestra. */}
+            {specialist.professional_license_number && specialist.license_verification_status !== "rejected" && (
+              <p className="text-sm text-muted-foreground mt-1.5">
+                Cédula profesional: <span className="font-medium text-foreground">{specialist.professional_license_number}</span>
+                {specialist.license_verification_status !== "verified" && <span> · en verificación</span>}
+              </p>
             )}
 
-            {allReviews.length > 0 && (
-              <div className="mt-4 min-h-[92px] bg-card border border-border/50 rounded-2xl px-5 py-4 max-w-xl mx-auto lg:mx-0">
-                <div className="flex items-start gap-4">
-                  <div className="flex flex-col items-center flex-shrink-0 pr-4 border-r border-border/50">
-                    <span className="font-heading font-extrabold text-3xl text-foreground leading-none">{avgRating.toFixed(2)}</span>
-                    <div className="flex gap-0.5 mt-2">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className={`w-3.5 h-3.5 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    {featuredReview ? (
-                      <>
-                        <p className="text-sm text-foreground/80 italic leading-relaxed line-clamp-2">
-                          “{featuredReview.comment}”
-                        </p>
-                        <div className="flex items-center justify-between gap-3 mt-2 flex-wrap">
-                          <span className="text-xs text-muted-foreground">
-                            {featuredReview.patient_name} · {new Date(featuredReview.created_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
-                          </span>
-                          <a href="#opiniones" className="text-xs font-semibold text-brand-blue hover:underline whitespace-nowrap">
-                            Ver las {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} →
-                          </a>
-                        </div>
-                      </>
-                    ) : (
-                      <a href="#opiniones" className="text-xs font-semibold text-brand-blue hover:underline">
-                        Ver las {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} →
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </div>
-
-          <div className="relative flex justify-center order-1">
-            <div className="relative w-36 h-44 sm:w-48 sm:h-56 rounded-[2rem] overflow-hidden border border-border/50 shadow-md bg-muted">
-              {specialist.profile_photo ? (
-                <img src={specialist.profile_photo} alt={`Foto de perfil de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <span className="font-heading font-bold text-4xl text-brand-navy/30">
-                    {specialist.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                  </span>
-                </div>
-              )}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 mt-5">
+              <button
+                type="button"
+                onClick={goToBooking}
+                className="hidden lg:inline-flex items-center gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white text-sm font-semibold px-5 min-h-[44px] rounded-xl transition-colors"
+              >
+                <Calendar className="w-4 h-4" /> Agendar cita
+              </button>
+              <button
+                type="button"
+                onClick={openReviewForm}
+                className="inline-flex items-center gap-2 bg-card border border-border hover:border-brand-blue/40 text-foreground text-sm font-medium px-4 min-h-[44px] rounded-xl transition-colors"
+              >
+                <PenLine className="w-4 h-4" /> Escribir opinión
+              </button>
+              <ShareProfileButton specialist={specialist} className="!rounded-xl !px-4" />
             </div>
           </div>
         </div>
+
+        {/* Celular: solo estrellas y número en chico (pedido de Jorge, 2026-10-09); el bloque grande
+            con la opinión escrita queda para pantallas desde "sm". */}
+        {allReviews.length > 0 && (
+          <a href="#opiniones" className="sm:hidden mt-5 flex items-center justify-center gap-2 text-sm">
+            <span className="font-heading font-extrabold text-lg text-foreground leading-none">{avgRating.toFixed(1)}</span>
+            <span className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star key={s} className={`w-4 h-4 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+              ))}
+            </span>
+            <span className="text-muted-foreground">· {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""}</span>
+          </a>
+        )}
+
+        {allReviews.length > 0 && (
+          <div className="hidden sm:flex mt-6 rounded-2xl bg-muted/50 border border-border/50 px-5 py-4 sm:px-6 sm:py-5 flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <div className="flex items-center justify-center sm:justify-start gap-4 flex-shrink-0">
+              <span className="font-heading font-extrabold text-5xl text-foreground leading-none">{avgRating.toFixed(1)}</span>
+              <div>
+                <div className="flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className={`w-4 h-4 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""}</p>
+              </div>
+            </div>
+            <div className="min-w-0 flex-1 sm:border-l sm:border-border/60 sm:pl-6">
+              {featuredReview && (
+                <>
+                  <p className="text-base text-foreground/85 italic leading-relaxed line-clamp-3">“{featuredReview.comment}”</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {featuredReview.patient_name} · {new Date(featuredReview.created_date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                </>
+              )}
+              <a href="#opiniones" className="inline-block text-sm font-semibold text-brand-blue hover:underline mt-2">
+                Ver las {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} →
+              </a>
+            </div>
+          </div>
+        )}
+
+        {glanceRows.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-border/50">
+            <h2 className="font-heading font-semibold text-base text-foreground mb-4">A un vistazo</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+              {glanceRows.map((r) => (
+                <div key={r.title} className="flex items-start gap-3">
+                  <span className="w-8 h-8 rounded-lg bg-brand-bluePale text-brand-blue flex items-center justify-center flex-shrink-0">
+                    <r.icon className="w-4 h-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground leading-snug">{r.title}</p>
+                    {r.detail && <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{r.detail}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* "Perfil actualizado" usa specialist.updated_date (trigger specialist_touch): señal de
+            contenido vigente para el paciente y para Google. */}
+        {((specialist.license_verification_status === "verified" && specialist.license_verified_at) || specialist.updated_date) && (
+          <p className="text-xs text-muted-foreground mt-6">
+            {[
+              specialist.license_verification_status === "verified" && specialist.license_verified_at
+                && `Última verificación: ${fmtLongDate(specialist.license_verified_at)}`,
+              specialist.updated_date && `Perfil actualizado: ${fmtLongDate(specialist.updated_date)}`,
+              specialist.license_verification_status === "verified" && specialist.license_verified_at
+                && "Verificamos manualmente cada cédula profesional",
+            ].filter(Boolean).join(" · ")}
+          </p>
+        )}
       </div>
 
       {/* Nav sticky con scroll-spy (escritorio) */}
@@ -499,11 +545,8 @@ export default function SpecialistProfile() {
                 <video src={specialist.video_url} controls className="w-full rounded-2xl max-h-64 bg-black" playsInline />
               </div>
             )}
-            {(specialist.professional_license_number || specialist.certifications) && (
+            {specialist.certifications && (
               <div className="mt-5 pt-5 border-t border-border/50 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
-                {specialist.professional_license_number && (
-                  <span><strong className="text-foreground font-medium">Cédula profesional:</strong> {specialist.professional_license_number}</span>
-                )}
                 {specialist.certifications && (
                   <span><strong className="text-foreground font-medium">Cédula de especialidad / certificaciones:</strong> {specialist.certifications}</span>
                 )}
