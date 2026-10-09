@@ -30,7 +30,6 @@ export default function SpecialistList() {
   const [filterSpecialty, setFilterSpecialty] = useState(urlParams.get("specialty") || "");
   const [filterZone, setFilterZone] = useState(urlParams.get("zone") || "");
   const [filterModality, setFilterModality] = useState("");
-  const [filterPrice, setFilterPrice] = useState("");
   const [filterInsurer, setFilterInsurer] = useState("");
   const [searchQuery, setSearchQuery] = useState(urlParams.get("q") || "");
   // Filtro por enfermedad (?condition=slug): llega desde el buscador cuando
@@ -120,9 +119,6 @@ export default function SpecialistList() {
     if (filterModality) {
       result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
     }
-    if (filterPrice) {
-      result = result.filter((s) => s.price_range === filterPrice);
-    }
     if (filterInsurer) {
       result = result.filter((s) => (s.insurers_relation || []).includes(filterInsurer));
     }
@@ -174,15 +170,14 @@ export default function SpecialistList() {
       },
     }[sortBy];
     return cmp ? [...ranked].sort(cmp) : ranked; // sort es estable: empates quedan en el orden recomendado
-  }, [specialists, filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, conditionRecord, subspecialtyRecord, searchQuery, sortBy, extrasMap]);
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterInsurer, conditionRecord, subspecialtyRecord, searchQuery, sortBy, extrasMap]);
 
-  const activeFilters = [filterSpecialty, filterZone, filterModality, filterPrice, filterInsurer, filterConditionSlug, filterSubspecialtySlug].filter(Boolean).length;
+  const activeFilters = [filterSpecialty, filterZone, filterModality, filterInsurer, filterConditionSlug, filterSubspecialtySlug].filter(Boolean).length;
 
   const clearFilters = () => {
     setFilterSpecialty("");
     setFilterZone("");
     setFilterModality("");
-    setFilterPrice("");
     setFilterInsurer("");
     setFilterConditionSlug("");
     setFilterSubspecialtySlug("");
@@ -319,21 +314,6 @@ export default function SpecialistList() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Precio</label>
-                <Select value={filterPrice} onValueChange={setFilterPrice}>
-                  <SelectTrigger className="h-10 rounded-xl text-sm">
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="$">$ Económico</SelectItem>
-                    <SelectItem value="$$">$$ Moderado</SelectItem>
-                    <SelectItem value="$$$">$$$ Alto</SelectItem>
-                    <SelectItem value="$$$$">$$$$ Premium</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Aseguradora</label>
                 <Select value={filterInsurer} onValueChange={setFilterInsurer}>
                   <SelectTrigger className="h-10 rounded-xl text-sm">
@@ -371,12 +351,6 @@ export default function SpecialistList() {
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
                   {filterModality}
                   <button onClick={() => setFilterModality("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
-                </span>
-              )}
-              {filterPrice && (
-                <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
-                  {filterPrice}
-                  <button onClick={() => setFilterPrice("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
                 </span>
               )}
               {filterInsurer && (
