@@ -449,6 +449,7 @@ const FUNCTION_MAP = {
   revokeClaimLink: ({ specialist_id } = {}) => supabase.rpc('revoke_claim_link', { p_specialist_id: specialist_id }),
   getClaimPreview: ({ token } = {}) => supabase.rpc('get_claim_preview', { p_token: token }),
   claimProfile: ({ token, cedula } = {}) => supabase.rpc('claim_profile', { p_token: token, p_cedula: cedula || null }),
+  getCardExtras: ({ ids } = {}) => supabase.rpc('get_card_extras', { p_ids: ids }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>

@@ -1,48 +1,44 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, ChevronRight } from "lucide-react";
+import { Banknote, Building2, BriefcaseMedical, ShieldPlus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppointmentForm from "./AppointmentForm";
 import VerifiedSeal from "./profile/VerifiedSeal";
 import { trackDoctorImpression } from "@/utils/trackDoctorStats";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
-import { base44 } from "@/api/base44Client";
 import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
+import { loadCardExtras, loadInsurerMap } from "@/lib/cardExtras";
+import { genderSpecialty } from "@/lib/profileMeta";
 
-const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-
-function getNext8Days() {
-  return Array.from({ length: 8 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return d;
-  });
-}
+// Tarjeta de médico del listado (la única que hay; CLAUDE.md §8q). Diseño "opción 2" elegido por
+// Jorge el 2026-10-09: datos de confianza al frente (hospital, años de experiencia, seguros, precio
+// de la consulta), calificación y número de opiniones reales, y dos botones: "Ver perfil" y
+// "Agendar cita" (verde). Se quitaron las fechas de la derecha: daban a entender que había
+// disponibilidad y solo abrían una solicitud. Cada dato solo sale si existe.
 
 export default function SpecialistCard({ specialist, priority = false, sourcePage = "otro" }) {
   const specialtyDisplay = useSpecialtyDisplay(specialist.specialty);
   const [showForm, setShowForm] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [firstConsult, setFirstConsult] = useState(null);
+  const [extras, setExtras] = useState(null);
+  const [insurerNames, setInsurerNames] = useState([]);
   const cardRef = useRef(null);
 
   useEffect(() => {
     if (!specialist?.id) return;
     let active = true;
-    base44.entities.SpecialistService.filter({ specialist_id: specialist.id })
-      .then((services) => {
-        if (!active || services.length === 0) return;
-        const match = services.find((s) => (s.name || "").trim().toLowerCase() === "consulta por primera vez");
-        if (match) {
-          setFirstConsult({ name: match.name, price: match.price });
-        } else {
-          const cheapest = services.reduce((min, s) => (s.price < (min?.price ?? Infinity) ? s : min), null);
-          if (cheapest) setFirstConsult({ name: cheapest.name, price: cheapest.price });
-        }
-      })
-      .catch(() => {});
+    loadCardExtras(specialist.id).then((e) => { if (active) setExtras(e); });
     return () => { active = false; };
   }, [specialist?.id]);
+
+  useEffect(() => {
+    const ids = specialist?.insurers_relation || [];
+    if (ids.length === 0) { setInsurerNames([]); return; }
+    let active = true;
+    loadInsurerMap().then((map) => {
+      if (active) setInsurerNames(ids.map((id) => map.get(id)).filter(Boolean));
+    });
+    return () => { active = false; };
+  }, [specialist?.insurers_relation]);
 
   useEffect(() => {
     if (!specialist?.id) return;
@@ -58,121 +54,114 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
     return () => observer.disconnect();
   }, [specialist?.id]);
 
-  const handleDateClick = (e, date) => {
-    e.preventDefault();
-    setSelectedDate(date.toISOString().split('T')[0]);
-    setShowForm(true);
-  };
+  const specialtyName = genderSpecialty(specialtyDisplay, specialist.full_name);
+  const reviewCount = extras?.review_count || 0;
+  const reviewAvg = extras?.review_avg != null ? Number(extras.review_avg) : null;
+  const price = extras?.consult_price != null ? Number(extras.consult_price) : null;
+  const n = insurerNames.length;
+
+  const facts = [];
+  if (extras?.office_name) facts.push({ icon: Building2, text: extras.office_name });
+  if (specialist.years_experience > 0) facts.push({ icon: BriefcaseMedical, text: `${specialist.years_experience} años de experiencia` });
+  if (n > 0) facts.push({ icon: ShieldPlus, text: `Acepta ${insurerNames.slice(0, 2).join(", ")}${n > 2 ? ` y ${n - 2} más` : ""}` });
+  if (price) facts.push({ icon: Banknote, text: `Consulta desde $${price.toLocaleString("es-MX")}` });
+
+  const factsList = (cls) => facts.length > 0 && (
+    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 ${cls}`}>
+      {facts.map((f) => (
+        <div key={f.text} className="flex items-center gap-2 text-sm text-foreground min-w-0">
+          <span className="w-6 h-6 rounded-md bg-brand-bluePale text-brand-blue flex items-center justify-center flex-shrink-0">
+            <f.icon className="w-3.5 h-3.5" aria-hidden="true" />
+          </span>
+          <span className="truncate">{f.text}</span>
+        </div>
+      ))}
+    </div>
+  );
+
+  const stars = (avg, cls) => (
+    <span className={`text-amber-400 tracking-tight ${cls}`} aria-hidden="true">
+      {"★".repeat(Math.round(avg))}{"☆".repeat(5 - Math.round(avg))}
+    </span>
+  );
+
   return (
     <>
-      <div ref={cardRef} className="group flex bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden">
-        {/* Left: main card info (clickable) */}
+      <div ref={cardRef} className="group bg-card rounded-2xl border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 overflow-hidden">
         <Link
           to={`/especialista/${specialist.slug}`}
-          className="flex-1 block p-5 sm:p-6"
+          className="block p-5 sm:p-6"
           onClick={() => trackDoctorClick(specialist, sourcePage)}
         >
-          <div className="flex gap-4">
-            <div className="w-24 h-24 sm:w-20 sm:h-20 rounded-2xl bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+          <div className="flex gap-4 sm:gap-5">
+            <div className="w-24 h-28 sm:w-[104px] sm:h-[120px] rounded-[1.4rem] bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist.profile_photo ? (
-                <img src={specialist.profile_photo} alt={specialist.full_name} loading={priority ? "eager" : "lazy"} className="w-full h-full object-cover" />
+                <img src={specialist.profile_photo} alt={specialist.full_name} loading={priority ? "eager" : "lazy"} className="w-full h-full object-cover object-top" />
               ) : (
-                <span className="font-heading font-bold text-xl text-primary">
-                  {specialist.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                <span className="font-heading font-bold text-2xl text-primary">
+                  {specialist.full_name?.split(" ").map((p) => p[0]).join("").slice(0, 2)}
                 </span>
               )}
             </div>
+
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                  {specialist.full_name}
-                </h3>
-                {specialist.license_verification_status === "verified" && (
-                  <VerifiedSeal size="sm" className="flex-shrink-0" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-heading font-semibold text-lg leading-snug text-foreground group-hover:text-primary transition-colors">
+                    {specialist.full_name}
+                    {specialist.license_verification_status === "verified" && (
+                      <span className="inline-block align-middle ml-2"><VerifiedSeal size="sm" /></span>
+                    )}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {specialtyName}
+                    {specialist.subspecialty && <> {"·"} {specialist.subspecialty}</>}
+                    {(specialist.zone || specialist.location) && <> {"·"} {specialist.zone || specialist.location}</>}
+                  </p>
+                  {reviewCount > 0 && reviewAvg != null && (
+                    <p className="sm:hidden text-xs mt-1.5 flex items-center gap-1.5">
+                      {stars(reviewAvg, "text-sm")}
+                      <span className="font-semibold text-foreground">{reviewAvg.toFixed(1)}</span>
+                      <span className="text-muted-foreground">({reviewCount})</span>
+                    </p>
+                  )}
+                </div>
+                {reviewCount > 0 && reviewAvg != null && (
+                  <div className="hidden sm:block text-right flex-shrink-0">
+                    <p className="font-heading font-bold text-xl text-foreground leading-none">{reviewAvg.toFixed(1)}</p>
+                    {stars(reviewAvg, "text-xs")}
+                    <p className="text-xs text-muted-foreground">{reviewCount} opinión{reviewCount !== 1 ? "es" : ""}</p>
+                  </div>
                 )}
               </div>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
-                <span className="text-xs font-medium text-primary bg-accent px-2 py-0.5 rounded-full">
-                  {specialtyDisplay}
-                </span>
-                {specialist.subspecialty && (
-                  <span className="text-xs text-muted-foreground">· {specialist.subspecialty}</span>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {specialist.zone || specialist.location}
-                </span>
-                {specialist.rating != null && (
-                  <span className="flex items-center gap-1 text-amber-500 font-medium">
-                    {'★'.repeat(Math.round(specialist.rating))}{'☆'.repeat(5 - Math.round(specialist.rating))}
-                    <span className="text-muted-foreground font-normal">{specialist.rating.toFixed(1)}</span>
-                  </span>
-                )}
-              </div>
+
+              {/* Escritorio: los datos van junto a la foto; en celular, debajo y a todo el ancho */}
+              <div className="hidden sm:block">{factsList("mt-3.5")}</div>
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {specialist.modality && (
-                <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full capitalize">
-                  {specialist.modality}
-                </span>
-              )}
-              {firstConsult && (
-                <span className="text-xs text-muted-foreground">
-                  {firstConsult.name}: <span className="font-medium text-foreground">${firstConsult.price.toLocaleString("es-MX")} MXN</span>
-                </span>
-              )}
-            </div>
+
+          <div className="sm:hidden">{factsList("mt-4")}</div>
+
+          <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-end gap-2.5">
+            <span className="inline-flex items-center justify-center flex-1 sm:flex-none min-h-[44px] px-4 rounded-xl border border-border bg-card text-sm font-medium text-foreground group-hover:border-primary/40 transition-colors">
+              Ver perfil
+            </span>
             <Button
               size="sm"
-              variant="ghost"
-              className="min-h-[44px] bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 lg:hidden"
-              onClick={(e) => { e.preventDefault(); setSelectedDate(null); setShowForm(true); }}
+              className="flex-1 sm:flex-none min-h-[44px] px-5 rounded-xl gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white text-sm font-semibold"
+              onClick={(e) => { e.preventDefault(); setShowForm(true); }}
             >
-              Agendar cita <ChevronRight className="w-3.5 h-3.5" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="min-h-[44px] bg-accent text-accent-foreground text-xs gap-1 hover:bg-accent/80 hidden lg:inline-flex"
-              onClick={(e) => { e.preventDefault(); setSelectedDate(null); setShowForm(true); }}
-            >
-              Agendar cita <ChevronRight className="w-3.5 h-3.5" />
+              <Calendar className="w-4 h-4" /> Agendar cita
             </Button>
           </div>
         </Link>
-
-        {/* Right: date picker (desktop only) */}
-        <div className="hidden lg:flex flex-col justify-center border-l border-border/50 p-5 w-52 flex-shrink-0">
-          <p className="text-xs font-heading font-semibold text-foreground mb-0.5">Selecciona una fecha</p>
-          <p className="text-xs text-muted-foreground mb-3">para agendar tu cita</p>
-          <div className="grid grid-cols-4 gap-1.5">
-            {getNext8Days().map((date, i) => (
-              <button
-                key={i}
-                onClick={(e) => handleDateClick(e, date)}
-                className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl border border-border/50 hover:border-primary hover:bg-accent transition-all text-center"
-              >
-                <span className="text-[10px] text-muted-foreground font-medium leading-tight">
-                  {i === 0 ? 'Hoy' : DAYS[date.getDay()]}
-                </span>
-                <span className="text-xs font-heading font-bold text-foreground">
-                  {date.getDate()}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       {showForm && (
         <AppointmentForm
           specialist={specialist}
-          initialDate={selectedDate}
-          onClose={() => { setShowForm(false); setSelectedDate(null); }}
+          initialDate={null}
+          onClose={() => setShowForm(false)}
         />
       )}
     </>

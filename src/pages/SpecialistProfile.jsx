@@ -24,7 +24,7 @@ import BookingSidebar from "../components/profile/BookingSidebar";
 import MobileBookingBar from "../components/profile/MobileBookingBar";
 import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
-import { buildProfileMetaText } from "@/lib/profileMeta";
+import { buildProfileMetaText, genderSpecialty } from "@/lib/profileMeta";
 import { PATIENT_TYPE_LABELS } from "@/lib/patientTypes";
 import LoadingLogo from "@/components/LoadingLogo";
 
@@ -377,7 +377,7 @@ export default function SpecialistProfile() {
               )}
             </div>
             <p className="text-brand-navy/70 font-semibold text-base sm:text-lg mt-2">
-              {specialtyDisplay || specialist.specialty}
+              {genderSpecialty(specialtyDisplay || specialist.specialty, specialist.full_name)}
               {specialist.subspecialty && <> {'·'} {specialist.subspecialty}</>}
               {specialist.zone && <> {'·'} {specialist.zone}</>}
             </p>
