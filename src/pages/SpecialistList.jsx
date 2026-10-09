@@ -8,6 +8,7 @@ import { rankSpecialists } from "@/lib/specialistRanking";
 import SearchBar from "../components/SearchBar";
 import SpecialistCard from "../components/SpecialistCard";
 import SpecialistsMapPanel from "../components/SpecialistsMapPanel";
+import { hasGoogleMaps } from "@/lib/googleMaps";
 import { Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import LoadingLogo from "@/components/LoadingLogo";
@@ -359,12 +360,16 @@ export default function SpecialistList() {
           )}
         </div>
 
-        {/* Mapa lateral (solo escritorio grande) con los especialistas visibles */}
-        <div className="hidden xl:block xl:w-[380px] flex-shrink-0">
-          <div className="sticky top-20">
-            <SpecialistsMapPanel specialists={filtered} />
+        {/* Mapa lateral (solo escritorio grande) con los especialistas visibles. Solo se reserva la
+            columna si hay llave de Google Maps: sin ella (hoy en producción) el panel no dibujaba
+            nada pero la columna de 380 px seguía ahí, vacía, y la lista quedaba en ~550 px. */}
+        {hasGoogleMaps && (
+          <div className="hidden xl:block xl:w-[380px] flex-shrink-0">
+            <div className="sticky top-20">
+              <SpecialistsMapPanel specialists={filtered} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
