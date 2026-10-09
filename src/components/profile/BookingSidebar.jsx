@@ -15,6 +15,7 @@ export default function BookingSidebar({ specialist, offices, services, resolved
     // no pasarse del espacio real disponible debajo del header.
     <div className="sticky" style={{ top: "calc(var(--header-h, 6rem) + 1rem)" }}>
       <div
+        id="agendar-cita"
         className="bg-card rounded-3xl border border-border/50 shadow-lg flex flex-col overflow-hidden"
         style={{ maxHeight: "calc(100vh - var(--header-h, 6rem) - 2rem)" }}
       >
