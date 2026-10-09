@@ -1,89 +1,49 @@
-import { useState } from "react";
-import { toast } from "sonner";
-import { formErrorMessage } from "@/lib/formErrors";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { X, MessageCircle, Star, ShieldCheck, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { trackDoctorContact } from "@/utils/trackDoctorStats";
 import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
+import { genderSpecialty } from "@/lib/profileMeta";
+import BookingFlow from "@/components/profile/BookingFlow";
+import VerifiedSeal from "@/components/profile/VerifiedSeal";
+import LoadingLogo from "@/components/LoadingLogo";
 
-const TIME_SLOTS = ["09:00", "10:30", "12:00", "16:00", "17:30"];
-
-function getNext7Days() {
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    days.push(d);
-  }
-  return days;
-}
-
-function formatDateValue(date) {
-  return date.toISOString().split("T")[0];
-}
-
-function formatDayLabel(date) {
-  if (date.toDateString() === new Date().toDateString()) return "Hoy";
-  return date.toLocaleDateString("es-MX", { weekday: "short" }).replace(".", "");
-}
-
-export default function AppointmentForm({ specialist, onClose, initialDate = "" }) {
+// Ventana de "Agendar cita" que se abre desde la tarjeta del listado. Es el MISMO formulario que la
+// tarjeta "Agendar cita" del perfil (BookingFlow): así el paciente ve lo mismo desde cualquier lado y
+// el doctor recibe siempre los mismos datos. Antes era un formulario aparte con foto grande, horarios
+// inventados y otros campos. BookingFlow decide su estado inicial con los consultorios y servicios que
+// recibe, por eso solo se dibuja cuando ya se cargaron.
+export default function AppointmentForm({ specialist, onClose }) {
+  useBodyScrollLock(true);
   const specialtyDisplay = useSpecialtyDisplay(specialist.specialty);
-  const [form, setForm] = useState({
-    patient_name: "",
-    phone: "",
-    reason: "",
-    preferred_date: initialDate,
-    preferred_time: "",
-    comments: "",
-  });
-  // Honeypot: campo invisible para humanos (oculto con CSS, no con "display:none"
-  // ni "type=hidden" para que los bots simples que sí leen esos atributos lo
-  // detecten igual). Si llega lleno, es casi seguro un bot: se corta en
-  // silencio sin avisarle que fue detectado.
-  const [website, setWebsite] = useState("");
+  const [data, setData] = useState(null);
 
-  const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (website) { onClose(); return; }
-
-    // Save the appointment request
-    try {
-      await base44.entities.AppointmentRequest.create({
-        ...form,
-        specialty: specialist.specialty,
-        city: specialist.zone || specialist.location,
-        specialist_id: specialist.id,
-        specialist_name: specialist.full_name,
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [offices, services, insurers] = await Promise.all([
+        base44.entities.Office.filter({ specialist_id: specialist.id }).catch(() => []),
+        base44.entities.SpecialistService.filter({ specialist_id: specialist.id }).catch(() => []),
+        base44.entities.Insurer.list("name", 300).catch(() => []),
+      ]);
+      if (cancelled) return;
+      const accepted = (specialist.insurers_relation || [])
+        .map((id) => insurers.find((i) => i.id === id))
+        .filter(Boolean);
+      setData({
+        offices,
+        services: [...services].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)),
+        insurers: accepted,
       });
-    } catch (err) {
-      toast.error(formErrorMessage(err, "No se pudo enviar tu solicitud. Intenta de nuevo."));
-      return;
-    }
-    trackDoctorContact(specialist);
+    })();
+    return () => { cancelled = true; };
+  }, [specialist.id, specialist.insurers_relation]);
 
-    // Build WhatsApp message
-    const message = `Hola, me gustaría solicitar una cita.
-
-Nombre: ${form.patient_name}
-Teléfono: ${form.phone}
-Motivo de consulta: ${form.reason}
-Fecha preferencial: ${form.preferred_date}
-Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${form.comments}` : ""}`;
-
-    // Open WhatsApp
-    window.open(
-      `https://wa.me/${specialist.whatsapp}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-
-    onClose();
-  };
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const initials = (specialist.full_name || "")
     .split(" ")
@@ -91,181 +51,68 @@ Hora preferencial: ${form.preferred_time}${form.comments ? `\nComentarios: ${for
     .join("")
     .slice(0, 2);
 
+  const license = specialist.professional_license_number;
+  const licenseStatus = specialist.license_verification_status;
+  const showLicense = license && licenseStatus !== "rejected";
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-card rounded-t-3xl sm:rounded-3xl border border-border/50 shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* Foto de portada del médico */}
-        <div className="relative w-full h-44 sm:h-52 rounded-t-3xl overflow-hidden flex-shrink-0">
-          {specialist.profile_photo ? (
-            <img src={specialist.profile_photo} alt={`Foto de ${specialist.full_name}`} loading="lazy" className="w-full h-full object-cover object-top" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent flex items-center justify-center">
-              <span className="font-heading font-bold text-4xl text-primary/40">{initials}</span>
-            </div>
-          )}
-
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Agendar cita con ${specialist.full_name}`}
+        className="relative w-full max-w-lg bg-card rounded-t-3xl sm:rounded-3xl border border-border/50 shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
+      >
+        <div className="bg-brand-augusta text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <h2 className="font-heading font-extrabold text-xl">Agendar cita</h2>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="absolute right-3 top-3 p-2 rounded-full bg-white/90 backdrop-blur shadow-sm hover:bg-white transition-colors"
+            className="p-1.5 -mr-1.5 rounded-full hover:bg-white/15 transition-colors"
           >
-            <X className="w-4 h-4 text-brand-navy" />
+            <X className="w-5 h-5" />
           </button>
-
-          {specialist.rating != null && (
-            <span className="absolute left-3 top-3 flex items-center gap-1 bg-white/90 backdrop-blur text-brand-navy text-xs font-bold px-2.5 py-1.5 rounded-full shadow-sm">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              {specialist.rating.toFixed(1)} rating
-            </span>
-          )}
         </div>
 
-        {/* Nombre, especialidad y datos rápidos */}
-        <div className="sticky top-0 bg-card/95 backdrop-blur-lg z-10 p-5 border-b border-border/50">
-          <h2 className="font-heading font-bold text-lg text-foreground">{specialist.full_name}</h2>
-          <p className="text-sm text-muted-foreground">{specialtyDisplay}</p>
-
-          {/* Datos rápidos */}
-          {(specialist.license_verification_status === "verified" || specialist.years_experience) && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {specialist.license_verification_status === "verified" && (
-                <span className="flex items-center gap-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Cédula verificada
-                </span>
-              )}
-              {specialist.years_experience && (
-                <span className="flex items-center gap-1.5 text-xs font-medium bg-brand-bluePale text-brand-navy rounded-full px-3 py-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  {specialist.years_experience} años de experiencia
-                </span>
-              )}
-              <span className="flex items-center gap-1.5 text-xs font-medium bg-accent text-accent-foreground rounded-full px-3 py-1.5">
-                <MessageCircle className="w-3.5 h-3.5" />
-                Contacto directo
-              </span>
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <input
-            type="text"
-            name="website"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            tabIndex={-1}
-            autoComplete="off"
-            aria-hidden="true"
-            style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
-          />
-          {/* Selector de fecha tipo calendario semanal */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">Selecciona una fecha</label>
-            <div className="grid grid-cols-7 gap-1.5">
-              {getNext7Days().map((date, i) => {
-                const value = formatDateValue(date);
-                const selected = form.preferred_date === value;
-                return (
-                  <button
-                    type="button"
-                    key={i}
-                    onClick={() => update("preferred_date", value)}
-                    className={`flex flex-col items-center gap-0.5 py-2 rounded-xl border text-center transition-colors ${
-                      selected
-                        ? "bg-brand-blue border-brand-blue text-white"
-                        : "border-border/50 hover:border-brand-blue/50 hover:bg-accent/30"
-                    }`}
-                  >
-                    <span className={`text-[10px] font-medium ${selected ? "text-white/80" : "text-muted-foreground"}`}>
-                      {formatDayLabel(date)}
-                    </span>
-                    <span className="text-sm font-heading font-bold">{date.getDate()}</span>
-                  </button>
-                );
-              })}
-            </div>
+        <div className="flex items-center gap-3.5 px-6 py-4 border-b border-border/50 flex-shrink-0">
+          <div className="w-14 h-16 rounded-xl overflow-hidden bg-accent flex-shrink-0 flex items-center justify-center">
+            {specialist.profile_photo ? (
+              <img src={specialist.profile_photo} alt={`Foto de ${specialist.full_name}`} className="w-full h-full object-cover object-top" />
+            ) : (
+              <span className="font-heading font-bold text-lg text-primary/50">{initials}</span>
+            )}
           </div>
-
-          {/* Selector de hora en píldoras */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">Selecciona un horario</label>
-            <div className="flex flex-wrap gap-2">
-              {TIME_SLOTS.map((slot) => {
-                const selected = form.preferred_time === slot;
-                return (
-                  <button
-                    type="button"
-                    key={slot}
-                    onClick={() => update("preferred_time", slot)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                      selected
-                        ? "bg-brand-blue border-brand-blue text-white"
-                        : "border-border/50 text-foreground hover:border-brand-blue/50 hover:bg-accent/30"
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1.5">Horarios sugeridos — confirma disponibilidad real con el médico por WhatsApp.</p>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Nombre completo *</label>
-            <Input
-              required
-              value={form.patient_name}
-              onChange={(e) => update("patient_name", e.target.value)}
-              placeholder="Tu nombre"
-              className="h-11 rounded-xl"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Teléfono *</label>
-            <Input
-              required
-              value={form.phone}
-              onChange={(e) => update("phone", e.target.value)}
-              placeholder="Tu número de teléfono"
-              className="h-11 rounded-xl"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Motivo de consulta *</label>
-            <Textarea
-              required
-              value={form.reason}
-              onChange={(e) => update("reason", e.target.value)}
-              placeholder="Describe brevemente el motivo de tu consulta"
-              className="rounded-xl min-h-[80px] resize-none"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Comentarios adicionales</label>
-            <Textarea
-              value={form.comments}
-              onChange={(e) => update("comments", e.target.value)}
-              placeholder="¿Algo más que debamos saber?"
-              className="rounded-xl min-h-[60px] resize-none"
-            />
-          </div>
-
-          <div className="pt-2">
-            <Button type="submit" size="lg" className="w-full gap-2 rounded-xl font-heading font-semibold h-12 bg-brand-blue hover:bg-brand-blue/90 text-white">
-              <MessageCircle className="w-5 h-5" />
-              Solicitar cita por WhatsApp
-            </Button>
-            <p className="text-xs text-center text-muted-foreground mt-3">
-              Se abrirá WhatsApp con un mensaje prellenado para el especialista
+          <div className="min-w-0">
+            <p className="font-heading font-bold text-base text-foreground leading-snug">
+              {specialist.full_name}
+              {licenseStatus === "verified" && <span className="inline-block align-middle ml-2"><VerifiedSeal size="sm" /></span>}
             </p>
+            <p className="text-sm text-muted-foreground">{genderSpecialty(specialtyDisplay, specialist.full_name)}</p>
+            {showLicense && (
+              <p className="text-xs text-muted-foreground">
+                Cédula profesional: {license}{licenseStatus !== "verified" ? " · en verificación" : ""}
+              </p>
+            )}
           </div>
-        </form>
+        </div>
+
+        <div className="px-6 pt-5 pb-6 overflow-y-auto overscroll-contain">
+          {data ? (
+            <BookingFlow
+              specialist={specialist}
+              offices={data.offices}
+              services={data.services}
+              insurers={data.insurers}
+            />
+          ) : (
+            <div className="py-10 flex justify-center"><LoadingLogo size="sm" /></div>
+          )}
+          <p className="text-xs text-muted-foreground border-t border-border/50 pt-4 mt-5">
+            El contacto y la solicitud de cita son gratuitos.
+          </p>
+        </div>
       </div>
     </div>
   );
