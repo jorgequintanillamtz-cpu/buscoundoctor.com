@@ -60,28 +60,34 @@ export default function ScrollSpyNav({ sections }) {
   }, [sections]);
 
   return (
-    // top-20 fijo antes: si el banner "¿Eres médico?" del header estaba
-    // visible, el header quedaba más alto que ese offset y este nav se
-    // metía parcialmente debajo (mismo bug que tenía la tarjeta de Agendar
-    // cita). Usa --header-h (medido en vivo por Header.jsx) igual que ella.
-    <nav
-      className="hidden lg:flex items-center gap-1 mt-6 mb-2 sticky z-30 bg-card rounded-3xl border border-border/50 px-3 py-2.5 text-sm overflow-x-auto"
-      style={{ top: "calc(var(--header-h, 5rem) + 0.5rem)" }}
-      aria-label="Navegación del perfil"
+    // La barra es una tarjeta con esquinas redondeadas y se queda fija al hacer scroll. Por eso va
+    // dentro de un contenedor fijo con el color del fondo de la página: sin él, el contenido de las
+    // secciones se veía pasar por el hueco de arriba y por las esquinas redondeadas (se "ponía por
+    // encima"). El contenedor llega hasta el borde inferior del menú de arriba (--header-h, medido
+    // en vivo por Header.jsx; antes un top-20 fijo se metía debajo del header cuando el banner
+    // "¿Eres médico?" estaba visible) y deja 0.5 rem de aire arriba y abajo de la tarjeta.
+    <div
+      className="hidden lg:block sticky z-30 bg-brand-canvas pt-2 pb-2 mt-4"
+      style={{ top: "var(--header-h, 5rem)" }}
     >
-      {sections.filter((s) => presentIds.has(s.id)).map((s) => (
-        <a
-          key={s.id}
-          href={`#${s.id}`}
-          className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors font-medium ${
-            active === s.id
-              ? "bg-brand-navy text-white"
-              : "text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale"
-          }`}
-        >
-          {s.label}
-        </a>
-      ))}
-    </nav>
+      <nav
+        className="flex items-center gap-1 bg-card rounded-3xl border border-border/50 px-3 py-2.5 text-sm overflow-x-auto"
+        aria-label="Navegación del perfil"
+      >
+        {sections.filter((s) => presentIds.has(s.id)).map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors font-medium ${
+              active === s.id
+                ? "bg-brand-navy text-white"
+                : "text-muted-foreground hover:text-brand-navy hover:bg-brand-bluePale"
+            }`}
+          >
+            {s.label}
+          </a>
+        ))}
+      </nav>
+    </div>
   );
 }
