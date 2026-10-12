@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/accordion";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
+import VerifiedFilter, { isVerifiedSpecialist } from "@/components/VerifiedFilter";
+import VerifiedSeal from "@/components/profile/VerifiedSeal";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -41,6 +43,7 @@ export default function SpecialtyPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const [filterModality, setFilterModality] = useState("");
+  const [onlyVerified, setOnlyVerified] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [subspecialties, setSubspecialties] = useState([]);
   const [faqs, setFaqs] = useState([]);
@@ -154,6 +157,7 @@ export default function SpecialtyPage() {
     if (!specialty || !cityName) return [];
     let result = specialists.filter((s) => s.specialty === specialty.name && (s.zone || s.location) === cityName);
     if (filterModality) result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
+    if (onlyVerified) result = result.filter(isVerifiedSpecialist);
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -164,7 +168,7 @@ export default function SpecialtyPage() {
       );
     }
     return rankSpecialists(result);
-  }, [specialty, specialists, cityName, filterModality, searchQuery]);
+  }, [specialty, specialists, cityName, filterModality, onlyVerified, searchQuery]);
 
   // Especialidades con muchas enfermedades cargadas (ej. Cardiología con 30+)
   // saturaban la página con una pared de pills. Ahora se muestran primero
@@ -180,8 +184,8 @@ export default function SpecialtyPage() {
   const topConditions = sortedConditions.slice(0, CONDITIONS_PREVIEW_COUNT);
   const restConditions = sortedConditions.slice(CONDITIONS_PREVIEW_COUNT);
 
-  const activeFilters = [filterModality].filter(Boolean).length;
-  const clearFilters = () => { setFilterModality(""); };
+  const activeFilters = [filterModality, onlyVerified].filter(Boolean).length;
+  const clearFilters = () => { setFilterModality(""); setOnlyVerified(false); };
 
   // min-h-[100dvh] (no un valor chico como 60vh) a propósito: mientras carga,
   // esta pantalla debe ocupar por lo menos toda la altura visible, para que
@@ -305,6 +309,8 @@ export default function SpecialtyPage() {
               {activeFilters > 0 && <button onClick={clearFilters} className="text-xs text-primary hover:underline">Limpiar</button>}
             </div>
             <div className="space-y-4">
+              <VerifiedFilter checked={onlyVerified} onChange={setOnlyVerified} />
+
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Buscar</label>
                 <div className="relative">
@@ -330,6 +336,12 @@ export default function SpecialtyPage() {
         <div className="flex-1">
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
+              {onlyVerified && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <VerifiedSeal size="sm" />
+                  <button onClick={() => setOnlyVerified(false)} aria-label="Quitar filtro de verificados" className="text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                </span>
+              )}
               {filterModality && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full capitalize">
                   {filterModality}<button onClick={() => setFilterModality("")} aria-label="Quitar filtro"><X className="w-3 h-3" /></button>
