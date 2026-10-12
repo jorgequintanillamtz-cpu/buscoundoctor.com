@@ -44,21 +44,23 @@ const MODALITY_LABELS = {
   ambas: "Presencial y en línea",
 };
 
+// Etiquetas cortas para que quepan en un renglón aun con el perfil completo (2026-10-11, a petición
+// de Jorge). "Formación" junta Experiencia y Estudios (van seguidos en la página); `ids` son los
+// bloques a los que apunta. El título de cada sección en la página no cambia.
 const NAV_SECTIONS = [
-  { id: "informacion", label: "Sobre el especialista" },
+  { id: "informacion", label: "Sobre mí" },
   { id: "especialidades", label: "Especialidades" },
   { id: "hospitales", label: "Hospitales" },
   { id: "servicios", label: "Servicios" },
-  { id: "experiencia", label: "Experiencia" },
-  { id: "estudios", label: "Estudios" },
-  { id: "tecnologia-tratamientos", label: "Tecnología y tratamientos" },
-  { id: "faq", label: "Preguntas frecuentes" },
+  { id: "experiencia", ids: ["experiencia", "estudios"], label: "Formación" },
+  { id: "tecnologia-tratamientos", label: "Tecnología" },
+  { id: "faq", label: "Preguntas" },
   { id: "opiniones", label: "Opiniones" },
 ];
 
 // Array estáble (fuera del componente) para no invalidar el useEffect del
 // hook usePresentSectionIds en cada render.
-const NAV_SECTION_IDS = NAV_SECTIONS.map((s) => s.id);
+const NAV_SECTION_IDS = NAV_SECTIONS.flatMap((s) => s.ids || [s.id]);
 
 const PAYMENT_LABELS = { tarjeta: "Tarjeta", transferencia: "Transferencia", efectivo: "Efectivo" };
 
@@ -496,10 +498,10 @@ export default function SpecialistProfile() {
           como enlaces ancla que hacen scroll — así todo el contenido sigue
           siempre renderizado y visible para Google (no ocultamos paneles). */}
       <nav className="order-1 lg:hidden flex items-center gap-1.5 mt-5 overflow-x-auto pb-1" aria-label="Navegación rápida del perfil">
-        {NAV_SECTIONS.filter((s) => presentSectionIds.has(s.id)).map((s) => (
+        {NAV_SECTIONS.filter((s) => (s.ids || [s.id]).some((id) => presentSectionIds.has(id))).map((s) => (
           <a
             key={s.id}
-            href={`#${s.id}`}
+            href={`#${(s.ids || [s.id]).find((id) => presentSectionIds.has(id))}`}
             className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:bg-accent hover:text-foreground transition-colors whitespace-nowrap"
           >
             {s.label}
