@@ -12,6 +12,7 @@ import { hasGoogleMaps } from "@/lib/googleMaps";
 import { Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import LoadingLogo from "@/components/LoadingLogo";
+import LoadError from "@/components/LoadError";
 
 export default function SpecialistList() {
   const [specialists, setSpecialists] = useState([]);
@@ -19,6 +20,8 @@ export default function SpecialistList() {
   const [zones, setZones] = useState([]);
   const [insurers, setInsurers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   // Orden de la lista (pedido de Jorge, 2026-10-09). "recomendados" es el orden de siempre
   // (destacados, perfil más completo, quien se registró primero; ver specialistRanking.js).
@@ -48,6 +51,17 @@ export default function SpecialistList() {
 
   useEffect(() => {
     async function load() {
+      setLoadError(false);
+      setLoading(true);
+      try {
+        await loadInner();
+      } catch (e) {
+        console.error("No se pudo cargar el listado", e);
+        setLoadError(true);
+        setLoading(false);
+      }
+    }
+    async function loadInner() {
       const [specs, specList, zoneList, insList] = await Promise.all([
         // publication_status: "published" evita que perfiles en borrador/revisión
         // (incluyendo perfiles de ejemplo internos) aparezcan en el directorio público.
@@ -63,7 +77,7 @@ export default function SpecialistList() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [reloadKey]);
 
   useEffect(() => {
     if (specialists.length === 0) return;
@@ -185,6 +199,10 @@ export default function SpecialistList() {
 
   // min-h-[100dvh]: evita que el Footer se vea antes de tiempo y brinque al
   // cargar el contenido real (mismo arreglo que Home.jsx/SpecialtyPage.jsx).
+  if (loadError) {
+    return <LoadError onRetry={() => setReloadKey((k) => k + 1)} />;
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">
