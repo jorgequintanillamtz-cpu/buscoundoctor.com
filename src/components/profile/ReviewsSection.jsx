@@ -99,7 +99,7 @@ export default function ReviewsSection({ specialistId, specialist }) {
             <div className="text-center flex-shrink-0">
               <p className="font-heading font-extrabold text-5xl text-foreground">{avg.toFixed(1)}</p>
               <div className="flex justify-center mt-1"><StarDisplay rating={Math.round(avg)} /></div>
-              <p className="text-xs text-muted-foreground mt-1">{reviews.length} opinión{reviews.length !== 1 ? "es" : ""} verificada{reviews.length !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-muted-foreground mt-1">{reviews.length} {reviews.length !== 1 ? "opiniones" : "opinión"} verificada{reviews.length !== 1 ? "s" : ""}</p>
             </div>
             <div className="flex-1 space-y-1.5 min-w-[200px]">
               {distribution.map(({ star, pct }) => (

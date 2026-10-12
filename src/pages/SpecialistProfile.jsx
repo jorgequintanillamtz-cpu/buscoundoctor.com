@@ -444,7 +444,7 @@ export default function SpecialistProfile() {
                 <Star key={s} className={`w-4 h-4 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
               ))}
             </span>
-            <span className="text-muted-foreground">· {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""}</span>
+            <span className="text-muted-foreground">· {allReviews.length} {allReviews.length !== 1 ? "opiniones" : "opinión"}</span>
           </a>
         )}
 
@@ -458,7 +458,7 @@ export default function SpecialistProfile() {
                     <Star key={s} className={`w-4 h-4 ${Math.round(avgRating) >= s ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
                   ))}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""}</p>
+                <p className="text-sm text-muted-foreground mt-1">{allReviews.length} {allReviews.length !== 1 ? "opiniones" : "opinión"}</p>
               </div>
             </div>
             <div className="min-w-0 flex-1 sm:border-l sm:border-border/60 sm:pl-6">
@@ -471,7 +471,7 @@ export default function SpecialistProfile() {
                 </>
               )}
               <a href="#opiniones" className="inline-block text-sm font-semibold text-brand-blue hover:underline mt-2">
-                Ver las {allReviews.length} opinión{allReviews.length !== 1 ? "es" : ""} →
+                Ver las {allReviews.length} {allReviews.length !== 1 ? "opiniones" : "opinión"} →
               </a>
             </div>
           </div>
