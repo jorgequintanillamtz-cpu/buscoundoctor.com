@@ -13,6 +13,8 @@ import { Link } from "react-router-dom";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
+import VerifiedFilter, { isVerifiedSpecialist } from "@/components/VerifiedFilter";
+import VerifiedSeal from "@/components/profile/VerifiedSeal";
 
 export default function SpecialistList() {
   const [specialists, setSpecialists] = useState([]);
@@ -34,6 +36,7 @@ export default function SpecialistList() {
   const [filterZone, setFilterZone] = useState(urlParams.get("zone") || "");
   const [filterModality, setFilterModality] = useState("");
   const [filterInsurer, setFilterInsurer] = useState("");
+  const [onlyVerified, setOnlyVerified] = useState(false);
   const [searchQuery, setSearchQuery] = useState(urlParams.get("q") || "");
   // Filtro por enfermedad (?condition=slug): llega desde el buscador cuando
   // se elige una enfermedad en vez de una especialidad. Se guarda el registro
@@ -133,6 +136,9 @@ export default function SpecialistList() {
     if (filterModality) {
       result = result.filter((s) => s.modality === filterModality || s.modality === "ambas");
     }
+    if (onlyVerified) {
+      result = result.filter(isVerifiedSpecialist);
+    }
     if (filterInsurer) {
       result = result.filter((s) => (s.insurers_relation || []).includes(filterInsurer));
     }
@@ -184,15 +190,16 @@ export default function SpecialistList() {
       },
     }[sortBy];
     return cmp ? [...ranked].sort(cmp) : ranked; // sort es estable: empates quedan en el orden recomendado
-  }, [specialists, filterSpecialty, filterZone, filterModality, filterInsurer, conditionRecord, subspecialtyRecord, searchQuery, sortBy, extrasMap]);
+  }, [specialists, filterSpecialty, filterZone, filterModality, filterInsurer, onlyVerified, conditionRecord, subspecialtyRecord, searchQuery, sortBy, extrasMap]);
 
-  const activeFilters = [filterSpecialty, filterZone, filterModality, filterInsurer, filterConditionSlug, filterSubspecialtySlug].filter(Boolean).length;
+  const activeFilters = [filterSpecialty, filterZone, filterModality, filterInsurer, filterConditionSlug, filterSubspecialtySlug, onlyVerified].filter(Boolean).length;
 
   const clearFilters = () => {
     setFilterSpecialty("");
     setFilterZone("");
     setFilterModality("");
     setFilterInsurer("");
+    setOnlyVerified(false);
     setFilterConditionSlug("");
     setFilterSubspecialtySlug("");
   };
@@ -277,6 +284,8 @@ export default function SpecialistList() {
             </div>
 
             <div className="space-y-4">
+              <VerifiedFilter checked={onlyVerified} onChange={setOnlyVerified} />
+
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Nombre</label>
                 <div className="relative">
@@ -353,6 +362,12 @@ export default function SpecialistList() {
           {/* Active filter tags */}
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
+              {onlyVerified && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <VerifiedSeal size="sm" />
+                  <button onClick={() => setOnlyVerified(false)} aria-label="Quitar filtro de verificados" className="text-muted-foreground hover:text-foreground"><X className="w-3 h-3" /></button>
+                </span>
+              )}
               {filterSpecialty && (
                 <span className="inline-flex items-center gap-1 text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-full">
                   {filterSpecialty}
