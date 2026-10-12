@@ -11,7 +11,8 @@ import { loadCardExtras, loadInsurerMap } from "@/lib/cardExtras";
 import { genderSpecialty } from "@/lib/profileMeta";
 
 // Tarjeta de médico del listado (la única que hay; CLAUDE.md §8q). Diseño "opción 2" elegido por
-// Jorge el 2026-10-09: datos de confianza al frente (hospital, años de experiencia, seguros, precio
+// Jorge el 2026-10-09 y compactado el 2026-10-12 (foto más grande, calificación y botones en la
+// columna derecha, precio abajo; sin franja de botones aparte): datos de confianza al frente (hospital, años de experiencia, seguros, precio
 // de la consulta), calificación y número de opiniones reales, y dos botones: "Ver perfil" y
 // "Agendar cita" (verde). Se quitaron las fechas de la derecha: daban a entender que había
 // disponibilidad y solo abrían una solicitud. Cada dato solo sale si existe.
@@ -64,11 +65,14 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
   if (extras?.office_name) facts.push({ icon: Building2, text: extras.office_name });
   if (specialist.years_experience > 0) facts.push({ icon: BriefcaseMedical, text: `${specialist.years_experience} años de experiencia` });
   if (n > 0) facts.push({ icon: ShieldPlus, text: `Acepta ${insurerNames.slice(0, 2).join(", ")}${n > 2 ? ` y ${n - 2} más` : ""}` });
-  if (price) facts.push({ icon: Banknote, text: `Consulta desde $${price.toLocaleString("es-MX")}` });
+  const priceText = price ? `$${price.toLocaleString("es-MX")}` : null;
 
-  const factsList = (cls) => facts.length > 0 && (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 ${cls}`}>
-      {facts.map((f) => (
+  // En celular el precio va como un dato más; en escritorio va abajo, junto a los botones.
+  const factsList = (cls, withPrice = false) => {
+    const list = withPrice && priceText ? [...facts, { icon: Banknote, text: `Consulta desde ${priceText}` }] : facts;
+    return list.length > 0 && (
+    <div className={`grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-2 ${cls}`}>
+      {list.map((f) => (
         <div key={f.text} className="flex items-center gap-2 text-sm text-foreground min-w-0">
           <span className="w-6 h-6 rounded-md bg-brand-bluePale text-brand-blue flex items-center justify-center flex-shrink-0">
             <f.icon className="w-3.5 h-3.5" aria-hidden="true" />
@@ -77,7 +81,8 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
         </div>
       ))}
     </div>
-  );
+    );
+  };
 
   const stars = (avg, cls) => (
     <span className={`text-amber-400 tracking-tight ${cls}`} aria-hidden="true">
@@ -94,7 +99,7 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
           onClick={() => trackDoctorClick(specialist, sourcePage)}
         >
           <div className="flex gap-4 sm:gap-5">
-            <div className="w-24 h-28 sm:w-[104px] sm:h-[120px] rounded-[1.4rem] bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-28 sm:w-[128px] sm:h-[160px] rounded-[1.4rem] bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
               {specialist.profile_photo ? (
                 <img src={specialist.profile_photo} alt={specialist.full_name} loading={priority ? "eager" : "lazy"} className="w-full h-full object-cover object-top" />
               ) : (
@@ -104,51 +109,71 @@ export default function SpecialistCard({ specialist, priority = false, sourcePag
               )}
             </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="font-heading font-semibold text-lg leading-snug text-foreground group-hover:text-primary transition-colors">
-                    {specialist.full_name}
-                    {specialist.license_verification_status === "verified" && (
-                      <span className="inline-block align-middle ml-2"><VerifiedSeal size="sm" /></span>
-                    )}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {specialtyName}
-                    {specialist.subspecialty && <> {"·"} {specialist.subspecialty}</>}
-                    {(specialist.zone || specialist.location) && <> {"·"} {specialist.zone || specialist.location}</>}
-                  </p>
-                  {reviewCount > 0 && reviewAvg != null && (
-                    <p className="sm:hidden text-xs mt-1.5 flex items-center gap-1.5">
-                      {stars(reviewAvg, "text-sm")}
-                      <span className="font-semibold text-foreground">{reviewAvg.toFixed(1)}</span>
-                      <span className="text-muted-foreground">({reviewCount})</span>
-                    </p>
-                  )}
-                </div>
-                {reviewCount > 0 && reviewAvg != null && (
-                  <div className="hidden sm:block text-right flex-shrink-0">
-                    <p className="font-heading font-bold text-xl text-foreground leading-none">{reviewAvg.toFixed(1)}</p>
-                    {stars(reviewAvg, "text-xs")}
-                    <p className="text-xs text-muted-foreground">{reviewCount} opinión{reviewCount !== 1 ? "es" : ""}</p>
-                  </div>
+            <div className="flex-1 min-w-0 flex flex-col">
+              <h3 className="font-heading font-semibold text-lg leading-snug text-foreground group-hover:text-primary transition-colors">
+                {specialist.full_name}
+                {specialist.license_verification_status === "verified" && (
+                  <span className="inline-block align-middle ml-2"><VerifiedSeal size="sm" /></span>
                 )}
-              </div>
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {specialtyName}
+                {specialist.subspecialty && <> {"·"} {specialist.subspecialty}</>}
+                {(specialist.zone || specialist.location) && <> {"·"} {specialist.zone || specialist.location}</>}
+              </p>
+              {reviewCount > 0 && reviewAvg != null && (
+                <p className="sm:hidden text-xs mt-1.5 flex items-center gap-1.5">
+                  {stars(reviewAvg, "text-sm")}
+                  <span className="font-semibold text-foreground">{reviewAvg.toFixed(1)}</span>
+                  <span className="text-muted-foreground">({reviewCount})</span>
+                </p>
+              )}
 
               {/* Escritorio: los datos van junto a la foto; en celular, debajo y a todo el ancho */}
               <div className="hidden sm:block">{factsList("mt-3.5")}</div>
+
+              {/* Escritorio: el precio de la consulta abajo, a la altura de los botones */}
+              {priceText && (
+                <p className="hidden sm:block mt-auto pt-3 text-sm text-muted-foreground">
+                  Consulta desde <span className="font-heading font-bold text-lg text-foreground">{priceText}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Escritorio: calificación arriba y botones abajo en la columna derecha (sin franja aparte) */}
+            <div className="hidden sm:flex flex-col justify-between items-end flex-shrink-0 w-[148px] gap-4">
+              {reviewCount > 0 && reviewAvg != null ? (
+                <div className="text-right">
+                  <p className="font-heading font-bold text-xl text-foreground leading-none">{reviewAvg.toFixed(1)}</p>
+                  {stars(reviewAvg, "text-xs")}
+                  <p className="text-xs text-muted-foreground">{reviewCount} {reviewCount !== 1 ? "opiniones" : "opinión"}</p>
+                </div>
+              ) : <div />}
+              <div className="flex flex-col gap-2 w-full">
+                <Button
+                  size="sm"
+                  className="w-full min-h-[44px] px-5 rounded-xl gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white text-sm font-semibold"
+                  onClick={(e) => { e.preventDefault(); setShowForm(true); }}
+                >
+                  <Calendar className="w-4 h-4" /> Agendar cita
+                </Button>
+                <span className="inline-flex items-center justify-center w-full min-h-[44px] px-4 rounded-xl border border-border bg-card text-sm font-medium text-foreground group-hover:border-primary/40 transition-colors">
+                  Ver perfil
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="sm:hidden">{factsList("mt-4")}</div>
+          {/* Celular: datos (con el precio) debajo de la foto y los dos botones a todo el ancho */}
+          <div className="sm:hidden">{factsList("mt-4", true)}</div>
 
-          <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-end gap-2.5">
-            <span className="inline-flex items-center justify-center flex-1 sm:flex-none min-h-[44px] px-4 rounded-xl border border-border bg-card text-sm font-medium text-foreground group-hover:border-primary/40 transition-colors">
+          <div className="sm:hidden mt-4 pt-4 border-t border-border/50 flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center flex-1 min-h-[44px] px-4 rounded-xl border border-border bg-card text-sm font-medium text-foreground">
               Ver perfil
             </span>
             <Button
               size="sm"
-              className="flex-1 sm:flex-none min-h-[44px] px-5 rounded-xl gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white text-sm font-semibold"
+              className="flex-1 min-h-[44px] px-5 rounded-xl gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white text-sm font-semibold"
               onClick={(e) => { e.preventDefault(); setShowForm(true); }}
             >
               <Calendar className="w-4 h-4" /> Agendar cita
