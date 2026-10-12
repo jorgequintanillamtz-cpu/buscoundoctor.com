@@ -20,6 +20,7 @@ import {
   Accordion, AccordionItem, AccordionTrigger, AccordionContent,
 } from "@/components/ui/accordion";
 import LoadingLogo from "@/components/LoadingLogo";
+import LoadError from "@/components/LoadError";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -35,6 +36,8 @@ export default function SpecialtyPage() {
   const [specialists, setSpecialists] = useState([]);
   const [cityName, setCityName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
 
   const [filterModality, setFilterModality] = useState("");
@@ -46,6 +49,7 @@ export default function SpecialtyPage() {
 
   useEffect(() => {
     let active = true;
+    setLoadError(false);
     (async () => {
       const [specList, allSpecs, zoneList] = await Promise.all([
         base44.entities.Specialty.filter({ profession_slug: professionSlug }),
@@ -71,9 +75,16 @@ export default function SpecialtyPage() {
       setFaqs(faqItems);
       setConditions(conditionList);
       setLoading(false);
-    })();
+    })().catch((e) => {
+      // Si falla la carga (conexión, servidor ocupado) se avisa y se deja reintentar, en vez de
+      // dejar el "cargando" para siempre.
+      if (!active) return;
+      console.error("No se pudo cargar la página de especialidad", e);
+      setLoadError(true);
+      setLoading(false);
+    });
     return () => { active = false; };
-  }, [professionSlug, citySlug]);
+  }, [professionSlug, citySlug, reloadKey]);
 
   useEffect(() => {
     if (!specialty || !cityName) return;
@@ -179,6 +190,10 @@ export default function SpecialtyPage() {
   // Footer aparecería visible un instante arriba y luego brincaría muy abajo
   // en cuanto cargara el contenido real -- eso es justo el "brinco" (CLS)
   // que ya se corrigió con la misma idea en Home.jsx.
+  if (loadError) {
+    return <LoadError onRetry={() => { setLoading(true); setReloadKey((k) => k + 1); }} />;
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[100dvh]">

@@ -26,6 +26,7 @@ import ShareProfileButton from "../components/profile/ShareProfileButton";
 import { setOpenGraph, SITE_OG, buildAbsoluteUrl } from "@/lib/seoMeta";
 import { buildProfileMetaText, genderSpecialty } from "@/lib/profileMeta";
 import { PATIENT_TYPE_LABELS } from "@/lib/patientTypes";
+import LoadError from "../components/LoadError";
 import LoadingLogo from "@/components/LoadingLogo";
 
 function setMeta(name, content) {
@@ -68,6 +69,10 @@ export default function SpecialistProfile() {
   const { slug } = useParams();
   const [specialist, setSpecialist] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Si no se pudo traer el perfil (conexión, servidor ocupado) se avisa y se deja reintentar, en vez de
+  // dejar el "cargando" para siempre.
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [insurers, setInsurers] = useState([]);
   const [offices, setOffices] = useState([]);
   const [descExpanded, setDescExpanded] = useState(false);
@@ -86,7 +91,7 @@ export default function SpecialistProfile() {
   const presentSectionIds = usePresentSectionIds(NAV_SECTION_IDS);
 
   useEffect(() => {
-    async function load() {
+    async function loadInner() {
       const results = await base44.entities.Specialist.filter({ slug, active: true });
       if (results.length > 0) {
         const specialist = results[0];
@@ -221,8 +226,19 @@ export default function SpecialistProfile() {
       }
       setLoading(false);
     }
+    async function load() {
+      setLoadError(false);
+      setLoading(true);
+      try {
+        await loadInner();
+      } catch (e) {
+        console.error("No se pudo cargar el perfil", e);
+        setLoadError(true);
+        setLoading(false);
+      }
+    }
     load();
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   // min-h-[100dvh]: evita que el Footer se vea antes de tiempo y brinque al
   // cargar el contenido real (mismo arreglo que Home.jsx/SpecialtyPage.jsx).
@@ -231,6 +247,10 @@ export default function SpecialistProfile() {
       <div className="flex items-center justify-center min-h-[100dvh]">
         <LoadingLogo />
       </div>);
+  }
+
+  if (loadError) {
+    return <LoadError onRetry={() => setReloadKey((k) => k + 1)} />;
   }
 
   if (!specialist) {
