@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import Logo from "@/components/Logo";
 import CountdownBox from "@/components/CountdownBox";
-import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import { LAUNCH_DATE, LAUNCH_PILL, HAS_LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 
 const CTA_URL = "/registro-medico";
 // Número real de WhatsApp del negocio (mismo que /contacto), para el botón
@@ -84,7 +84,6 @@ export default function LandingMedicos() {
   const [showStickyCta, setShowStickyCta] = useState(false);
   const heroRef = useRef(null);
   const countdown = useCountdown(LAUNCH_DATE);
-  const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
   // --- Paso 1 del registro, embebido justo debajo del hero ---
   const [specialties, setSpecialties] = useState([]);
@@ -192,7 +191,7 @@ export default function LandingMedicos() {
           <div className="bg-brand-bluePale/60 border-t border-brand-blue/10 py-1.5 px-2">
             <p className="text-center text-xs sm:text-sm font-semibold text-brand-blue flex items-center justify-center gap-1.5">
               <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Lanzamos en {countdown.days}d {countdown.hours}h {countdown.minutes}m {countdown.seconds}s</span>
+              <span>{HAS_LAUNCH_DATE ? `Lanzamos en ${countdown.days}d ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s` : LAUNCH_PILL}</span>
               <span className="hidden sm:inline text-brand-navy/70 font-normal">· Regístrate antes para salir más arriba</span>
             </p>
           </div>
@@ -336,18 +335,20 @@ export default function LandingMedicos() {
                 <Logo className="h-8 sm:h-9 mx-auto mb-4" />
                 <span className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue text-xs font-bold tracking-wide uppercase px-3 py-1.5 rounded-full mb-4">
                   <Sparkles className="w-3 h-3" />
-                  Lanzamos el {launchDateLabel}
+                  {LAUNCH_PILL}
                 </span>
-                <h2 id="countdown-heading" className="font-heading font-bold text-xl sm:text-2xl text-brand-navy mb-5">
+                <h2 id="countdown-heading" className={`font-heading font-bold text-xl sm:text-2xl text-brand-navy ${HAS_LAUNCH_DATE ? "mb-5" : "mb-1"}`}>
                   Regístrate ahora y sé de los primeros médicos visibles en el directorio
                 </h2>
 
+{HAS_LAUNCH_DATE && (
                 <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6">
                   <CountdownBox value={countdown.days} label="Días" />
                   <CountdownBox value={countdown.hours} label="Horas" />
                   <CountdownBox value={countdown.minutes} label="Min" />
                   <CountdownBox value={countdown.seconds} label="Seg" />
                 </div>
+)}
 
               </div>
             </div>
@@ -425,13 +426,13 @@ export default function LandingMedicos() {
               </div>
               <div className="text-center md:text-left">
                 <span className="inline-block text-xs font-bold tracking-wide uppercase text-brand-blue bg-brand-bluePale px-3 py-1.5 rounded-full mb-3">
-                  Oferta de lanzamiento
+                  Oferta de inauguración
                 </span>
                 <h2 id="fundador-heading" className="font-heading font-bold text-2xl sm:text-3xl text-foreground mb-2">
                   Sé Miembro Fundador y ahorra <span className="text-brand-blue">$23,988 MXN</span>
                 </h2>
                 <p className="text-muted-foreground mb-3">
-                  Regístrate antes del lanzamiento y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $1,999 MXN/mes) — sin tarjeta, sin compromiso.
+                  Regístrate antes de la inauguración y obtén el plan Premium <span className="font-semibold text-brand-navy">gratis durante 1 año</span> (valor $1,999 MXN/mes) — sin tarjeta, sin compromiso.
                 </p>
                 <p className="text-sm font-semibold text-brand-blue mb-5">
                   Cupo limitado: solo los primeros 5 médicos por especialidad pueden ser Miembros Fundadores.

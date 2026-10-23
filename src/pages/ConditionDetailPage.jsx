@@ -7,7 +7,7 @@ import BlogCard from "@/components/BlogCard";
 import { trackDoctorClick } from "@/utils/trackDoctorClick";
 import { slugify } from "@/lib/citySlug";
 import CountdownBox from "@/components/CountdownBox";
-import { LAUNCH_DATE, LAUNCH_DAY_LABEL, useCountdown } from "@/lib/launchCountdown";
+import { LAUNCH_DATE, LAUNCH_WHEN, HAS_LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 import { useSpecialtyDisplay } from "@/hooks/useSpecialtyDisplay";
 import {
   Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink,
@@ -369,12 +369,12 @@ export default function ConditionDetailPage() {
                   Esta sección está en construcción
                 </h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Todavía ningún doctor ha marcado esta condición en su perfil. El directorio completo de BuscoUnDoctor sale el {LAUNCH_DAY_LABEL}.
+                  Todavía ningún doctor ha marcado esta condición en su perfil. El directorio completo de BuscoUnDoctor llega {LAUNCH_WHEN}.
                 </p>
               </div>
             </div>
 
-            {!countdown.done && (
+            {HAS_LAUNCH_DATE && !countdown.done && (
               <div className="flex items-center gap-2 mb-4">
                 <CountdownBox value={countdown.days} label="Días" compact />
                 <CountdownBox value={countdown.hours} label="Hrs" compact />
