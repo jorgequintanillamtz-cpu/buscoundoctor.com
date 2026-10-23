@@ -1,24 +1,35 @@
 import { useState, useEffect } from "react";
 
-// Fecha de lanzamiento público de la plataforma (hora de Monterrey, UTC-6).
-// Vive aquí -- no repetida en cada página -- para que /para-medicos y
-// cualquier otra página con countdown (ej. especialidades sin doctores
-// todavía) no puedan desincronizarse si la fecha cambia.
-export const LAUNCH_DATE = new Date("2026-11-15T00:00:00-06:00");
+// Lanzamiento público de la plataforma. Vive aquí -- no repetido en cada página -- para que
+// /para-medicos, /registro-gratis, el inicio y las páginas de especialidades sin doctores
+// todavía no puedan desincronizarse.
+//
+// 2026-10-23, a petición de Jorge: SIN FECHA EXACTA ("inicios de 2027"). Con LAUNCH_DATE = null
+// no hay cuenta regresiva y los textos dicen LAUNCH_APPROX. Para volver a una fecha real basta
+// poner aquí un Date (por ejemplo new Date("2027-01-15T00:00:00-06:00")): las cajas del
+// contador, los "faltan N días" y los textos con fecha reaparecen solos.
+export const LAUNCH_DATE = null;
+export const LAUNCH_APPROX = "inicios de 2027";
+export const HAS_LAUNCH_DATE = LAUNCH_DATE instanceof Date;
 
-// "15 de noviembre", para textos corridos ("sale el 15 de noviembre"). Se
-// calcula de LAUNCH_DATE para que cambiar la fecha arriba baste.
-export const LAUNCH_DAY_LABEL = LAUNCH_DATE.toLocaleDateString("es-MX", {
-  day: "numeric",
-  month: "long",
-  timeZone: "America/Monterrey",
-});
+const longDate = HAS_LAUNCH_DATE
+  ? LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" })
+  : "";
 
-// Cuenta regresiva en vivo hasta `target`, actualizada cada segundo.
+// Para textos corridos: "El directorio completo sale {LAUNCH_WHEN}" -> "a inicios de 2027" / "el 15 de enero de 2027".
+export const LAUNCH_WHEN = HAS_LAUNCH_DATE ? `el ${longDate}` : `a ${LAUNCH_APPROX}`;
+
+// Para las píldoras de las páginas de médicos: "Inauguración: inicios de 2027" / "Lanzamos el 15 de enero de 2027".
+export const LAUNCH_PILL = HAS_LAUNCH_DATE ? `Lanzamos el ${longDate}` : `Inauguración: ${LAUNCH_APPROX}`;
+
+// Cuenta regresiva en vivo hasta `target`, actualizada cada segundo. Sin fecha (`null`) no cuenta:
+// regresa ceros y `done: false` (las páginas no dibujan las cajas si no hay fecha, ver HAS_LAUNCH_DATE).
 export function useCountdown(target) {
-  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, target.getTime() - Date.now()));
+  const calc = () => (target ? Math.max(0, target.getTime() - Date.now()) : 0);
+  const [timeLeft, setTimeLeft] = useState(calc);
 
   useEffect(() => {
+    if (!target) return undefined;
     const id = setInterval(() => {
       setTimeLeft(Math.max(0, target.getTime() - Date.now()));
     }, 1000);
@@ -31,6 +42,6 @@ export function useCountdown(target) {
     hours: Math.floor((totalSeconds % 86400) / 3600),
     minutes: Math.floor((totalSeconds % 3600) / 60),
     seconds: totalSeconds % 60,
-    done: timeLeft <= 0,
+    done: target ? timeLeft <= 0 : false,
   };
 }

@@ -10,7 +10,7 @@ import BlogCard from "../components/BlogCard";
 import { resolveCitySlug } from "@/lib/citySlug";
 import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
 import CountdownBox from "@/components/CountdownBox";
-import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import { LAUNCH_DATE, LAUNCH_PILL, LAUNCH_WHEN, HAS_LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 
 // Ilustración decorativa de fondo del hero: una fila de siluetas de personas
 // (pacientes y médicos, estos últimos marcados con un pequeño gafete/estetoscopio)
@@ -212,7 +212,6 @@ export default function Home() {
   // especialidad/enfermedad sin doctores todavía) para la sección de
   // "Explora por especialidad", que hoy solo tiene tarjetas placeholder.
   const countdown = useCountdown(LAUNCH_DATE);
-  const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
   const submitHeroSearch = () => {
     // Navega a las páginas SEO dedicadas (/:professionSlug/:citySlug) en vez
@@ -447,7 +446,7 @@ export default function Home() {
 
           {/* Countdown de lanzamiento en el hero: refuerza que la página
               está a punto de arrancar de lleno (el directorio real de
-              especialistas llega el 15 de noviembre). Píldora en blanco
+              especialistas llega a inicios de 2027). Píldora en blanco
               translucido (mismo estilo que las pills de especialidades de
               arriba) para que se lea bien sobre el fondo navy, en vez de la
               versión bg-brand-bluePale que se usa en secciones con fondo
@@ -456,14 +455,16 @@ export default function Home() {
             <div className="flex flex-col items-center gap-3 mt-8 sm:mt-7">
               <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 text-white text-[11px] font-bold tracking-wide uppercase px-3 py-1.5 rounded-full">
                 <Sparkles className="w-3 h-3 text-amber-300" />
-                Lanzamos el {launchDateLabel}
+                {LAUNCH_PILL}
               </span>
+{HAS_LAUNCH_DATE && (
               <div className="flex items-center gap-2">
                 <CountdownBox value={countdown.days} label="Días" compact />
                 <CountdownBox value={countdown.hours} label="Horas" compact />
                 <CountdownBox value={countdown.minutes} label="Min" compact />
                 <CountdownBox value={countdown.seconds} label="Seg" compact />
               </div>
+)}
             </div>
           )}
 
@@ -642,14 +643,16 @@ export default function Home() {
               <div className="mt-4 flex flex-col items-center gap-3">
                 <span className="inline-flex items-center gap-1.5 bg-brand-bluePale text-brand-blue text-[11px] font-bold tracking-wide uppercase px-3 py-1.5 rounded-full">
                   <Sparkles className="w-3 h-3" />
-                  Muy pronto: especialistas reales el {launchDateLabel}
+                  Muy pronto: especialistas reales {LAUNCH_WHEN}
                 </span>
+{HAS_LAUNCH_DATE && (
                 <div className="flex items-center gap-2">
                   <CountdownBox value={countdown.days} label="Días" compact />
                   <CountdownBox value={countdown.hours} label="Horas" compact />
                   <CountdownBox value={countdown.minutes} label="Min" compact />
                   <CountdownBox value={countdown.seconds} label="Seg" compact />
                 </div>
+)}
               </div>
             )}
           </div>

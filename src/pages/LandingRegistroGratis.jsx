@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 import Logo from "@/components/Logo";
-import { LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
+import { LAUNCH_DATE, LAUNCH_PILL, HAS_LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 
 // Landing de conversión para tráfico de anuncios (versión mejorada de
@@ -116,7 +116,6 @@ function RegistroSteps({ current = 0 }) {
 export default function LandingRegistroGratis() {
   const navigate = useNavigate();
   const countdown = useCountdown(LAUNCH_DATE);
-  const launchDateLabel = LAUNCH_DATE.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Monterrey" });
 
   const [specialties, setSpecialties] = useState([]);
   const [step1, setStep1] = useState({ title: "", full_name: "", whatsapp: "", specialty: "", subspecialty: "" });
@@ -183,7 +182,7 @@ export default function LandingRegistroGratis() {
           <div className="bg-brand-bluePale/60 border-t border-brand-blue/10 py-1.5 px-2">
             <p className="text-center text-xs font-semibold text-brand-blue flex items-center justify-center gap-1.5">
               <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>Lanzamos el {launchDateLabel} · faltan {countdown.days} días</span>
+              <span>{HAS_LAUNCH_DATE ? `${LAUNCH_PILL} · faltan ${countdown.days} días` : LAUNCH_PILL}</span>
             </p>
           </div>
         )}
