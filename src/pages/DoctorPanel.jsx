@@ -70,11 +70,11 @@ export default function DoctorPanel() {
   // abre ahí directo en vez de siempre en "Inicio".
   // También acepta ?seccion=documentos (enlace del correo "sube tu cédula"), ?seccion=perfil
   // (donde se sube la foto; lo usa la pantalla final del registro) y
-  // ?seccion=ajustes&tab=correos (enlace de los recordatorios para apagarlos) en la URL; solo esas, a propósito.
+  // ?seccion=ajustes&tab=correos (enlace de los recordatorios para apagarlos) y ?seccion=resenas&tab=recomendaciones (pantalla final de reclamar perfil) en la URL; solo esas, a propósito.
   const [section, setSection] = useState(() => {
     if (location.state?.section) return location.state.section;
     const wanted = new URLSearchParams(location.search).get("seccion");
-    return wanted === "documentos" || wanted === "ajustes" || wanted === "perfil" ? wanted : "resumen";
+    return wanted === "documentos" || wanted === "ajustes" || wanted === "perfil" || wanted === "resenas" ? wanted : "resumen";
   });
   const [completenessChecklist, setCompletenessChecklist] = useState(null);
   // Modo "paso a paso": recorre, una por una, las pantallas de lo que le falta
@@ -512,7 +512,7 @@ export default function DoctorPanel() {
             {section === "perfil" && <DoctorEditorPerfil form={form} update={update} simple />}
             {section === "plan" && <DoctorPremiumStatus specialistId={specialistId} specialistName={form.full_name} />}
             {section === "solicitudes" && <DoctorAppointmentRequests specialistId={specialistId} />}
-            {section === "resenas" && <DoctorReviews specialistId={specialistId} />}
+            {section === "resenas" && <DoctorReviews specialistId={specialistId} initialTab={new URLSearchParams(location.search).get("tab")} />}
             {section === "detalles" && <DoctorDetailsManager form={form} update={update} specialistId={specialistId} />}
             {section === "formacion" && <EducationManager specialistId={specialistId} />}
             {section === "idiomas" && <LanguagesManager specialistId={specialistId} />}
