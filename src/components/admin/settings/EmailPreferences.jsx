@@ -14,8 +14,8 @@ const OPTIONS = [
   },
   {
     key: "resenas",
-    label: "Reseñas nuevas",
-    desc: "Un correo cada vez que un paciente deja una reseña, antes de que la revisemos y publiquemos.",
+    label: "Reseñas y recomendaciones nuevas",
+    desc: "Un correo cuando un paciente deja una reseña (antes de que la revisemos y publiquemos) o cuando te recomienda.",
   },
   {
     key: "estado",
