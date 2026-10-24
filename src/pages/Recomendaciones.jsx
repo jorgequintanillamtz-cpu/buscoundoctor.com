@@ -7,20 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
+import { RECOMMENDATION_TAGS as TAGS } from "@/lib/recommendationTags";
 
 // /recomendaciones -- los pacientes recomiendan a su doctor (CLAUDE.md §8r). Piloto: página con
 // `noindex`, sin enlaces desde el resto del sitio. 3 pasos: (1) el doctor, (2) la recomendación,
 // (3) verificar el correo con un código y aceptar. Todo pasa por 3 funciones de la base de datos
 // con límites anti-abuso; aquí solo se arma la pantalla.
-const TAGS = [
-  { v: "explica_claro", label: "Explica con claridad" },
-  { v: "puntual", label: "Puntual" },
-  { v: "buen_trato", label: "Buen trato" },
-  { v: "instalaciones_limpias", label: "Instalaciones limpias" },
-  { v: "precio_justo", label: "Precio justo" },
-  { v: "resolvio_problema", label: "Resolvió mi problema" },
-];
-
 const REASONS = {
   codigo_vencido: "El código venció. Pide uno nuevo.",
   demasiados_intentos: "Demasiados intentos con ese código. Pide uno nuevo.",

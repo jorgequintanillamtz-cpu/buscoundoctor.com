@@ -33,6 +33,8 @@ const ENTITY_TABLE_MAP = {
   SpecialistSeoChecklist: 'specialist_seo_checklist',
   Review: 'review',
   SpecialistQuestion: 'specialist_question',
+  DoctorSuggestion: 'doctor_suggestion',
+  DoctorRecommendation: 'doctor_recommendation',
   DoctorNotification: 'doctor_notification',
   AppointmentRequest: 'appointment_request',
   DoctorStorefront: 'doctor_storefront',
@@ -453,6 +455,11 @@ const FUNCTION_MAP = {
   // Recomendaciones de pacientes (CLAUDE.md §8r): pedir el código por correo, buscar doctor y enviar.
   requestRecommendationCode: ({ email } = {}) => supabase.rpc('request_recommendation_code', { p_email: email }),
   searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
+  adminReviewSuggestion: ({ id, action, notes } = {}) => supabase.rpc('admin_review_suggestion', { p_id: id, p_action: action, p_notes: notes || null }),
+  adminReviewRecommendation: ({ ids, status } = {}) => supabase.rpc('admin_review_recommendation', { p_ids: ids, p_status: status }),
+  adminMergeSuggestion: ({ source, target_suggestion, target_specialist } = {}) =>
+    supabase.rpc('admin_merge_suggestion', { p_source: source, p_target_suggestion: target_suggestion || null, p_target_specialist: target_specialist || null }),
+  adminCreateSpecialistFromSuggestion: ({ suggestion } = {}) => supabase.rpc('admin_create_specialist_from_suggestion', { p_suggestion: suggestion }),
   submitRecommendation: ({ email, code, target, tags, message, consent, marketing, consent_version } = {}) =>
     supabase.rpc('submit_recommendation', {
       p_email: email, p_code: code, p_target: target, p_tags: tags || [], p_message: message || null,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Heart, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList, Menu } from "lucide-react";
+import { LayoutDashboard, Users, Heart, Star, FileText, ShieldCheck, Calendar, Crown, History, Inbox, Mail, LogOut, Gift, UserRound, Settings, Search, X, BookOpen, ClipboardList, Menu, HeartHandshake } from "lucide-react";
 import { AdminBadgeProvider, useAdminBadges } from "@/components/adminBadges";
 import { base44 } from "@/api/base44Client";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
@@ -37,6 +37,7 @@ const adminNavSections = [
       { path: "/admin/doctores", label: "Doctores", icon: Users },
       { path: "/admin/registros", label: "Registros", icon: ClipboardList },
       { path: "/admin/referidos", label: "Referidos", icon: Gift },
+      { path: "/admin/recomendaciones", label: "Recomendaciones", icon: HeartHandshake },
       { path: "/admin/verificaciones", label: "Verificar documentos", icon: ShieldCheck },
       { path: "/admin/blog", label: "Blog", icon: FileText },
       { path: "/admin/resenas", label: "Reseñas", icon: Star },
