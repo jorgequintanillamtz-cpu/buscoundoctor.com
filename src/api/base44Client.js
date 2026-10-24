@@ -456,6 +456,7 @@ const FUNCTION_MAP = {
   requestRecommendationCode: ({ email } = {}) => supabase.rpc('request_recommendation_code', { p_email: email }),
   listMyRecommendations: () => supabase.rpc('list_my_recommendations'),
   searchRecommendedDoctors: ({ query } = {}) => supabase.rpc('search_recommended_doctors', { p_query: query }),
+  listRecommendedDoctors: () => supabase.rpc('list_recommended_doctors'),
   getRecommendedDoctor: ({ slug } = {}) => supabase.rpc('get_recommended_doctor', { p_slug: slug }),
   searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
   adminReviewSuggestion: ({ id, action, notes } = {}) => supabase.rpc('admin_review_suggestion', { p_id: id, p_action: action, p_notes: notes || null }),
