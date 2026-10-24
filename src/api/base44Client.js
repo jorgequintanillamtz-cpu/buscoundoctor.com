@@ -450,6 +450,14 @@ const FUNCTION_MAP = {
   getClaimPreview: ({ token } = {}) => supabase.rpc('get_claim_preview', { p_token: token }),
   claimProfile: ({ token, cedula } = {}) => supabase.rpc('claim_profile', { p_token: token, p_cedula: cedula || null }),
   getCardExtras: ({ ids } = {}) => supabase.rpc('get_card_extras', { p_ids: ids }),
+  // Recomendaciones de pacientes (CLAUDE.md §8r): pedir el código por correo, buscar doctor y enviar.
+  requestRecommendationCode: ({ email } = {}) => supabase.rpc('request_recommendation_code', { p_email: email }),
+  searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
+  submitRecommendation: ({ email, code, target, tags, message, consent, marketing, consent_version } = {}) =>
+    supabase.rpc('submit_recommendation', {
+      p_email: email, p_code: code, p_target: target, p_tags: tags || [], p_message: message || null,
+      p_consent: consent === true, p_marketing: marketing === true, p_consent_version: consent_version || 'v1',
+    }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
   createConsultReview: ({ consult_summary_id, rating }) =>
