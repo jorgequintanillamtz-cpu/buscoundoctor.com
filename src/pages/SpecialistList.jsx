@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { SlidersHorizontal, X, Search } from "lucide-react";
+import { SlidersHorizontal, X, Search, Heart, ShieldQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,9 @@ export default function SpecialistList() {
   const [filterInsurer, setFilterInsurer] = useState("");
   const [onlyVerified, setOnlyVerified] = useState(false);
   const [searchQuery, setSearchQuery] = useState(urlParams.get("q") || "");
+  // Doctores que pacientes recomendaron y aún no tienen perfil (CLAUDE.md §8r, paso 6): solo se
+  // encuentran escribiendo su nombre, y se muestran aparte del listado, nunca mezclados con él.
+  const [recommended, setRecommended] = useState([]);
   // Filtro por enfermedad (?condition=slug): llega desde el buscador cuando
   // se elige una enfermedad en vez de una especialidad. Se guarda el registro
   // completo (no solo el slug) para poder filtrar por conditions_relation y
@@ -51,6 +54,23 @@ export default function SpecialistList() {
   // listado general de su especialidad base (ej. Dentista).
   const [filterSubspecialtySlug, setFilterSubspecialtySlug] = useState(urlParams.get("subspecialty") || "");
   const [subspecialtyRecord, setSubspecialtyRecord] = useState(null);
+
+  const onlyNameFilter = !filterSpecialty && !filterZone && !filterModality && !filterInsurer && !onlyVerified
+    && !filterConditionSlug && !filterSubspecialtySlug;
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 3 || !onlyNameFilter) { setRecommended([]); return; }
+    let active = true;
+    const t = setTimeout(async () => {
+      try {
+        const { data } = await base44.functions.invoke("searchRecommendedDoctors", { query: q });
+        if (active) setRecommended(Array.isArray(data) ? data : []);
+      } catch {
+        if (active) setRecommended([]); // es un extra: si falla, el listado sigue igual
+      }
+    }, 350);
+    return () => { active = false; clearTimeout(t); };
+  }, [searchQuery, onlyNameFilter]);
 
   useEffect(() => {
     async function load() {
@@ -422,6 +442,37 @@ export default function SpecialistList() {
               {filtered.map((s, i) => (
                 <SpecialistCard key={s.id} specialist={s} priority={i === 0} sourcePage="directorio" />
               ))}
+            </div>
+          )}
+
+          {recommended.length > 0 && (
+            <div className="mt-8 rounded-2xl border border-border/60 bg-card p-4 sm:p-5">
+              <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+                <Heart className="w-4 h-4 text-red-500 fill-red-500" aria-hidden="true" /> Recomendados por pacientes
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Estos doctores aún no tienen perfil verificado en BuscoUnDoctor: la información viene de recomendaciones de pacientes.
+              </p>
+              <div className="mt-3 space-y-2">
+                {recommended.map((r) => (
+                  <Link
+                    key={r.slug}
+                    to={`/recomendado/${r.slug}`}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-xl border border-border/60 px-4 py-3 hover:border-primary/40 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-heading font-semibold text-foreground break-words">{r.full_name}</p>
+                      <p className="text-sm text-muted-foreground break-words">{[r.specialty, r.zone].filter(Boolean).join(" · ")}</p>
+                    </div>
+                    <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-1 flex-shrink-0">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
+                      </span>
+                      <span className="text-xs text-foreground">{r.count} {r.count === 1 ? "recomendación" : "recomendaciones"}</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           )}
         </div>
