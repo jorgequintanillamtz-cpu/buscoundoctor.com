@@ -30,6 +30,7 @@ const EMAIL_TYPE_LABELS = {
   registro_recuperacion_3: "Recuperar registro (3.º, a los 4 días)",
   recordatorio_completar_perfil: "Recordatorio: completa tu perfil",
   recordatorio_subir_cedula: "Recordatorio: sube tu cédula",
+  recomendacion_codigo: "Código de verificación (recomendaciones)",
   doctor_solicita_baja_admin: "Aviso: solicitud de baja",
   doctor_reenvio_revision_admin: "Aviso: doctor reenvió a revisión",
   prueba: "Prueba",
