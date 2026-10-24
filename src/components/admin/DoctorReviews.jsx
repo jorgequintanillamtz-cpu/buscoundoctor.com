@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { Star, MessageSquareText, ShieldCheck, Reply, Loader2, Pencil, Trash2, HelpCircle } from "lucide-react";
+import { Star, MessageSquareText, ShieldCheck, Reply, Loader2, Pencil, Trash2, HelpCircle, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import DoctorQuestions from "./DoctorQuestions";
+import DoctorRecommendations from "./DoctorRecommendations";
 import LoadingLogo from "@/components/LoadingLogo";
 
 function fmtDate(d) {
@@ -152,14 +153,21 @@ function StatCard({ label, value, tone = "navy" }) {
 // Reseñas del propio doctor: antes solo se podían ver en su perfil público
 // (y solo las ya aprobadas). Aquí ve todas — aprobadas y pendientes — junto
 // con su promedio y la distribución por estrellas, sin salir del panel.
-export default function DoctorReviews({ specialistId }) {
+export default function DoctorReviews({ specialistId, initialTab }) {
   // "Preguntas" (Dudas solucionadas) vive aquí mismo como pestaña, en vez de
   // agregar una opción nueva al menú del panel -- ya tiene 7 y no queremos
   // subirlo. El numerito rojo del menú ("Reseñas") avisa de las dos cosas,
   // porque el aviso de pregunta nueva usa la misma sección "resenas".
-  const [tab, setTab] = useState("resenas");
+  const [tab, setTab] = useState(initialTab === "recomendaciones" || initialTab === "preguntas" ? initialTab : "resenas");
+  const [recs, setRecs] = useState({ count: 0, items: [] });
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // "Recomendaciones" (pacientes que recomiendan sin dejar reseña): solo las ya aprobadas por el equipo.
+  useEffect(() => {
+    if (!specialistId) return;
+    base44.functions.invoke("listMyRecommendations").then(({ data }) => { if (data) setRecs(data); }).catch(() => {});
+  }, [specialistId]);
 
   useEffect(() => {
     if (!specialistId) return;
@@ -200,7 +208,7 @@ export default function DoctorReviews({ specialistId }) {
           Reseñas
         </h1>
         <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
-          Lo que tus pacientes opinan de ti, y las preguntas que te hacen desde tu perfil público.
+          Lo que tus pacientes opinan de ti, las preguntas que te hacen desde tu perfil público y quiénes te recomiendan.
         </p>
       </div>
 
@@ -223,9 +231,20 @@ export default function DoctorReviews({ specialistId }) {
         >
           <HelpCircle className="w-3.5 h-3.5" /> Preguntas
         </button>
+        <button
+          type="button"
+          onClick={() => setTab("recomendaciones")}
+          className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            tab === "recomendaciones" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+          }`}
+        >
+          <Heart className="w-3.5 h-3.5" /> Recomendaciones{recs.count > 0 ? ` (${recs.count})` : ""}
+        </button>
       </div>
 
-      {tab === "preguntas" ? (
+      {tab === "recomendaciones" ? (
+        <DoctorRecommendations data={recs} />
+      ) : tab === "preguntas" ? (
         <DoctorQuestions specialistId={specialistId} />
       ) : (
         <>

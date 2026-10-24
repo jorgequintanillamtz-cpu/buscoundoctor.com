@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Loader2, Mail, CheckCircle2, BadgeCheck, MapPin, Stethoscope, ShieldCheck, Camera, AlertTriangle,
+  Loader2, Mail, CheckCircle2, BadgeCheck, MapPin, Stethoscope, ShieldCheck, Camera, AlertTriangle, Heart,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import OAuthButtons from "@/components/OAuthButtons";
@@ -31,6 +31,7 @@ export default function ReclamarPerfil() {
   const { token } = useParams();
   const navigate = useNavigate();
   const oauthProviders = useOAuthProviders();
+  const [recCount, setRecCount] = useState(0); // pacientes que ya lo recomendaron (recomendaciones aprobadas)
   const [phase, setPhase] = useState("loading"); // loading | bad | intro | email-form | otp | done
   const [badReason, setBadReason] = useState("invalid");
   const [preview, setPreview] = useState(null);
@@ -132,6 +133,7 @@ export default function ReclamarPerfil() {
         return;
       }
       try { notifyWelcome(data.specialist); } catch { /* el aviso nunca debe estorbar */ }
+      base44.functions.invoke("listMyRecommendations").then(({ data: r }) => setRecCount(r?.count || 0)).catch(() => {});
       setPhase("done");
     } catch (err) {
       setError(formErrorMessage(err, "No se pudo reclamar el perfil. Intenta de nuevo o escríbenos por WhatsApp."));
@@ -289,6 +291,16 @@ export default function ReclamarPerfil() {
             <p className="text-sm text-muted-foreground">
               Ya quedó a tu nombre y pasó a revisión de nuestro equipo. Sube tu cédula y tus fotos desde tu panel para acelerar la publicación.
             </p>
+            {recCount > 0 && (
+              <div className="rounded-2xl bg-brand-bluePale p-4 text-left">
+                <p className="flex items-center gap-2 font-heading font-bold text-brand-navy">
+                  <Heart className="w-4 h-4 text-red-500 fill-red-500" aria-hidden="true" />
+                  {recCount === 1 ? "Un paciente ya te recomendó" : `${recCount} pacientes ya te recomendaron`}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">Mira lo que más valoraron de ti y sus mensajes privados.</p>
+                <Button variant="outline" onClick={() => navigate("/panel-medico?seccion=resenas&tab=recomendaciones")} className="mt-3 min-h-[44px] rounded-xl bg-white">Ver mis recomendaciones</Button>
+              </div>
+            )}
             <div className="flex flex-col gap-2">
               <Button onClick={() => navigate("/panel-medico?seccion=perfil")} className="min-h-[44px] rounded-xl gap-1.5">
                 <Camera className="w-4 h-4" /> Subir mi foto de perfil

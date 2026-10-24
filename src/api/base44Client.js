@@ -454,6 +454,7 @@ const FUNCTION_MAP = {
   getCardExtras: ({ ids } = {}) => supabase.rpc('get_card_extras', { p_ids: ids }),
   // Recomendaciones de pacientes (CLAUDE.md §8r): pedir el código por correo, buscar doctor y enviar.
   requestRecommendationCode: ({ email } = {}) => supabase.rpc('request_recommendation_code', { p_email: email }),
+  listMyRecommendations: () => supabase.rpc('list_my_recommendations'),
   getRecommendedDoctor: ({ slug } = {}) => supabase.rpc('get_recommended_doctor', { p_slug: slug }),
   searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
   adminReviewSuggestion: ({ id, action, notes } = {}) => supabase.rpc('admin_review_suggestion', { p_id: id, p_action: action, p_notes: notes || null }),
