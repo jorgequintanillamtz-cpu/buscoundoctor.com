@@ -295,6 +295,23 @@ export default function AdminRecomendaciones() {
                     <span className="font-semibold text-foreground">{g.recs.length}</span> {g.recs.length === 1 ? "recomendación" : "recomendaciones"}
                     <span className="text-muted-foreground"> · {approvedCount} aprobadas · {g.pendingIds.length} por revisar</span>
                   </p>
+                  {g.kind === "suggestion" && s?.slug && g.status === "approved" && (
+                    <p className="text-xs mt-2 flex items-center gap-3 flex-wrap">
+                      <a href={`/recomendado/${s.slug}`} target="_blank" rel="noopener noreferrer" className="text-brand-blue inline-flex items-center gap-1 hover:underline">
+                        Ver página pública <ExternalLink className="w-3 h-3" />
+                      </a>
+                      <button
+                        type="button"
+                        className="text-brand-blue hover:underline"
+                        onClick={() => navigator.clipboard?.writeText(`https://buscoundoctor.com/recomendado/${s.slug}`).then(() => setNotice({ ok: true, text: "Enlace copiado" })).catch(() => setNotice({ ok: false, text: "No se pudo copiar el enlace" }))}
+                      >
+                        Copiar enlace
+                      </button>
+                      <span className="text-muted-foreground">
+                        {approvedCount >= 3 && s.license_checked_at ? "Aparece en Google" : "Solo con el enlace (para Google faltan 3 recomendaciones aprobadas y la cédula comprobada)"}
+                      </span>
+                    </p>
+                  )}
                   {topTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {topTags.map(([t, n]) => <span key={t} className="text-xs bg-brand-bluePale text-brand-navy px-2.5 py-1 rounded-full">{recommendationTagLabel(t)} · {n}</span>)}
