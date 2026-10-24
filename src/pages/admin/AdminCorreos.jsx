@@ -20,6 +20,7 @@ const EMAIL_TYPE_LABELS = {
   articulo_rechazado: "Artículo rechazado",
   nueva_solicitud_cita: "Nueva solicitud de cita",
   nueva_resena: "Nueva reseña",
+  nueva_recomendacion: "Nueva recomendación",
   contacto_publico: "Formulario de contacto",
   nuevo_interes_especialidad: "Interés en especialidad",
   nuevo_registro_doctor_admin: "Aviso: nuevo registro de doctor",
