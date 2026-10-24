@@ -73,6 +73,7 @@ const LandingRegistroGratis = lazy(() => import('./pages/LandingRegistroGratis')
 const BajaCorreos = lazy(() => import('./pages/BajaCorreos'));
 const ReclamarPerfil = lazy(() => import('./pages/ReclamarPerfil'));
 const Recomendaciones = lazy(() => import('./pages/Recomendaciones'));
+const RecomendadosLista = lazy(() => import('./pages/RecomendadosLista'));
 const RecomendadoPerfil = lazy(() => import('./pages/RecomendadoPerfil'));
 const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
 const StorefrontProductDetail = lazy(() => import('./pages/StorefrontProductDetail'));
@@ -121,6 +122,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
+        <Route path="/recomendados" element={<RecomendadosLista />} />
         <Route path="/recomendado/:slug" element={<RecomendadoPerfil />} />
         <Route path="/hospital/:slug" element={<HospitalPage />} />
         <Route path="/hospitales" element={<HospitalsPage />} />
