@@ -12,8 +12,8 @@ import { setOpenGraph, SITE_OG } from "@/lib/seoMeta";
 
 // Número real de WhatsApp del negocio. Formato wa.me: 52 (México) + 10
 // dígitos (81 = Monterrey), sin espacios ni signos.
-const WHATSAPP_NUMBER = "528117902740";
-const WHATSAPP_DISPLAY = "+52 81 1790 2740";
+const WHATSAPP_NUMBER = "528186888530";
+const WHATSAPP_DISPLAY = "+52 81 8688 8530";
 const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   "Hola, tengo una pregunta sobre BuscoUnDoctor"
 )}`;

@@ -8,7 +8,7 @@ import LoadingLogo from "@/components/LoadingLogo";
 // Mismo número de WhatsApp del negocio que se usa en /contacto y
 // /para-medicos, para que "Actualizar a Premium" abra el mismo canal de
 // contacto que ya conocen los doctores.
-const WHATSAPP_NUMBER = "528117902740";
+const WHATSAPP_NUMBER = "528186888530";
 
 const fmtDate = (d) =>
   d ? new Date(d).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" }) : "—";

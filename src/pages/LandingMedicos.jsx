@@ -14,7 +14,7 @@ import { LAUNCH_DATE, LAUNCH_PILL, HAS_LAUNCH_DATE, useCountdown } from "@/lib/l
 const CTA_URL = "/registro-medico";
 // Número real de WhatsApp del negocio (mismo que /contacto), para el botón
 // de "¿sigues teniendo dudas?" al final de la página.
-const WHATSAPP_NUMBER = "528117902740";
+const WHATSAPP_NUMBER = "528186888530";
 const WHATSAPP_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   "Hola, tengo una pregunta sobre el registro de médicos en BuscoUnDoctor"
 )}`;

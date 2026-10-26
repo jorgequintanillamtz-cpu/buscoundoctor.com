@@ -3,7 +3,7 @@
 // que un doctor con dudas mientras edita su perfil pueda escribirle
 // directo al equipo sin tener que salir del panel a buscar la página de
 // Contacto. Mismo número real de WhatsApp que ya usa Contact.jsx.
-const WHATSAPP_NUMBER = "528117902740";
+const WHATSAPP_NUMBER = "528186888530";
 // Enlace de WhatsApp al equipo con un mensaje prellenado (lo reutilizan los
 // avisos de ayuda del panel).
 export function supportWhatsAppLink(text = "Hola, tengo una duda sobre mi perfil en BuscoUnDoctor") {
