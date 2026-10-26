@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine, Quote } from "lucide-react";
+import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine, Quote, MoreVertical, Flag } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
+import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { setCanonical, setOpenGraph, buildAbsoluteUrl } from "@/lib/seoMeta";
 
@@ -26,10 +28,30 @@ const commentMonth = (ym) => {
   return MONTHS[Number(m) - 1] ? `${MONTHS[Number(m) - 1]} ${y}` : "";
 };
 
+// Menú de 3 puntitos para reportar (cualquier persona puede, sin cuenta). `items`: [{ label, onSelect }]
+function ReportMenu({ items, ariaLabel }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button type="button" aria-label={ariaLabel || items[0].label} className="p-1.5 -m-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
+          <MoreVertical className="w-4 h-4" aria-hidden="true" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {items.map((it) => (
+          <DropdownMenuItem key={it.label} onSelect={it.onSelect} className="gap-2 cursor-pointer"><Flag className="w-4 h-4" aria-hidden="true" /> {it.label}</DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export default function RecomendadoPerfil() {
   const { slug } = useParams();
   const [doc, setDoc] = useState(null);
   const [state, setState] = useState("loading"); // loading | ok | notfound | error
+  const [report, setReport] = useState(null); // { id, kind, what } cuando se abre la ventana de reportar
+  const [showAll, setShowAll] = useState(false); // lista de recomendaciones: las 10 más recientes o todas
 
   const load = useCallback(async () => {
     setState("loading");
@@ -106,10 +128,13 @@ export default function RecomendadoPerfil() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-brand-bluePale p-5">
-            <p className="flex items-center gap-2 font-heading font-bold text-lg text-brand-navy">
-              <Heart className="w-5 h-5 text-red-500 fill-red-500" aria-hidden="true" />
-              {n > 0 ? `Recomendado por ${n} ${n === 1 ? "paciente" : "pacientes"}` : "Aún no hay recomendaciones publicadas"}
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <p className="flex items-center gap-2 font-heading font-bold text-lg text-brand-navy">
+                <Heart className="w-5 h-5 text-red-500 fill-red-500 flex-shrink-0" aria-hidden="true" />
+                {n > 0 ? `Recomendado por ${n} ${n === 1 ? "paciente" : "pacientes"}` : "Aún no hay recomendaciones publicadas"}
+              </p>
+              <ReportMenu items={[{ label: "Reportar recomendaciones", onSelect: () => setReport({ id: null, kind: null, what: "las recomendaciones" }) }]} />
+            </div>
             {doc.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-3">
                 {doc.tags.map((t) => (
@@ -131,18 +156,41 @@ export default function RecomendadoPerfil() {
           </div>
         </div>
 
-        {(doc.comments || []).length > 0 && (
+        {(doc.recommendations || []).length > 0 && (
           <div className="bg-card rounded-3xl border border-brand-canvasBorder p-5 sm:p-6">
-            <h2 className="font-heading font-semibold text-foreground">Lo que dicen sus pacientes</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Comentarios de pacientes, revisados antes de publicarse y sin su nombre. Solo mostramos recomendaciones positivas.</p>
+            <h2 className="font-heading font-semibold text-foreground">Recomendaciones de pacientes ({doc.recommendations.length})</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Cada una se muestra sin nombre y después de que la revisamos. Solo mostramos recomendaciones positivas.</p>
             <ul className="mt-3 space-y-2.5">
-              {doc.comments.map((c, i) => (
-                <li key={i} className="rounded-xl bg-muted/50 px-4 py-3">
-                  <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{c.text}</span></p>
-                  <p className="text-xs text-muted-foreground mt-1.5 pl-6">Paciente · {commentMonth(c.month)}</p>
+              {(showAll ? doc.recommendations : doc.recommendations.slice(0, 10)).map((r) => (
+                <li key={r.id} className="rounded-xl bg-muted/50 px-4 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    {r.comment ? (
+                      <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{r.comment}</span></p>
+                    ) : (r.tags || []).length === 0 ? (
+                      <p className="text-sm text-foreground">Recomienda a este doctor.</p>
+                    ) : <span />}
+                    <ReportMenu
+                      ariaLabel="Reportar"
+                      items={[
+                        { label: "Reportar recomendación", onSelect: () => setReport({ id: r.id, kind: "recommendation", what: "la recomendación" }) },
+                        ...(r.comment ? [{ label: "Reportar comentario", onSelect: () => setReport({ id: r.id, kind: "comment", what: "el comentario" }) }] : []),
+                      ]}
+                    />
+                  </div>
+                  {(r.tags || []).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {r.tags.map((t) => <span key={t} className="text-xs bg-white text-brand-navy px-2.5 py-1 rounded-full border border-brand-canvasBorder">{recommendationTagLabel(t)}</span>)}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
+                    <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" /> {r.name ? <><span className="font-medium text-foreground">{r.name}</span> · </> : null}{commentMonth(r.month)}
+                  </p>
                 </li>
               ))}
             </ul>
+            {doc.recommendations.length > 10 && !showAll && (
+              <button type="button" onClick={() => setShowAll(true)} className="mt-3 text-sm font-medium text-brand-blue hover:underline">Ver las {doc.recommendations.length} recomendaciones</button>
+            )}
           </div>
         )}
 
@@ -166,6 +214,7 @@ export default function RecomendadoPerfil() {
           <Button asChild variant="outline" className="mt-3 rounded-xl min-h-[44px]"><Link to="/contacto">Contactar a BuscoUnDoctor</Link></Button>
         </div>
       </div>
+      <ReportRecommendationDialog open={!!report} onOpenChange={(o) => { if (!o) setReport(null); }} slug={doc.slug} commentId={report?.id || null} kind={report?.kind || null} what={report?.what || "la recomendación"} />
     </div>
   );
 }

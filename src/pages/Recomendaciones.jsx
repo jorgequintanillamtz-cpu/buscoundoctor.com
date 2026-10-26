@@ -30,6 +30,7 @@ export default function Recomendaciones() {
   const [target, setTarget] = useState(null); // { mode: "existing", kind, id, full_name, specialty, zone } | { mode: "new", ... }
   const [tags, setTags] = useState([]);
   const [message, setMessage] = useState("");
+  const [firstName, setFirstName] = useState(""); // primer nombre opcional: si se escribe, se muestra junto a la recomendación
   const [comment, setComment] = useState(""); // comentario público corto (lo revisa el equipo; sin nombre)
   const [showPrivate, setShowPrivate] = useState(false);
   const [email, setEmail] = useState("");
@@ -121,6 +122,9 @@ export default function Recomendaciones() {
   };
   const specialtyLabel = (name) => specialties.find((s) => s.name === name)?.display_name || name;
 
+  const firstNameClean = firstName.replace(/\s+/g, " ").trim();
+  const nameProblem = firstNameClean && (firstNameClean.length < 2 || !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+([ -][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)?$/.test(firstNameClean))
+    ? "Escribe solo tu primer nombre, sin números ni símbolos." : "";
   const commentClean = comment.replace(/\s+/g, " ").trim();
   const commentProblem = !commentClean ? ""
     : commentClean.length < 20 ? "Escribe al menos 20 letras, o deja el comentario vacío."
@@ -156,7 +160,7 @@ export default function Recomendaciones() {
       : target.kind === "suggestion" ? { suggestion_id: target.id } : { specialist_id: target.id };
     try {
       const { data } = await base44.functions.invoke("submitRecommendation", {
-        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null,
+        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null, name: firstNameClean || null,
         consent: true, marketing, consent_version: CONSENT_VERSION,
       });
       if (data?.ok) { setStep(4); }
@@ -171,7 +175,7 @@ export default function Recomendaciones() {
   };
 
   const reset = () => {
-    setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setShowPrivate(false); setCode(""); setCodeSent(false);
+    setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setFirstName(""); setShowPrivate(false); setCode(""); setCodeSent(false);
     setConsent(false); setMarketing(false); setQuery(""); setResults(null); setAdding(false);
     setNewDoc({ full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError("");
   };
@@ -192,7 +196,7 @@ export default function Recomendaciones() {
               <span className="text-emerald-300">Recomiéndalo</span>
             </h1>
             <p className="mt-3 text-white/75 text-sm sm:text-base">
-              Ayuda a otros pacientes a encontrar buen trato. Toma un minuto y tu nombre nunca se muestra.
+              Ayuda a otros pacientes a encontrar buen trato. Toma un minuto. Tu apellido y tu correo nunca se muestran.
             </p>
           </div>
         )}
@@ -348,10 +352,16 @@ export default function Recomendaciones() {
                 className="rounded-xl resize-none" />
               <div className="flex items-start justify-between gap-3 mt-1.5">
                 <p className={`text-xs ${commentProblem ? "text-red-600" : "text-muted-foreground"}`}>
-                  {commentProblem || "Habla de su trato, cómo explica, el consultorio o la atención. Sin tu enfermedad ni nombres de otras personas. Se publica sin tu nombre, después de que lo revisemos."}
+                  {commentProblem || "Habla de su trato, cómo explica, el consultorio o la atención. Sin tu enfermedad ni nombres de otras personas. Se publica después de que lo revisemos."}
                 </p>
                 <span className="text-xs text-muted-foreground flex-shrink-0">{comment.length}/160</span>
               </div>
+
+              <p className="text-sm font-medium text-foreground mt-5 mb-1.5">Tu primer nombre <span className="text-muted-foreground font-normal">(opcional)</span></p>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value.slice(0, 25))} placeholder="Ej. María" className="h-12 rounded-xl" autoComplete="given-name" />
+              <p className={`text-xs mt-1.5 ${nameProblem ? "text-red-600" : "text-muted-foreground"}`}>
+                {nameProblem || "Si lo escribes, aparece junto a tu recomendación. Solo tu primer nombre: nunca tu apellido ni tu correo."}
+              </p>
 
               {!showPrivate && !message ? (
                 <button type="button" onClick={() => setShowPrivate(true)} className="mt-5 text-sm text-brand-blue hover:underline">
@@ -370,7 +380,7 @@ export default function Recomendaciones() {
 
               <div className="flex gap-3 mt-6">
                 <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-12 rounded-xl px-4"><ArrowLeft className="w-4 h-4" /></Button>
-                <Button type="button" onClick={() => setStep(3)} disabled={!!commentProblem} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
+                <Button type="button" onClick={() => setStep(3)} disabled={!!commentProblem || !!nameProblem} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
               </div>
             </div>
           )}
@@ -438,7 +448,7 @@ export default function Recomendaciones() {
             <div className="text-center py-4">
               <div className="w-14 h-14 rounded-full bg-brand-augustaLight text-brand-augusta flex items-center justify-center mx-auto"><CheckCircle2 className="w-8 h-8" /></div>
               <h2 className="font-heading font-bold text-xl text-foreground mt-4">¡Gracias por recomendar{she ? "la" : "lo"}!</h2>
-              <p className="text-sm text-muted-foreground mt-2">Tu recomendación quedó en revisión. Tu nombre nunca se muestra.</p>
+              <p className="text-sm text-muted-foreground mt-2">Tu recomendación quedó en revisión. Tu apellido y tu correo nunca se muestran.</p>
               <Button type="button" onClick={reset} className="w-full mt-6 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Recomendar a otro doctor</Button>
               <Button asChild variant="outline" className="w-full mt-3 h-12 rounded-xl gap-2">
                 <a href={shareHref} target="_blank" rel="noopener noreferrer"><Share2 className="w-4 h-4" /> Compartir con un amigo</a>

@@ -10,6 +10,7 @@ import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
+import { REPORT_REASONS } from "@/components/ReportRecommendationDialog";
 import {
   HeartHandshake, Search, CheckCircle2, XCircle, ChevronDown, ChevronUp, ExternalLink, ShieldCheck, GitMerge, UserPlus, Quote,
 } from "lucide-react";
@@ -36,6 +37,7 @@ const TABS = [
   { key: "approved", label: "Aprobados" },
   { key: "rejected", label: "Rechazados" },
   { key: "all", label: "Todos" },
+  { key: "reports", label: "Reportes" },
 ];
 
 export default function AdminRecomendaciones() {
@@ -53,6 +55,7 @@ export default function AdminRecomendaciones() {
   const [notice, setNotice] = useState(null); // { ok, text }
   const [notes, setNotes] = useState({});
   const [mergeTarget, setMergeTarget] = useState({});
+  const [reports, setReports] = useState([]); // reportes de visitantes sobre comentarios o páginas
   const [commentsPublic, setCommentsPublic] = useState(null); // interruptor: ¿se muestran los comentarios al público?
 
   const load = async () => {
@@ -64,6 +67,7 @@ export default function AdminRecomendaciones() {
         base44.entities.Specialist.list(),
       ]);
       setSuggestions(s); setRecs(r); setSpecialists(sp.filter((x) => !x.deleted_at));
+      try { setReports(await base44.entities.RecommendationReport.list("-created_at", 500)); } catch { setReports([]); }
       try { const { data } = await base44.functions.invoke("adminGetRecommendationSettings"); setCommentsPublic(!!data?.comments_public); } catch { setCommentsPublic(null); }
     } catch (e) {
       console.error("No se pudieron cargar las recomendaciones", e);
@@ -108,6 +112,7 @@ export default function AdminRecomendaciones() {
     const term = q.trim().toLowerCase();
     return groups
       .filter((g) => {
+        if (tab === "reports") return false;
         if (tab === "pending") return needsReview(g);
         if (tab === "approved") return g.status === "approved" && g.pendingIds.length === 0 && g.pendingCommentIds.length === 0;
         if (tab === "rejected") return g.status === "rejected";
@@ -120,6 +125,10 @@ export default function AdminRecomendaciones() {
   const totalPending = recs.filter((r) => r.status === "pending").length;
   const pendingDoctors = groups.filter(needsReview).length;
   const totalApproved = recs.filter((r) => r.status === "approved").length;
+  const openReports = reports.filter((r) => r.status === "open");
+  const doneReports = reports.filter((r) => r.status !== "open");
+  const reasonLabel = (v) => REPORT_REASONS.find((x) => x.v === v)?.label || v;
+  const reviewReport = (rep, action, okText) => run(`rep-${rep.id}`, () => invoke("adminReviewReport", { id: rep.id, action }), okText);
   const totalPendingComments = recs.filter((r) => r.comment_status === "pending").length;
 
   const run = async (key, fn, okText) => {
@@ -280,7 +289,7 @@ export default function AdminRecomendaciones() {
           {TABS.map((t) => (
             <button key={t.key} type="button" onClick={() => setTab(t.key)}
               className={`px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${tab === t.key ? "bg-brand-navy text-white" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
-              {t.label}
+              {t.label}{t.key === "reports" && openReports.length > 0 ? ` (${openReports.length})` : ""}
             </button>
           ))}
         </div>
@@ -295,7 +304,55 @@ export default function AdminRecomendaciones() {
       )}
 
       <div className="mt-5 space-y-4">
-        {visible.length === 0 && (
+        {tab === "reports" && (
+          <>
+            {reports.length === 0 && (
+              <div className="text-center py-16 bg-card rounded-2xl border border-border/50"><p className="text-muted-foreground">No hay reportes.</p></div>
+            )}
+            {[["Por revisar", openReports], ["Ya revisados", doneReports]].map(([title, list]) => list.length > 0 && (
+              <div key={title}>
+                <h2 className="text-sm font-heading font-semibold text-foreground mb-2">{title} ({list.length})</h2>
+                <div className="space-y-3">
+                  {list.map((rep) => {
+                    const sug = suggestions.find((x) => x.id === rep.suggestion_id);
+                    const rc = rep.recommendation_id ? recs.find((x) => x.id === rep.recommendation_id) : null;
+                    const busyRep = busy === `rep-${rep.id}`;
+                    return (
+                      <div key={rep.id} className="bg-card rounded-2xl border border-border/50 p-4">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-heading font-semibold text-foreground">{sug?.full_name || "Doctor"}</p>
+                          <span className="text-xs bg-muted px-2.5 py-1 rounded-full text-muted-foreground">{rep.kind === "comment" ? "Reporte de un comentario" : rep.kind === "recommendation" ? "Reporte de una recomendación" : "Reporte de la página"}</span>
+                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${rep.reason === "soy_el_doctor" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{reasonLabel(rep.reason)}</span>
+                          {rep.status !== "open" && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">{rep.status === "dismissed" ? "Descartado" : rep.status === "actioned" ? "Contenido retirado" : "Atendido"}</span>}
+                          <span className="text-xs text-muted-foreground ml-auto">{fmtDate(rep.created_at)}</span>
+                        </div>
+                        {rc && (rc.tags || []).length > 0 && <div className="flex flex-wrap gap-1.5 mt-2">{rc.tags.map((t) => <span key={t} className="text-xs bg-muted px-2 py-0.5 rounded-full">{recommendationTagLabel(t)}</span>)}</div>}
+                        {rc?.public_comment && <p className="text-sm text-foreground mt-2 flex gap-2"><Quote className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-1" /> <span className="break-words">{rc.public_comment}</span></p>}
+                        {rep.details && <p className="text-sm text-muted-foreground mt-2 break-words"><span className="font-medium text-foreground">Detalles:</span> {rep.details}</p>}
+                        {rep.reporter_email && <p className="text-sm text-muted-foreground mt-1">Quien reporta: <a href={`mailto:${rep.reporter_email}`} className="text-brand-blue hover:underline">{rep.reporter_email}</a></p>}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {sug?.slug && <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs"><a href={`/recomendado/${sug.slug}`} target="_blank" rel="noopener noreferrer">Ver página <ExternalLink className="w-3 h-3 ml-1" /></a></Button>}
+                          {rep.status === "open" ? (
+                            <>
+                              {rc?.public_comment && rep.recommendation_id && <Button size="sm" variant="outline" disabled={busyRep} onClick={() => reviewReport(rep, "hide_comment", "Comentario retirado")} className="rounded-lg h-8 text-xs text-red-700">Retirar comentario</Button>}
+                              {rep.recommendation_id && <Button size="sm" variant="outline" disabled={busyRep} onClick={() => reviewReport(rep, "reject_recommendation", "Recomendación retirada")} className="rounded-lg h-8 text-xs text-red-700">Retirar la recomendación</Button>}
+                              <Button size="sm" variant="outline" disabled={busyRep} onClick={() => reviewReport(rep, "resolved", "Reporte atendido")} className="rounded-lg h-8 text-xs">Marcar atendido</Button>
+                              <Button size="sm" variant="outline" disabled={busyRep} onClick={() => reviewReport(rep, "dismiss", "Reporte descartado")} className="rounded-lg h-8 text-xs">Descartar</Button>
+                            </>
+                          ) : (
+                            <Button size="sm" variant="outline" disabled={busyRep} onClick={() => reviewReport(rep, "reopen", "Reporte reabierto")} className="rounded-lg h-8 text-xs">Reabrir</Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {tab !== "reports" && visible.length === 0 && (
           <div className="text-center py-16 bg-card rounded-2xl border border-border/50">
             <p className="text-muted-foreground">{tab === "pending" ? "No hay nada por revisar." : "No hay doctores en esta lista."}</p>
           </div>
@@ -445,6 +502,12 @@ export default function AdminRecomendaciones() {
                           {r.status !== "rejected" && <Button size="sm" variant="outline" disabled={busy === `r-${r.id}`} onClick={() => reviewOne(g, r, "rejected")} className="rounded-lg h-8 text-xs text-red-700">Rechazar</Button>}
                         </div>
                       </div>
+                      {r.display_name && (
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
+                          Mostrará el nombre: <span className="font-medium text-foreground">{r.display_name}</span>
+                          <button type="button" disabled={busy === `n-${r.id}`} onClick={() => run(`n-${r.id}`, () => invoke("adminClearRecommendationName", { id: r.id }), "Nombre quitado")} className="text-red-700 hover:underline">Quitar nombre</button>
+                        </p>
+                      )}
                       {r.public_comment && (
                         <div className="mt-2 rounded-lg bg-brand-bluePale/60 p-2.5">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
