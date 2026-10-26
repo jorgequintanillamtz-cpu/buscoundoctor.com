@@ -463,6 +463,7 @@ const FUNCTION_MAP = {
   adminReviewReport: ({ id, action } = {}) => supabase.rpc('admin_review_report', { p_id: id, p_action: action }),
   getSpecialistRecommendations: ({ slug } = {}) => supabase.rpc('get_specialist_recommendations', { p_slug: slug }),
   getRecommendedDoctor: ({ slug } = {}) => supabase.rpc('get_recommended_doctor', { p_slug: slug }),
+  findSimilarDoctors: ({ specialty, query } = {}) => supabase.rpc('find_similar_doctors', { p_specialty: specialty, p_query: query }),
   searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
   adminReviewSuggestion: ({ id, action, notes } = {}) => supabase.rpc('admin_review_suggestion', { p_id: id, p_action: action, p_notes: notes || null }),
   adminClearRecommendationName: ({ id } = {}) => supabase.rpc('admin_clear_recommendation_name', { p_id: id }),
