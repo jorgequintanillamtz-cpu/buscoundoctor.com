@@ -1,4 +1,4 @@
-import { Heart, Lock, Quote } from "lucide-react";
+import { Heart, Lock, Quote, MessageSquareText } from "lucide-react";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 
 function fmtDate(d) {
@@ -29,6 +29,7 @@ export default function DoctorRecommendations({ data }) {
   items.forEach((r) => (r.tags || []).forEach((t) => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
   const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
   const withMessage = items.filter((r) => r.message);
+  const withComment = items.filter((r) => r.comment);
 
   return (
     <div className="space-y-5 max-w-2xl">
@@ -50,6 +51,23 @@ export default function DoctorRecommendations({ data }) {
           </>
         )}
       </div>
+
+      {withComment.length > 0 && (
+        <div>
+          <h2 className="text-sm font-heading font-semibold text-foreground mb-1 flex items-center gap-1.5">
+            <MessageSquareText className="w-4 h-4 text-muted-foreground" /> Comentarios de pacientes ({withComment.length})
+          </h2>
+          <p className="text-xs text-muted-foreground mb-3">Frases cortas que dejaron tus pacientes, ya revisadas por nuestro equipo y sin su nombre.</p>
+          <div className="space-y-2">
+            {withComment.map((r) => (
+              <div key={r.id} className="bg-card border border-border/50 rounded-2xl p-4">
+                <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{r.comment}</span></p>
+                <p className="text-xs text-muted-foreground mt-2 text-right">{fmtDate(r.created_at)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div>
         <h2 className="text-sm font-heading font-semibold text-foreground mb-1 flex items-center gap-1.5">
