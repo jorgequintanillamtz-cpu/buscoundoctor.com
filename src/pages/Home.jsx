@@ -10,6 +10,7 @@ import BlogCard from "../components/BlogCard";
 import { resolveCitySlug } from "@/lib/citySlug";
 import { HERO_SPECIALTY_PLACEHOLDERS } from "@/lib/heroSearchPlaceholders";
 import CountdownBox from "@/components/CountdownBox";
+import RecommendedDoctorsSection from "@/components/RecommendedDoctorsSection";
 import { LAUNCH_DATE, LAUNCH_PILL, LAUNCH_WHEN, HAS_LAUNCH_DATE, useCountdown } from "@/lib/launchCountdown";
 
 // Ilustración decorativa de fondo del hero: una fila de siluetas de personas
@@ -823,6 +824,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Doctores recomendados por pacientes (lleva a /recomendados; no se dibuja si no hay ninguno). */}
+      <RecommendedDoctorsSection />
 
       {/* Únete a BuscoUnDoctor: banner de reclutamiento de médicos, justo
           arriba del blog, mostrado como 3 pasos (registro, validación,

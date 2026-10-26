@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight, Activity, Newspaper, HelpCircle, Info, Mail } from "lucide-react";
+import { Menu, X, Search, Stethoscope, MapPin, LogIn, UserPlus, ChevronRight, Activity, Newspaper, HelpCircle, Info, Mail, ThumbsUp } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -248,6 +248,14 @@ export default function Header() {
 
           <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             <Link
+              to="/recomendados"
+              className={`text-sm font-medium transition-colors whitespace-nowrap ${
+                isHome ? "text-white/80 hover:text-white" : "text-brand-navy/70 hover:text-brand-navy"
+              }`}
+            >
+              Recomendados
+            </Link>
+            <Link
               to="/panel-medico"
               className={`text-sm font-medium transition-colors whitespace-nowrap ${
                 isHome ? "text-white/80 hover:text-white" : "text-brand-navy/70 hover:text-brand-navy"
@@ -347,6 +355,13 @@ export default function Header() {
               className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
               <Stethoscope className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
               Especialistas
+            </Link>
+            <Link
+              to="/recomendados"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
+              <ThumbsUp className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+              Doctores recomendados
             </Link>
             <Link
               to="/enfermedades"
