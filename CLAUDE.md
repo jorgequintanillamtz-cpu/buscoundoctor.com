@@ -55,6 +55,10 @@ Los dueños son **Jorge y David** (hermanos). Los dos tienen acceso completo (c�
 
 **No existe entorno de pruebas.** Solo hay un proyecto Supabase, que es producción. Todo lo que pruebes toca datos reales (ver §9).
 
+### WhatsApp del negocio (2026-10-26)
+
+El WhatsApp de soporte y contacto es **+52 81 8688 8530** (`528186888530` en los enlaces `wa.me`; antes era 81 1790 2740, cambiado por Jorge). **No hay una constante única**: está repetido en `src/components/DoctorSupportWhatsApp.jsx` (ayuda del panel del doctor; `supportWhatsAppLink()` la usan el panel, Ajustes, la bienvenida y `ReclamarPerfil`), `src/pages/Contact.jsx` (número y enlace de `/contacto`), `src/pages/LandingMedicos.jsx` (`/para-medicos` y las de registro) y `src/components/admin/DoctorPremiumStatus.jsx` (Premium, hoy oculto). **Y también en la base de datos:** la respuesta de la pregunta frecuente "¿Cómo contacto a BuscoUnDoctor si tengo dudas?" (`faq_item`). **Si vuelve a cambiar, hay que tocar los 4 archivos y esa pregunta** (busca con `grep -rn "<número>" src` y `faq_item::text ~ '<número>'`). Los correos de Postgres no llevan el número (verificado).
+
 ### La capa de compatibilidad `src/api/base44Client.js`
 
 El sitio se construyó primero en Base44, y ~240 archivos llaman al SDK con la sintaxis de Base44 (`base44.entities.Specialist.filter(...)`, `base44.auth.*`, `base44.functions.invoke`, `base44.integrations.Core.*`). En vez de reescribirlos, `base44Client.js` **traduce esas llamadas a Supabase**. Entonces:
