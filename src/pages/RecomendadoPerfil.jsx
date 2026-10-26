@@ -93,7 +93,9 @@ export default function RecomendadoPerfil() {
             <p className="text-muted-foreground">
               {doc.license
                 ? <>Cédula profesional: <span className="font-medium text-foreground">{doc.license}</span> · consultada en el Registro Nacional de Profesionistas (SEP)</>
-                : "Cédula profesional: aún sin comprobar"}
+                : doc.license_checked
+                  ? "Cédula profesional consultada en el Registro Nacional de Profesionistas (SEP)"
+                  : "Cédula profesional: aún sin comprobar"}
             </p>
           </div>
 
@@ -115,7 +117,7 @@ export default function RecomendadoPerfil() {
 
           <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
             <Button asChild className="rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white">
-              <Link to="/recomendaciones"><PenLine className="w-4 h-4" /> Recomendar a este doctor</Link>
+              <Link to={`/recomendaciones?doctor=${doc.slug}`}><PenLine className="w-4 h-4" /> Recomendar a este doctor</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-xl min-h-[44px] gap-2">
               <a href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer"><Share2 className="w-4 h-4" /> Compartir</a>

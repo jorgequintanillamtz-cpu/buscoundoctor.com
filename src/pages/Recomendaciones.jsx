@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,23 @@ export default function Recomendaciones() {
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
   const searchSeq = useRef(0);
+  const [params] = useSearchParams();
+
+  // Si llegan desde la página de un doctor ("Recomendar a este doctor", /recomendaciones?doctor=su-enlace),
+  // el paso 1 ya trae a ese doctor elegido (se puede cambiar con la X). Si el enlace no sirve, todo sigue normal.
+  useEffect(() => {
+    const slug = params.get("doctor");
+    if (!slug) return undefined;
+    let active = true;
+    base44.functions.invoke("getRecommendedDoctor", { slug })
+      .then(({ data }) => {
+        if (active && data?.ok && data.id) {
+          setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, zone: data.zone });
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     document.title = "Recomienda a tu doctor | BuscoUnDoctor";
