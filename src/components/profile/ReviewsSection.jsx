@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Star, ShieldCheck, Heart } from "lucide-react";
 import moment from "moment";
 import ReviewForm from "../ReviewForm";
+import RecommendationCards from "../RecommendationCards";
+import { recommendationTagLabel } from "@/lib/recommendationTags";
 
 function StarDisplay({ rating, size = "w-4 h-4" }) {
   return (
@@ -32,6 +35,9 @@ export default function ReviewsSection({ specialistId, specialist }) {
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState("recientes");
   const [showForm, setShowForm] = useState(false);
+  // Recomendaciones de pacientes (CLAUDE.md §8r): las que le hicieron antes de registrarse y las nuevas, junto a las reseñas.
+  const [recData, setRecData] = useState(null);
+  const [tab, setTab] = useState(null); // null = automático (reseñas; si no hay reseñas pero sí recomendaciones, esas)
 
   // El botón "Escribir opinión" del encabezado del perfil abre este formulario (SpecialistProfile.jsx).
   useEffect(() => {
@@ -47,6 +53,19 @@ export default function ReviewsSection({ specialistId, specialist }) {
       .catch(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [specialistId]);
+
+  useEffect(() => {
+    if (!specialist?.slug) return undefined;
+    let active = true;
+    base44.functions.invoke("getSpecialistRecommendations", { slug: specialist.slug })
+      .then(({ data }) => { if (active && data?.ok) setRecData(data); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [specialist?.slug]);
+
+  const recCount = recData?.count || 0;
+  const hasRecs = recCount > 0;
+  const activeTab = tab ?? (reviews.length === 0 && hasRecs ? "recomendaciones" : "resenas");
 
   const avg = reviews.length > 0 ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : null;
 
@@ -81,15 +100,68 @@ export default function ReviewsSection({ specialistId, specialist }) {
     <div id="opiniones" className="mt-6 bg-card rounded-3xl border border-border/50 p-7 sm:p-9 scroll-mt-32">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
         <h2 className="font-heading font-bold text-xl text-foreground">Opiniones de pacientes</h2>
-        {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors"
+        <div className="flex items-center gap-2 flex-wrap">
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="text-sm font-medium text-primary border border-primary/30 bg-accent hover:bg-primary/10 px-4 py-1.5 rounded-full transition-colors"
+            >
+              ✏️ Escribir opinión
+            </button>
+          )}
+          <Link
+            to={`/recomendaciones?doctor=${specialist?.slug}`}
+            className="text-sm font-medium text-foreground border border-border bg-card hover:bg-muted px-4 py-1.5 rounded-full transition-colors"
           >
-            ✏️ Escribir opinión
-          </button>
-        )}
+            Recomendar
+          </Link>
+        </div>
       </div>
+
+      {hasRecs && (
+        <div className="inline-flex items-center bg-muted rounded-full p-1 mb-6" role="tablist" aria-label="Opiniones y recomendaciones">
+          {[
+            { key: "resenas", label: `Reseñas (${reviews.length})`, icon: Star },
+            { key: "recomendaciones", label: `Recomendaciones (${recCount})`, icon: Heart },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                activeTab === t.key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              }`}
+            >
+              <t.icon className="w-3.5 h-3.5" aria-hidden="true" /> {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {activeTab === "recomendaciones" && hasRecs && (
+        <div>
+          <p className="flex items-center gap-2 font-heading font-bold text-lg text-foreground">
+            <Heart className="w-5 h-5 text-red-500 fill-red-500 flex-shrink-0" aria-hidden="true" />
+            Recomendado por {recCount} {recCount === 1 ? "paciente" : "pacientes"}
+          </p>
+          {(recData.tags || []).length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {recData.tags.map((t) => (
+                <span key={t.tag} className="text-sm bg-brand-bluePale text-brand-navy px-3 py-1 rounded-full">{recommendationTagLabel(t.tag)} · {t.n}</span>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground mt-3 mb-3">
+            Recomendaciones de pacientes, revisadas antes de publicarse y sin apellido ni correo. Solo mostramos recomendaciones positivas; no son reseñas ni una valoración médica.
+          </p>
+          <RecommendationCards slug={specialist.slug} recommendations={recData.recommendations} />
+        </div>
+      )}
+
+      {activeTab === "resenas" && (
+        <>
 
       {reviews.length === 0 ? (
         <p className="text-sm text-muted-foreground">Aún no hay opiniones aprobadas para este especialista. ¡Sé el primero en dejar una!</p>
@@ -174,6 +246,9 @@ export default function ReviewsSection({ specialistId, specialist }) {
               </div>
             ))}
           </div>
+        </>
+      )}
+
         </>
       )}
 

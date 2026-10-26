@@ -60,9 +60,16 @@ export default function Recomendaciones() {
     if (!slug) return undefined;
     let active = true;
     base44.functions.invoke("getRecommendedDoctor", { slug })
-      .then(({ data }) => {
-        if (active && data?.ok && data.id) {
+      .then(async ({ data }) => {
+        if (!active) return;
+        if (data?.ok && data.id) {
           setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, zone: data.zone });
+          return;
+        }
+        // No es un doctor "recomendado" sin perfil: puede ser un doctor ya registrado y publicado (viene de su perfil).
+        const { data: sp } = await base44.functions.invoke("getSpecialistRecommendations", { slug });
+        if (active && sp?.ok && sp.id) {
+          setTarget({ mode: "existing", kind: "specialist", id: sp.id, full_name: sp.full_name, specialty: sp.specialty, zone: sp.zone });
         }
       })
       .catch(() => {});
