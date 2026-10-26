@@ -47,7 +47,11 @@ export default function Recomendaciones() {
   const [results, setResults] = useState(null); // null = aún no busca
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [newDoc, setNewDoc] = useState({ full_name: "", specialty: "", zone: "", hospital: "", license_number: "" });
+  // Al agregar un doctor nuevo: ya elegida la especialidad, mientras se escribe el nombre se muestran los doctores
+  // parecidos de esa especialidad, para elegirlos en vez de duplicarlos (CLAUDE.md §8r).
+  const [similar, setSimilar] = useState([]);
+  const similarSeq = useRef(0);
+  const [newDoc, setNewDoc] = useState({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); // title: "Dr." | "Dra."; full_name: solo el nombre
   const [specialties, setSpecialties] = useState([]);
   const [zones, setZones] = useState([]);
   const searchSeq = useRef(0);
@@ -112,9 +116,29 @@ export default function Recomendaciones() {
     return () => clearTimeout(id);
   }, [query]);
 
+  useEffect(() => {
+    const q = newDoc.full_name.trim();
+    if (!adding || !newDoc.specialty || q.length < 3) { setSimilar([]); return undefined; }
+    const seq = ++similarSeq.current;
+    const id = setTimeout(async () => {
+      try {
+        const { data } = await base44.functions.invoke("findSimilarDoctors", { specialty: newDoc.specialty, query: q });
+        if (seq === similarSeq.current) setSimilar(Array.isArray(data) ? data : []);
+      } catch {
+        if (seq === similarSeq.current) setSimilar([]); // es una ayuda: si falla, se puede agregar igual
+      }
+    }, 350);
+    return () => clearTimeout(id);
+  }, [adding, newDoc.specialty, newDoc.full_name]);
+
   const targetName = target?.full_name || "";
   const she = isFemale(targetName);
-  const newDocValid = newDoc.full_name.trim().length >= 5 && !!newDoc.specialty;
+  const splitTitle = (raw) => {
+    const m = String(raw || "").trim().match(/^(dra|doctora|dr|doctor)\.?\s+/i);
+    if (!m) return { title: "", name: String(raw || "").trim() };
+    return { title: /^dra|^doctora/i.test(m[1]) ? "Dra." : "Dr.", name: String(raw).trim().slice(m[0].length).trim() };
+  };
+  const newDocValid = !!newDoc.title && newDoc.full_name.trim().length >= 4 && !!newDoc.specialty;
   const emailValid = /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(email.trim());
 
   const pickExisting = (r) => {
@@ -124,7 +148,7 @@ export default function Recomendaciones() {
   };
   const confirmNew = () => {
     if (!newDocValid) return;
-    setTarget({ mode: "new", ...newDoc, full_name: newDoc.full_name.trim() });
+    setTarget({ mode: "new", ...newDoc, full_name: `${newDoc.title} ${newDoc.full_name.trim()}` });
     setError("");
   };
   const specialtyLabel = (name) => specialties.find((s) => s.name === name)?.display_name || name;
@@ -184,7 +208,7 @@ export default function Recomendaciones() {
   const reset = () => {
     setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setFirstName(""); setShowPrivate(false); setCode(""); setCodeSent(false);
     setConsent(false); setMarketing(false); setQuery(""); setResults(null); setAdding(false);
-    setNewDoc({ full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError("");
+    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError("");
   };
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`Acabo de recomendar a mi doctor en BuscoUnDoctor. Tú también puedes recomendar al tuyo, toma un minuto: ${PAGE_URL}`)}`;
@@ -271,7 +295,7 @@ export default function Recomendaciones() {
                       {results && results.length === 0 && !searching && (
                         <p className="text-sm text-muted-foreground mt-3">No lo tenemos todavía.</p>
                       )}
-                      <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => ({ ...d, full_name: d.full_name || query.trim() })); }}
+                      <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
                         className="mt-4 text-sm font-medium text-brand-augusta hover:underline">
                         ¿No aparece? Agrégalo
                       </button>
@@ -281,15 +305,47 @@ export default function Recomendaciones() {
                   {adding && (
                     <div className="space-y-3">
                       <div>
-                        <label className="text-sm font-medium text-foreground mb-1 block">Nombre completo del doctor</label>
-                        <Input value={newDoc.full_name} onChange={(e) => setNewDoc({ ...newDoc, full_name: e.target.value })} placeholder="Ej. Dra. Ana Pérez López" className="h-11 rounded-xl" maxLength={120} />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-1 block">Especialidad</label>
-                        <select value={newDoc.specialty} onChange={(e) => setNewDoc({ ...newDoc, specialty: e.target.value })} className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm">
+                        <label className="text-sm font-medium text-foreground mb-1 block">¿De qué especialidad es?</label>
+                        <select value={newDoc.specialty} onChange={(e) => { setNewDoc({ ...newDoc, specialty: e.target.value }); setSimilar([]); }} className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm">
                           <option value="">Elige una especialidad</option>
                           {specialties.map((s) => <option key={s.id} value={s.name}>{s.display_name || s.name}</option>)}
                         </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1 block">¿Es doctor o doctora?</label>
+                        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Doctor o doctora">
+                          {["Dr.", "Dra."].map((t) => (
+                            <button key={t} type="button" role="radio" aria-checked={newDoc.title === t} onClick={() => setNewDoc({ ...newDoc, title: t })}
+                              className={`h-11 rounded-xl border text-sm font-medium transition-colors ${newDoc.title === t ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark" : "border-input bg-background text-foreground hover:border-brand-augusta/50"}`}>
+                              {t === "Dr." ? "Doctor (Dr.)" : "Doctora (Dra.)"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1 block">Nombre y apellido(s)</label>
+                        <Input value={newDoc.full_name}
+                          onChange={(e) => { const t = splitTitle(e.target.value); setNewDoc({ ...newDoc, title: t.title || newDoc.title, full_name: t.title ? t.name : e.target.value }); }}
+                          disabled={!newDoc.specialty}
+                          placeholder={newDoc.specialty ? "Ej. Ana Pérez López (sin Dr. ni Dra.)" : "Primero elige la especialidad"} className="h-11 rounded-xl" maxLength={100} />
+                        {similar.length > 0 && (
+                          <div className="mt-2 rounded-xl border border-brand-augusta/40 bg-brand-augustaLight/40 p-2">
+                            <p className="text-xs font-medium text-brand-augustaDark px-2 pt-1 pb-1.5">¿Es alguno de estos? Elígelo para no duplicarlo.</p>
+                            <ul className="space-y-1.5">
+                              {similar.map((r) => (
+                                <li key={`${r.kind}-${r.id}`}>
+                                  <button type="button" onClick={() => pickExisting(r)} className="w-full text-left rounded-lg bg-white border border-border/60 hover:border-brand-augusta/60 px-3 py-2.5 transition-colors">
+                                    <p className="font-medium text-foreground text-sm">{r.full_name}</p>
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 flex-wrap">
+                                      {specialtyLabel(r.specialty)}{r.zone && <><MapPin className="w-3 h-3 ml-1" />{r.zone}</>}
+                                      <span className="ml-1 text-[11px] bg-muted px-2 py-0.5 rounded-full">{r.kind === "specialist" ? "Ya está en BuscoUnDoctor" : "Ya lo recomendaron"}</span>
+                                    </p>
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
