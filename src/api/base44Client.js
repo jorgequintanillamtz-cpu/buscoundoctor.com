@@ -35,6 +35,7 @@ const ENTITY_TABLE_MAP = {
   SpecialistQuestion: 'specialist_question',
   DoctorSuggestion: 'doctor_suggestion',
   DoctorRecommendation: 'doctor_recommendation',
+  RecommendationReport: 'recommendation_report',
   DoctorNotification: 'doctor_notification',
   AppointmentRequest: 'appointment_request',
   DoctorStorefront: 'doctor_storefront',
@@ -457,9 +458,13 @@ const FUNCTION_MAP = {
   listMyRecommendations: () => supabase.rpc('list_my_recommendations'),
   searchRecommendedDoctors: ({ query } = {}) => supabase.rpc('search_recommended_doctors', { p_query: query }),
   listRecommendedDoctors: () => supabase.rpc('list_recommended_doctors'),
+  submitRecommendationReport: ({ slug, comment_id, kind, reason, details, email } = {}) =>
+    supabase.rpc('submit_recommendation_report', { p_slug: slug, p_comment_id: comment_id || null, p_reason: reason, p_details: details || null, p_email: email || null, p_kind: kind || null }),
+  adminReviewReport: ({ id, action } = {}) => supabase.rpc('admin_review_report', { p_id: id, p_action: action }),
   getRecommendedDoctor: ({ slug } = {}) => supabase.rpc('get_recommended_doctor', { p_slug: slug }),
   searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
   adminReviewSuggestion: ({ id, action, notes } = {}) => supabase.rpc('admin_review_suggestion', { p_id: id, p_action: action, p_notes: notes || null }),
+  adminClearRecommendationName: ({ id } = {}) => supabase.rpc('admin_clear_recommendation_name', { p_id: id }),
   adminReviewRecommendationComment: ({ id, status } = {}) => supabase.rpc('admin_review_recommendation_comment', { p_id: id, p_status: status }),
   adminSetCommentsPublic: ({ value } = {}) => supabase.rpc('admin_set_comments_public', { p_value: value === true }),
   adminGetRecommendationSettings: () => supabase.from('recommendation_settings').select('comments_public').maybeSingle(),
@@ -467,11 +472,12 @@ const FUNCTION_MAP = {
   adminMergeSuggestion: ({ source, target_suggestion, target_specialist } = {}) =>
     supabase.rpc('admin_merge_suggestion', { p_source: source, p_target_suggestion: target_suggestion || null, p_target_specialist: target_specialist || null }),
   adminCreateSpecialistFromSuggestion: ({ suggestion } = {}) => supabase.rpc('admin_create_specialist_from_suggestion', { p_suggestion: suggestion }),
-  submitRecommendation: ({ email, code, target, tags, message, comment, consent, marketing, consent_version } = {}) =>
+  submitRecommendation: ({ email, code, target, tags, message, comment, name, consent, marketing, consent_version } = {}) =>
     supabase.rpc('submit_recommendation', {
       p_email: email, p_code: code, p_target: target, p_tags: tags || [], p_message: message || null,
       p_consent: consent === true, p_marketing: marketing === true, p_consent_version: consent_version || 'v1',
       p_comment: comment || null,
+      p_name: name || null,
     }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
