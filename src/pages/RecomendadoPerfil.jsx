@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
 import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
+import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { setCanonical, setOpenGraph, buildAbsoluteUrl } from "@/lib/seoMeta";
@@ -96,16 +97,13 @@ export default function RecomendadoPerfil() {
   const n = doc.count;
   const url = buildAbsoluteUrl(`/recomendado/${doc.slug}`);
   const shareText = `${doc.full_name} está recomendado por ${n} ${n === 1 ? "paciente" : "pacientes"} en BuscoUnDoctor: ${url}`;
-  const initials = doc.full_name.replace(/^(dr|dra)\.?\s+/i, "").split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="bg-brand-canvas min-h-[70vh] py-8 sm:py-12">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 space-y-4">
         <div className="bg-card rounded-3xl border border-brand-canvasBorder shadow-card p-6 sm:p-8">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center font-heading font-bold text-xl flex-shrink-0" aria-hidden="true">
-              {initials}
-            </div>
+            <RecommendedAvatar photo={doc.photo} name={doc.full_name} className="w-16 h-16 sm:w-20 sm:h-20" />
             <div className="min-w-0">
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
                 <ShieldQuestion className="w-3.5 h-3.5" aria-hidden="true" /> Perfil sin verificar
