@@ -461,6 +461,7 @@ const FUNCTION_MAP = {
   submitRecommendationReport: ({ slug, comment_id, kind, reason, details, email } = {}) =>
     supabase.rpc('submit_recommendation_report', { p_slug: slug, p_comment_id: comment_id || null, p_reason: reason, p_details: details || null, p_email: email || null, p_kind: kind || null }),
   adminReviewReport: ({ id, action } = {}) => supabase.rpc('admin_review_report', { p_id: id, p_action: action }),
+  getSpecialistRecommendations: ({ slug } = {}) => supabase.rpc('get_specialist_recommendations', { p_slug: slug }),
   getRecommendedDoctor: ({ slug } = {}) => supabase.rpc('get_recommended_doctor', { p_slug: slug }),
   searchRecommendableDoctors: ({ query } = {}) => supabase.rpc('search_recommendable_doctors', { p_query: query }),
   adminReviewSuggestion: ({ id, action, notes } = {}) => supabase.rpc('admin_review_suggestion', { p_id: id, p_action: action, p_notes: notes || null }),

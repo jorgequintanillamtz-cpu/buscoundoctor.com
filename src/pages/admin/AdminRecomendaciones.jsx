@@ -315,12 +315,13 @@ export default function AdminRecomendaciones() {
                 <div className="space-y-3">
                   {list.map((rep) => {
                     const sug = suggestions.find((x) => x.id === rep.suggestion_id);
+                    const repSpec = rep.specialist_id ? specialists.find((x) => x.id === rep.specialist_id) : null; // reporte hecho en el perfil de un doctor registrado
                     const rc = rep.recommendation_id ? recs.find((x) => x.id === rep.recommendation_id) : null;
                     const busyRep = busy === `rep-${rep.id}`;
                     return (
                       <div key={rep.id} className="bg-card rounded-2xl border border-border/50 p-4">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-heading font-semibold text-foreground">{sug?.full_name || "Doctor"}</p>
+                          <p className="font-heading font-semibold text-foreground">{sug?.full_name || repSpec?.full_name || "Doctor"}</p>
                           <span className="text-xs bg-muted px-2.5 py-1 rounded-full text-muted-foreground">{rep.kind === "comment" ? "Reporte de un comentario" : rep.kind === "recommendation" ? "Reporte de una recomendación" : "Reporte de la página"}</span>
                           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${rep.reason === "soy_el_doctor" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{reasonLabel(rep.reason)}</span>
                           {rep.status !== "open" && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700">{rep.status === "dismissed" ? "Descartado" : rep.status === "actioned" ? "Contenido retirado" : "Atendido"}</span>}
@@ -331,7 +332,7 @@ export default function AdminRecomendaciones() {
                         {rep.details && <p className="text-sm text-muted-foreground mt-2 break-words"><span className="font-medium text-foreground">Detalles:</span> {rep.details}</p>}
                         {rep.reporter_email && <p className="text-sm text-muted-foreground mt-1">Quien reporta: <a href={`mailto:${rep.reporter_email}`} className="text-brand-blue hover:underline">{rep.reporter_email}</a></p>}
                         <div className="flex flex-wrap gap-2 mt-3">
-                          {sug?.slug && <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs"><a href={`/recomendado/${sug.slug}`} target="_blank" rel="noopener noreferrer">Ver página <ExternalLink className="w-3 h-3 ml-1" /></a></Button>}
+                          {(sug?.slug || repSpec?.slug) && <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs"><a href={sug?.slug ? `/recomendado/${sug.slug}` : `/especialista/${repSpec.slug}`} target="_blank" rel="noopener noreferrer">Ver página <ExternalLink className="w-3 h-3 ml-1" /></a></Button>}
                           {rep.status === "open" ? (
                             <>
                               {rc?.public_comment && rep.recommendation_id && <Button size="sm" variant="outline" disabled={busyRep} onClick={() => reviewReport(rep, "hide_comment", "Comentario retirado")} className="rounded-lg h-8 text-xs text-red-700">Retirar comentario</Button>}
