@@ -53,6 +53,7 @@ export default function AdminRecomendaciones() {
   const [notice, setNotice] = useState(null); // { ok, text }
   const [notes, setNotes] = useState({});
   const [mergeTarget, setMergeTarget] = useState({});
+  const [commentsPublic, setCommentsPublic] = useState(null); // interruptor: ¿se muestran los comentarios al público?
 
   const load = async () => {
     setLoadError(false);
@@ -63,6 +64,7 @@ export default function AdminRecomendaciones() {
         base44.entities.Specialist.list(),
       ]);
       setSuggestions(s); setRecs(r); setSpecialists(sp.filter((x) => !x.deleted_at));
+      try { const { data } = await base44.functions.invoke("adminGetRecommendationSettings"); setCommentsPublic(!!data?.comments_public); } catch { setCommentsPublic(null); }
     } catch (e) {
       console.error("No se pudieron cargar las recomendaciones", e);
       setLoadError(true);
@@ -98,16 +100,16 @@ export default function AdminRecomendaciones() {
         status: list.every((r) => r.status === "rejected") ? "rejected" : "approved", recs: list,
       });
     });
-    return out.map((g) => ({ ...g, pendingIds: g.recs.filter((r) => r.status === "pending").map((r) => r.id) }));
+    return out.map((g) => ({ ...g, pendingIds: g.recs.filter((r) => r.status === "pending").map((r) => r.id), pendingCommentIds: g.recs.filter((r) => r.comment_status === "pending").map((r) => r.id) }));
   }, [suggestions, recs, specialists]);
 
-  const needsReview = (g) => g.status !== "rejected" && (g.status === "pending" || g.pendingIds.length > 0);
+  const needsReview = (g) => g.status !== "rejected" && (g.status === "pending" || g.pendingIds.length > 0 || g.pendingCommentIds.length > 0);
   const visible = useMemo(() => {
     const term = q.trim().toLowerCase();
     return groups
       .filter((g) => {
         if (tab === "pending") return needsReview(g);
-        if (tab === "approved") return g.status === "approved" && g.pendingIds.length === 0;
+        if (tab === "approved") return g.status === "approved" && g.pendingIds.length === 0 && g.pendingCommentIds.length === 0;
         if (tab === "rejected") return g.status === "rejected";
         return true;
       })
@@ -118,6 +120,7 @@ export default function AdminRecomendaciones() {
   const totalPending = recs.filter((r) => r.status === "pending").length;
   const pendingDoctors = groups.filter(needsReview).length;
   const totalApproved = recs.filter((r) => r.status === "approved").length;
+  const totalPendingComments = recs.filter((r) => r.comment_status === "pending").length;
 
   const run = async (key, fn, okText) => {
     setBusy(key); setNotice(null);
@@ -174,6 +177,21 @@ export default function AdminRecomendaciones() {
   };
 
   const reviewOne = (g, r, status) => run(`r-${r.id}`, () => invoke("adminReviewRecommendation", { ids: [r.id], status }), status === "approved" ? "Recomendación aprobada" : "Recomendación rechazada");
+
+  const reviewComment = (r, status) => run(`c-${r.id}`, () => invoke("adminReviewRecommendationComment", { id: r.id, status }), status === "approved" ? "Comentario aprobado" : "Comentario rechazado");
+
+  const toggleCommentsPublic = async () => {
+    const turnOn = !commentsPublic;
+    const ok = await confirm({
+      title: turnOn ? "¿Mostrar los comentarios al público?" : "¿Ocultar los comentarios?",
+      description: turnOn
+        ? "Los comentarios que ya aprobaste empezarán a verse en la página pública de cada doctor. Hazlo solo cuando el abogado haya revisado los términos y la política de contenido."
+        : "Los comentarios dejarán de verse en las páginas públicas. Las recomendaciones y las etiquetas no cambian.",
+      confirmLabel: turnOn ? "Mostrar" : "Ocultar",
+    });
+    if (!ok) return;
+    run("flag", async () => { const res = await invoke("adminSetCommentsPublic", { value: turnOn }); setCommentsPublic(turnOn); return res; }, turnOn ? "Comentarios visibles al público" : "Comentarios ocultos");
+  };
 
   const toggleLicense = (g) => run(g.key, () => invoke("adminReviewSuggestion", { id: g.suggestion.id, action: g.suggestion.license_checked_at ? "license_unchecked" : "license_checked" }),
     g.suggestion.license_checked_at ? "Se quitó la marca de cédula comprobada" : "Cédula marcada como comprobada");
@@ -232,14 +250,30 @@ export default function AdminRecomendaciones() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mt-5">
-        {[["Recomendaciones por revisar", "Por revisar", totalPending, "bg-brand-blue"], ["Doctores por revisar", "Doctores", pendingDoctors, "bg-brand-navy"], ["Recomendaciones aprobadas", "Aprobadas", totalApproved, "bg-brand-blue"]].map(([label, short, value, tone]) => (
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+        {[["Recomendaciones por revisar", "Por revisar", totalPending, "bg-brand-blue"], ["Comentarios por revisar", "Comentarios", totalPendingComments, "bg-brand-navy"], ["Doctores por revisar", "Doctores", pendingDoctors, "bg-brand-blue"], ["Recomendaciones aprobadas", "Aprobadas", totalApproved, "bg-brand-navy"]].map(([label, short, value, tone]) => (
           <div key={label} className={`rounded-xl p-3.5 ${tone}`}>
             <p className="text-xs sm:text-sm font-semibold text-white/90 mb-1"><span className="sm:hidden">{short}</span><span className="hidden sm:inline">{label}</span></p>
             <p className="font-heading font-extrabold text-3xl sm:text-4xl text-white leading-tight">{value}</p>
           </div>
         ))}
       </div>
+
+      {commentsPublic !== null && (
+        <div className="mt-5 rounded-xl border border-border/60 bg-card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">
+              Comentarios públicos: <span className={commentsPublic ? "text-emerald-700" : "text-muted-foreground"}>{commentsPublic ? "visibles" : "ocultos"}</span>
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {commentsPublic ? "Los comentarios aprobados se ven en la página pública de cada doctor." : "Aunque apruebes comentarios, no se muestran al público hasta que los hagas visibles. Conviene esperar la revisión del abogado."}
+            </p>
+          </div>
+          <Button size="sm" variant="outline" disabled={busy === "flag"} onClick={toggleCommentsPublic} className="rounded-xl flex-shrink-0">
+            {commentsPublic ? "Ocultar comentarios" : "Hacer visibles"}
+          </Button>
+        </div>
+      )}
 
       <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <div className="flex gap-1.5 overflow-x-auto">
@@ -293,7 +327,7 @@ export default function AdminRecomendaciones() {
                   </p>
                   <p className="text-sm mt-2">
                     <span className="font-semibold text-foreground">{g.recs.length}</span> {g.recs.length === 1 ? "recomendación" : "recomendaciones"}
-                    <span className="text-muted-foreground"> · {approvedCount} aprobadas · {g.pendingIds.length} por revisar</span>
+                    <span className="text-muted-foreground"> · {approvedCount} aprobadas · {g.pendingIds.length} por revisar{g.pendingCommentIds.length > 0 ? ` · ${g.pendingCommentIds.length} ${g.pendingCommentIds.length === 1 ? "comentario" : "comentarios"} por revisar` : ""}</span>
                   </p>
                   {g.kind === "suggestion" && s?.slug && g.status === "approved" && (
                     <p className="text-xs mt-2 flex items-center gap-3 flex-wrap">
@@ -411,6 +445,24 @@ export default function AdminRecomendaciones() {
                           {r.status !== "rejected" && <Button size="sm" variant="outline" disabled={busy === `r-${r.id}`} onClick={() => reviewOne(g, r, "rejected")} className="rounded-lg h-8 text-xs text-red-700">Rechazar</Button>}
                         </div>
                       </div>
+                      {r.public_comment && (
+                        <div className="mt-2 rounded-lg bg-brand-bluePale/60 p-2.5">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <p className="text-xs font-semibold text-brand-navy flex items-center gap-1.5">
+                              Comentario público
+                              <span className={`font-medium px-2 py-0.5 rounded-full ${r.comment_status === "approved" ? "bg-emerald-100 text-emerald-700" : r.comment_status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                                {r.comment_status === "approved" ? "aprobado" : r.comment_status === "rejected" ? "rechazado" : "por revisar"}
+                              </span>
+                            </p>
+                            <div className="flex gap-1.5">
+                              {r.comment_status !== "approved" && <Button size="sm" variant="outline" disabled={busy === `c-${r.id}`} onClick={() => reviewComment(r, "approved")} className="rounded-lg h-7 text-xs">Aprobar comentario</Button>}
+                              {r.comment_status !== "rejected" && <Button size="sm" variant="outline" disabled={busy === `c-${r.id}`} onClick={() => reviewComment(r, "rejected")} className="rounded-lg h-7 text-xs text-red-700">Rechazar</Button>}
+                            </div>
+                          </div>
+                          <p className="text-sm text-foreground mt-1.5 break-words">“{r.public_comment}”</p>
+                          {r.status !== "approved" && <p className="text-[11px] text-muted-foreground mt-1">Solo se publica si la recomendación también está aprobada.</p>}
+                        </div>
+                      )}
                       {r.private_message ? (
                         <p className="text-sm text-foreground mt-2 flex gap-2"><Quote className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-1" /> <span className="break-words">{r.private_message}</span></p>
                       ) : (

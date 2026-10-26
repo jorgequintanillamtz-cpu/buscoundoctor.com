@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
-import { RECOMMENDATION_TAGS as TAGS } from "@/lib/recommendationTags";
+import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
 // /recomendaciones -- los pacientes recomiendan a su doctor (CLAUDE.md §8r). Piloto: página con
 // `noindex`, sin enlaces desde el resto del sitio. 3 pasos: (1) el doctor, (2) la recomendación,
@@ -30,6 +30,8 @@ export default function Recomendaciones() {
   const [target, setTarget] = useState(null); // { mode: "existing", kind, id, full_name, specialty, zone } | { mode: "new", ... }
   const [tags, setTags] = useState([]);
   const [message, setMessage] = useState("");
+  const [comment, setComment] = useState(""); // comentario público corto (lo revisa el equipo; sin nombre)
+  const [showPrivate, setShowPrivate] = useState(false);
   const [email, setEmail] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState("");
@@ -119,7 +121,19 @@ export default function Recomendaciones() {
   };
   const specialtyLabel = (name) => specialties.find((s) => s.name === name)?.display_name || name;
 
-  const toggleTag = (v) => setTags((cur) => (cur.includes(v) ? cur.filter((t) => t !== v) : [...cur, v]));
+  const commentClean = comment.replace(/\s+/g, " ").trim();
+  const commentProblem = !commentClean ? ""
+    : commentClean.length < 20 ? "Escribe al menos 20 letras, o deja el comentario vacío."
+    : /(https?:|www\.|@|\.com|\.mx|\.net|\.org)/i.test(commentClean) || commentClean.replace(/\D/g, "").length >= 7 ? "Sin enlaces, correos ni teléfonos, por favor."
+    : "";
+
+  // "¿Qué destacas?": MAX_TAGS selectores que se despliegan; en cada uno se puede escoger cualquier opción de
+// cualquier sección (agrupadas dentro del selector). Una opción ya elegida no se repite en los demás.
+  const setSlot = (i, v) => setTags((cur) => {
+    const slots = Array.from({ length: MAX_TAGS }, (_, k) => cur[k] || "");
+    slots[i] = v;
+    return slots.filter(Boolean);
+  });
 
   const requestCode = async () => {
     if (!emailValid || busy || cooldown > 0) return;
@@ -142,7 +156,7 @@ export default function Recomendaciones() {
       : target.kind === "suggestion" ? { suggestion_id: target.id } : { specialist_id: target.id };
     try {
       const { data } = await base44.functions.invoke("submitRecommendation", {
-        email: email.trim(), code, target: dest, tags, message: message.trim() || null,
+        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null,
         consent: true, marketing, consent_version: CONSENT_VERSION,
       });
       if (data?.ok) { setStep(4); }
@@ -157,7 +171,7 @@ export default function Recomendaciones() {
   };
 
   const reset = () => {
-    setStep(1); setTarget(null); setTags([]); setMessage(""); setCode(""); setCodeSent(false);
+    setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setShowPrivate(false); setCode(""); setCodeSent(false);
     setConsent(false); setMarketing(false); setQuery(""); setResults(null); setAdding(false);
     setNewDoc({ full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError("");
   };
@@ -306,29 +320,57 @@ export default function Recomendaciones() {
                 <CheckCircle2 className="w-5 h-5" /> Sí, {she ? "la" : "lo"} recomiendo
               </div>
 
-              <p className="text-sm font-medium text-foreground mt-5 mb-2">¿Qué destacas? <span className="text-muted-foreground font-normal">(opcional)</span></p>
-              <div className="flex flex-wrap gap-2">
-                {TAGS.map((t) => {
-                  const on = tags.includes(t.v);
-                  return (
-                    <button key={t.v} type="button" onClick={() => toggleTag(t.v)} aria-pressed={on}
-                      className={`px-3.5 py-2 rounded-full text-sm border transition-colors ${on ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark font-medium" : "border-border text-foreground hover:border-brand-augusta/50"}`}>
-                      {t.label}
-                    </button>
-                  );
-                })}
+              <p className="text-sm font-medium text-foreground mt-5">¿Qué destacas? <span className="text-muted-foreground font-normal">(opcional)</span></p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-3">Elige hasta {MAX_TAGS} cosas: lo que más destaca {she ? "de ella" : "de él"}.</p>
+              <div className="space-y-2">
+                {Array.from({ length: MAX_TAGS }, (_, i) => (
+                  <select
+                    key={i}
+                    value={tags[i] || ""}
+                    onChange={(e) => setSlot(i, e.target.value)}
+                    aria-label={`Qué destaca, opción ${i + 1}`}
+                    className={`w-full h-12 px-3.5 rounded-xl border text-sm bg-background ${tags[i] ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark font-medium" : "border-input text-muted-foreground"}`}
+                  >
+                    <option value="">{`Opción ${i + 1}: elige una`}</option>
+                    {RECOMMENDATION_SECTIONS.map((sec) => (
+                      <optgroup key={sec.key} label={sec.label}>
+                        {sec.tags.map((t) => (
+                          <option key={t.v} value={t.v} disabled={tags.includes(t.v) && tags[i] !== t.v}>{t.label}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                ))}
               </div>
 
-              <p className="text-sm font-medium text-foreground mt-5 mb-1.5">Mensaje privado para {she ? "la doctora" : "el doctor"} <span className="text-muted-foreground font-normal">(opcional)</span></p>
-              <Textarea value={message} onChange={(e) => setMessage(e.target.value.slice(0, 500))} rows={3} placeholder="Ej. Gracias por explicarme todo con calma."
+              <p className="text-sm font-medium text-foreground mt-6 mb-1.5">Cuéntanos qué hace {she ? "a esta doctora" : "a este doctor"} excelente <span className="text-muted-foreground font-normal">(opcional)</span></p>
+              <Textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, 160))} rows={3} placeholder="Ej. Me explicó todo con calma y siempre contestó mis dudas."
                 className="rounded-xl resize-none" />
-              <p className="text-xs text-muted-foreground mt-1.5">
-                Solo {she ? "ella" : "él"} lo verá, cuando reclame su perfil. No escribas datos de salud ni de otras personas. {message.length}/500
-              </p>
+              <div className="flex items-start justify-between gap-3 mt-1.5">
+                <p className={`text-xs ${commentProblem ? "text-red-600" : "text-muted-foreground"}`}>
+                  {commentProblem || "Habla de su trato, cómo explica, el consultorio o la atención. Sin tu enfermedad ni nombres de otras personas. Se publica sin tu nombre, después de que lo revisemos."}
+                </p>
+                <span className="text-xs text-muted-foreground flex-shrink-0">{comment.length}/160</span>
+              </div>
+
+              {!showPrivate && !message ? (
+                <button type="button" onClick={() => setShowPrivate(true)} className="mt-5 text-sm text-brand-blue hover:underline">
+                  Dejarle un mensaje privado {she ? "a la doctora" : "al doctor"} (opcional)
+                </button>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-foreground mt-5 mb-1.5">Mensaje privado para {she ? "la doctora" : "el doctor"} <span className="text-muted-foreground font-normal">(opcional)</span></p>
+                  <Textarea value={message} onChange={(e) => setMessage(e.target.value.slice(0, 500))} rows={3} placeholder="Ej. Gracias por escucharme con tanta paciencia."
+                    className="rounded-xl resize-none" />
+                  <p className="text-xs text-muted-foreground mt-1.5">
+                    Solo {she ? "ella" : "él"} lo verá, cuando reclame su perfil; no se publica. No escribas datos de salud ni de otras personas. {message.length}/500
+                  </p>
+                </>
+              )}
 
               <div className="flex gap-3 mt-6">
                 <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-12 rounded-xl px-4"><ArrowLeft className="w-4 h-4" /></Button>
-                <Button type="button" onClick={() => setStep(3)} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
+                <Button type="button" onClick={() => setStep(3)} disabled={!!commentProblem} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
               </div>
             </div>
           )}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine } from "lucide-react";
+import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine, Quote } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import LoadingLogo from "@/components/LoadingLogo";
@@ -20,6 +20,12 @@ function setMeta(name, content) {
 // pacientes" y etiquetas con conteos). Nunca muestra el mensaje privado de los pacientes. Se indexa
 // en Google solo con >= 3 recomendaciones aprobadas y la cédula comprobada por el equipo; antes, solo
 // se llega con el enlace.
+const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const commentMonth = (ym) => {
+  const [y, m] = String(ym || "").split("-");
+  return MONTHS[Number(m) - 1] ? `${MONTHS[Number(m) - 1]} ${y}` : "";
+};
+
 export default function RecomendadoPerfil() {
   const { slug } = useParams();
   const [doc, setDoc] = useState(null);
@@ -124,6 +130,21 @@ export default function RecomendadoPerfil() {
             </Button>
           </div>
         </div>
+
+        {(doc.comments || []).length > 0 && (
+          <div className="bg-card rounded-3xl border border-brand-canvasBorder p-5 sm:p-6">
+            <h2 className="font-heading font-semibold text-foreground">Lo que dicen sus pacientes</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Comentarios de pacientes, revisados antes de publicarse y sin su nombre. Solo mostramos recomendaciones positivas.</p>
+            <ul className="mt-3 space-y-2.5">
+              {doc.comments.map((c, i) => (
+                <li key={i} className="rounded-xl bg-muted/50 px-4 py-3">
+                  <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{c.text}</span></p>
+                  <p className="text-xs text-muted-foreground mt-1.5 pl-6">Paciente · {commentMonth(c.month)}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="bg-card rounded-3xl border border-brand-canvasBorder p-5 sm:p-6 text-sm text-muted-foreground flex gap-3">
           <Info className="w-5 h-5 flex-shrink-0 mt-0.5" aria-hidden="true" />
