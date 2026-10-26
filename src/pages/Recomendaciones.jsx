@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X } from "lucide-react";
+import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, UserPlus } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
@@ -292,13 +292,20 @@ export default function Recomendaciones() {
                           ))}
                         </ul>
                       )}
-                      {results && results.length === 0 && !searching && (
-                        <p className="text-sm text-muted-foreground mt-3">No lo tenemos todavía.</p>
-                      )}
-                      <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
-                        className="mt-4 text-sm font-medium text-brand-augusta hover:underline">
-                        ¿No aparece? Agrégalo
-                      </button>
+                      {(() => {
+                        const noMatch = !!results && results.length === 0 && !searching;
+                        return (
+                          <div className={`mt-4 rounded-2xl p-4 ${noMatch ? "border-2 border-brand-augusta bg-brand-augustaLight" : "border-2 border-dashed border-brand-augusta/50 bg-brand-augustaLight/40"}`}>
+                            <p className={`text-sm ${noMatch ? "font-semibold text-brand-augustaDark" : "text-foreground/80"}`}>
+                              {noMatch ? "No lo tenemos todavía. ¡Sé el primero en recomendarlo!" : "¿No encuentras a tu doctor? Aún estamos creciendo: agrégalo tú."}
+                            </p>
+                            <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
+                              className="mt-3 w-full h-12 rounded-xl bg-brand-augusta hover:bg-brand-augustaDark text-white font-semibold flex items-center justify-center gap-2 transition-colors">
+                              <UserPlus className="w-5 h-5" /> Agregar a mi doctor
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </>
                   )}
 
@@ -356,13 +363,9 @@ export default function Recomendaciones() {
                           </select>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-foreground mb-1 block">Hospital <span className="text-muted-foreground font-normal">(opcional)</span></label>
-                          <Input value={newDoc.hospital} onChange={(e) => setNewDoc({ ...newDoc, hospital: e.target.value })} placeholder="Ej. Hospital Zambrano" className="h-11 rounded-xl" maxLength={120} />
+                          <label className="text-sm font-medium text-foreground mb-1 block">Hospital / clínica <span className="text-muted-foreground font-normal">(opcional)</span></label>
+                          <Input value={newDoc.hospital} onChange={(e) => setNewDoc({ ...newDoc, hospital: e.target.value })} placeholder="Ej. Zambrano Hellion" className="h-11 rounded-xl" maxLength={120} />
                         </div>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-1 block">Cédula profesional <span className="text-muted-foreground font-normal">(opcional)</span></label>
-                        <Input value={newDoc.license_number} onChange={(e) => setNewDoc({ ...newDoc, license_number: e.target.value })} placeholder="Si la sabes, nos ayuda a verificarlo" className="h-11 rounded-xl" maxLength={20} />
                       </div>
                       <div className="flex items-center gap-3 pt-1">
                         <Button type="button" onClick={confirmNew} disabled={!newDocValid} className="rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white">Usar este doctor</Button>
