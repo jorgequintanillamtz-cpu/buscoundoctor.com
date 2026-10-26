@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
+import RecommendedAvatar from "@/components/RecommendedAvatar";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -112,9 +113,12 @@ export default function RecomendadosLista() {
                       to={`/recomendado/${d.slug}`}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-xl border border-border/60 px-4 py-3 hover:border-primary/40 transition-colors"
                     >
-                      <div className="min-w-0">
-                        <p className="font-heading font-semibold text-foreground break-words">{d.full_name}</p>
-                        {d.zone && <p className="text-sm text-muted-foreground break-words">{d.zone}</p>}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-12 h-12" />
+                        <div className="min-w-0">
+                          <p className="font-heading font-semibold text-foreground break-words">{d.full_name}</p>
+                          {d.zone && <p className="text-sm text-muted-foreground break-words">{d.zone}</p>}
+                        </div>
                       </div>
                       <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-1 flex-shrink-0">
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
