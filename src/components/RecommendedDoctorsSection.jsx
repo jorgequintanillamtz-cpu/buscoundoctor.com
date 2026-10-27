@@ -54,7 +54,7 @@ export default function RecommendedDoctorsSection() {
                     <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs text-foreground">
-                    <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" /> {d.count} recomendaciones
+                    <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" /> {d.count} {d.count === 1 ? "recomendación" : "recomendaciones"}
                   </span>
                 </div>
               </div>
