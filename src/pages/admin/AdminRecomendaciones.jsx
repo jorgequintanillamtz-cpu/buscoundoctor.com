@@ -400,7 +400,7 @@ export default function AdminRecomendaciones() {
                         Copiar enlace
                       </button>
                       <span className="text-muted-foreground">
-                        {approvedCount >= 3 && s.license_checked_at ? "Aparece en Google" : "Solo con el enlace (para Google faltan 3 recomendaciones aprobadas y la cédula comprobada)"}
+                        {!s.license_checked_at ? "Solo con el enlace (para salir en la lista /recomendados falta marcar la cédula como comprobada)" : approvedCount >= 3 ? "Aparece en la lista /recomendados y en Google" : approvedCount >= 1 ? "Aparece en la lista /recomendados, pero no en Google (para Google faltan 3 recomendaciones aprobadas)" : "Solo con el enlace (falta al menos 1 recomendación aprobada)"}
                       </span>
                     </p>
                   )}

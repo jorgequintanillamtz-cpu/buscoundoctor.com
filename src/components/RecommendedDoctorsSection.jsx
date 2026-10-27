@@ -6,7 +6,7 @@ import RecommendedAvatar from "@/components/RecommendedAvatar";
 
 // Sección del inicio: "Doctores recomendados por pacientes" (CLAUDE.md §8r). Muestra los 4 con más
 // recomendaciones y lleva a /recomendados (la lista por especialidad). Solo entran los doctores que cumplen
-// la regla de esa lista (3+ recomendaciones aprobadas y cédula comprobada). Si no hay ninguno, o si la
+// la regla de esa lista (1+ recomendación aprobada y cédula comprobada). Si no hay ninguno, o si la
 // consulta falla, la sección no se dibuja: el inicio nunca muestra una sección vacía ni un error.
 export default function RecommendedDoctorsSection() {
   const [list, setList] = useState([]);
