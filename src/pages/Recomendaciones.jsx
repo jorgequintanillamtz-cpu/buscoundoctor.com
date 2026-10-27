@@ -523,7 +523,7 @@ export default function Recomendaciones() {
               {!codeSent ? (
                 <Button type="button" onClick={requestCode} disabled={!emailValid || busy}
                   className="w-full mt-4 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">
-                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviarme el código"}
+                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar mi correo"}
                 </Button>
               ) : (
                 <>
