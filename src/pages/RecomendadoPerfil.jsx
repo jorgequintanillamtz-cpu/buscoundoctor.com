@@ -28,7 +28,7 @@ const INTEREST_BANNER_FROM = 3; // "N pacientes pidieron que les avisen" solo de
 // reclama su perfil (CLAUDE.md §8r). A propósito NO se parece a un perfil verificado: etiqueta gris
 // "Perfil sin verificar", sin sello azul, sin estrellas ni "opiniones" (solo "Recomendado por N
 // pacientes" y etiquetas con conteos). Nunca muestra el mensaje privado de los pacientes. Se indexa
-// en Google solo con >= 3 recomendaciones aprobadas y la cédula comprobada por el equipo; antes, solo
+// en Google solo con >= 3 recomendaciones aprobadas y la cédula comprobada por el equipo (la lista /recomendados, en cambio, ya no exige la cédula); antes, solo
 // se llega con el enlace. Paso 32: el objetivo de la página es que el doctor se registre, por eso
 // el llamado para él va justo después de "Agendar cita" (que es lo que le falta).
 export default function RecomendadoPerfil() {

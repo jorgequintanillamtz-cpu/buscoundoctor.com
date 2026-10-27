@@ -36,7 +36,7 @@ const pacientes = (n) => `Recomendado por ${n} ${n === 1 ? "paciente" : "pacient
 // /recomendados -- doctores recomendados por pacientes, por especialidad (CLAUDE.md §8r, pasos 8 y 31).
 // Primero se ven las especialidades (las 10 más comunes primero; el resto plegado si son muchas) y al elegir una
 // (?especialidad=…, así el botón "atrás" del navegador funciona) salen sus doctores, con filtro por zona y orden.
-// Solo aparecen los que tienen al menos 1 recomendación aprobada y la cédula comprobada por el equipo (lo filtra
+// Solo aparecen los que tienen al menos 1 recomendación aprobada (la cédula ya no se exige; lo filtra
 // la base de datos). Son doctores SIN perfil verificado: por eso la etiqueta gris y el aviso arriba. Durante el
 // piloto no lleva enlaces desde el sitio y es `noindex`.
 export default function RecomendadosLista() {

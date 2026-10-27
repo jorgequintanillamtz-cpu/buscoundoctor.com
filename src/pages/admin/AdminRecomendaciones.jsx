@@ -300,14 +300,16 @@ export default function AdminRecomendaciones() {
   if (loadError) return <LoadError onRetry={() => { setLoading(true); load(); }} />;
 
   const approvedOf = (g) => g.recs.filter((r) => r.status === "approved").length;
-  // ¿Dónde se ve este doctor? (lo que más confundía: sin la cédula marcada como comprobada no sale en la lista pública)
+  // ¿Dónde se ve este doctor? A la lista pública entra con 1+ recomendación aprobada (la cédula ya no se exige, 2026-10-27);
+  // para salir en Google siguen haciendo falta 3 recomendaciones aprobadas y la cédula marcada como comprobada.
   const visibilityOf = (g) => {
     if (g.kind !== "suggestion" || g.status !== "approved" || !g.suggestion?.slug) return null;
     const n = approvedOf(g);
-    if (!g.suggestion.license_checked_at) return { tone: "bg-amber-50 text-amber-800", short: "No sale en la lista: falta marcar la cédula", long: "Solo con el enlace: para salir en la lista /recomendados falta marcar la cédula como comprobada." };
-    if (n >= 3) return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista y en Google", long: "Aparece en la lista /recomendados y en Google." };
-    if (n >= 1) return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista", long: "Aparece en la lista /recomendados, pero no en Google (para Google faltan 3 recomendaciones aprobadas)." };
-    return { tone: "bg-muted text-muted-foreground", short: "Solo con el enlace", long: "Solo con el enlace: falta al menos 1 recomendación aprobada." };
+    const checked = !!g.suggestion.license_checked_at;
+    if (n < 1) return { tone: "bg-muted text-muted-foreground", short: "Solo con el enlace", long: "Solo con el enlace: falta al menos 1 recomendación aprobada para salir en la lista." };
+    if (n >= 3 && checked) return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista y en Google", long: "Aparece en la lista /recomendados y en Google." };
+    const falta = [n < 3 ? `${3 - n} ${3 - n === 1 ? "recomendación aprobada más" : "recomendaciones aprobadas más"}` : null, !checked ? "marcar la cédula como comprobada" : null].filter(Boolean).join(" y ");
+    return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista", long: `Aparece en la lista /recomendados. Para salir también en Google falta: ${falta}.` };
   };
   const phoneFmt = (t) => t.replace(/(\d{2})(\d{4})(\d{4})/, "$1 $2 $3");
   const copy = (text, okText, failText) => navigator.clipboard?.writeText(text).then(() => setNotice({ ok: true, text: okText })).catch(() => setNotice({ ok: false, text: failText }));
