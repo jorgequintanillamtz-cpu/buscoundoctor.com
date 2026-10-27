@@ -71,16 +71,28 @@ export function LatestRecommendations({ data }) {
   );
 }
 
-// Carrusel horizontal de doctores: se desliza con el dedo o con las flechas (escritorio). Cada tarjeta cuenta como
-// impresión solo cuando se ve de verdad (IntersectionObserver), no por estar fuera de pantalla en el carrusel.
-function DoctorSlider({ children, resetKey, onSeen }) {
+// Ancho de cada tarjeta del carrusel: en celular una y un pedacito de la siguiente; desde tableta dos y un pedacito de la tercera.
+// Con una sola tarjeta, centrada y sin pedacito.
+const slideWidth = (n) => (n === 1 ? "w-full max-w-md mx-auto" : "w-[calc(100%_-_3rem)] sm:w-[calc((100%_-_3.75rem)/2)]");
+
+// Carrusel horizontal (doctores y comentarios): se desliza con el dedo, con las flechas (escritorio) o tocando los puntos de abajo
+// (uno por tarjeta; el marcado es la primera tarjeta visible). Si `onSeen` existe, cada tarjeta con `data-slug` cuenta como
+// impresión solo cuando se ve de verdad (IntersectionObserver), no por estar fuera de pantalla.
+function CardSlider({ children, resetKey, onSeen, label, prevLabel, nextLabel }) {
   const ref = useRef(null);
   const seen = useRef(new Set());
   const [edge, setEdge] = useState({ prev: false, next: false });
+  const [pos, setPos] = useState({ active: 0, count: 0 });
   const update = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    setEdge({ prev: el.scrollLeft > 4, next: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+    const kids = [...el.children];
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    const left = el.getBoundingClientRect().left;
+    let active = kids.findIndex((k) => k.getBoundingClientRect().left >= left - 8);
+    if (atEnd || active < 0) active = Math.max(kids.length - 1, 0);
+    setPos({ active, count: kids.length });
+    setEdge({ prev: el.scrollLeft > 4, next: !atEnd });
   }, []);
   useEffect(() => {
     const el = ref.current;
@@ -89,28 +101,45 @@ function DoctorSlider({ children, resetKey, onSeen }) {
     update();
     window.addEventListener("resize", update);
     let io = null;
-    if (typeof IntersectionObserver !== "undefined") {
-      io = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          const slug = e.target.getAttribute("data-slug");
-          if (e.isIntersecting && slug && !seen.current.has(slug)) { seen.current.add(slug); onSeen(slug); }
-        });
-      }, { root: el, threshold: 0.6 });
-      el.querySelectorAll("[data-slug]").forEach((n) => io.observe(n));
-    } else {
-      el.querySelectorAll("[data-slug]").forEach((n) => onSeen(n.getAttribute("data-slug")));
+    if (onSeen) {
+      if (typeof IntersectionObserver !== "undefined") {
+        io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            const slug = e.target.getAttribute("data-slug");
+            if (e.isIntersecting && slug && !seen.current.has(slug)) { seen.current.add(slug); onSeen(slug); }
+          });
+        }, { root: el, threshold: 0.6 });
+        el.querySelectorAll("[data-slug]").forEach((n) => io.observe(n));
+      } else {
+        el.querySelectorAll("[data-slug]").forEach((n) => onSeen(n.getAttribute("data-slug")));
+      }
     }
     return () => { window.removeEventListener("resize", update); if (io) io.disconnect(); };
   }, [resetKey]);
   const go = (dir) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.9, behavior: "smooth" });
+  const goTo = (i) => {
+    const el = ref.current; const k = el?.children[i];
+    if (el && k) el.scrollTo({ left: el.scrollLeft + k.getBoundingClientRect().left - el.getBoundingClientRect().left, behavior: "smooth" });
+  };
   const arrow = "hidden md:flex absolute top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white border border-border shadow-md text-foreground hover:border-brand-augusta hover:text-brand-augusta transition-colors";
   return (
-    <div className="relative mt-6">
-      <div ref={ref} onScroll={update} className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="list" aria-label="Doctores recomendados">
-        {children}
+    <div className="mt-6">
+      <div className="relative">
+        <div ref={ref} onScroll={update} className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="list" aria-label={label}>
+          {children}
+        </div>
+        {edge.prev && <button type="button" onClick={() => go(-1)} aria-label={prevLabel} className={`${arrow} left-0 -translate-x-1/2`}><ChevronLeft className="w-5 h-5" /></button>}
+        {edge.next && <button type="button" onClick={() => go(1)} aria-label={nextLabel} className={`${arrow} right-0 translate-x-1/2`}><ChevronRight className="w-5 h-5" /></button>}
       </div>
-      {edge.prev && <button type="button" onClick={() => go(-1)} aria-label="Ver doctores anteriores" className={`${arrow} left-0 -translate-x-1/2`}><ChevronLeft className="w-5 h-5" /></button>}
-      {edge.next && <button type="button" onClick={() => go(1)} aria-label="Ver más doctores" className={`${arrow} right-0 translate-x-1/2`}><ChevronRight className="w-5 h-5" /></button>}
+      {pos.count > 1 && (
+        <div className="flex justify-center items-center mt-3" role="group" aria-label={`${label}: ${pos.count} en total`}>
+          {Array.from({ length: pos.count }, (_, i) => (
+            <button key={i} type="button" onClick={() => goTo(i)} aria-label={`Ir al ${i + 1} de ${pos.count}`} aria-current={i === pos.active ? "true" : undefined} className="p-1.5">
+              <span className={`block h-2 rounded-full transition-all ${i === pos.active ? "w-5 bg-brand-augusta" : "w-2 bg-border"}`} />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -201,10 +230,10 @@ export default function RecommendationsLanding({ data, onRecommend }) {
             </div>
           ) : (
             <>
-              <DoctorSlider resetKey={shownKey} onSeen={(slug) => recordRecommendedViews([slug], "impression")}>
+              <CardSlider resetKey={shownKey} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label="Doctores recomendados" prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores">
                 {shown.map((d) => (
                   <div key={d.slug} data-slug={d.slug} role="listitem"
-                    className={`snap-start shrink-0 rounded-2xl border border-border/60 bg-card px-4 py-3.5 sm:py-4 hover:border-brand-augusta/50 hover:shadow-md transition-all flex flex-col ${shown.length === 1 ? "w-full max-w-md mx-auto" : "w-[90%] sm:w-[calc(50%-6px)]"}`}>
+                    className={`snap-start shrink-0 rounded-2xl border border-border/60 bg-card px-4 py-3.5 sm:py-4 hover:border-brand-augusta/50 hover:shadow-md transition-all flex flex-col ${slideWidth(shown.length)}`}>
                     <Link to={`/recomendado/${d.slug}`} className="flex items-start gap-3 flex-1">
                       <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-12 h-12 sm:w-14 sm:h-14" />
                       <div className="min-w-0 flex-1">
@@ -231,20 +260,20 @@ export default function RecommendationsLanding({ data, onRecommend }) {
                     </Link>
                     <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border/50">
                       <Link to={`/recomendado/${d.slug}`}
-                        className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 lg:px-4 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-[13px] lg:text-sm font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
+                        className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
                         Ver recomendaciones <ArrowRight className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" />
                       </Link>
                       {onRecommend && (
                         <button type="button" onClick={() => onRecommend(d.slug)} aria-label={`Yo también lo recomiendo: ${d.full_name}`}
-                          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 lg:px-4 rounded-full border border-brand-augusta bg-white text-brand-augusta hover:bg-brand-augustaLight text-[13px] lg:text-sm font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
+                          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full border border-brand-augusta bg-white text-brand-augusta hover:bg-brand-augustaLight text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
                           {/* Celular y tableta: etiqueta corta (y sin corazón en celular) para que los dos botones quepan en una fila; si no caben, el segundo baja */}
-                          <Heart className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" /> <span className="lg:hidden">Yo también</span><span className="hidden lg:inline">Yo también lo recomiendo</span>
+                          <Heart className="w-3.5 h-3.5 hidden lg:block" aria-hidden="true" /> <span className="lg:hidden">Yo también</span><span className="hidden lg:inline">Yo también lo recomiendo</span>
                         </button>
                       )}
                     </div>
                   </div>
                 ))}
-              </DoctorSlider>
+              </CardSlider>
             </>
           )}
 
@@ -256,11 +285,11 @@ export default function RecommendationsLanding({ data, onRecommend }) {
 
       {/* Lo que dicen los pacientes: solo si hay comentarios aprobados y el equipo los hizo visibles */}
       {comments.length > 0 && (
-        <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-4">
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy text-center">Lo que dicen los pacientes</h2>
-          <div className={`grid gap-3 mt-6 ${comments.length === 1 ? "grid-cols-1 max-w-md mx-auto" : "grid-cols-1 sm:grid-cols-2"}`}>
+          <CardSlider resetKey={comments.map((c) => c.id).join(",")} label="Comentarios de pacientes" prevLabel="Ver comentarios anteriores" nextLabel="Ver más comentarios">
             {comments.map((c) => (
-              <div key={c.id} className="rounded-2xl bg-card border border-border/50 px-4 py-4">
+              <div key={c.id} role="listitem" className={`snap-start shrink-0 flex flex-col rounded-2xl bg-card border border-border/60 px-4 py-4 ${slideWidth(comments.length)}`}>
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{c.text}</span></p>
                   <ReportMenu ariaLabel="Reportar" items={[
@@ -273,20 +302,20 @@ export default function RecommendationsLanding({ data, onRecommend }) {
                     {c.tags.map((t) => <span key={t} className="text-xs bg-muted text-brand-navy px-2.5 py-1 rounded-full">{recommendationTagLabel(t)}</span>)}
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground mt-2.5 flex items-center gap-1.5 flex-wrap">
+                <p className="text-xs text-muted-foreground mt-auto pt-2.5 flex items-center gap-1.5 flex-wrap">
                   <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" />
                   {c.name ? <><span className="font-medium text-foreground">{c.name}</span> · </> : null}{commentMonth(c.month)} ·{" "}
                   <Link to={`/recomendado/${c.doctor_slug}`} className="underline hover:text-foreground">{c.doctor_name}</Link>
                 </p>
               </div>
             ))}
-          </div>
+          </CardSlider>
           <ReportRecommendationDialog open={!!report} onOpenChange={(o) => { if (!o) setReport(null); }} slug={report?.slug} commentId={report?.id || null} kind={report?.kind || null} what={report?.what || "la recomendación"} />
         </section>
       )}
 
       {/* Invitar a un amigo (queda suelto: era parte de la sección de confianza que se quitó) */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-10 text-center">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8 text-center">
         <a href={shareHref} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 h-12 px-6 rounded-xl border border-brand-augusta text-brand-augusta bg-white font-semibold hover:bg-brand-augustaLight transition-colors">
           <Share2 className="w-4 h-4" aria-hidden="true" /> Invita a un amigo a recomendar a su doctor
