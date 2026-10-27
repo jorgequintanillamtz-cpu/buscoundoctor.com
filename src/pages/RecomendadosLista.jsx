@@ -19,9 +19,8 @@ const OTHER = "Otras especialidades";
 
 // /recomendados -- doctores recomendados por pacientes, por especialidad (CLAUDE.md §8r, paso 8).
 // Primero se ven todas las especialidades (con cuántos doctores tiene cada una) y al elegir una
-// (?especialidad=…, así el botón "atrás" del navegador funciona) salen sus doctores. Solo aparecen los que cumplen la misma regla que para salir en Google:
-// 3 o más recomendaciones aprobadas y la cédula comprobada por el equipo (lo filtra la base de
-// datos). Son doctores SIN perfil verificado: por eso la etiqueta gris y el aviso arriba. Durante
+// (?especialidad=…, así el botón "atrás" del navegador funciona) salen sus doctores. Solo aparecen los que tienen al menos 1 recomendación aprobada y la cédula
+// comprobada por el equipo (lo filtra la base de datos; desde 2026-10-26 ya no se piden 3). Son doctores SIN perfil verificado: por eso la etiqueta gris y el aviso arriba. Durante
 // el piloto no lleva enlaces desde el sitio y es `noindex`.
 export default function RecomendadosLista() {
   const [list, setList] = useState([]);
@@ -85,7 +84,7 @@ export default function RecomendadosLista() {
           <div className="bg-card rounded-3xl border border-brand-canvasBorder p-8 text-center">
             <Heart className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-40" aria-hidden="true" />
             <p className="font-medium text-foreground">Aún no hay doctores en esta lista.</p>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">Aparecen aquí cuando reciben 3 recomendaciones de pacientes y revisamos su cédula. ¿Tienes un doctor que recomendar?</p>
+            <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">Aparecen aquí cuando reciben una recomendación de un paciente y revisamos su cédula. ¿Tienes un doctor que recomendar?</p>
             <Button asChild className="mt-4 rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white">
               <Link to="/recomendaciones"><PenLine className="w-4 h-4" /> Recomendar a un doctor</Link>
             </Button>
