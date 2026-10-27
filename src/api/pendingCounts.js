@@ -2,6 +2,7 @@ import { base44 } from "@/api/base44Client";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
 import { isAwaitingReview } from "@/api/doctorReview";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 // Cuenta lo que necesita atención del dueño en cada sección, para mostrar
 // el círculo rojo en el menú del admin. Mismos criterios que usa cada
@@ -23,9 +24,12 @@ export async function loadPendingCounts() {
   ]);
 
   // Los doctores en la papelera no cuentan para ninguna cola: ya no son
-  // relevantes operativamente hasta que se restauren.
-  const activeSpecialists = specialists.filter((s) => !s.deleted_at);
+  // relevantes operativamente hasta que se restauren. Los perfiles del sitio
+  // de tiendas tampoco (no son del directorio), ni sus documentos, artículos
+  // o consultorios.
+  const activeSpecialists = specialists.filter((s) => !s.deleted_at && esDelDirectorio(s));
   const specialistsById = Object.fromEntries(specialists.map((s) => [s.id, s]));
+  const ofDirectoryDoctor = (specialistId) => esDelDirectorio(specialistsById[specialistId]);
 
   const pendingDoctors = activeSpecialists.filter(isAwaitingReview).length;
 
@@ -36,17 +40,17 @@ export async function loadPendingCounts() {
   ).length;
 
   const pendingDocuments = docs.filter(
-    (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at
+    (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsById[d.specialist_id]?.deleted_at && ofDirectoryDoctor(d.specialist_id)
   ).length;
 
   const pendingBlogPosts = posts.filter(
-    (p) => p.submitted_by_specialist_id && p.review_status === "pending_review" && !specialistsById[p.submitted_by_specialist_id]?.deleted_at
+    (p) => p.submitted_by_specialist_id && p.review_status === "pending_review" && !specialistsById[p.submitted_by_specialist_id]?.deleted_at && ofDirectoryDoctor(p.submitted_by_specialist_id)
   ).length;
 
   const lateDoctors = SHOW_PREMIUM ? computeLateDoctors(mergePremiumStatus(activeSpecialists, premiumStatuses), payments).length : 0;
   const pendingConditionRequests = conditionRequests.length;
   // Consultorios que dicen atender en un hospital del catálogo y el equipo aún no confirma.
-  const pendingHospitals = hospitalOffices.filter((o) => !specialistsById[o.specialist_id]?.deleted_at).length;
+  const pendingHospitals = hospitalOffices.filter((o) => !specialistsById[o.specialist_id]?.deleted_at && ofDirectoryDoctor(o.specialist_id)).length;
 
   return {
     "/admin/doctores": pendingDoctors,

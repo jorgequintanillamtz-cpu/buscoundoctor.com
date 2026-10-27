@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { approveDoctor, rejectDoctor, isAwaitingReview } from "@/api/doctorReview";
 import { logActivity } from "@/api/activityLog";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 import { loadPremiumStatuses, mergePremiumStatus, computeLateDoctors } from "@/api/premiumStatus";
 import { useAdminBadges } from "@/components/adminBadges";
 import { PendingDocCard } from "@/pages/admin/AdminVerificaciones";
@@ -344,13 +345,16 @@ export default function AdminInbox() {
       base44.entities.Hospital.list("display_order", 200).catch(() => []),
       base44.auth.me().catch(() => null),
     ]);
-    setSpecialists(specs);
-    setDocs(allDocs);
-    setPosts(allPosts);
+    // Los perfiles del sitio de tiendas (y sus documentos, artículos y
+    // consultorios) no son del directorio: no entran a ninguna cola.
+    const tiendasIds = new Set(specs.filter((s) => !esDelDirectorio(s)).map((s) => s.id));
+    setSpecialists(specs.filter(esDelDirectorio));
+    setDocs(allDocs.filter((d) => !tiendasIds.has(d.specialist_id)));
+    setPosts(allPosts.filter((p) => !tiendasIds.has(p.submitted_by_specialist_id)));
     setPayments(allPayments);
     setPremiumStatuses(statuses);
     setConditionRequests(allConditionRequests);
-    setHospitalOffices(pendingOffices);
+    setHospitalOffices(pendingOffices.filter((o) => !tiendasIds.has(o.specialist_id)));
     setHospitals(hospitalList);
     setUser(me);
     setLoading(false);

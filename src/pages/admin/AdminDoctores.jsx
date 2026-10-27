@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
 import { approveDoctor, rejectDoctor, isAwaitingReview, getDoctorStateInfo } from "@/api/doctorReview";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
@@ -50,7 +51,9 @@ export default function AdminDoctores() {
       base44.entities.AppointmentRequest.list("-created_date", 2000),
       loadPremiumStatuses(),
     ]).then(([d, r, premiumStatuses]) => {
-      setDoctors(mergePremiumStatus(d, premiumStatuses));
+      // Los perfiles del sitio de tiendas no son del directorio: no salen en
+      // ninguna pestaña (Todos, Pendientes, En progreso ni Papelera).
+      setDoctors(mergePremiumStatus(d.filter(esDelDirectorio), premiumStatuses));
       setRequests(r);
       setLoading(false);
     });

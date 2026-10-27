@@ -8,6 +8,7 @@ import { logActivity } from "@/api/activityLog";
 import { notifyDocumentApproved, notifyDocumentRejected } from "@/api/doctorNotify";
 import { useAdminBadges } from "@/components/adminBadges";
 import LoadingLogo from "@/components/LoadingLogo";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 // Misma lista de tipos de documento que usa DocumentManager.jsx (el
 // componente que vive dentro del editor de cada doctor), para que las
@@ -166,10 +167,11 @@ export default function AdminVerificaciones() {
     ]);
     const specialistsMap = Object.fromEntries(allSpecialists.map((s) => [s.id, s]));
     // Si el doctor está en la papelera, su documento deja de ser relevante
-    // para revisión hasta que se restaure.
+    // para revisión hasta que se restaure. Los documentos de perfiles del
+    // sitio de tiendas tampoco se revisan aquí (no son del directorio).
     setDocs(
       allDocs.filter(
-        (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsMap[d.specialist_id]?.deleted_at
+        (d) => (d.upload_status === "uploaded" || d.upload_status === "under_review") && !specialistsMap[d.specialist_id]?.deleted_at && esDelDirectorio(specialistsMap[d.specialist_id])
       )
     );
     setSpecialistsById(specialistsMap);

@@ -2,6 +2,7 @@ import { base44 } from "@/api/base44Client";
 import { logActivity } from "@/api/activityLog";
 import { notifyProfileApproved, notifyProfileRejected } from "@/api/doctorNotify";
 import { formatDateOnly } from "@/lib/dateLabels";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 // Un solo lugar para "¿en qué estado real está este doctor?", en vez de
 // que cada pantalla (lista de Doctores, revisión individual) lo calcule a
@@ -45,8 +46,9 @@ export function getDoctorStateInfo(doc) {
 // ¿Este perfil espera que el administrador lo revise? Perfiles en revisión,
 // borradores con dueño, y perfiles a los que se les pidieron cambios y el doctor
 // ya los corrigió (resubmitted_at). Lo usan la Bandeja, la lista y los contadores.
+// Los perfiles del sitio de tiendas nunca esperan revisión aquí (ver specialistOrigin.js).
 export function isAwaitingReview(s) {
-  if (!s || s.deleted_at) return false;
+  if (!s || s.deleted_at || !esDelDirectorio(s)) return false;
   return (
     s.publication_status === "pending_review" ||
     (s.publication_status === "draft" && !!s.owner_user_id) ||

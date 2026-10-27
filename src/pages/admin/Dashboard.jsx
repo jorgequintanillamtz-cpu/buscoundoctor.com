@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { loadPremiumStatuses, mergePremiumStatus } from "@/api/premiumStatus";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 import DoctorStatsPanel from "@/components/admin/DoctorStatsPanel";
 import {
   TrendingUp, BarChart3, Heart, MapPin,
@@ -64,8 +65,9 @@ export default function Dashboard() {
         base44.entities.Office.list(),
         base44.entities.Zone.list(),
       ]);
-      // Los doctores en la papelera no cuentan en las métricas del dashboard.
-      const merged = mergePremiumStatus(rawSpecialists, premiumStatuses).filter((s) => !s.deleted_at);
+      // Los doctores en la papelera no cuentan en las métricas del dashboard,
+      // ni los perfiles del sitio de tiendas (no son del directorio).
+      const merged = mergePremiumStatus(rawSpecialists, premiumStatuses).filter((s) => !s.deleted_at && esDelDirectorio(s));
       setSpecialists(merged);
       setOffices(rawOffices);
       setZones(rawZones);
