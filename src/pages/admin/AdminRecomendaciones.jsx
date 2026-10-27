@@ -159,13 +159,32 @@ export default function AdminRecomendaciones() {
 
   const invoke = async (name, payload) => (await base44.functions.invoke(name, payload)).data;
 
-  const approveGroup = (g) => run(g.key, async () => {
-    const res = g.kind === "suggestion"
-      ? await invoke("adminReviewSuggestion", { id: g.suggestion.id, action: "approve" })
-      : await invoke("adminReviewRecommendation", { ids: g.pendingIds, status: "approved" });
-    logActivity({ type: "recomendacion_aprobada", description: `Se aprobó a ${g.name} y sus recomendaciones`, specialistId: g.specialist?.id, specialistName: g.name });
-    return res;
-  }, `Aprobado: ${g.name}`);
+  // "Aprobar todo": el doctor, sus recomendaciones pendientes y, desde 2026-10-26 (pedido de Jorge),
+  // también sus comentarios pendientes. Si hay comentarios, se pide confirmación porque se vuelven públicos
+  // (cuando el interruptor de comentarios está encendido).
+  const approveGroup = async (g) => {
+    const commentIds = g.recs.filter((r) => r.comment_status === "pending" && r.status !== "rejected").map((r) => r.id);
+    const nComments = commentIds.length;
+    if (nComments > 0) {
+      const ok = await confirm({
+        title: `¿Aprobar todo de ${g.name}?`,
+        description: `Se aprueban el doctor, sus recomendaciones pendientes y ${nComments === 1 ? "1 comentario" : `${nComments} comentarios`} (los comentarios se verán en su página pública si el interruptor de comentarios está encendido).`,
+        confirmLabel: "Aprobar todo",
+      });
+      if (!ok) return;
+    }
+    run(g.key, async () => {
+      let res = { ok: true };
+      if (g.kind === "suggestion") res = await invoke("adminReviewSuggestion", { id: g.suggestion.id, action: "approve" });
+      else if (g.pendingIds.length > 0) res = await invoke("adminReviewRecommendation", { ids: g.pendingIds, status: "approved" });
+      if (res && res.ok === false) return res;
+      for (const id of commentIds) {
+        await invoke("adminReviewRecommendationComment", { id, status: "approved" });
+      }
+      logActivity({ type: "recomendacion_aprobada", description: `Se aprobó a ${g.name}, sus recomendaciones${nComments ? " y comentarios" : ""}`, specialistId: g.specialist?.id, specialistName: g.name });
+      return res;
+    }, `Aprobado: ${g.name}`);
+  };
 
   const rejectGroup = async (g) => {
     const ok = await confirm({
@@ -413,7 +432,7 @@ export default function AdminRecomendaciones() {
 
                 {canAct && (
                   <div className="flex gap-2 flex-wrap">
-                    {(g.status === "pending" || g.pendingIds.length > 0) && (
+                    {(g.status === "pending" || g.pendingIds.length > 0 || g.pendingCommentIds.length > 0) && (
                       <Button size="sm" disabled={busy === g.key} onClick={() => approveGroup(g)} className="rounded-xl gap-1.5 bg-brand-augusta hover:bg-brand-augusta/90 text-white">
                         <CheckCircle2 className="w-4 h-4" /> Aprobar todo
                       </Button>
