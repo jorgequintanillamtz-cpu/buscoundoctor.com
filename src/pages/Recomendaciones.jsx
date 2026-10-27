@@ -342,7 +342,6 @@ export default function Recomendaciones() {
 
                   {adding && (
                     <div className="space-y-3">
-                      <p className="font-heading font-semibold text-foreground">¿Quién es tu doctor?</p>
                       <div>
                         <label className="text-sm font-medium text-foreground mb-1 block">¿De qué especialidad es?</label>
                         {(() => {
