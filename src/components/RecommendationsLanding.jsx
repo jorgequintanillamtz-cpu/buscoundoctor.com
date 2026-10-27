@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Heart, Quote, Search, ShieldQuestion, Share2 } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Heart, Quote, Search, ShieldQuestion, Share2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
@@ -19,7 +19,6 @@ import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
 const SHOW_FILTER_FROM = 3; // los botones de especialidad solo salen con 3+ doctores (con menos se ven vacíos)
 const SHOW_SEARCH_FROM = 5; // el buscador por nombre solo sale con 5+ doctores (con menos estorba)
-const FIRST_BATCH = 6; // doctores que se ven al inicio; el resto, con "Ver más doctores"
 const NEW_DAYS = 7; // "Nuevo": recomendado en los últimos 7 días
 const DAY_MS = 86400000;
 
@@ -46,12 +45,12 @@ export function LatestRecommendations({ data }) {
   const latest = data.doctors.filter((d) => d.last_at).sort((a, b) => new Date(b.last_at) - new Date(a.last_at)).slice(0, 5);
   const quote = (data.comments || [])[0];
   return (
-    <aside className="hidden lg:block lg:sticky lg:top-6 xl:col-start-3 xl:row-start-1 bg-card rounded-3xl border border-border/50 shadow-lg p-6">
+    <aside className="hidden lg:block mt-6 bg-card rounded-3xl border border-border/50 shadow-lg p-6">
       <h2 className="font-heading font-semibold text-lg text-foreground">Últimas recomendaciones</h2>
-      <ul className="mt-3 divide-y divide-border/50">
+      <ul className="mt-3 grid grid-cols-2 gap-x-8 divide-y-0">
         {latest.map((d) => (
           <li key={d.slug}>
-            <Link to={`/recomendado/${d.slug}`} className="flex items-center gap-3 py-3 group">
+            <Link to={`/recomendado/${d.slug}`} className="flex items-center gap-3 py-2.5 group">
               <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-11 h-11" />
               <div className="min-w-0 flex-1">
                 <p className="font-heading font-semibold text-sm text-foreground break-words leading-snug group-hover:text-brand-augusta transition-colors">{d.full_name}</p>
@@ -62,13 +61,57 @@ export function LatestRecommendations({ data }) {
         ))}
       </ul>
       {quote && (
-        <div className="mt-2 rounded-2xl bg-muted/50 px-4 py-3">
+        <div className="mt-3 rounded-2xl bg-muted/50 px-4 py-3">
           <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{quote.text}</span></p>
           <p className="text-xs text-muted-foreground mt-2">{quote.name ? <><span className="font-medium text-foreground">{quote.name}</span> · </> : null}<Link to={`/recomendado/${quote.doctor_slug}`} className="underline hover:text-foreground">{quote.doctor_name}</Link></p>
         </div>
       )}
       <a href="#doctores" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-augusta hover:underline">Ver todos los doctores <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></a>
     </aside>
+  );
+}
+
+// Carrusel horizontal de doctores: se desliza con el dedo o con las flechas (escritorio). Cada tarjeta cuenta como
+// impresión solo cuando se ve de verdad (IntersectionObserver), no por estar fuera de pantalla en el carrusel.
+function DoctorSlider({ children, resetKey, onSeen }) {
+  const ref = useRef(null);
+  const seen = useRef(new Set());
+  const [edge, setEdge] = useState({ prev: false, next: false });
+  const update = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    setEdge({ prev: el.scrollLeft > 4, next: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+  }, []);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    el.scrollTo({ left: 0 });
+    update();
+    window.addEventListener("resize", update);
+    let io = null;
+    if (typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          const slug = e.target.getAttribute("data-slug");
+          if (e.isIntersecting && slug && !seen.current.has(slug)) { seen.current.add(slug); onSeen(slug); }
+        });
+      }, { root: el, threshold: 0.6 });
+      el.querySelectorAll("[data-slug]").forEach((n) => io.observe(n));
+    } else {
+      el.querySelectorAll("[data-slug]").forEach((n) => onSeen(n.getAttribute("data-slug")));
+    }
+    return () => { window.removeEventListener("resize", update); if (io) io.disconnect(); };
+  }, [resetKey]);
+  const go = (dir) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.9, behavior: "smooth" });
+  const arrow = "hidden md:flex absolute top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white border border-border shadow-md text-foreground hover:border-brand-augusta hover:text-brand-augusta transition-colors";
+  return (
+    <div className="relative mt-6">
+      <div ref={ref} onScroll={update} className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="list" aria-label="Doctores recomendados">
+        {children}
+      </div>
+      {edge.prev && <button type="button" onClick={() => go(-1)} aria-label="Ver doctores anteriores" className={`${arrow} left-0 -translate-x-1/2`}><ChevronLeft className="w-5 h-5" /></button>}
+      {edge.next && <button type="button" onClick={() => go(1)} aria-label="Ver más doctores" className={`${arrow} right-0 translate-x-1/2`}><ChevronRight className="w-5 h-5" /></button>}
+    </div>
   );
 }
 
@@ -85,7 +128,6 @@ const FAQ = [
 export default function RecommendationsLanding({ data, onRecommend }) {
   const [specialty, setSpecialty] = useState("");
   const [query, setQuery] = useState("");
-  const [expanded, setExpanded] = useState(false);
   const [report, setReport] = useState(null); // { id, slug, kind, what }
 
   const doctors = useMemo(() => (data ? data.doctors : []), [data]);
@@ -97,16 +139,11 @@ export default function RecommendationsLanding({ data, onRecommend }) {
   const matches = doctors.filter((d) =>
     (!showFilter || !specialty || d.specialty === specialty) &&
     (!q || norm([d.full_name, d.specialty, d.subspecialty].join(" ")).includes(q)));
-  // Con una búsqueda o un filtro activos se ven todos los resultados; si no, los primeros y "Ver más".
-  const filtering = !!q || (showFilter && !!specialty);
-  const shown = expanded || filtering ? matches : matches.slice(0, FIRST_BATCH);
-  const hidden = matches.length - shown.length;
+  const shown = matches;
   // "Nuevo" solo dice algo si no todos lo son (al arrancar, todos los doctores son recientes).
   const showNew = doctors.some(isNew) && !doctors.every(isNew);
   const totalRecs = doctors.reduce((n, d) => n + (Number(d.count) || 0), 0);
-  // Impresión: estos doctores aparecieron en la lista (la base cuenta una por visitante por día).
   const shownKey = shown.map((d) => d.slug).join(",");
-  useEffect(() => { if (shownKey) recordRecommendedViews(shownKey.split(","), "impression"); }, [shownKey]);
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`¿Tu doctor es excelente? Recomiéndalo en BuscoUnDoctor, toma un minuto: ${PAGE_URL}`)}`;
 
@@ -123,7 +160,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
             <p className="text-center mt-3">
               <span className="inline-flex items-center gap-1.5 text-sm text-foreground bg-brand-augustaLight/70 px-3.5 py-1.5 rounded-full">
                 <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" />
-                <span><strong>{doctors.length}</strong> {doctors.length === 1 ? "doctor" : "doctores"} y <strong>{totalRecs}</strong> {totalRecs === 1 ? "recomendación" : "recomendaciones"} hasta ahora</span>
+                <span><strong>{doctors.length}</strong> {doctors.length === 1 ? "doctor" : "doctores"} y <strong>{totalRecs}</strong> {totalRecs === 1 ? "recomendación" : "recomendaciones"}<span className="hidden sm:inline"> hasta ahora</span></span>
               </span>
             </p>
           )}
@@ -164,9 +201,10 @@ export default function RecommendationsLanding({ data, onRecommend }) {
             </div>
           ) : (
             <>
-              <div className={`mt-6 grid gap-3 ${shown.length === 1 ? "grid-cols-1 max-w-md mx-auto" : "grid-cols-1 sm:grid-cols-2"}`}>
+              <DoctorSlider resetKey={shownKey} onSeen={(slug) => recordRecommendedViews([slug], "impression")}>
                 {shown.map((d) => (
-                  <div key={d.slug} className="rounded-2xl border border-border/60 bg-card px-4 py-3.5 sm:py-4 hover:border-brand-augusta/50 hover:shadow-md transition-all flex flex-col">
+                  <div key={d.slug} data-slug={d.slug} role="listitem"
+                    className={`snap-start shrink-0 rounded-2xl border border-border/60 bg-card px-4 py-3.5 sm:py-4 hover:border-brand-augusta/50 hover:shadow-md transition-all flex flex-col ${shown.length === 1 ? "w-full max-w-md mx-auto" : "w-[90%] sm:w-[calc(50%-6px)]"}`}>
                     <Link to={`/recomendado/${d.slug}`} className="flex items-start gap-3 flex-1">
                       <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-12 h-12 sm:w-14 sm:h-14" />
                       <div className="min-w-0 flex-1">
@@ -191,30 +229,22 @@ export default function RecommendationsLanding({ data, onRecommend }) {
                         )}
                       </div>
                     </Link>
-                    <div className="flex gap-2 mt-3 pt-3 border-t border-border/50">
+                    <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border/50">
                       <Link to={`/recomendado/${d.slug}`}
-                        className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-3 lg:px-4 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-[13px] lg:text-sm font-semibold whitespace-nowrap transition-colors flex-1">
-                        Ver recomendaciones <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                        className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 lg:px-4 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-[13px] lg:text-sm font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
+                        Ver recomendaciones <ArrowRight className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" />
                       </Link>
                       {onRecommend && (
                         <button type="button" onClick={() => onRecommend(d.slug)} aria-label={`Yo también lo recomiendo: ${d.full_name}`}
-                          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-3 lg:px-4 rounded-full border border-brand-augusta bg-white text-brand-augusta hover:bg-brand-augustaLight text-[13px] lg:text-sm font-semibold whitespace-nowrap transition-colors lg:flex-1">
-                          {/* Celular y tableta: etiqueta corta para que los dos botones quepan en una fila */}
-                          <Heart className="w-3.5 h-3.5" aria-hidden="true" /> <span className="lg:hidden">Yo también</span><span className="hidden lg:inline">Yo también lo recomiendo</span>
+                          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 lg:px-4 rounded-full border border-brand-augusta bg-white text-brand-augusta hover:bg-brand-augustaLight text-[13px] lg:text-sm font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
+                          {/* Celular y tableta: etiqueta corta (y sin corazón en celular) para que los dos botones quepan en una fila; si no caben, el segundo baja */}
+                          <Heart className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" /> <span className="lg:hidden">Yo también</span><span className="hidden lg:inline">Yo también lo recomiendo</span>
                         </button>
                       )}
                     </div>
                   </div>
                 ))}
-              </div>
-              {hidden > 0 && (
-                <div className="text-center mt-5">
-                  <button type="button" onClick={() => setExpanded(true)}
-                    className="inline-flex items-center gap-2 h-11 px-6 rounded-full border border-brand-augusta text-brand-augusta bg-white font-semibold text-sm hover:bg-brand-augustaLight transition-colors">
-                    Ver más doctores ({hidden} más)
-                  </button>
-                </div>
-              )}
+              </DoctorSlider>
             </>
           )}
 
