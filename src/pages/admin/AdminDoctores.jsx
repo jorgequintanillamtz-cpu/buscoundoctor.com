@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
-import { approveDoctor, rejectDoctor, isAwaitingReview, getDoctorStateInfo } from "@/api/doctorReview";
+import { approveDoctors, rejectDoctors, isAwaitingReview, getDoctorStateInfo, TIENDAS_PROFILE_ERROR } from "@/api/doctorReview";
 import { SHOW_PREMIUM } from "@/lib/featureFlags";
 import { esDelDirectorio } from "@/lib/specialistOrigin";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
@@ -301,11 +301,14 @@ export default function AdminDoctores() {
   const handleBulkApprove = async (ids) => {
     if (ids.length === 0) return;
     try {
-      const toApprove = doctors.filter(d => ids.includes(d.id));
-      await Promise.all(toApprove.map(d => approveDoctor(d)));
-      setDoctors(prev => prev.map(d => (ids.includes(d.id) ? { ...d, publication_status: "published", active: true } : d)));
+      // approveDoctors deja fuera los perfiles del sitio de tiendas ANTES de
+      // escribir nada, aunque se hayan seleccionado.
+      const { done, skipped } = await approveDoctors(doctors.filter(d => ids.includes(d.id)));
+      const doneIds = done.map(d => d.id);
+      setDoctors(prev => prev.map(d => (doneIds.includes(d.id) ? { ...d, publication_status: "published", active: true } : d)));
       setSelectedPending(new Set());
-      toast.success(`${ids.length} perfil${ids.length !== 1 ? "es" : ""} aprobado${ids.length !== 1 ? "s" : ""} y publicado${ids.length !== 1 ? "s" : ""}`);
+      toast.success(`${doneIds.length} perfil${doneIds.length !== 1 ? "es" : ""} aprobado${doneIds.length !== 1 ? "s" : ""} y publicado${doneIds.length !== 1 ? "s" : ""}`);
+      if (skipped.length > 0) toast.error(TIENDAS_PROFILE_ERROR);
       refreshBadges();
     } catch (e) {
       toast.error("No se pudo aprobar: " + e.message);
@@ -318,11 +321,12 @@ export default function AdminDoctores() {
     if (!rejectDialog.motivo.trim()) { toast.error("Debes ingresar un motivo de rechazo"); return; }
     setRejecting(true);
     try {
-      const toReject = doctors.filter(d => rejectDialog.ids.includes(d.id));
-      await Promise.all(toReject.map(d => rejectDoctor(d, rejectDialog.motivo.trim())));
-      setDoctors(prev => prev.map(d => (rejectDialog.ids.includes(d.id) ? { ...d, publication_status: "rejected" } : d)));
+      const { done, skipped } = await rejectDoctors(doctors.filter(d => rejectDialog.ids.includes(d.id)), rejectDialog.motivo.trim());
+      const doneIds = done.map(d => d.id);
+      setDoctors(prev => prev.map(d => (doneIds.includes(d.id) ? { ...d, publication_status: "rejected" } : d)));
       setSelectedPending(new Set());
-      toast.success(`${rejectDialog.ids.length} perfil${rejectDialog.ids.length !== 1 ? "es" : ""} rechazado${rejectDialog.ids.length !== 1 ? "s" : ""}`);
+      toast.success(`${doneIds.length} perfil${doneIds.length !== 1 ? "es" : ""} rechazado${doneIds.length !== 1 ? "s" : ""}`);
+      if (skipped.length > 0) toast.error(TIENDAS_PROFILE_ERROR);
       setRejectDialog({ open: false, ids: [], motivo: "" });
       refreshBadges();
     } catch (e) {

@@ -56,7 +56,17 @@ export function isAwaitingReview(s) {
   );
 }
 
+// Freno: un perfil del sitio de tiendas no se aprueba, rechaza, publica ni
+// cambia de estado desde el directorio, aunque llegue aquí por error (las
+// listas del admin ya no los muestran). Lanza antes de escribir nada.
+export const TIENDAS_PROFILE_ERROR = "Este perfil es del sitio de tiendas: no se revisa ni se publica desde el directorio.";
+
+export function assertDelDirectorio(doc) {
+  if (!esDelDirectorio(doc)) throw new Error(TIENDAS_PROFILE_ERROR);
+}
+
 export async function approveDoctor(doc) {
+  assertDelDirectorio(doc);
   const alreadyVisible = doc.publication_status === "published" && doc.active === true;
   await base44.entities.Specialist.update(doc.id, { publication_status: "published", active: true, resubmitted_at: null, vacation_until: null });
   logActivity({
@@ -70,6 +80,7 @@ export async function approveDoctor(doc) {
 }
 
 export async function rejectDoctor(doc, reason) {
+  assertDelDirectorio(doc);
   await base44.entities.Specialist.update(doc.id, { publication_status: "rejected", resubmitted_at: null, vacation_until: null });
   logActivity({
     type: "doctor_rechazado",
@@ -81,11 +92,34 @@ export async function rejectDoctor(doc, reason) {
   return { publication_status: "rejected" };
 }
 
+// Versiones masivas ("Aprobar seleccionados" / rechazo en grupo): separan los
+// perfiles de tiendas ANTES de escribir, para que uno de ellos no deje la
+// tanda a medias (unos aprobados y otros no). Regresan qué se hizo y qué se
+// dejó fuera.
+export function splitByOrigin(docs) {
+  const valid = (docs || []).filter(esDelDirectorio);
+  const skipped = (docs || []).filter((d) => !esDelDirectorio(d));
+  return { valid, skipped };
+}
+
+export async function approveDoctors(docs) {
+  const { valid, skipped } = splitByOrigin(docs);
+  await Promise.all(valid.map((d) => approveDoctor(d)));
+  return { done: valid, skipped };
+}
+
+export async function rejectDoctors(docs, reason) {
+  const { valid, skipped } = splitByOrigin(docs);
+  await Promise.all(valid.map((d) => rejectDoctor(d, reason)));
+  return { done: valid, skipped };
+}
+
 // Cambia el estado de un perfil desde el editor del admin, con las tres
 // opciones que entiende cualquiera: en revisión, publicado (visible) o en
 // pausa (oculto). Devuelve los campos que quedaron para reflejarlos en el
 // formulario (si no, el autoguardado los revertiría).
 export async function setDoctorState(doc, next) {
+  assertDelDirectorio(doc);
   if (next === "published") return approveDoctor(doc);
   const fields = next === "paused"
     ? { publication_status: "published", active: false, resubmitted_at: null, vacation_until: null }

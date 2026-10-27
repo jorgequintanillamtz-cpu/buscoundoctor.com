@@ -18,6 +18,8 @@ import DocumentManager from "@/components/admin/DocumentManager";
 import DoctorDashboardHome from "@/components/admin/DoctorDashboardHome";
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, trackContactChanges, EMPTY_SPECIALIST_FORM } from "@/api/specialistForm";
 import { notifyProfileApproved } from "@/api/doctorNotify";
+import { TIENDAS_PROFILE_ERROR } from "@/api/doctorReview";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 import LoadingLogo from "@/components/LoadingLogo";
 
 // Este editor ahora es exclusivo del panel de administración (/admin/doctores/editar/:id),
@@ -102,6 +104,8 @@ export default function AdminDoctorEditor() {
 
   const handlePublish = async () => {
     const f = formRef.current;
+    // Freno: un perfil del sitio de tiendas no se publica desde el directorio.
+    if (!esDelDirectorio(f)) { toast.error(TIENDAS_PROFILE_ERROR); return; }
     if (!f.full_name) { toast.error("El nombre es obligatorio"); return; }
     if (!f.specialty) { toast.error("La especialidad es obligatoria"); return; }
     if (!f.whatsapp) { toast.error("El WhatsApp es obligatorio para publicar"); return; }
