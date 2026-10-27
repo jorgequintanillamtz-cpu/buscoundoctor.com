@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
 import RecommendationsLanding from "@/components/RecommendationsLanding";
+import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
@@ -26,13 +27,6 @@ const REASONS = {
 const CONSENT_VERSION = "v1";
 const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
 const isFemale = (name) => /^\s*(dra|doctora)\b/i.test(name || "");
-
-// Las 10 especialidades que se muestran primero al agregar un doctor (por slug del catálogo, en este orden).
-// El resto sale al elegir "Otra especialidad". Para cambiarlas, edita esta lista.
-const TOP_SPECIALTY_SLUGS = [
-  "medicina-general", "ginecologia", "pediatria", "dentista", "dermatologia",
-  "cardiologia", "ortopedia-y-traumatologia", "oftalmologia", "psicologia", "nutricion",
-];
 
 export default function Recomendaciones() {
   const [step, setStep] = useState(1); // 1 doctor | 2 recomendación | 3 verificar | 4 gracias

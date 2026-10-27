@@ -108,11 +108,11 @@ export default function RecommendationsLanding({ onRecommend }) {
                       )}
                     </div>
                   </Link>
-                  <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-border/50">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mt-3 pt-3 border-t border-border/50">
                     <Link to={`/recomendado/${d.slug}`} className="text-sm font-medium text-brand-augusta hover:underline inline-flex items-center gap-1">Ver recomendaciones <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></Link>
                     {onRecommend && (
                       <button type="button" onClick={() => onRecommend(d.slug)}
-                        className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-sm font-semibold transition-colors">
+                        className="inline-flex items-center justify-center gap-1.5 h-10 sm:h-9 px-3.5 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-sm font-semibold transition-colors w-full sm:w-auto">
                         <Heart className="w-3.5 h-3.5 fill-current" aria-hidden="true" /> Yo también lo recomiendo
                       </button>
                     )}
