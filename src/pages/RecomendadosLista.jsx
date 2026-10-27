@@ -141,7 +141,7 @@ export default function RecomendadosLista() {
         <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-14 h-14" />
         <div className="min-w-0 flex-1">
           <p className="font-heading font-semibold text-foreground break-words leading-snug">{d.full_name}</p>
-          <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.zone].filter(Boolean).join(" · ")}</p>
+          <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, d.zone].filter(Boolean).join(" · ")}</p>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
               <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar

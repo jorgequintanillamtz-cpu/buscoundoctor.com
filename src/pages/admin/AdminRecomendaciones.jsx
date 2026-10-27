@@ -57,6 +57,7 @@ export default function AdminRecomendaciones() {
   const [mergeTarget, setMergeTarget] = useState({});
   const [reports, setReports] = useState([]); // reportes de visitantes sobre comentarios o páginas
   const [viewStats, setViewStats] = useState({}); // vistas e impresiones por propuesta
+  const [catalog, setCatalog] = useState({ specialties: [], subspecialties: [] }); // para el menú de subespecialidad de cada doctor
   const [interest, setInterest] = useState({}); // pacientes que pidieron aviso por propuesta: { id: { count, contacts[] } }
   const [commentsPublic, setCommentsPublic] = useState(null); // interruptor: ¿se muestran los comentarios al público?
 
@@ -72,6 +73,7 @@ export default function AdminRecomendaciones() {
       try { setReports(await base44.entities.RecommendationReport.list("-created_at", 500)); } catch { setReports([]); }
       try { const { data } = await base44.functions.invoke("adminRecommendedViewStats"); setViewStats(data && typeof data === "object" ? data : {}); } catch { setViewStats({}); }
       try { const { data } = await base44.functions.invoke("adminRecommendedInterest"); setInterest(data && typeof data === "object" ? data : {}); } catch { setInterest({}); }
+      try { const [sp, ss] = await Promise.all([base44.entities.Specialty.filter({ active: true }), base44.entities.Subspecialty.filter({ active: true })]); setCatalog({ specialties: sp, subspecialties: ss }); } catch { setCatalog({ specialties: [], subspecialties: [] }); }
       try { const { data } = await base44.functions.invoke("adminGetRecommendationSettings"); setCommentsPublic(!!data?.comments_public); } catch { setCommentsPublic(null); }
     } catch (e) {
       console.error("No se pudieron cargar las recomendaciones", e);
@@ -141,6 +143,7 @@ export default function AdminRecomendaciones() {
       const res = await fn();
       if (res && res.ok === false) {
         const reasons = {
+          subespecialidad_invalida: "Esa subespecialidad no corresponde a la especialidad del doctor.",
           ya_tiene_perfil: "Este doctor ya tiene un perfil privado creado.",
           ya_juntada: "Esta propuesta ya fue juntada con otra.",
           cedula_duplicada: "Ya existe un doctor con esa cédula. Júntala con ese doctor en vez de crear otro perfil.",
@@ -207,6 +210,17 @@ export default function AdminRecomendaciones() {
       return res;
     }, `Rechazado: ${g.name}`);
   };
+
+  // Subespecialidades que se pueden elegir para una especialidad (por nombre).
+  const subOptionsFor = (specialtyName) => {
+    const id = catalog.specialties.find((x) => x.name === specialtyName)?.id;
+    return id ? catalog.subspecialties.filter((x) => x.parent_specialty_id === id).sort((a, b) => a.name.localeCompare(b.name, "es")) : [];
+  };
+  const setSubspecialty = (g, value) => run(`sub-${g.suggestion.id}`, async () => {
+    const res = await invoke("adminSetSuggestionSubspecialty", { id: g.suggestion.id, subspecialty: value || null });
+    if (res?.ok) logActivity({ type: "recomendacion_subespecialidad", description: `Se puso la subespecialidad de ${g.name}: ${value || "ninguna"}`, specialistId: g.specialist?.id, specialistName: g.name });
+    return res;
+  }, "Subespecialidad guardada");
 
   const reviewOne = (g, r, status) => run(`r-${r.id}`, () => invoke("adminReviewRecommendation", { ids: [r.id], status }), status === "approved" ? "Recomendación aprobada" : "Recomendación rechazada");
 
@@ -403,9 +417,19 @@ export default function AdminRecomendaciones() {
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {[g.specialty, g.zone, g.hospital].filter(Boolean).join(" · ") || "—"}
+                    {[g.specialty, g.subspecialty, g.zone, g.hospital].filter(Boolean).join(" · ") || "—"}
                     {g.license && <> · Cédula: <span className="font-medium text-foreground">{g.license}</span></>}
                   </p>
+                  {g.kind === "suggestion" && canAct && s && subOptionsFor(s.specialty).length > 0 && (
+                    <div className="mt-1.5 flex items-center gap-2 text-xs flex-wrap">
+                      <label htmlFor={`sub-${s.id}`} className="text-muted-foreground">Subespecialidad:</label>
+                      <select id={`sub-${s.id}`} value={s.subspecialty || ""} onChange={(e) => setSubspecialty(g, e.target.value)} disabled={busy === `sub-${s.id}`}
+                        className="h-8 px-2 rounded-lg border border-input bg-background text-xs max-w-full">
+                        <option value="">Ninguna / no sé</option>
+                        {subOptionsFor(s.specialty).map((x) => <option key={x.id} value={x.name}>{x.name}</option>)}
+                      </select>
+                    </div>
+                  )}
                   {s && (
                     <p className="text-xs text-muted-foreground mt-1">
                       Vistas de su página: <span className="font-medium text-foreground">{viewStats[s.id]?.views_30 || 0}</span> en 30 días ({viewStats[s.id]?.views_7 || 0} en 7; {viewStats[s.id]?.views_total || 0} en total)

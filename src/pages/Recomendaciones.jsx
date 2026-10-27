@@ -39,6 +39,7 @@ export default function Recomendaciones() {
   const [showPrivate, setShowPrivate] = useState(false);
   const [email, setEmail] = useState("");
   const [codeSent, setCodeSent] = useState(false);
+  const [verified, setVerified] = useState(false); // ya recomendó a uno: el mismo código vale 30 min para los demás doctores
   const [code, setCode] = useState("");
   const [consent, setConsent] = useState(false);
   const [marketing, setMarketing] = useState(false);
@@ -55,8 +56,9 @@ export default function Recomendaciones() {
   // parecidos de esa especialidad, para elegirlos en vez de duplicarlos (CLAUDE.md §8r).
   const [similar, setSimilar] = useState([]);
   const similarSeq = useRef(0);
-  const [newDoc, setNewDoc] = useState({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "" }); // title: "Dr." | "Dra."; full_name: solo el nombre
+  const [newDoc, setNewDoc] = useState({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "", subspecialty: "" }); // title: "Dr." | "Dra."; full_name: solo el nombre
   const [specialties, setSpecialties] = useState([]);
+  const [subspecialties, setSubspecialties] = useState([]);
   const [showOtherSpecialties, setShowOtherSpecialties] = useState(false);
   const [zones, setZones] = useState([]);
   const searchSeq = useRef(0);
@@ -69,7 +71,7 @@ export default function Recomendaciones() {
     try {
       const { data } = await base44.functions.invoke("getRecommendedDoctor", { slug });
       if (data?.ok && data.id) {
-        setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, zone: data.zone });
+        setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, subspecialty: data.subspecialty, zone: data.zone });
         setStep(2);
         return true;
       }
@@ -108,6 +110,7 @@ export default function Recomendaciones() {
     robots.setAttribute("content", "noindex, nofollow");
     base44.entities.Specialty.filter({ active: true }).then((l) => setSpecialties([...l].sort((a, b) => (a.display_name || a.name).localeCompare(b.display_name || b.name, "es")))).catch(() => {});
     base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
+    base44.entities.Subspecialty.filter({ active: true }).then((l) => setSubspecialties(l)).catch(() => {});
   }, []);
 
   // Empezar cada paso desde arriba (en celular "Siguiente" queda abajo; ver CLAUDE.md §10).
@@ -161,6 +164,10 @@ export default function Recomendaciones() {
   };
   const phoneDigits = newDoc.contact_phone.replace(/\D/g, "");
   const phoneProblem = phoneDigits && !(phoneDigits.length === 10 || (phoneDigits.length === 12 && phoneDigits.startsWith("52")));
+  // Subespecialidades de la especialidad elegida (opcional). Si cambia la especialidad, la elegida deja de valer sola.
+  const specialtyId = specialties.find((x) => x.name === newDoc.specialty)?.id;
+  const subOptions = specialtyId ? subspecialties.filter((x) => x.parent_specialty_id === specialtyId).sort((a, b) => a.name.localeCompare(b.name, "es")) : [];
+  const subValue = subOptions.some((x) => x.name === newDoc.subspecialty) ? newDoc.subspecialty : "";
   const newDocValid = !!newDoc.title && newDoc.full_name.trim().length >= 4 && !!newDoc.specialty && !phoneProblem;
   const emailValid = /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(email.trim());
 
@@ -179,7 +186,7 @@ export default function Recomendaciones() {
   };
   const confirmNew = () => {
     if (!newDocValid) return;
-    setTarget({ mode: "new", ...newDoc, full_name: `${newDoc.title} ${newDoc.full_name.trim()}` });
+    setTarget({ mode: "new", ...newDoc, subspecialty: subValue, full_name: `${newDoc.title} ${newDoc.full_name.trim()}` });
     setError("");
   };
   // Un solo botón "Siguiente": con un doctor de la lista, o con el formulario "¿Quién es tu doctor?" completo.
@@ -225,18 +232,22 @@ export default function Recomendaciones() {
     if (!codeSent || code.length !== 6 || !consent || busy) return;
     setBusy(true); setError("");
     const dest = target.mode === "new"
-      ? { new: { full_name: target.full_name, specialty: target.specialty, zone: target.zone || null, hospital: target.hospital || null, license_number: target.license_number || null, contact_phone: target.contact_phone || null } }
+      ? { new: { full_name: target.full_name, specialty: target.specialty, zone: target.zone || null, hospital: target.hospital || null, license_number: target.license_number || null, contact_phone: target.contact_phone || null, subspecialty: target.subspecialty || null } }
       : target.kind === "suggestion" ? { suggestion_id: target.id } : { specialist_id: target.id };
     try {
       const { data } = await base44.functions.invoke("submitRecommendation", {
         email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null, name: firstNameClean || null,
         consent: true, marketing, consent_version: CONSENT_VERSION,
       });
-      if (data?.ok) { setStep(4); }
+      if (data?.ok) { setVerified(true); setStep(4); }
       else if (data?.reason === "codigo_incorrecto") {
         const n = data.intentos_restantes;
         setError(`Código incorrecto.${typeof n === "number" ? ` Te quedan ${n} ${n === 1 ? "intento" : "intentos"}.` : ""}`);
-      } else setError(REASONS[data?.reason] || "No pudimos guardar tu recomendación. Intenta de nuevo.");
+      } else {
+        // Código vencido o con demasiados intentos: se pide otro (el paciente vuelve a "Confirmar mi correo").
+        if (data?.reason === "codigo_vencido" || data?.reason === "demasiados_intentos") { setVerified(false); setCodeSent(false); setCode(""); }
+        setError(REASONS[data?.reason] || "No pudimos guardar tu recomendación. Intenta de nuevo.");
+      }
     } catch (e) {
       setError(formErrorMessage(e, "No pudimos guardar tu recomendación. Intenta de nuevo."));
     }
@@ -244,9 +255,11 @@ export default function Recomendaciones() {
   };
 
   const reset = () => {
-    setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setFirstName(""); setShowPrivate(false); setCode(""); setCodeSent(false);
-    setConsent(false); setMarketing(false); setQuery(""); setResults(null); setAdding(false);
-    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "" }); setError(""); setShowOtherSpecialties(false);
+    setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setShowPrivate(false);
+    // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
+    if (!verified) { setFirstName(""); setCode(""); setCodeSent(false); setConsent(false); setMarketing(false); }
+    setQuery(""); setResults(null); setAdding(false);
+    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "", subspecialty: "" }); setError(""); setShowOtherSpecialties(false);
   };
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`Acabo de recomendar a mi doctor en BuscoUnDoctor. Tú también puedes recomendar al tuyo, toma un minuto: ${PAGE_URL}`)}`;
@@ -285,7 +298,7 @@ export default function Recomendaciones() {
         {step === 2 && target && (
           <div className="max-w-xl mx-auto mt-5">
             <p className="font-heading font-bold text-xl">{targetName}</p>
-            <p className="text-white/75 text-sm mt-0.5">{[specialtyLabel(target.specialty), target.zone].filter(Boolean).join(" · ")}</p>
+            <p className="text-white/75 text-sm mt-0.5">{[specialtyLabel(target.specialty), target.subspecialty, target.zone].filter(Boolean).join(" · ")}</p>
           </div>
         )}
         {step === 3 && (
@@ -323,7 +336,7 @@ export default function Recomendaciones() {
                 <div className="rounded-2xl border border-brand-augusta bg-brand-augustaLight p-4 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-brand-augustaDark">{target.full_name}</p>
-                    <p className="text-sm text-brand-augustaDark/80">{[specialtyLabel(target.specialty), target.zone].filter(Boolean).join(" · ")}</p>
+                    <p className="text-sm text-brand-augustaDark/80">{[specialtyLabel(target.specialty), target.subspecialty, target.zone].filter(Boolean).join(" · ")}</p>
                   </div>
                   <button type="button" onClick={() => setTarget(null)} aria-label="Cambiar de doctor" className="p-1 text-brand-augustaDark/70 hover:text-brand-augustaDark"><X className="w-4 h-4" /></button>
                 </div>
@@ -404,6 +417,15 @@ export default function Recomendaciones() {
                           );
                         })()}
                       </div>
+                      {subOptions.length > 0 && (
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-1 block">Subespecialidad <span className="text-muted-foreground font-normal">(opcional)</span></label>
+                          <select value={subValue} onChange={(e) => setNewDoc({ ...newDoc, subspecialty: e.target.value })} className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm" aria-label="Subespecialidad">
+                            <option value="">No sé / ninguna</option>
+                            {subOptions.map((x) => <option key={x.id} value={x.name}>{x.name}</option>)}
+                          </select>
+                        </div>
+                      )}
                       <div>
                         <label className="text-sm font-medium text-foreground mb-1 block">¿Es doctor o doctora?</label>
                         <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Doctor o doctora">
@@ -550,7 +572,7 @@ export default function Recomendaciones() {
 
               <label className="text-sm font-medium text-foreground mb-1.5 block">Tu correo electrónico</label>
               <div className="flex gap-2">
-                <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (codeSent) { setCodeSent(false); setCode(""); } }}
+                <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (codeSent) { setCodeSent(false); setCode(""); setVerified(false); } }}
                   placeholder="tucorreo@ejemplo.com" className="h-12 rounded-xl flex-1" autoComplete="email" />
               </div>
               <p className="text-xs text-muted-foreground mt-1.5">Solo lo usamos para confirmar que eres una persona real. No se muestra.</p>
@@ -562,15 +584,23 @@ export default function Recomendaciones() {
                 </Button>
               ) : (
                 <>
-                  <label className="text-sm font-medium text-foreground mt-5 mb-1.5 block">Código de 6 números</label>
-                  <Input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code"
-                    placeholder="000000" className="h-12 rounded-xl text-center text-xl tracking-[0.5em] font-semibold" />
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Te lo mandamos a {email.trim()}. Revisa también spam.{" "}
-                    <button type="button" onClick={requestCode} disabled={cooldown > 0 || busy} className="text-brand-augusta font-medium hover:underline disabled:opacity-50 disabled:no-underline">
-                      {cooldown > 0 ? `Pedir otro en ${cooldown} s` : "Pedir otro código"}
-                    </button>
-                  </p>
+                  {verified ? (
+                    <p className="mt-5 flex items-start gap-2 rounded-xl bg-brand-augustaLight text-brand-augustaDark text-sm px-3.5 py-3">
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden="true" /> Ya confirmaste tu correo. Solo toca "Enviar recomendación".
+                    </p>
+                  ) : (
+                    <>
+                      <label className="text-sm font-medium text-foreground mt-5 mb-1.5 block">Código de 6 números</label>
+                      <Input value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))} inputMode="numeric" autoComplete="one-time-code"
+                        placeholder="000000" className="h-12 rounded-xl text-center text-xl tracking-[0.5em] font-semibold" />
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        Te lo mandamos a {email.trim()}. Revisa también spam.{" "}
+                        <button type="button" onClick={requestCode} disabled={cooldown > 0 || busy} className="text-brand-augusta font-medium hover:underline disabled:opacity-50 disabled:no-underline">
+                          {cooldown > 0 ? `Pedir otro en ${cooldown} s` : "Pedir otro código"}
+                        </button>
+                      </p>
+                    </>
+                  )}
 
                   <div className="space-y-3 mt-5">
                     <label className="flex items-start gap-2.5 cursor-pointer">

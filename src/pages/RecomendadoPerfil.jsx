@@ -134,7 +134,7 @@ export default function RecomendadoPerfil() {
                 )}
               </div>
               <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground leading-tight mt-2">{doc.full_name}</h1>
-              {doc.specialty && <p className="text-muted-foreground mt-1 flex items-center gap-1.5"><Stethoscope className="w-4 h-4 flex-shrink-0" aria-hidden="true" />{doc.specialty}</p>}
+              {doc.specialty && <p className="text-muted-foreground mt-1 flex items-center gap-1.5"><Stethoscope className="w-4 h-4 flex-shrink-0" aria-hidden="true" />{[doc.specialty, doc.subspecialty].filter(Boolean).join(" · ")}</p>}
             </div>
           </div>
 
