@@ -58,19 +58,16 @@ export default function RecomendadoPerfil() {
     if (state === "ok" && doc && !doc.redirect) recordRecommendedViews([doc.slug], "view");
   }, [state, doc]);
 
-  // Doctores parecidos (columna de la derecha en escritorio): primero los de la misma especialidad; si hay menos de 3, se
-  // completa con los más recomendados de otras. De la misma lista pública; si falla, simplemente no se muestran.
+  // Doctores parecidos (columna de la derecha en escritorio): SOLO de la misma especialidad (pedido de Jorge), los más
+  // recomendados primero. De la misma lista pública; si falla o no hay otros, simplemente no se muestran.
   useEffect(() => {
-    if (state !== "ok" || !doc || doc.redirect) { setRelated([]); return undefined; }
+    if (state !== "ok" || !doc || doc.redirect || !doc.specialty) { setRelated([]); return undefined; }
     let active = true;
     base44.functions.invoke("listRecommendedDoctors")
       .then(({ data }) => {
         if (!active || !Array.isArray(data)) return;
         const byRank = (a, b) => b.count - a.count || a.full_name.localeCompare(b.full_name, "es");
-        const rest = data.filter((d) => d.slug !== doc.slug);
-        const same = rest.filter((d) => doc.specialty && d.specialty === doc.specialty).sort(byRank).slice(0, 5);
-        const fill = same.length >= 3 ? [] : rest.filter((d) => !same.includes(d)).sort(byRank).slice(0, 3 - same.length);
-        const list = [...same, ...fill];
+        const list = data.filter((d) => d.slug !== doc.slug && d.specialty === doc.specialty).sort(byRank).slice(0, 5);
         setRelated(list);
         recordRecommendedViews(list.map((d) => d.slug), "impression");
       })
@@ -117,17 +114,16 @@ export default function RecomendadoPerfil() {
   const shareText = `${doc.full_name} está recomendado por ${n} ${n === 1 ? "paciente" : "pacientes"} en BuscoUnDoctor: ${url}`;
   const showBars = n >= BARS_FROM && doc.tags.length > 0;
   const interest = Number(doc.interest_count) || 0;
-  const allSame = related.length > 0 && related.every((d) => d.specialty === doc.specialty);
   const relatedCard = related.length > 0 ? (
     <div className="bg-card rounded-3xl border border-brand-canvasBorder p-5 sm:p-6">
-      <h2 className="font-heading font-semibold text-foreground">{allSame ? `Otros doctores de ${doc.specialty} recomendados` : "Otros doctores recomendados"}</h2>
+      <h2 className="font-heading font-semibold text-foreground">Otros doctores de {doc.specialty} recomendados</h2>
       <div className="mt-3 grid grid-cols-1 gap-2.5">
         {related.map((d) => (
           <Link key={d.slug} to={`/recomendado/${d.slug}`} className="flex items-center gap-3 rounded-xl border border-border/60 px-3.5 py-3 hover:border-brand-augusta/50 transition-colors">
             <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-11 h-11" />
             <div className="min-w-0 flex-1">
               <p className="font-heading font-semibold text-foreground break-words leading-snug">{d.full_name}</p>
-              <p className="text-xs text-muted-foreground break-words">{[d.specialty !== doc.specialty ? d.specialty : null, d.zone, `${d.count} ${d.count === 1 ? "recomendación" : "recomendaciones"}`].filter(Boolean).join(" · ")}</p>
+              <p className="text-xs text-muted-foreground break-words">{[d.subspecialty, d.zone, `${d.count} ${d.count === 1 ? "recomendación" : "recomendaciones"}`].filter(Boolean).join(" · ")}</p>
             </div>
             <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
           </Link>
