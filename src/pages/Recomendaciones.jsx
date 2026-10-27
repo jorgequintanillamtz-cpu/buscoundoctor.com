@@ -290,7 +290,8 @@ export default function Recomendaciones() {
           {/* ---------- PASO 1: el doctor ---------- */}
           {step === 1 && (
             <div>
-              <h2 className="font-heading font-semibold text-lg text-foreground mb-3">¿A quién quieres recomendar?</h2>
+              {/* En el formulario de "escribir su nombre" no va este título: ahí solo se pregunta lo que sigue. */}
+              {!(adding && !target) && <h2 className="font-heading font-semibold text-lg text-foreground mb-3">¿A quién quieres recomendar?</h2>}
 
               {target ? (
                 <div className="rounded-2xl border border-brand-augusta bg-brand-augustaLight p-4 flex items-start justify-between gap-3">
@@ -431,10 +432,13 @@ export default function Recomendaciones() {
                 </>
               )}
 
-              <Button type="button" onClick={goNext} disabled={!canContinue}
-                className="w-full mt-6 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">
-                Siguiente
-              </Button>
+              {/* Con la búsqueda no hay "Siguiente": al tocar un doctor se pasa solo. Solo el formulario de "escribir su nombre" lo necesita. */}
+              {adding && !target && (
+                <Button type="button" onClick={goNext} disabled={!canContinue}
+                  className="w-full mt-6 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">
+                  Siguiente
+                </Button>
+              )}
             </div>
           )}
 
