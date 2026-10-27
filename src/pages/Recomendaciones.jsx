@@ -317,8 +317,8 @@ export default function Recomendaciones() {
         )}
       </header>
 
-      <main className={`relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16 ${wide ? "lg:max-w-5xl lg:grid lg:grid-cols-[32rem_minmax(0,1fr)] lg:gap-8 lg:items-start" : ""}`}>
-        <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7">
+      <main className={`relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16 ${wide ? "lg:max-w-5xl lg:grid lg:grid-cols-[32rem_minmax(0,1fr)] lg:gap-8 lg:items-start xl:max-w-7xl xl:grid-cols-[minmax(0,1fr)_32rem_minmax(0,1fr)]" : ""}`}>
+        <div className={`bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7 ${wide ? "xl:col-start-2" : ""}`}>
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
             <button type="button"
               onClick={goBack}
