@@ -477,12 +477,6 @@ export default function Recomendaciones() {
                 <span className="text-xs text-muted-foreground flex-shrink-0">{comment.length}/160</span>
               </div>
 
-              <p className="text-sm font-medium text-foreground mt-5 mb-1.5">Tu primer nombre <span className="text-muted-foreground font-normal">(opcional)</span></p>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value.slice(0, 25))} placeholder="Ej. María" className="h-12 rounded-xl" autoComplete="given-name" />
-              <p className={`text-xs mt-1.5 ${nameProblem ? "text-red-600" : "text-muted-foreground"}`}>
-                {nameProblem || "Si lo escribes, aparece junto a tu recomendación. Solo tu primer nombre: nunca tu apellido ni tu correo."}
-              </p>
-
               {!showPrivate && !message ? (
                 <button type="button" onClick={() => setShowPrivate(true)} className="mt-5 text-sm text-brand-blue hover:underline">
                   Dejarle un mensaje privado {she ? "a la doctora" : "al doctor"} (opcional)
@@ -500,7 +494,7 @@ export default function Recomendaciones() {
 
               <div className="flex gap-3 mt-6">
                 <Button type="button" variant="outline" onClick={goBack} className="h-12 rounded-xl px-4"><ArrowLeft className="w-4 h-4" /></Button>
-                <Button type="button" onClick={() => setStep(3)} disabled={!!commentProblem || !!nameProblem} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
+                <Button type="button" onClick={() => setStep(3)} disabled={!!commentProblem} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
               </div>
             </div>
           )}
@@ -508,6 +502,12 @@ export default function Recomendaciones() {
           {/* ---------- PASO 3: verificar y enviar ---------- */}
           {step === 3 && (
             <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Tu primer nombre <span className="text-muted-foreground font-normal">(opcional)</span></label>
+              <Input value={firstName} onChange={(e) => setFirstName(e.target.value.slice(0, 25))} placeholder="Ej. María" className="h-12 rounded-xl" autoComplete="given-name" />
+              <p className={`text-xs mt-1.5 mb-5 ${nameProblem ? "text-red-600" : "text-muted-foreground"}`}>
+                {nameProblem || "Si lo escribes, aparece junto a tu recomendación. Solo tu primer nombre: nunca tu apellido ni tu correo."}
+              </p>
+
               <label className="text-sm font-medium text-foreground mb-1.5 block">Tu correo electrónico</label>
               <div className="flex gap-2">
                 <Input type="email" value={email} onChange={(e) => { setEmail(e.target.value); if (codeSent) { setCodeSent(false); setCode(""); } }}
@@ -548,7 +548,7 @@ export default function Recomendaciones() {
                     </label>
                   </div>
 
-                  <Button type="button" onClick={submit} disabled={code.length !== 6 || !consent || busy}
+                  <Button type="button" onClick={submit} disabled={code.length !== 6 || !consent || busy || !!nameProblem}
                     className="w-full mt-5 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">
                     {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar recomendación"}
                   </Button>
