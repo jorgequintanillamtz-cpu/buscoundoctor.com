@@ -1,3 +1,4 @@
+import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { SlidersHorizontal, X, Search, Heart, ShieldQuestion } from "lucide-react";
@@ -58,6 +59,8 @@ export default function SpecialistList() {
 
   const onlyNameFilter = !filterSpecialty && !filterZone && !filterModality && !filterInsurer && !onlyVerified
     && !filterConditionSlug && !filterSubspecialtySlug;
+  // Impresión: los doctores recomendados que aparecen en el bloque de la búsqueda por nombre.
+  useEffect(() => { recordRecommendedViews(recommended.map((r) => r.slug), "impression"); }, [recommended]);
   useEffect(() => {
     const q = searchQuery.trim();
     if (q.length < 3 || !onlyNameFilter) { setRecommended([]); return; }

@@ -56,6 +56,7 @@ export default function AdminRecomendaciones() {
   const [notes, setNotes] = useState({});
   const [mergeTarget, setMergeTarget] = useState({});
   const [reports, setReports] = useState([]); // reportes de visitantes sobre comentarios o páginas
+  const [viewStats, setViewStats] = useState({}); // vistas e impresiones por propuesta
   const [commentsPublic, setCommentsPublic] = useState(null); // interruptor: ¿se muestran los comentarios al público?
 
   const load = async () => {
@@ -68,6 +69,7 @@ export default function AdminRecomendaciones() {
       ]);
       setSuggestions(s); setRecs(r); setSpecialists(sp.filter((x) => !x.deleted_at));
       try { setReports(await base44.entities.RecommendationReport.list("-created_at", 500)); } catch { setReports([]); }
+      try { const { data } = await base44.functions.invoke("adminRecommendedViewStats"); setViewStats(data && typeof data === "object" ? data : {}); } catch { setViewStats({}); }
       try { const { data } = await base44.functions.invoke("adminGetRecommendationSettings"); setCommentsPublic(!!data?.comments_public); } catch { setCommentsPublic(null); }
     } catch (e) {
       console.error("No se pudieron cargar las recomendaciones", e);
@@ -402,6 +404,12 @@ export default function AdminRecomendaciones() {
                     {[g.specialty, g.zone, g.hospital].filter(Boolean).join(" · ") || "—"}
                     {g.license && <> · Cédula: <span className="font-medium text-foreground">{g.license}</span></>}
                   </p>
+                  {s && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Vistas de su página: <span className="font-medium text-foreground">{viewStats[s.id]?.views_30 || 0}</span> en 30 días ({viewStats[s.id]?.views_7 || 0} en 7; {viewStats[s.id]?.views_total || 0} en total)
+                      {" · "}Apariciones en listas: <span className="font-medium text-foreground">{viewStats[s.id]?.imp_30 || 0}</span> en 30 días ({viewStats[s.id]?.imp_7 || 0} en 7; {viewStats[s.id]?.imp_total || 0} en total)
+                    </p>
+                  )}
                   {s?.contact_phone && (
                     <p className="text-sm mt-1 flex items-center gap-x-3 gap-y-1 flex-wrap">
                       <span className="text-muted-foreground">Teléfono para citas (lo dio un paciente, no se muestra al público):</span>
