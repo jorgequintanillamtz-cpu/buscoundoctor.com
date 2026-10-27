@@ -46,7 +46,7 @@ export function LatestRecommendations({ data }) {
   const latest = data.doctors.filter((d) => d.last_at).sort((a, b) => new Date(b.last_at) - new Date(a.last_at)).slice(0, 5);
   const quote = (data.comments || [])[0];
   return (
-    <aside className="hidden lg:block lg:sticky lg:top-6 bg-card rounded-3xl border border-border/50 shadow-lg p-6">
+    <aside className="hidden lg:block lg:sticky lg:top-6 xl:col-start-3 xl:row-start-1 bg-card rounded-3xl border border-border/50 shadow-lg p-6">
       <h2 className="font-heading font-semibold text-lg text-foreground">Últimas recomendaciones</h2>
       <ul className="mt-3 divide-y divide-border/50">
         {latest.map((d) => (
