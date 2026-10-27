@@ -1,4 +1,4 @@
-import { SITE, GENERIC, loadPublicSpecialist, buildProfileMeta, renderHtml, validSlug, hasUsablePhoto } from "./_lib/og.js";
+import { SITE, GENERIC, loadPublicSpecialist, loadRecommendedDoctor, buildProfileMeta, renderHtml, validSlug, hasUsablePhoto } from "./_lib/og.js";
 
 // Vista previa al compartir un perfil (WhatsApp, Facebook, iMessage, Telegram, LinkedIn,
 // X, Slack, Discord). Esas apps leen la página SIN ejecutar código, y el sitio es una
@@ -28,6 +28,43 @@ export default async function handler(req, res) {
         bodyText: "Armamos tu perfil médico en el directorio verificado de Monterrey y San Pedro.",
         noindex: true,
       })
+    );
+    return;
+  }
+
+  // Doctor recomendado por pacientes (/recomendado/:slug): tarjeta con su nombre y cuántos pacientes lo recomiendan,
+  // con el logo (nunca su foto: es un perfil sin verificar). Perfil sin verificar = lo dice la descripción.
+  if (req.query.tipo === "recomendado") {
+    let card = null;
+    try {
+      const d = await loadRecommendedDoctor(slug);
+      if (d) {
+        const n = Number(d.count) || 0;
+        const where = [d.specialty, d.zone].filter(Boolean).join(" en ");
+        card = renderHtml({
+          title: `${d.full_name}${where ? ` — ${where}` : ""} | BuscoUnDoctor`,
+          ogTitle: `${d.full_name}${d.specialty ? ` — ${d.specialty}` : ""}`,
+          description: `${n} ${n === 1 ? "paciente recomienda" : "pacientes recomiendan"} a ${d.full_name}. Perfil sin verificar: son opiniones de pacientes, no una valoración médica.`,
+          url: `${SITE}/recomendado/${d.slug}`,
+          image: `${SITE}/api/og-image`,
+          imageAlt: "BuscoUnDoctor",
+          heading: d.full_name,
+          bodyText: `${n} ${n === 1 ? "paciente recomienda" : "pacientes recomiendan"} a ${d.full_name}.`,
+          noindex: !d.indexable,
+        });
+      }
+    } catch { /* cae a la tarjeta genérica */ }
+    res.status(200).send(
+      card ||
+        renderHtml({
+          title: GENERIC.title,
+          description: GENERIC.description,
+          url: `${SITE}/`,
+          image: `${SITE}/api/og-image`,
+          imageAlt: "BuscoUnDoctor",
+          heading: "BuscoUnDoctor",
+          bodyText: GENERIC.description,
+        })
     );
     return;
   }

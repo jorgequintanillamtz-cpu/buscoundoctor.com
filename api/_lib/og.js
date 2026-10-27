@@ -44,6 +44,21 @@ export async function loadPublicSpecialist(slug) {
   return rows[0] || null;
 }
 
+// Doctor recomendado por pacientes (/recomendado/:slug, CLAUDE.md §8r). Usa la función pública de la base de datos:
+// solo devuelve propuestas aprobadas por el equipo, y nunca el mensaje privado ni datos de quien recomendó.
+export async function loadRecommendedDoctor(slug) {
+  if (!validSlug(slug) || !ANON_KEY) return null;
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_recommended_doctor`, {
+    method: "POST",
+    headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_slug: slug }),
+    signal: AbortSignal.timeout(5000),
+  });
+  if (!r.ok) return null;
+  const d = await r.json();
+  return d && d.ok && !d.redirect ? d : null;
+}
+
 // Mismas reglas de texto que la página del perfil: viven en src/lib/profileMeta.js (un solo lugar).
 export async function buildProfileMeta(s) {
   let specialtyDisplay = null;

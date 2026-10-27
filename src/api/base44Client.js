@@ -460,6 +460,8 @@ const FUNCTION_MAP = {
   listRecommendedDoctors: () => supabase.rpc('list_recommended_doctors'),
   recordRecommendedViews: ({ slugs, kind } = {}) => supabase.rpc('record_recommended_views', { p_slugs: slugs, p_kind: kind }),
   adminRecommendedViewStats: () => supabase.rpc('admin_recommended_view_stats'),
+  submitDoctorInterest: ({ slug, contact, consent } = {}) => supabase.rpc('submit_doctor_interest', { p_slug: slug, p_contact: contact, p_consent: consent }),
+  adminRecommendedInterest: () => supabase.rpc('admin_recommended_interest'),
   listRecommendationsLanding: () => supabase.rpc('list_recommendations_landing'),
   submitRecommendationReport: ({ slug, comment_id, kind, reason, details, email } = {}) =>
     supabase.rpc('submit_recommendation_report', { p_slug: slug, p_comment_id: comment_id || null, p_reason: reason, p_details: details || null, p_email: email || null, p_kind: kind || null }),
