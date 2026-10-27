@@ -25,6 +25,13 @@ const CONSENT_VERSION = "v1";
 const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
 const isFemale = (name) => /^\s*(dra|doctora)\b/i.test(name || "");
 
+// Las 10 especialidades que se muestran primero al agregar un doctor (por slug del catálogo, en este orden).
+// El resto sale al elegir "Otra especialidad". Para cambiarlas, edita esta lista.
+const TOP_SPECIALTY_SLUGS = [
+  "medicina-general", "ginecologia", "pediatria", "dentista", "dermatologia",
+  "cardiologia", "ortopedia-y-traumatologia", "oftalmologia", "psicologia", "nutricion",
+];
+
 export default function Recomendaciones() {
   const [step, setStep] = useState(1); // 1 doctor | 2 recomendación | 3 verificar | 4 gracias
   const [target, setTarget] = useState(null); // { mode: "existing", kind, id, full_name, specialty, zone } | { mode: "new", ... }
@@ -53,6 +60,7 @@ export default function Recomendaciones() {
   const similarSeq = useRef(0);
   const [newDoc, setNewDoc] = useState({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); // title: "Dr." | "Dra."; full_name: solo el nombre
   const [specialties, setSpecialties] = useState([]);
+  const [showOtherSpecialties, setShowOtherSpecialties] = useState(false);
   const [zones, setZones] = useState([]);
   const searchSeq = useRef(0);
   const [params] = useSearchParams();
@@ -162,12 +170,12 @@ export default function Recomendaciones() {
     : /(https?:|www\.|@|\.com|\.mx|\.net|\.org)/i.test(commentClean) || commentClean.replace(/\D/g, "").length >= 7 ? "Sin enlaces, correos ni teléfonos, por favor."
     : "";
 
-  // "¿Qué destacas?": MAX_TAGS selectores que se despliegan; en cada uno se puede escoger cualquier opción de
-// cualquier sección (agrupadas dentro del selector). Una opción ya elegida no se repite en los demás.
-  const setSlot = (i, v) => setTags((cur) => {
-    const slots = Array.from({ length: MAX_TAGS }, (_, k) => cur[k] || "");
-    slots[i] = v;
-    return slots.filter(Boolean);
+  // "¿Qué destacas?": un selector por tema (El doctor, El consultorio, Tiempo…); cada uno solo trae las
+  // opciones de su tema y se puede escoger una. En total, hasta MAX_TAGS (el servidor también lo exige).
+  const sectionTag = (sec) => tags.find((t) => sec.tags.some((x) => x.v === t)) || "";
+  const setSection = (sec, v) => setTags((cur) => {
+    const rest = cur.filter((t) => !sec.tags.some((x) => x.v === t));
+    return v ? [...rest, v] : rest;
   });
 
   const requestCode = async () => {
@@ -208,7 +216,7 @@ export default function Recomendaciones() {
   const reset = () => {
     setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setFirstName(""); setShowPrivate(false); setCode(""); setCodeSent(false);
     setConsent(false); setMarketing(false); setQuery(""); setResults(null); setAdding(false);
-    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError("");
+    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError(""); setShowOtherSpecialties(false);
   };
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`Acabo de recomendar a mi doctor en BuscoUnDoctor. Tú también puedes recomendar al tuyo, toma un minuto: ${PAGE_URL}`)}`;
@@ -247,6 +255,13 @@ export default function Recomendaciones() {
 
       <main className="max-w-lg mx-auto px-4 -mt-8 pb-16">
         <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7">
+          {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
+            <button type="button"
+              onClick={() => { if (step === 1) setAdding(false); else setStep(step - 1); setError(""); }}
+              className="-mt-1 mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px] -ml-1 px-1">
+              <ArrowLeft className="w-4 h-4" /> Atrás
+            </button>
+          )}
           {step <= 3 && (
             <div className="flex gap-1.5 mb-5" aria-label={`Paso ${step} de 3`}>
               {[1, 2, 3].map((n) => (
@@ -313,10 +328,38 @@ export default function Recomendaciones() {
                     <div className="space-y-3">
                       <div>
                         <label className="text-sm font-medium text-foreground mb-1 block">¿De qué especialidad es?</label>
-                        <select value={newDoc.specialty} onChange={(e) => { setNewDoc({ ...newDoc, specialty: e.target.value }); setSimilar([]); }} className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm">
-                          <option value="">Elige una especialidad</option>
-                          {specialties.map((s) => <option key={s.id} value={s.name}>{s.display_name || s.name}</option>)}
-                        </select>
+                        {(() => {
+                          const top = TOP_SPECIALTY_SLUGS.map((slug) => specialties.find((x) => x.slug === slug)).filter(Boolean);
+                          const topNames = new Set(top.map((x) => x.name));
+                          const others = specialties.filter((x) => !topNames.has(x.name));
+                          const otherChosen = !!newDoc.specialty && !topNames.has(newDoc.specialty);
+                          const otherOpen = showOtherSpecialties || otherChosen;
+                          const chip = (on) => `px-3.5 h-10 rounded-full border text-sm font-medium transition-colors ${on ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark" : "border-input bg-background text-foreground hover:border-brand-augusta/50"}`;
+                          return (
+                            <>
+                              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Especialidad">
+                                {top.map((x) => (
+                                  <button key={x.id} type="button" role="radio" aria-checked={newDoc.specialty === x.name}
+                                    onClick={() => { setNewDoc({ ...newDoc, specialty: x.name }); setSimilar([]); setShowOtherSpecialties(false); }}
+                                    className={chip(newDoc.specialty === x.name)}>
+                                    {x.display_name || x.name}
+                                  </button>
+                                ))}
+                                <button type="button" role="radio" aria-checked={otherOpen}
+                                  onClick={() => { setShowOtherSpecialties(true); if (!otherChosen) { setNewDoc({ ...newDoc, specialty: "" }); setSimilar([]); } }}
+                                  className={chip(otherOpen)}>
+                                  Otra especialidad
+                                </button>
+                              </div>
+                              {otherOpen && (
+                                <select value={otherChosen ? newDoc.specialty : ""} onChange={(e) => { setNewDoc({ ...newDoc, specialty: e.target.value }); setSimilar([]); }} className="mt-2 w-full h-11 px-3 rounded-xl border border-input bg-background text-sm" aria-label="Otra especialidad">
+                                  <option value="">Elige la especialidad</option>
+                                  {others.map((x) => <option key={x.id} value={x.name}>{x.display_name || x.name}</option>)}
+                                </select>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                       <div>
                         <label className="text-sm font-medium text-foreground mb-1 block">¿Es doctor o doctora?</label>
@@ -391,26 +434,25 @@ export default function Recomendaciones() {
               </div>
 
               <p className="text-sm font-medium text-foreground mt-5">¿Qué destacas? <span className="text-muted-foreground font-normal">(opcional)</span></p>
-              <p className="text-xs text-muted-foreground mt-0.5 mb-3">Elige hasta {MAX_TAGS} cosas: lo que más destaca {she ? "de ella" : "de él"}.</p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-3">Elige una por tema, hasta {MAX_TAGS} en total: lo que más destaca {she ? "de ella" : "de él"}.</p>
               <div className="space-y-2">
-                {Array.from({ length: MAX_TAGS }, (_, i) => (
-                  <select
-                    key={i}
-                    value={tags[i] || ""}
-                    onChange={(e) => setSlot(i, e.target.value)}
-                    aria-label={`Qué destaca, opción ${i + 1}`}
-                    className={`w-full h-12 px-3.5 rounded-xl border text-sm bg-background ${tags[i] ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark font-medium" : "border-input text-muted-foreground"}`}
-                  >
-                    <option value="">{`Opción ${i + 1}: elige una`}</option>
-                    {RECOMMENDATION_SECTIONS.map((sec) => (
-                      <optgroup key={sec.key} label={sec.label}>
-                        {sec.tags.map((t) => (
-                          <option key={t.v} value={t.v} disabled={tags.includes(t.v) && tags[i] !== t.v}>{t.label}</option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                ))}
+                {RECOMMENDATION_SECTIONS.map((sec) => {
+                  const picked = sectionTag(sec);
+                  const full = !picked && tags.length >= MAX_TAGS;
+                  return (
+                    <select
+                      key={sec.key}
+                      value={picked}
+                      onChange={(e) => setSection(sec, e.target.value)}
+                      disabled={full}
+                      aria-label={`Qué destacas: ${sec.label}`}
+                      className={`w-full h-12 px-3.5 rounded-xl border text-sm bg-background disabled:opacity-50 ${picked ? "border-brand-augusta bg-brand-augustaLight text-brand-augustaDark font-medium" : "border-input text-muted-foreground"}`}
+                    >
+                      <option value="">{full ? `${sec.label}: ya elegiste ${MAX_TAGS}` : `${sec.label}: elige una`}</option>
+                      {sec.tags.map((t) => <option key={t.v} value={t.v}>{t.label}</option>)}
+                    </select>
+                  );
+                })}
               </div>
 
               <p className="text-sm font-medium text-foreground mt-6 mb-1.5">Cuéntanos qué hace {she ? "a esta doctora" : "a este doctor"} excelente <span className="text-muted-foreground font-normal">(opcional)</span></p>
