@@ -26,19 +26,6 @@ const DAY_MS = 86400000;
 const norm = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const isNew = (d) => !!d.last_at && Date.now() - new Date(d.last_at).getTime() <= NEW_DAYS * DAY_MS;
 
-// "hace 3 h", "ayer", "hace 4 días" para la columna de últimas recomendaciones.
-function timeAgo(iso) {
-  const ms = Date.now() - new Date(iso).getTime();
-  if (!(ms >= 0)) return "hoy";
-  const h = Math.floor(ms / 3600000);
-  if (h < 1) return "hace unos minutos";
-  if (h < 24) return `hace ${h} h`;
-  const d = Math.floor(ms / DAY_MS);
-  if (d === 1) return "ayer";
-  if (d < 30) return `hace ${d} días`;
-  return "hace más de un mes";
-}
-
 // Una sola consulta para toda la página (la usan las secciones de abajo y la columna de la derecha en escritorio).
 // null = cargando | { total, doctors, comments } | false = falló
 export function useLandingData() {
@@ -70,7 +57,6 @@ export function LatestRecommendations({ data }) {
                 <p className="font-heading font-semibold text-sm text-foreground break-words leading-snug group-hover:text-brand-augusta transition-colors">{d.full_name}</p>
                 <p className="text-xs text-muted-foreground break-words">{[d.specialty, d.zone].filter(Boolean).join(" · ")}</p>
               </div>
-              <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo(d.last_at)}</span>
             </Link>
           </li>
         ))}
