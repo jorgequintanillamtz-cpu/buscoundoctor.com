@@ -10,6 +10,7 @@ import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
+import { specialtyLabel, specialtySearchText } from "@/lib/specialtyAliases";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -76,7 +77,7 @@ export default function RecomendadosLista() {
 
   const groups = useMemo(() => {
     const k = norm(q.trim());
-    const filtered = k.length >= 2 ? list.filter((d) => norm(d.full_name).includes(k) || norm(d.specialty).includes(k)) : list;
+    const filtered = k.length >= 2 ? list.filter((d) => norm(d.full_name).includes(k) || norm(specialtySearchText(d.specialty)).includes(k)) : list;
     const map = new Map();
     filtered.forEach((d) => {
       const key = d.specialty || OTHER;
@@ -225,7 +226,7 @@ export default function RecomendadosLista() {
                 <button type="button" onClick={() => setParams({})} className="text-sm text-brand-blue hover:underline inline-flex items-center gap-1">
                   <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Todas las especialidades
                 </button>
-                <h2 className="font-heading font-bold text-xl text-foreground mt-3">{selected.specialty}</h2>
+                <h2 className="font-heading font-bold text-xl text-foreground mt-3">{specialtyLabel(selected.specialty)}</h2>
                 <p className="text-xs text-muted-foreground">{selected.doctors.length} {selected.doctors.length === 1 ? "doctor recomendado" : "doctores recomendados"}</p>
 
                 {(zones.length > 1 || selected.doctors.length > 1) && (
@@ -258,7 +259,7 @@ export default function RecomendadosLista() {
 
                 {/* Invitación a recomendar a otro: se ve más grande mientras hay pocos doctores */}
                 <div className={`mt-4 rounded-2xl border border-dashed border-brand-augusta/40 bg-brand-augustaLight/40 text-center ${selected.doctors.length < 3 ? "p-6" : "p-4"}`}>
-                  <p className="font-heading font-semibold text-foreground">¿Conoces a otro doctor de {selected.specialty}?</p>
+                  <p className="font-heading font-semibold text-foreground">¿Conoces a otro doctor de {specialtyLabel(selected.specialty)}?</p>
                   <p className="text-sm text-muted-foreground mt-1">Sé el primero en recomendarlo: toma menos de un minuto.</p>
                   <Button asChild className="mt-3 rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augustaDark text-white">
                     <Link to="/recomendaciones"><PenLine className="w-4 h-4" /> Recomendar a un doctor</Link>
@@ -279,7 +280,7 @@ export default function RecomendadosLista() {
                       className="flex items-center justify-between gap-3 text-left bg-card rounded-2xl border border-brand-canvasBorder px-4 py-4 hover:border-primary/40 hover:shadow-card transition-all min-h-[64px]"
                     >
                       <span className="min-w-0">
-                        <span className="block font-heading font-semibold text-foreground break-words">{g.specialty}</span>
+                        <span className="block font-heading font-semibold text-foreground break-words">{specialtyLabel(g.specialty)}</span>
                         <span className="block text-sm text-muted-foreground">{g.doctors.length} {g.doctors.length === 1 ? "doctor" : "doctores"}</span>
                       </span>
                       <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />

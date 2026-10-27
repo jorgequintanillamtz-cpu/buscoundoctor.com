@@ -9,6 +9,7 @@ import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, H
 import { formErrorMessage } from "@/lib/formErrors";
 import RecommendationsLanding from "@/components/RecommendationsLanding";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
+import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
@@ -384,7 +385,7 @@ export default function Recomendaciones() {
                                   <button key={x.id} type="button" role="radio" aria-checked={newDoc.specialty === x.name}
                                     onClick={() => { setNewDoc({ ...newDoc, specialty: x.name }); setSimilar([]); setShowOtherSpecialties(false); }}
                                     className={chip(newDoc.specialty === x.name)}>
-                                    {x.display_name || x.name}
+                                    {aliasLabel(x.name, x.display_name || x.name)}
                                   </button>
                                 ))}
                                 <button type="button" role="radio" aria-checked={otherOpen}
@@ -396,7 +397,7 @@ export default function Recomendaciones() {
                               {otherOpen && (
                                 <select value={otherChosen ? newDoc.specialty : ""} onChange={(e) => { setNewDoc({ ...newDoc, specialty: e.target.value }); setSimilar([]); }} className="mt-2 w-full h-11 px-3 rounded-xl border border-input bg-background text-sm" aria-label="Otra especialidad">
                                   <option value="">Elige la especialidad</option>
-                                  {others.map((x) => <option key={x.id} value={x.name}>{x.display_name || x.name}</option>)}
+                                  {others.map((x) => <option key={x.id} value={x.name}>{aliasLabel(x.name, x.display_name || x.name)}</option>)}
                                 </select>
                               )}
                             </>
