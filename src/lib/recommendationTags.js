@@ -31,14 +31,11 @@ export const RECOMMENDATION_SECTIONS = [
     { v: "da_factura", label: "Da factura" },
     { v: "facilidades_pago", label: "Facilidades de pago" },
   ] },
-  { key: "tratamiento", label: "Tratamiento", tags: [
-    { v: "sin_tratamientos_innecesarios", label: "Sin tratamientos innecesarios" },
-    { v: "cuidadoso", label: "Cuidadoso en los procedimientos" },
-    { v: "tratamiento_a_medida", label: "Tratamiento a mi medida" },
-  ] },
   { key: "para_quien", label: "Lo recomiendo para", tags: [
     { v: "para_ninos", label: "Niños" },
     { v: "para_adultos_mayores", label: "Adultos mayores" },
+    { v: "para_hombres", label: "Hombres" },
+    { v: "para_mujeres", label: "Mujeres" },
     { v: "para_embarazadas", label: "Embarazadas" },
     { v: "segunda_opinion", label: "Una segunda opinión" },
   ] },
@@ -51,6 +48,8 @@ const RETIRED_TAGS = {
   estacionamiento: "Hay estacionamiento", sala_espera_comoda: "Sala de espera cómoda", poca_espera: "Poca espera",
   precio_claro: "Precio claro desde el inicio", explica_opciones: "Explica las opciones de tratamiento",
   indicaciones_claras: "Indicaciones claras", resultados_esperados: "Resultados como me explicó",
+  // Se quitó la sección "Tratamiento" completa (2026-10-26, pedido de Jorge).
+  sin_tratamientos_innecesarios: "Sin tratamientos innecesarios", cuidadoso: "Cuidadoso en los procedimientos", tratamiento_a_medida: "Tratamiento a mi medida",
 };
 
 // Lista plana (la usan el admin, la página del doctor y el panel para poner el nombre de cada etiqueta).
