@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, UserPlus } from "lucide-react";
+import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
@@ -76,12 +76,14 @@ export default function Recomendaciones() {
         if (!active) return;
         if (data?.ok && data.id) {
           setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, zone: data.zone });
+          setStep(2);
           return;
         }
         // No es un doctor "recomendado" sin perfil: puede ser un doctor ya registrado y publicado (viene de su perfil).
         const { data: sp } = await base44.functions.invoke("getSpecialistRecommendations", { slug });
         if (active && sp?.ok && sp.id) {
           setTarget({ mode: "existing", kind: "specialist", id: sp.id, full_name: sp.full_name, specialty: sp.specialty, zone: sp.zone });
+          setStep(2);
         }
       })
       .catch(() => {});
@@ -153,11 +155,26 @@ export default function Recomendaciones() {
     setTarget({ mode: "existing", kind: r.kind, id: r.id, full_name: r.full_name, specialty: r.specialty, zone: r.zone });
     setAdding(false);
     setError("");
+    setStep(2); // al tocar un doctor de la lista se pasa directo a la recomendación, sin pantalla de confirmación
+  };
+  // Atrás desde el paso 2: se suelta el doctor elegido para volver a la búsqueda (o al formulario, que conserva lo escrito).
+  const goBack = () => {
+    if (step === 1) setAdding(false);
+    else if (step === 2) { setTarget(null); setStep(1); }
+    else setStep(step - 1);
+    setError("");
   };
   const confirmNew = () => {
     if (!newDocValid) return;
     setTarget({ mode: "new", ...newDoc, full_name: `${newDoc.title} ${newDoc.full_name.trim()}` });
     setError("");
+  };
+  // Un solo botón "Siguiente": con un doctor de la lista, o con el formulario "¿Quién es tu doctor?" completo.
+  const canContinue = !!target || (adding && newDocValid);
+  const goNext = () => {
+    if (!canContinue) return;
+    if (!target) confirmNew();
+    setStep(2);
   };
   const specialtyLabel = (name) => specialties.find((s) => s.name === name)?.display_name || name;
 
@@ -257,7 +274,7 @@ export default function Recomendaciones() {
         <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7">
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
             <button type="button"
-              onClick={() => { if (step === 1) setAdding(false); else setStep(step - 1); setError(""); }}
+              onClick={goBack}
               className="-mt-1 mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground min-h-[44px] -ml-1 px-1">
               <ArrowLeft className="w-4 h-4" /> Atrás
             </button>
@@ -273,14 +290,13 @@ export default function Recomendaciones() {
           {/* ---------- PASO 1: el doctor ---------- */}
           {step === 1 && (
             <div>
-              <h2 className="font-heading font-semibold text-lg text-foreground mb-3">¿A qué doctor quieres recomendar?</h2>
+              <h2 className="font-heading font-semibold text-lg text-foreground mb-3">¿A quién quieres recomendar?</h2>
 
               {target ? (
                 <div className="rounded-2xl border border-brand-augusta bg-brand-augustaLight p-4 flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-brand-augustaDark">{target.full_name}</p>
                     <p className="text-sm text-brand-augustaDark/80">{[specialtyLabel(target.specialty), target.zone].filter(Boolean).join(" · ")}</p>
-                    {target.mode === "new" && <p className="text-xs text-brand-augustaDark/70 mt-1">Doctor nuevo: lo revisamos antes de mostrarlo.</p>}
                   </div>
                   <button type="button" onClick={() => setTarget(null)} aria-label="Cambiar de doctor" className="p-1 text-brand-augustaDark/70 hover:text-brand-augustaDark"><X className="w-4 h-4" /></button>
                 </div>
@@ -312,11 +328,11 @@ export default function Recomendaciones() {
                         return (
                           <div className={`mt-4 rounded-2xl p-4 ${noMatch ? "border-2 border-brand-augusta bg-brand-augustaLight" : "border-2 border-dashed border-brand-augusta/50 bg-brand-augustaLight/40"}`}>
                             <p className={`text-sm ${noMatch ? "font-semibold text-brand-augustaDark" : "text-foreground/80"}`}>
-                              {noMatch ? "No lo tenemos todavía. ¡Sé el primero en recomendarlo!" : "¿No encuentras a tu doctor? Aún estamos creciendo: agrégalo tú."}
+                              {noMatch ? "No lo vemos en la lista. Cuéntanos quién es y lo recomiendas igual." : "¿No lo ves en la lista? Cuéntanos quién es y lo recomiendas igual."}
                             </p>
                             <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
                               className="mt-3 w-full h-12 rounded-xl bg-brand-augusta hover:bg-brand-augustaDark text-white font-semibold flex items-center justify-center gap-2 transition-colors">
-                              <UserPlus className="w-5 h-5" /> Agregar a mi doctor
+                              <PenLine className="w-5 h-5" /> Escribir su nombre
                             </button>
                           </div>
                         );
@@ -326,6 +342,7 @@ export default function Recomendaciones() {
 
                   {adding && (
                     <div className="space-y-3">
+                      <p className="font-heading font-semibold text-foreground">¿Quién es tu doctor?</p>
                       <div>
                         <label className="text-sm font-medium text-foreground mb-1 block">¿De qué especialidad es?</label>
                         {(() => {
@@ -380,7 +397,7 @@ export default function Recomendaciones() {
                           placeholder={newDoc.specialty ? "Ej. Ana Pérez López (sin Dr. ni Dra.)" : "Primero elige la especialidad"} className="h-11 rounded-xl" maxLength={100} />
                         {similar.length > 0 && (
                           <div className="mt-2 rounded-xl border border-brand-augusta/40 bg-brand-augustaLight/40 p-2">
-                            <p className="text-xs font-medium text-brand-augustaDark px-2 pt-1 pb-1.5">¿Es alguno de estos? Elígelo para no duplicarlo.</p>
+                            <p className="text-xs font-medium text-brand-augustaDark px-2 pt-1 pb-1.5">¿Es alguno de estos? Toca para elegirlo.</p>
                             <ul className="space-y-1.5">
                               {similar.map((r) => (
                                 <li key={`${r.kind}-${r.id}`}>
@@ -399,7 +416,7 @@ export default function Recomendaciones() {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-sm font-medium text-foreground mb-1 block">Zona <span className="text-muted-foreground font-normal">(opcional)</span></label>
+                          <label className="text-sm font-medium text-foreground mb-1 block">¿Dónde consulta? <span className="text-muted-foreground font-normal">(opcional)</span></label>
                           <select value={newDoc.zone} onChange={(e) => setNewDoc({ ...newDoc, zone: e.target.value })} className="w-full h-11 px-3 rounded-xl border border-input bg-background text-sm">
                             <option value="">Elige</option>
                             {zones.map((z) => <option key={z.id} value={z.name}>{z.name}</option>)}
@@ -410,16 +427,12 @@ export default function Recomendaciones() {
                           <Input value={newDoc.hospital} onChange={(e) => setNewDoc({ ...newDoc, hospital: e.target.value })} placeholder="Ej. Zambrano Hellion" className="h-11 rounded-xl" maxLength={120} />
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 pt-1">
-                        <Button type="button" onClick={confirmNew} disabled={!newDocValid} className="rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white">Usar este doctor</Button>
-                        <button type="button" onClick={() => setAdding(false)} className="text-sm text-muted-foreground hover:underline">Volver a buscar</button>
-                      </div>
                     </div>
                   )}
                 </>
               )}
 
-              <Button type="button" onClick={() => setStep(2)} disabled={!target}
+              <Button type="button" onClick={goNext} disabled={!canContinue}
                 className="w-full mt-6 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">
                 Siguiente
               </Button>
@@ -487,7 +500,7 @@ export default function Recomendaciones() {
               )}
 
               <div className="flex gap-3 mt-6">
-                <Button type="button" variant="outline" onClick={() => setStep(1)} className="h-12 rounded-xl px-4"><ArrowLeft className="w-4 h-4" /></Button>
+                <Button type="button" variant="outline" onClick={goBack} className="h-12 rounded-xl px-4"><ArrowLeft className="w-4 h-4" /></Button>
                 <Button type="button" onClick={() => setStep(3)} disabled={!!commentProblem || !!nameProblem} className="flex-1 h-12 rounded-xl bg-brand-augusta hover:bg-brand-augusta/90 text-white font-semibold">Siguiente</Button>
               </div>
             </div>
