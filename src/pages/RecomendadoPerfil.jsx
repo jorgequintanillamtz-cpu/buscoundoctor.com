@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine, Phone, Clock, Lock } from "lucide-react";
+import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine, Phone, Clock, Lock, Eye } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import LoadingLogo from "@/components/LoadingLogo";
@@ -9,6 +9,7 @@ import ReportRecommendationDialog from "@/components/ReportRecommendationDialog"
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import RecommendationCards, { ReportMenu } from "@/components/RecommendationCards";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
+import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { setCanonical, setOpenGraph, buildAbsoluteUrl } from "@/lib/seoMeta";
 
 function setMeta(name, content) {
@@ -42,6 +43,11 @@ export default function RecomendadoPerfil() {
   }, [slug]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Cuenta esta vista (el número que se ve es el de antes de esta visita).
+  useEffect(() => {
+    if (state === "ok" && doc && !doc.redirect) recordRecommendedViews([doc.slug], "view");
+  }, [state, doc]);
 
   useEffect(() => {
     if (state === "notfound" || state === "error") { setMeta("robots", "noindex, nofollow"); return; }
@@ -80,9 +86,17 @@ export default function RecomendadoPerfil() {
           <div className="flex items-start gap-4">
             <RecommendedAvatar photo={doc.photo} name={doc.full_name} className="w-16 h-16 sm:w-20 sm:h-20" />
             <div className="min-w-0">
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-                <ShieldQuestion className="w-3.5 h-3.5" aria-hidden="true" /> Perfil sin verificar
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                  <ShieldQuestion className="w-4 h-4" aria-hidden="true" /> Perfil sin verificar
+                </span>
+                {/* Con menos de 10 vistas no se muestra: un número chico se ve mal. */}
+                {Number(doc.views) >= 10 && (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue px-1 py-1">
+                    <Eye className="w-4 h-4" aria-hidden="true" /> Visto {Number(doc.views).toLocaleString("es-MX")} veces
+                  </span>
+                )}
+              </div>
               <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground leading-tight mt-2">{doc.full_name}</h1>
               {doc.specialty && <p className="text-muted-foreground mt-1 flex items-center gap-1.5"><Stethoscope className="w-4 h-4 flex-shrink-0" aria-hidden="true" />{doc.specialty}</p>}
             </div>

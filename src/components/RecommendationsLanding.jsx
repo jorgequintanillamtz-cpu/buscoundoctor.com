@@ -7,6 +7,7 @@ import ReportRecommendationDialog from "@/components/ReportRecommendationDialog"
 import { ReportMenu, commentMonth } from "@/components/RecommendationCards";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
+import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 
 // Secciones de la landing de recomendaciones (CLAUDE.md §8r, pasos 26 y 28): van debajo del formulario de
@@ -47,6 +48,8 @@ export default function RecommendationsLanding({ onRecommend }) {
   const specialties = useMemo(() => [...new Set(doctors.map((d) => d.specialty).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es")), [doctors]);
   const showFilter = doctors.length >= SHOW_FILTER_FROM && specialties.length > 1;
   const shown = showFilter && specialty ? doctors.filter((d) => d.specialty === specialty) : doctors;
+  // Impresión: estos doctores aparecieron en la lista (la base cuenta una por visitante por día).
+  useEffect(() => { recordRecommendedViews(shown.map((d) => d.slug), "impression"); }, [shown]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`¿Tu doctor es excelente? Recomiéndalo en BuscoUnDoctor, toma un minuto: ${PAGE_URL}`)}`;
 

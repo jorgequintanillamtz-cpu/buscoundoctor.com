@@ -1,3 +1,4 @@
+import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Heart, ShieldQuestion, Search, PenLine, ChevronRight, ArrowLeft } from "lucide-react";
@@ -63,6 +64,8 @@ export default function RecomendadosLista() {
 
   const selected = useMemo(() => groups.find((g) => g.id === selectedId) || null, [groups, selectedId]);
   useEffect(() => { window.scrollTo(0, 0); }, [selectedId]);
+  // Impresión: los doctores de la especialidad abierta aparecieron en la lista.
+  useEffect(() => { if (selected) recordRecommendedViews(selected.doctors.map((d) => d.slug), "impression"); }, [selected]);
 
   if (state === "loading") return <div className="min-h-[60vh] flex items-center justify-center"><LoadingLogo /></div>;
   if (state === "error") return <LoadError onRetry={load} />;

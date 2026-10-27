@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Heart, ShieldQuestion } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
+import { recordRecommendedViews } from "@/lib/recommendedViews";
 
 // Sección del inicio: "Doctores recomendados por pacientes" (CLAUDE.md §8r). Muestra los 4 con más
 // recomendaciones y lleva a /recomendados (la lista por especialidad). Solo entran los doctores que cumplen
@@ -19,9 +20,11 @@ export default function RecommendedDoctorsSection() {
     return () => { active = false; };
   }, []);
 
-  if (list.length === 0) return null;
-
   const top = [...list].sort((a, b) => b.count - a.count || a.full_name.localeCompare(b.full_name, "es")).slice(0, 4);
+  // Impresión: estos 4 aparecieron en el inicio.
+  useEffect(() => { recordRecommendedViews(top.map((d) => d.slug), "impression"); }, [list]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (list.length === 0) return null;
   const specialties = new Set(list.map((d) => d.specialty || "otras")).size;
 
   return (
