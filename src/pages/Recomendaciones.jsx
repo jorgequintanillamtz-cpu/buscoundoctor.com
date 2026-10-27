@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart } from "lucide-react";
+import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart, ArrowDown } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
-import RecommendationsLanding from "@/components/RecommendationsLanding";
+import RecommendationsLanding, { LatestRecommendations, useLandingData } from "@/components/RecommendationsLanding";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
@@ -96,6 +96,9 @@ export default function Recomendaciones() {
 
   // Botón flotante (solo celular): aparece al bajar por la landing y regresa al formulario.
   const [showFab, setShowFab] = useState(false);
+  const landing = useLandingData(); // doctores y comentarios de la landing (también alimentan la columna de la derecha en escritorio)
+  const hasDoctors = !!landing && landing.doctors.length > 0;
+  const wide = (step === 1 || step === 4) && hasDoctors; // escritorio: formulario a la izquierda, últimas recomendaciones a la derecha
   useEffect(() => {
     const onScroll = () => setShowFab(window.scrollY > 700);
     onScroll();
@@ -293,6 +296,11 @@ export default function Recomendaciones() {
             <p className="mt-3 text-white/75 text-sm sm:text-base">
               Ayuda a otros pacientes a encontrar buen trato. Toma un minuto. Tu apellido y tu correo nunca se muestran.
             </p>
+            {hasDoctors && (
+              <a href="#doctores" className="lg:hidden inline-flex items-center gap-1.5 mt-4 h-9 px-4 rounded-full border border-white/30 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+                Ver doctores recomendados <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+              </a>
+            )}
           </div>
         )}
         {step === 2 && target && (
@@ -309,7 +317,7 @@ export default function Recomendaciones() {
         )}
       </header>
 
-      <main className="relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16">
+      <main className={`relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16 ${wide ? "lg:max-w-5xl lg:grid lg:grid-cols-[32rem_minmax(0,1fr)] lg:gap-8 lg:items-start" : ""}`}>
         <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7">
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
             <button type="button"
@@ -649,6 +657,8 @@ export default function Recomendaciones() {
           {step === 1 && error && <p role="alert" className="text-sm text-destructive mt-3">{error}</p>}
         </div>
 
+        {wide && <LatestRecommendations data={landing} />}
+
         {/* En los pasos 1 y 4 este aviso ya sale en el pie de la landing (no se repite). */}
         {!(step === 1 || step === 4) && (
           <p className="text-center text-xs text-muted-foreground mt-5 px-4">
@@ -659,7 +669,7 @@ export default function Recomendaciones() {
       </main>
 
       {/* Landing: debajo del formulario, solo al inicio y al terminar (durante los pasos 2 y 3 no distrae). */}
-      {(step === 1 || step === 4) && <RecommendationsLanding onRecommend={(slug) => { trackEvent("rec_desde_tarjeta"); startWithSlug(slug); }} />}
+      {(step === 1 || step === 4) && <RecommendationsLanding data={landing} onRecommend={(slug) => { trackEvent("rec_desde_tarjeta"); startWithSlug(slug); }} />}
 
       {/* Botón flotante del celular: baja con la persona y la regresa al formulario. */}
       {(step === 1 || step === 4) && showFab && (
