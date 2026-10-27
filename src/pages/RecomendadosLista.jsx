@@ -75,8 +75,7 @@ export default function RecomendadosLista() {
             <Heart className="w-6 h-6 text-red-500 fill-red-500" aria-hidden="true" /> Doctores recomendados por pacientes
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-            Doctores que pacientes recomendaron en BuscoUnDoctor. Aún no tienen perfil verificado: la información viene de las recomendaciones,
-            que revisamos antes de publicarlas, y la cédula se consultó en el registro público de la SEP. Son opiniones de pacientes, no una valoración médica.
+            Perfiles sin verificar. Son opiniones de pacientes, no una valoración médica.
           </p>
         </div>
 

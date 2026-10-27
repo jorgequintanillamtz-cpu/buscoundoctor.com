@@ -34,6 +34,10 @@ export default function Header() {
   // grande desaparece de la vista al hacer scroll hacia abajo. En el resto
   // de las páginas siempre está visible, como antes.
   const [showCompactSearch, setShowCompactSearch] = useState(!isHome);
+  // En /recomendados (lista de doctores recomendados por pacientes) no va el buscador de arriba: esa página
+  // tiene su propio buscador y el de arriba confundía (CLAUDE.md §8r, 2026-10-26).
+  const hideHeaderSearch = location.pathname === "/recomendados";
+  const searchVisible = showCompactSearch && !hideHeaderSearch;
 
   // Bloquea el scroll del fondo mientras el menú móvil a pantalla completa está abierto
   useEffect(() => {
@@ -198,14 +202,14 @@ export default function Header() {
           </button>
         </div>
       )}
-      <div className={`w-full px-4 sm:px-6 ${showCompactSearch ? "pb-3 lg:pb-0" : "pb-0"} ${isHome ? "bg-brand-navy" : "bg-brand-blueLight"}`}>
+      <div className={`w-full px-4 sm:px-6 ${searchVisible ? "pb-3 lg:pb-0" : "pb-0"} ${isHome ? "bg-brand-navy" : "bg-brand-blueLight"}`}>
         <div className="flex items-center justify-between h-20 gap-4">
           <Logo to="/" className="h-[47px] sm:h-[52px]" />
 
           {/* Buscador compacto: en el Home solo aparece tras hacer scroll y
               perder de vista el buscador grande del hero; en el resto de
               páginas siempre está visible. */}
-          {showCompactSearch && (
+          {searchVisible && (
             <div className="siri-glow-border relative hidden lg:block rounded-full flex-1 max-w-xl">
               <div className="relative z-10 flex items-center bg-white rounded-full shadow-sm overflow-hidden">
                 <div className="flex flex-col justify-center px-4 py-1.5 flex-1 min-w-0">
@@ -289,7 +293,7 @@ export default function Header() {
         {/* Buscador compacto en móvil: debajo del header. En el Home, mismo
             criterio que el de escritorio (solo tras perder de vista el
             buscador grande del hero). */}
-        {showCompactSearch && (
+        {searchVisible && (
           <div className="lg:hidden flex items-center gap-2">
             <div className="siri-glow-border relative flex-1 min-w-0 rounded-full">
               <div className="relative z-10 bg-white rounded-full shadow-sm px-3 py-1">
