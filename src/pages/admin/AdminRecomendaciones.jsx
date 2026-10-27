@@ -57,6 +57,7 @@ export default function AdminRecomendaciones() {
   const [mergeTarget, setMergeTarget] = useState({});
   const [reports, setReports] = useState([]); // reportes de visitantes sobre comentarios o páginas
   const [viewStats, setViewStats] = useState({}); // vistas e impresiones por propuesta
+  const [interest, setInterest] = useState({}); // pacientes que pidieron aviso por propuesta: { id: { count, contacts[] } }
   const [commentsPublic, setCommentsPublic] = useState(null); // interruptor: ¿se muestran los comentarios al público?
 
   const load = async () => {
@@ -70,6 +71,7 @@ export default function AdminRecomendaciones() {
       setSuggestions(s); setRecs(r); setSpecialists(sp.filter((x) => !x.deleted_at));
       try { setReports(await base44.entities.RecommendationReport.list("-created_at", 500)); } catch { setReports([]); }
       try { const { data } = await base44.functions.invoke("adminRecommendedViewStats"); setViewStats(data && typeof data === "object" ? data : {}); } catch { setViewStats({}); }
+      try { const { data } = await base44.functions.invoke("adminRecommendedInterest"); setInterest(data && typeof data === "object" ? data : {}); } catch { setInterest({}); }
       try { const { data } = await base44.functions.invoke("adminGetRecommendationSettings"); setCommentsPublic(!!data?.comments_public); } catch { setCommentsPublic(null); }
     } catch (e) {
       console.error("No se pudieron cargar las recomendaciones", e);
@@ -409,6 +411,21 @@ export default function AdminRecomendaciones() {
                       Vistas de su página: <span className="font-medium text-foreground">{viewStats[s.id]?.views_30 || 0}</span> en 30 días ({viewStats[s.id]?.views_7 || 0} en 7; {viewStats[s.id]?.views_total || 0} en total)
                       {" · "}Apariciones en listas: <span className="font-medium text-foreground">{viewStats[s.id]?.imp_30 || 0}</span> en 30 días ({viewStats[s.id]?.imp_7 || 0} en 7; {viewStats[s.id]?.imp_total || 0} en total)
                     </p>
+                  )}
+                  {s && interest[s.id]?.count > 0 && (
+                    <details className="text-xs mt-1">
+                      <summary className="cursor-pointer text-brand-blue hover:underline">
+                        {interest[s.id].count} {interest[s.id].count === 1 ? "paciente pidió" : "pacientes pidieron"} que les avisen cuando pueda agendar
+                      </summary>
+                      <ul className="mt-1.5 space-y-0.5 text-muted-foreground">
+                        {interest[s.id].contacts.map((c, i) => (
+                          <li key={i}>
+                            <span className="font-medium text-foreground">{c.kind === "whatsapp" ? c.contact.replace(/(\d{2})(\d{4})(\d{4})/, "$1 $2 $3") : c.contact}</span>
+                            {" · "}{c.kind === "whatsapp" ? "WhatsApp" : "correo"}{" · "}{new Date(c.at).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
                   )}
                   {s?.contact_phone && (
                     <p className="text-sm mt-1 flex items-center gap-x-3 gap-y-1 flex-wrap">
