@@ -328,7 +328,7 @@ export default function Recomendaciones() {
                         return (
                           <div className={`mt-4 rounded-2xl p-4 ${noMatch ? "border-2 border-brand-augusta bg-brand-augustaLight" : "border-2 border-dashed border-brand-augusta/50 bg-brand-augustaLight/40"}`}>
                             <p className={`text-sm ${noMatch ? "font-semibold text-brand-augustaDark" : "text-foreground/80"}`}>
-                              {noMatch ? "No lo vemos en la lista. Cuéntanos quién es y lo recomiendas igual." : "¿No lo ves en la lista? Cuéntanos quién es y lo recomiendas igual."}
+                              {noMatch ? "No lo vemos en la lista. Sé el primero en recomendarlo." : "¿No lo ves en la lista? Cuéntanos quién es y lo recomiendas igual."}
                             </p>
                             <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
                               className="mt-3 w-full h-12 rounded-xl bg-brand-augusta hover:bg-brand-augustaDark text-white font-semibold flex items-center justify-center gap-2 transition-colors">
@@ -502,7 +502,8 @@ export default function Recomendaciones() {
           {/* ---------- PASO 3: verificar y enviar ---------- */}
           {step === 3 && (
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Tu primer nombre <span className="text-muted-foreground font-normal">(opcional)</span></label>
+              <h2 className="font-heading font-semibold text-lg text-foreground mb-4">¿Quién {she ? "la" : "lo"} recomienda?</h2>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Tu nombre</label>
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value.slice(0, 25))} placeholder="Ej. María" className="h-12 rounded-xl" autoComplete="given-name" />
               <p className={`text-xs mt-1.5 mb-5 ${nameProblem ? "text-red-600" : "text-muted-foreground"}`}>
                 {nameProblem || "Si lo escribes, aparece junto a tu recomendación. Solo tu primer nombre: nunca tu apellido ni tu correo."}
