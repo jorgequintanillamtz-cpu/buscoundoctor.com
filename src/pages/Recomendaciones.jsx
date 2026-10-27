@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine } from "lucide-react";
+import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
+import RecommendationsLanding from "@/components/RecommendationsLanding";
+import { trackEvent, trackTag } from "@/lib/trackEvent";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
 // /recomendaciones -- los pacientes recomiendan a su doctor (CLAUDE.md §8r). Piloto: página con
@@ -65,30 +67,44 @@ export default function Recomendaciones() {
   const searchSeq = useRef(0);
   const [params] = useSearchParams();
 
-  // Si llegan desde la página de un doctor ("Recomendar a este doctor", /recomendaciones?doctor=su-enlace),
-  // el paso 1 ya trae a ese doctor elegido (se puede cambiar con la X). Si el enlace no sirve, todo sigue normal.
+  // Elegir a un doctor por su enlace y pasar directo al paso 2. Lo usan (a) quien llega desde la página de un doctor
+  // ("Recomendar a este doctor", /recomendaciones?doctor=su-enlace) y (b) el botón "Yo también lo recomiendo" de las
+  // tarjetas de la landing. Si el enlace no sirve, todo sigue normal en el paso 1.
+  const startWithSlug = async (slug) => {
+    try {
+      const { data } = await base44.functions.invoke("getRecommendedDoctor", { slug });
+      if (data?.ok && data.id) {
+        setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, zone: data.zone });
+        setStep(2);
+        return true;
+      }
+      // No es un doctor "recomendado" sin perfil: puede ser un doctor ya registrado y publicado (viene de su perfil).
+      const { data: sp } = await base44.functions.invoke("getSpecialistRecommendations", { slug });
+      if (sp?.ok && sp.id) {
+        setTarget({ mode: "existing", kind: "specialist", id: sp.id, full_name: sp.full_name, specialty: sp.specialty, zone: sp.zone });
+        setStep(2);
+        return true;
+      }
+    } catch { /* si falla, se queda en el paso 1 */ }
+    return false;
+  };
   useEffect(() => {
     const slug = params.get("doctor");
-    if (!slug) return undefined;
-    let active = true;
-    base44.functions.invoke("getRecommendedDoctor", { slug })
-      .then(async ({ data }) => {
-        if (!active) return;
-        if (data?.ok && data.id) {
-          setTarget({ mode: "existing", kind: "suggestion", id: data.id, full_name: data.full_name, specialty: data.specialty, zone: data.zone });
-          setStep(2);
-          return;
-        }
-        // No es un doctor "recomendado" sin perfil: puede ser un doctor ya registrado y publicado (viene de su perfil).
-        const { data: sp } = await base44.functions.invoke("getSpecialistRecommendations", { slug });
-        if (active && sp?.ok && sp.id) {
-          setTarget({ mode: "existing", kind: "specialist", id: sp.id, full_name: sp.full_name, specialty: sp.specialty, zone: sp.zone });
-          setStep(2);
-        }
-      })
-      .catch(() => {});
-    return () => { active = false; };
+    if (slug) startWithSlug(slug);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Medición (Clarity): visita, y cada paso al que se llega (el 4 es "enviada").
+  useEffect(() => { trackTag("landing", "recomendaciones"); }, []);
+  useEffect(() => { trackEvent(step === 4 ? "rec_enviada" : `rec_paso_${step}`); }, [step]);
+
+  // Botón flotante (solo celular): aparece al bajar por la landing y regresa al formulario.
+  const [showFab, setShowFab] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowFab(window.scrollY > 700);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     document.title = "Recomienda a tu doctor | BuscoUnDoctor";
@@ -200,7 +216,7 @@ export default function Recomendaciones() {
     setBusy(true); setError("");
     try {
       const { data } = await base44.functions.invoke("requestRecommendationCode", { email: email.trim() });
-      if (data?.ok) { setCodeSent(true); setCode(""); setCooldown(30); }
+      if (data?.ok) { setCodeSent(true); setCode(""); setCooldown(30); trackEvent("rec_codigo_pedido"); }
       else setError(REASONS[data?.reason] || "No pudimos mandar el código. Intenta de nuevo.");
     } catch (e) {
       setError(formErrorMessage(e, "No pudimos mandar el código. Revisa tu correo e intenta de nuevo."));
@@ -239,9 +255,22 @@ export default function Recomendaciones() {
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`Acabo de recomendar a mi doctor en BuscoUnDoctor. Tú también puedes recomendar al tuyo, toma un minuto: ${PAGE_URL}`)}`;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div id="top" className="min-h-screen bg-background">
       {/* Portada azul: grande en el paso 1, compacta después para que el formulario quepa en el celular */}
-      <header className={`bg-brand-navy text-white text-center px-5 ${step === 1 ? "pt-8 pb-16" : "pt-6 pb-12"}`}>
+      <header className={`relative overflow-hidden bg-brand-navy text-white text-center px-5 ${step === 1 ? "pt-8 pb-16" : "pt-6 pb-12"}`}>
+        {step === 1 && (
+          <>
+            <svg aria-hidden="true" viewBox="0 0 100 100" className="hidden md:block absolute left-[6%] top-16 w-28 h-28 text-white/10 -rotate-6" fill="currentColor">
+              <path d="M15 15h55a10 10 0 0 1 10 10v30a10 10 0 0 1-10 10H45L28 82V65H15A10 10 0 0 1 5 55V25a10 10 0 0 1 10-10z" />
+            </svg>
+            <svg aria-hidden="true" viewBox="0 0 100 100" className="hidden md:block absolute right-[7%] top-20 w-24 h-24 text-emerald-300/20 rotate-6" fill="currentColor">
+              <path d="M50 88C20 62 8 46 8 32a21 21 0 0 1 42-6 21 21 0 0 1 42 6c0 14-12 30-42 56z" />
+            </svg>
+            <svg aria-hidden="true" viewBox="0 0 100 100" className="hidden lg:block absolute right-[18%] top-6 w-14 h-14 text-white/10 rotate-12" fill="currentColor">
+              <path d="M15 15h55a10 10 0 0 1 10 10v30a10 10 0 0 1-10 10H45L28 82V65H15A10 10 0 0 1 5 55V25a10 10 0 0 1 10-10z" />
+            </svg>
+          </>
+        )}
         <Link to="/" className="inline-block">
           <img src="/logo.webp" alt="BuscoUnDoctor" className="h-8 w-auto brightness-0 invert" />
         </Link>
@@ -270,7 +299,7 @@ export default function Recomendaciones() {
         )}
       </header>
 
-      <main className="max-w-lg mx-auto px-4 -mt-8 pb-16">
+      <main className="relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16">
         <div className="bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7">
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
             <button type="button"
@@ -331,7 +360,7 @@ export default function Recomendaciones() {
                             <p className={`text-sm ${noMatch ? "font-semibold text-brand-augustaDark" : "text-foreground/80"}`}>
                               {noMatch ? "No lo vemos en la lista. Sé el primero en recomendarlo." : "¿No lo ves en la lista? Cuéntanos quién es y lo recomiendas igual."}
                             </p>
-                            <button type="button" onClick={() => { setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
+                            <button type="button" onClick={() => { trackEvent("rec_escribir_nombre"); setAdding(true); setNewDoc((d) => { const t = splitTitle(query); return { ...d, title: d.title || t.title, full_name: d.full_name || t.name }; }); }}
                               className="mt-3 w-full h-12 rounded-xl bg-brand-augusta hover:bg-brand-augustaDark text-white font-semibold flex items-center justify-center gap-2 transition-colors">
                               <PenLine className="w-5 h-5" /> Escribir su nombre
                             </button>
@@ -584,11 +613,28 @@ export default function Recomendaciones() {
           {step === 1 && error && <p role="alert" className="text-sm text-destructive mt-3">{error}</p>}
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-5 px-4">
-          Las recomendaciones son opiniones de usuarios, no de BuscoUnDoctor. ¿Algún problema?{" "}
-          <Link to="/contacto" className="underline">Escríbenos</Link>
-        </p>
+        {/* En los pasos 1 y 4 este aviso ya sale en el pie de la landing (no se repite). */}
+        {!(step === 1 || step === 4) && (
+          <p className="text-center text-xs text-muted-foreground mt-5 px-4">
+            Las recomendaciones son opiniones de usuarios, no de BuscoUnDoctor. ¿Algún problema?{" "}
+            <Link to="/contacto" className="underline">Escríbenos</Link>
+          </p>
+        )}
       </main>
+
+      {/* Landing: debajo del formulario, solo al inicio y al terminar (durante los pasos 2 y 3 no distrae). */}
+      {(step === 1 || step === 4) && <RecommendationsLanding onRecommend={(slug) => { trackEvent("rec_desde_tarjeta"); startWithSlug(slug); }} />}
+
+      {/* Botón flotante del celular: baja con la persona y la regresa al formulario. */}
+      {(step === 1 || step === 4) && showFab && (
+        <div className="sm:hidden fixed bottom-4 inset-x-4 z-40">
+          <button type="button"
+            onClick={() => { if (step === 4) reset(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+            className="w-full h-12 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white font-semibold shadow-lg flex items-center justify-center gap-2 transition-colors">
+            <Heart className="w-4 h-4 fill-current" aria-hidden="true" /> {step === 4 ? "Recomendar a otro doctor" : "Recomendar a mi doctor"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
