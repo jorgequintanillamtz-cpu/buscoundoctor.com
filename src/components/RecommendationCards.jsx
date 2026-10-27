@@ -20,7 +20,7 @@ export function ReportMenu({ items, ariaLabel }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" aria-label={ariaLabel || items[0].label} className="p-1.5 -m-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
+        <button type="button" aria-label={ariaLabel || items[0].label} className="p-3 -m-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
           <MoreVertical className="w-4 h-4" aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>

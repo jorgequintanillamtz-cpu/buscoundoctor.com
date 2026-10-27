@@ -98,7 +98,7 @@ export default function Recomendaciones() {
   const [showFab, setShowFab] = useState(false);
   const landing = useLandingData(); // doctores y comentarios de la landing (también alimentan la columna de la derecha en escritorio)
   const hasDoctors = !!landing && landing.doctors.length > 0;
-  const wide = (step === 1 || step === 4) && hasDoctors; // escritorio: formulario a la izquierda, últimas recomendaciones a la derecha
+  const wide = (step === 1 || step === 4) && hasDoctors; // escritorio: formulario centrado y, debajo, las últimas recomendaciones
   useEffect(() => {
     const onScroll = () => setShowFab(window.scrollY > 700);
     onScroll();
@@ -317,8 +317,8 @@ export default function Recomendaciones() {
         )}
       </header>
 
-      <main className={`relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16 ${wide ? "lg:max-w-5xl lg:grid lg:grid-cols-[32rem_minmax(0,1fr)] lg:gap-8 lg:items-start xl:max-w-7xl xl:grid-cols-[minmax(0,1fr)_32rem_minmax(0,1fr)]" : ""}`}>
-        <div className={`bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7 ${wide ? "xl:col-start-2" : ""}`}>
+      <main className={`relative z-10 max-w-lg mx-auto px-4 -mt-8 pb-16 ${wide ? "lg:max-w-3xl" : ""}`}>
+        <div className={`bg-card rounded-3xl border border-border/50 shadow-lg p-5 sm:p-7 ${wide ? "lg:max-w-lg lg:mx-auto" : ""}`}>
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
             <button type="button"
               onClick={goBack}
