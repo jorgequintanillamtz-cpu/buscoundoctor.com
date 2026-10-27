@@ -60,7 +60,7 @@ export default function Recomendaciones() {
   // parecidos de esa especialidad, para elegirlos en vez de duplicarlos (CLAUDE.md §8r).
   const [similar, setSimilar] = useState([]);
   const similarSeq = useRef(0);
-  const [newDoc, setNewDoc] = useState({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); // title: "Dr." | "Dra."; full_name: solo el nombre
+  const [newDoc, setNewDoc] = useState({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "" }); // title: "Dr." | "Dra."; full_name: solo el nombre
   const [specialties, setSpecialties] = useState([]);
   const [showOtherSpecialties, setShowOtherSpecialties] = useState(false);
   const [zones, setZones] = useState([]);
@@ -164,7 +164,9 @@ export default function Recomendaciones() {
     if (!m) return { title: "", name: String(raw || "").trim() };
     return { title: /^dra|^doctora/i.test(m[1]) ? "Dra." : "Dr.", name: String(raw).trim().slice(m[0].length).trim() };
   };
-  const newDocValid = !!newDoc.title && newDoc.full_name.trim().length >= 4 && !!newDoc.specialty;
+  const phoneDigits = newDoc.contact_phone.replace(/\D/g, "");
+  const phoneProblem = phoneDigits && !(phoneDigits.length === 10 || (phoneDigits.length === 12 && phoneDigits.startsWith("52")));
+  const newDocValid = !!newDoc.title && newDoc.full_name.trim().length >= 4 && !!newDoc.specialty && !phoneProblem;
   const emailValid = /^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]+$/.test(email.trim());
 
   const pickExisting = (r) => {
@@ -228,7 +230,7 @@ export default function Recomendaciones() {
     if (!codeSent || code.length !== 6 || !consent || busy) return;
     setBusy(true); setError("");
     const dest = target.mode === "new"
-      ? { new: { full_name: target.full_name, specialty: target.specialty, zone: target.zone || null, hospital: target.hospital || null, license_number: target.license_number || null } }
+      ? { new: { full_name: target.full_name, specialty: target.specialty, zone: target.zone || null, hospital: target.hospital || null, license_number: target.license_number || null, contact_phone: target.contact_phone || null } }
       : target.kind === "suggestion" ? { suggestion_id: target.id } : { specialist_id: target.id };
     try {
       const { data } = await base44.functions.invoke("submitRecommendation", {
@@ -249,7 +251,7 @@ export default function Recomendaciones() {
   const reset = () => {
     setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setFirstName(""); setShowPrivate(false); setCode(""); setCodeSent(false);
     setConsent(false); setMarketing(false); setQuery(""); setResults(null); setAdding(false);
-    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "" }); setError(""); setShowOtherSpecialties(false);
+    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "" }); setError(""); setShowOtherSpecialties(false);
   };
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`Acabo de recomendar a mi doctor en BuscoUnDoctor. Tú también puedes recomendar al tuyo, toma un minuto: ${PAGE_URL}`)}`;
@@ -455,6 +457,15 @@ export default function Recomendaciones() {
                           <label className="text-sm font-medium text-foreground mb-1 block">Hospital / clínica <span className="text-muted-foreground font-normal">(opcional)</span></label>
                           <Input value={newDoc.hospital} onChange={(e) => setNewDoc({ ...newDoc, hospital: e.target.value })} placeholder="Ej. Zambrano Hellion" className="h-11 rounded-xl" maxLength={120} />
                         </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-1 block">Teléfono para citas <span className="text-muted-foreground font-normal">(opcional)</span></label>
+                        <Input type="tel" inputMode="tel" autoComplete="off" value={newDoc.contact_phone}
+                          onChange={(e) => setNewDoc({ ...newDoc, contact_phone: e.target.value.slice(0, 20) })}
+                          placeholder="Ej. 81 1234 5678" className="h-11 rounded-xl" />
+                        <p className={`text-xs mt-1.5 ${phoneProblem ? "text-red-600" : "text-muted-foreground"}`}>
+                          {phoneProblem ? "Escribe los 10 números del teléfono." : "Si lo sabes, nos ayuda a que el doctor reciba citas. No lo mostramos al público."}
+                        </p>
                       </div>
                     </div>
                   )}

@@ -402,6 +402,15 @@ export default function AdminRecomendaciones() {
                     {[g.specialty, g.zone, g.hospital].filter(Boolean).join(" · ") || "—"}
                     {g.license && <> · Cédula: <span className="font-medium text-foreground">{g.license}</span></>}
                   </p>
+                  {s?.contact_phone && (
+                    <p className="text-sm mt-1 flex items-center gap-x-3 gap-y-1 flex-wrap">
+                      <span className="text-muted-foreground">Teléfono para citas (lo dio un paciente, no se muestra al público):</span>
+                      <span className="font-medium text-foreground">{s.contact_phone.replace(/(\d{2})(\d{4})(\d{4})/, "$1 $2 $3")}</span>
+                      <button type="button" className="text-brand-blue hover:underline text-xs"
+                        onClick={() => navigator.clipboard?.writeText(s.contact_phone).then(() => setNotice({ ok: true, text: "Teléfono copiado" })).catch(() => setNotice({ ok: false, text: "No se pudo copiar el teléfono" }))}>Copiar</button>
+                      <a href={`https://wa.me/52${s.contact_phone}`} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline text-xs inline-flex items-center gap-1">WhatsApp <ExternalLink className="w-3 h-3" /></a>
+                    </p>
+                  )}
                   <p className="text-sm mt-2">
                     <span className="font-semibold text-foreground">{g.recs.length}</span> {g.recs.length === 1 ? "recomendación" : "recomendaciones"}
                     <span className="text-muted-foreground"> · {approvedCount} aprobadas · {g.pendingIds.length} por revisar{g.pendingCommentIds.length > 0 ? ` · ${g.pendingCommentIds.length} ${g.pendingCommentIds.length === 1 ? "comentario" : "comentarios"} por revisar` : ""}</span>

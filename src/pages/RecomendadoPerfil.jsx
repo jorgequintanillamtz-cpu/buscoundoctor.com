@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine } from "lucide-react";
+import { Heart, Info, ShieldQuestion, Stethoscope, MapPin, Building2, Share2, PenLine, Phone, Clock, Lock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import LoadingLogo from "@/components/LoadingLogo";
@@ -125,6 +125,24 @@ export default function RecomendadoPerfil() {
             </Button>
             <Button asChild variant="outline" className="rounded-xl min-h-[44px] gap-2">
               <a href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer"><Share2 className="w-4 h-4" /> Compartir</a>
+            </Button>
+          </div>
+        </div>
+
+        {/* Agendar cita: borroso a propósito hasta que el doctor se registre y complete su perfil (CLAUDE.md §8r).
+            Los números de abajo son de relleno: el teléfono real que dio algún paciente NUNCA llega al navegador. */}
+        <div className="relative overflow-hidden bg-card rounded-3xl border border-brand-canvasBorder p-5 sm:p-6" style={{ minHeight: 230 }}>
+          <h2 className="font-heading font-semibold text-foreground">Agendar cita</h2>
+          <div aria-hidden="true" className="mt-3 space-y-2.5 text-sm text-foreground blur-[6px] select-none pointer-events-none">
+            <p className="flex items-center gap-2"><Phone className="w-4 h-4" /> Teléfono: 81 1234 5678</p>
+            <p className="flex items-center gap-2"><Share2 className="w-4 h-4" /> WhatsApp: 81 8765 4321</p>
+            <p className="flex items-center gap-2"><Clock className="w-4 h-4" /> Lunes a viernes, 9:00 – 18:00</p>
+          </div>
+          <div className="absolute inset-0 bg-white/55 flex flex-col items-center justify-center text-center px-5 gap-2">
+            <span className="w-10 h-10 rounded-full bg-brand-navy text-white flex items-center justify-center"><Lock className="w-4 h-4" aria-hidden="true" /></span>
+            <p className="text-sm font-medium text-foreground max-w-xs">El contacto para citas se activa cuando {doc.full_name} se registre y complete su perfil.</p>
+            <Button asChild size="sm" className="rounded-xl min-h-[40px] bg-brand-augusta hover:bg-brand-augusta/90 text-white">
+              <Link to="/registro-medico">¿Eres tú? Regístrate gratis</Link>
             </Button>
           </div>
         </div>
