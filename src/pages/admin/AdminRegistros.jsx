@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import LoadingLogo from "@/components/LoadingLogo";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 // registration_step guarda el ÚLTIMO PASO COMPLETADO. Desde 2026-10-08 el registro ya
 // no tiene paso de fotos: tras "Ubicación" lo que sigue es crear la cuenta. "fotos" solo
@@ -129,7 +130,7 @@ export default function AdminRegistros() {
       base44.entities.Specialist.list("-created_date", 2000),
       base44.entities.SpecialistService.list("-created_date", 2000).catch(() => []),
     ]).then(([specs, svcs]) => {
-      setSpecialists(specs.filter((s) => s.registration_step));
+      setSpecialists(specs.filter((s) => s.registration_step && esDelDirectorio(s)));
       setServices(svcs);
       setLoading(false);
     });

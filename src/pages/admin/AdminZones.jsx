@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import LoadingLogo from "@/components/LoadingLogo";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 const STATUS_LABELS = {
   published: "Publicados",
@@ -59,7 +60,8 @@ export default function AdminZones() {
         base44.entities.Specialist.list("-created_date", 2000),
         base44.entities.PremiumStatus.filter({ plan_slug: "premium" }).catch(() => []),
       ]);
-      setAllSpecialists(specs);
+      // Los perfiles del sitio de tiendas no cuentan en las ciudades del directorio.
+      setAllSpecialists(specs.filter(esDelDirectorio));
       setPremiumIds(new Set(premiums.map((p) => p.specialist_id)));
     } finally {
       setStatsLoading(false);

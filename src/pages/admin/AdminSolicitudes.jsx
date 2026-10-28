@@ -17,6 +17,7 @@ import { es } from "date-fns/locale";
 import { usePaginatedList } from "@/api/usePaginatedList";
 import Pagination from "@/components/admin/Pagination";
 import LoadingLogo from "@/components/LoadingLogo";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 function fmtDate(d) {
   if (!d) return "—";
@@ -154,7 +155,8 @@ export default function AdminSolicitudes() {
       base44.entities.Specialist.list(),
     ]).then(([r, s]) => {
       setRequests(r);
-      setSpecialists(s);
+      // Los perfiles del sitio de tiendas no son del directorio: sin recuadro aquí.
+      setSpecialists(s.filter(esDelDirectorio));
       setLoading(false);
     });
   }, []);

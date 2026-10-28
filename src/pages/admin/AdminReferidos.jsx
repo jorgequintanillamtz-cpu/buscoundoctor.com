@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useAdminBadges } from "@/components/adminBadges";
 import { formatDateOnly } from "@/lib/dateLabels";
 import LoadingLogo from "@/components/LoadingLogo";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 function KpiCard({ label, value, tone = "navy" }) {
   const bg = tone === "navy" ? "bg-brand-navy" : "bg-brand-blue";
@@ -35,7 +36,7 @@ export default function AdminReferidos() {
       base44.entities.Specialist.list(),
       base44.entities.Plan.filter({ slug: "premium" }).catch(() => []),
     ]);
-    setSpecialists(specs.filter((s) => !s.deleted_at));
+    setSpecialists(specs.filter((s) => !s.deleted_at && esDelDirectorio(s)));
     if (plans[0]?.price_monthly) setPremiumPrice(Number(plans[0].price_monthly));
     setLoading(false);
   };

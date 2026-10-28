@@ -17,6 +17,7 @@ import {
 import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { logActivity } from "@/api/activityLog";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { loadPremiumStatuses, mergePremiumStatus, savePremiumStatus } from "@/api/premiumStatus";
@@ -277,8 +278,9 @@ export default function AdminPremium() {
       loadPremiumStatuses(),
     ]);
     // Los doctores en la papelera dejan de contar para Premium: ya no se
-    // les cobra ni aparecen como retrasados.
-    setSpecialists(mergePremiumStatus(specs.filter((s) => !s.deleted_at), premiumStatuses));
+    // les cobra ni aparecen como retrasados. Los perfiles del sitio de tiendas
+    // no son del directorio.
+    setSpecialists(mergePremiumStatus(specs.filter((s) => !s.deleted_at && esDelDirectorio(s)), premiumStatuses));
     setPayments(pays);
     setLoading(false);
   };
