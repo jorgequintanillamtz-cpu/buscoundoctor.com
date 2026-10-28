@@ -3,6 +3,7 @@ import { Heart, Quote, MoreVertical, Flag } from "lucide-react";
 import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
+import CardSlider, { slideWidth } from "@/components/CardSlider";
 
 // Piezas compartidas de las recomendaciones de pacientes (CLAUDE.md §8r): se usan en la página de un doctor
 // recomendado (/recomendado/:slug) y en el perfil de un doctor registrado (/especialista/:slug, pestaña
@@ -20,7 +21,7 @@ export function ReportMenu({ items, ariaLabel }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" aria-label={ariaLabel || items[0].label} className="p-1.5 -m-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
+        <button type="button" aria-label={ariaLabel || items[0].label} className="p-3 -m-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
           <MoreVertical className="w-4 h-4" aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
@@ -34,40 +35,51 @@ export function ReportMenu({ items, ariaLabel }) {
 }
 
 // Lista de recomendaciones (las 10 más recientes y "Ver las N" para el resto). `slug` es el enlace del doctor
-// (de la página de recomendado o de su perfil registrado): sirve para reportar.
+// (de la página de recomendado o de su perfil registrado): sirve para reportar. En celular van en un carrusel
+// (con la siguiente asomando y puntitos); desde tableta, como lista.
 export default function RecommendationCards({ slug, recommendations }) {
   const [showAll, setShowAll] = useState(false);
   const [report, setReport] = useState(null); // { id, kind, what }
   const list = recommendations || [];
+  const shown = showAll ? list : list.slice(0, 10);
+  const card = (r, extra = "", tag = "li") => {
+    const Tag = tag;
+    return (
+      <Tag key={r.id} role={tag === "div" ? "listitem" : undefined} className={`rounded-xl bg-muted/50 px-4 py-3 ${extra}`}>
+        <div className="flex items-start justify-between gap-3">
+          {r.comment ? (
+            <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{r.comment}</span></p>
+          ) : (r.tags || []).length === 0 ? (
+            <p className="text-sm text-foreground">Recomienda a este doctor.</p>
+          ) : <span />}
+          <ReportMenu
+            ariaLabel="Reportar"
+            items={[
+              { label: "Reportar recomendación", onSelect: () => setReport({ id: r.id, kind: "recommendation", what: "la recomendación" }) },
+              ...(r.comment ? [{ label: "Reportar comentario", onSelect: () => setReport({ id: r.id, kind: "comment", what: "el comentario" }) }] : []),
+            ]}
+          />
+        </div>
+        {(r.tags || []).length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {r.tags.map((t) => <span key={t} className="text-xs bg-white text-brand-navy px-2.5 py-1 rounded-full border border-brand-canvasBorder">{recommendationTagLabel(t)}</span>)}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground mt-auto pt-2 flex items-center gap-1.5">
+          <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" /> {r.name ? <><span className="font-medium text-foreground">{r.name}</span> · </> : null}{commentMonth(r.month)}
+        </p>
+      </Tag>
+    );
+  };
   return (
     <>
-      <ul className="space-y-2.5">
-        {(showAll ? list : list.slice(0, 10)).map((r) => (
-          <li key={r.id} className="rounded-xl bg-muted/50 px-4 py-3">
-            <div className="flex items-start justify-between gap-3">
-              {r.comment ? (
-                <p className="text-sm text-foreground flex gap-2"><Quote className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" aria-hidden="true" /><span className="break-words">{r.comment}</span></p>
-              ) : (r.tags || []).length === 0 ? (
-                <p className="text-sm text-foreground">Recomienda a este doctor.</p>
-              ) : <span />}
-              <ReportMenu
-                ariaLabel="Reportar"
-                items={[
-                  { label: "Reportar recomendación", onSelect: () => setReport({ id: r.id, kind: "recommendation", what: "la recomendación" }) },
-                  ...(r.comment ? [{ label: "Reportar comentario", onSelect: () => setReport({ id: r.id, kind: "comment", what: "el comentario" }) }] : []),
-                ]}
-              />
-            </div>
-            {(r.tags || []).length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {r.tags.map((t) => <span key={t} className="text-xs bg-white text-brand-navy px-2.5 py-1 rounded-full border border-brand-canvasBorder">{recommendationTagLabel(t)}</span>)}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" aria-hidden="true" /> {r.name ? <><span className="font-medium text-foreground">{r.name}</span> · </> : null}{commentMonth(r.month)}
-            </p>
-          </li>
-        ))}
+      <div className="sm:hidden">
+        <CardSlider className="" resetKey={shown.map((r) => r.id).join(",")} label="Recomendaciones de pacientes" prevLabel="Ver recomendaciones anteriores" nextLabel="Ver más recomendaciones">
+          {shown.map((r) => card(r, `snap-start shrink-0 flex flex-col ${slideWidth(shown.length)}`, "div"))}
+        </CardSlider>
+      </div>
+      <ul className="hidden sm:block space-y-2.5">
+        {shown.map((r) => card(r))}
       </ul>
       {list.length > 10 && !showAll && (
         <button type="button" onClick={() => setShowAll(true)} className="mt-3 text-sm font-medium text-brand-blue hover:underline">Ver las {list.length} recomendaciones</button>
