@@ -14,6 +14,7 @@ import LegacySpecialtyRedirect from './lib/LegacySpecialtyRedirect';
 import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
 import DoctorSupportWhatsApp from './components/DoctorSupportWhatsApp';
 import LoadingLogo from "@/components/LoadingLogo";
+import TiendasPanelGuard from './components/TiendasPanelGuard';
 
 // Cada página se carga en su propio bloque de código, bajo demanda, en vez de
 // venir toda junta en un solo archivo de ~700KB que cualquier visitante
@@ -181,10 +182,12 @@ const AuthenticatedApp = () => {
       {/* Editor del storefront (lado del doctor): separado del panel de
           administración del directorio. Maneja su propia auth como el
           DoctorPanel. */}
-      <Route path="/panel-medico/storefront" element={<DoctorStorefrontEditor />} />
-      <Route path="/panel-medico/productos" element={<DoctorProducts />} />
-      <Route path="/panel-medico/pagos" element={<DoctorPayments />} />
-      <Route path="/panel-medico/resumen" element={<DoctorConsultSummaries />} />
+      {/* TiendasPanelGuard: si el perfil es del sitio de tiendas, muestra el
+          aviso en vez de la pantalla (solo lee; ver TiendasPanelGuard.jsx). */}
+      <Route path="/panel-medico/storefront" element={<TiendasPanelGuard><DoctorStorefrontEditor /></TiendasPanelGuard>} />
+      <Route path="/panel-medico/productos" element={<TiendasPanelGuard><DoctorProducts /></TiendasPanelGuard>} />
+      <Route path="/panel-medico/pagos" element={<TiendasPanelGuard><DoctorPayments /></TiendasPanelGuard>} />
+      <Route path="/panel-medico/resumen" element={<TiendasPanelGuard><DoctorConsultSummaries /></TiendasPanelGuard>} />
 
       <Route element={<AdminLayout />}>
         <Route element={<RequireAdmin />}>

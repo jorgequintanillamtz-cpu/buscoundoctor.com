@@ -36,6 +36,8 @@ import { SECTION_GROUPS, SIDE_LINKS } from "@/components/admin/DoctorPanelSideba
 import { useSpecialistForm, useRecalculateScore, useAutoSaveSpecialist, EMPTY_SPECIALIST_FORM, DOCTOR_RESTRICTED_FIELDS } from "@/api/specialistForm";
 import LoadingLogo from "@/components/LoadingLogo";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
+import { TiendasProfileNotice } from "@/components/TiendasProfileNotice";
+import { esDelDirectorio } from "@/lib/specialistOrigin";
 
 // El estado del formulario (campos vacíos, generar slug, armar payload,
 // autoguardado, recalcular score) vive en src/api/specialistForm.js,
@@ -60,7 +62,7 @@ import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 export default function DoctorPanel() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [status, setStatus] = useState("loading"); // loading | ready | no-profile | wrong-role
+  const [status, setStatus] = useState("loading"); // loading | ready | no-profile | wrong-role | tiendas
   const [specialistId, setSpecialistId] = useState(null);
   const [isAssistant, setIsAssistant] = useState(false);
   const { form, setForm, formRef, update, buildData } = useSpecialistForm({ stripFields: DOCTOR_RESTRICTED_FIELDS });
@@ -124,6 +126,13 @@ export default function DoctorPanel() {
         // pantalla con un botón. `replace` para que "Atrás" no lo regrese
         // aquí y lo vuelva a mandar al registro en bucle.
         navigate("/registro-medico", { replace: true });
+        return;
+      }
+      if (!esDelDirectorio(specialist)) {
+        // Perfil del sitio de tiendas (dueño o su asistente): solo el aviso.
+        // Se corta aquí, antes del formulario, el tour, el porcentaje y el
+        // autoguardado, para que abrir el panel no escriba nada.
+        setStatus("tiendas");
         return;
       }
       setIsAssistant(asAssistant);
@@ -305,6 +314,10 @@ export default function DoctorPanel() {
         <LoadingLogo />
       </div>
     );
+  }
+
+  if (status === "tiendas") {
+    return renderShell(<TiendasProfileNotice />);
   }
 
   if (status === "wrong-role") {
