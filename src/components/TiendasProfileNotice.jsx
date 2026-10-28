@@ -3,11 +3,12 @@ import { LogOut, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 
-// Dirección del panel del sitio de tiendas, para el botón "Ir a mi panel".
-// Vacía por defecto: sin ella no se muestra el botón (solo el aviso).
-const TIENDAS_ORIGIN = (() => {
+// Panel del sitio de tiendas, para el botón "Ir a mi panel":
+// VITE_TIENDAS_ORIGIN + /panel-medico. Vacía por defecto: sin ella no se
+// muestra el botón (solo el aviso).
+const TIENDAS_PANEL_URL = (() => {
   const raw = (import.meta.env.VITE_TIENDAS_ORIGIN || "").trim();
-  return /^https?:\/\//i.test(raw) ? raw.replace(/\/+$/, "") : "";
+  return /^https?:\/\//i.test(raw) ? `${raw.replace(/\/+$/, "")}/panel-medico` : "";
 })();
 
 // Aviso para un perfil creado desde el sitio de tiendas (specialist.origin =
@@ -22,9 +23,9 @@ export function TiendasProfileNotice() {
         Este perfil se creó desde el sitio de tiendas y se administra desde allá. No aparece en el directorio de BuscoUnDoctor.
       </p>
       <div className="mt-5 flex flex-col sm:flex-row gap-2 justify-center">
-        {TIENDAS_ORIGIN && (
+        {TIENDAS_PANEL_URL && (
           <Button asChild className="rounded-xl gap-1.5">
-            <a href={TIENDAS_ORIGIN}>
+            <a href={TIENDAS_PANEL_URL}>
               Ir a mi panel
               <ExternalLink className="w-4 h-4" />
             </a>
