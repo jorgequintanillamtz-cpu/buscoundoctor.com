@@ -75,6 +75,7 @@ const BajaCorreos = lazy(() => import('./pages/BajaCorreos'));
 const ReclamarPerfil = lazy(() => import('./pages/ReclamarPerfil'));
 const Recomendaciones = lazy(() => import('./pages/Recomendaciones'));
 const RecomendacionesNueva = lazy(() => import('./pages/RecomendacionesNueva'));
+const RecomendacionesFlow = lazy(() => import('./pages/RecomendacionesFlow'));
 const RecomendadosLista = lazy(() => import('./pages/RecomendadosLista'));
 const RecomendadoPerfil = lazy(() => import('./pages/RecomendadoPerfil'));
 const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
@@ -120,6 +121,8 @@ const AuthenticatedApp = () => {
         <Route path="/recomendaciones" element={<Recomendaciones />} />
         {/* Copia de prueba para rediseñar /recomendaciones (noindex, sin enlaces). */}
         <Route path="/recomendaciones-nueva" element={<RecomendacionesNueva />} />
+        {/* Tercera versión de prueba, estilo "flow" (un solo degradado continuo, vidrio). noindex, sin enlaces. */}
+        <Route path="/recomendaciones-flow" element={<RecomendacionesFlow />} />
       </Route>
 
       <Route element={<Layout />}>
