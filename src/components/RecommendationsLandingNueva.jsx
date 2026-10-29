@@ -250,7 +250,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
   const showNew = doctors.some(isNew) && !doctors.every(isNew);
 
   const renderSlider = (items, label) => (
-    <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false}>
+    <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed>
       {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} onRecommend={onRecommend} />)}
     </CardSlider>
   );
