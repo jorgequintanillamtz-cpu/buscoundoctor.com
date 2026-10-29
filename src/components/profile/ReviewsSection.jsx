@@ -154,7 +154,7 @@ export default function ReviewsSection({ specialistId, specialist }) {
             </div>
           )}
           <p className="text-xs text-muted-foreground mt-3 mb-3">
-            Recomendaciones de pacientes, revisadas antes de publicarse y sin apellido ni correo. Solo mostramos recomendaciones positivas; no son reseñas ni una valoración médica.
+            Recomendaciones de pacientes, revisadas antes de publicarse y sin mostrar el correo de quien recomienda. Solo mostramos recomendaciones positivas; no son reseñas ni una valoración médica.
           </p>
           <RecommendationCards slug={specialist.slug} recommendations={recData.recommendations} />
         </div>

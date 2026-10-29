@@ -243,7 +243,7 @@ export default function RecomendadoFlow() {
           {recs.length > 0 && (
             <div className={`rounded-3xl border border-white/80 bg-white/60 backdrop-blur-sm p-5 sm:p-6 ${doc.tags.length === 0 ? "lg:col-span-2" : ""}`}>
               <h2 className="font-heading font-medium tracking-tight text-xl text-brand-navy">Recomendaciones de pacientes ({recs.length})</h2>
-              <p className="text-xs text-brand-navy/60 mt-0.5">Sin apellido ni correo, y revisadas antes de publicarse. Solo mostramos recomendaciones positivas.</p>
+              <p className="text-xs text-brand-navy/60 mt-0.5">Revisadas antes de publicarse; nunca mostramos el correo de quien recomienda. Solo mostramos recomendaciones positivas.</p>
               {/* Una cita grande por recomendación; con dos o más, en carrusel (desliza o usa las flechas). */}
               <CardSlider className="mt-4" dots={false} resetKey={recs.map((r) => r.id).join(",")} label="Recomendaciones de pacientes" prevLabel="Ver recomendaciones anteriores" nextLabel="Ver más recomendaciones">
                 {recs.map((r) => (

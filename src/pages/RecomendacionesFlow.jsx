@@ -37,7 +37,22 @@ const REASONS = {
   no_se_pudo_enviar: "No pudimos mandar el código. Intenta de nuevo en un momento.",
 };
 
-const CONSENT_VERSION = "v1";
+// v2 (2026-10-29, solo esta página): el paciente da nombre y apellido y acepta que se publiquen con su
+// recomendación (o solo el nombre si marca "No mostrar mi apellido").
+const CONSENT_VERSION = "v2";
+
+// Nombre y apellido(s) de quien recomienda: letras, hasta 4 palabras separadas por espacio o guion. Si lo
+// escribieron todo en minúsculas o todo en mayúsculas se pone con mayúscula inicial ("maría lópez" → "María
+// López", con "de/del/la/las/los/y" en minúscula salvo al inicio); si no, se respeta ("María de la Garza").
+// La base de datos aplica la misma regla.
+const PERSON_NAME_RE = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ -][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+){0,3}$/;
+const NAME_PARTICLES = new Set(["de", "del", "la", "las", "los", "y"]);
+const tidyName = (s) => {
+  const t = s.replace(/\s+/g, " ").trim();
+  if (t !== t.toLowerCase() && t !== t.toUpperCase()) return t;
+  return t.toLowerCase().split(" ").map((w, i) => (i > 0 && NAME_PARTICLES.has(w) ? w
+    : w.replace(/(^|-)(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase()))).join(" ");
+};
 const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
 const isFemale = (name) => /^\s*(dra|doctora)\b/i.test(name || "");
 
@@ -98,7 +113,11 @@ export default function RecomendacionesFlow() {
   const [tags, setTags] = useState([]);
   const [openSection, setOpenSection] = useState(null); // tema abierto en "¿Qué destacas?"
   const [message, setMessage] = useState("");
-  const [firstName, setFirstName] = useState(""); // primer nombre opcional: si se escribe, se muestra junto a la recomendación
+  // Nombre y apellido(s), obligatorios (2026-10-29, pedido de David: dan confianza y el equipo tiene el dato).
+  // Se publican con la recomendación; con "No mostrar mi apellido" solo se ve el nombre (el equipo sí lo ve completo).
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [hideLastName, setHideLastName] = useState(false);
   const [comment, setComment] = useState(""); // comentario público corto (lo revisa el equipo; sin nombre)
   const [showPrivate, setShowPrivate] = useState(false);
   const [email, setEmail] = useState("");
@@ -271,9 +290,13 @@ export default function RecomendacionesFlow() {
   };
   const specialtyLabel = (name) => specialties.find((s) => s.name === name)?.display_name || name;
 
-  const firstNameClean = firstName.replace(/\s+/g, " ").trim();
-  const nameProblem = firstNameClean && (firstNameClean.length < 2 || !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+([ -][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)?$/.test(firstNameClean))
-    ? "Escribe solo tu primer nombre, sin números ni símbolos." : "";
+  const firstNameClean = tidyName(firstName);
+  const lastNameClean = tidyName(lastName);
+  const badName = (v) => v && (v.length < 2 || !PERSON_NAME_RE.test(v));
+  const nameProblem = badName(firstNameClean) ? "Escribe tu nombre solo con letras, sin números ni símbolos."
+    : badName(lastNameClean) ? "Escribe tu apellido solo con letras, sin números ni símbolos." : "";
+  const nameMissing = !firstNameClean || !lastNameClean;
+  const shownName = hideLastName ? firstNameClean : `${firstNameClean} ${lastNameClean}`.trim();
   const commentClean = comment.replace(/\s+/g, " ").trim();
   const commentProblem = !commentClean ? ""
     : commentClean.length < 20 ? "Escribe al menos 20 letras, o deja el comentario vacío."
@@ -300,14 +323,15 @@ export default function RecomendacionesFlow() {
   };
 
   const submit = async () => {
-    if (!codeSent || code.length !== 6 || !consent || busy) return;
+    if (!codeSent || code.length !== 6 || !consent || busy || nameMissing || nameProblem) return;
     setBusy(true); setError("");
     const dest = target.mode === "new"
       ? { new: { full_name: target.full_name, specialty: target.specialty, zone: target.zone || null, hospital: target.hospital || null, license_number: target.license_number || null, contact_phone: target.contact_phone || null, subspecialty: target.subspecialty || null } }
       : target.kind === "suggestion" ? { suggestion_id: target.id } : { specialist_id: target.id };
     try {
       const { data } = await base44.functions.invoke("submitRecommendation", {
-        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null, name: firstNameClean || null,
+        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null,
+        first_name: firstNameClean, last_name: lastNameClean, show_last_name: !hideLastName,
         consent: true, marketing, consent_version: CONSENT_VERSION,
       });
       if (data?.ok) { setVerified(true); setStep(4); }
@@ -335,7 +359,7 @@ export default function RecomendacionesFlow() {
   const reset = () => {
     setStep(1); setTarget(null); setTags([]); setOpenSection(null); setMessage(""); setComment(""); setShowPrivate(false);
     // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
-    if (!verified) { setFirstName(""); setCode(""); setCodeSent(false); setConsent(false); setMarketing(false); }
+    if (!verified) { setFirstName(""); setLastName(""); setHideLastName(false); setCode(""); setCodeSent(false); setConsent(false); setMarketing(false); }
     setQuery(""); setResults(null); setAdding(false);
     setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "", subspecialty: "" }); setError(""); setShowOtherSpecialties(false);
   };
@@ -677,11 +701,32 @@ export default function RecomendacionesFlow() {
           {step === 3 && (
             <div>
               <h2 className="font-heading font-semibold text-lg text-foreground mb-4">¿Quién {she ? "la" : "lo"} recomienda?</h2>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Tu nombre</label>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value.slice(0, 25))} placeholder="Ej. María" className="h-12 rounded-xl" autoComplete="given-name" />
-              <p className={`text-xs mt-1.5 mb-5 ${nameProblem ? "text-red-600" : "text-muted-foreground"}`}>
-                {nameProblem || "Si lo escribes, aparece junto a tu recomendación. Solo tu primer nombre: nunca tu apellido ni tu correo."}
-              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="rec-nombre" className="text-sm font-medium text-foreground mb-1.5 block">Nombre</label>
+                  <Input id="rec-nombre" value={firstName} onChange={(e) => setFirstName(e.target.value.slice(0, 40))} placeholder="Ej. María" className="h-12 rounded-xl" autoComplete="given-name" />
+                </div>
+                <div>
+                  <label htmlFor="rec-apellido" className="text-sm font-medium text-foreground mb-1.5 block">Apellido(s)</label>
+                  <Input id="rec-apellido" value={lastName} onChange={(e) => setLastName(e.target.value.slice(0, 40))} placeholder="Ej. López" className="h-12 rounded-xl" autoComplete="family-name" />
+                </div>
+              </div>
+              {nameProblem ? (
+                <p className="text-xs text-red-600 mt-1.5">{nameProblem}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {firstNameClean && lastNameClean
+                    ? <>Se verá así junto a tu recomendación: <span className="font-semibold text-brand-flowDeep">{shownName}</span></>
+                    : "Se muestra junto a tu recomendación para dar confianza. Tu correo nunca se muestra."}
+                </p>
+              )}
+              <label className="flex items-start gap-2.5 cursor-pointer mt-3 mb-5">
+                <Checkbox checked={hideLastName} onCheckedChange={(v) => setHideLastName(v === true)} className="mt-0.5" />
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  <span className="text-foreground font-medium">No mostrar mi apellido</span>
+                  <span className="block">Solo se verá tu nombre. Útil si prefieres que no se sepa que consultas con {she ? "esta doctora" : "este doctor"}.</span>
+                </span>
+              </label>
 
               <label className="text-sm font-medium text-foreground mb-1.5 block">Tu correo electrónico</label>
               <div className="flex gap-2">
@@ -719,7 +764,7 @@ export default function RecomendacionesFlow() {
                     <label className="flex items-start gap-2.5 cursor-pointer">
                       <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
                       <span className="text-xs text-muted-foreground leading-relaxed">
-                        <span className="text-foreground font-medium">Acepto que se guarde mi recomendación de forma privada</span> y que BuscoUnDoctor use mi correo solo para verificarla.{" "}
+                        <span className="text-foreground font-medium">Acepto que se publique mi recomendación con mi {hideLastName ? "nombre" : "nombre y apellido"}</span> y que BuscoUnDoctor use mi correo solo para verificarla.{" "}
                         <Link to="/aviso-de-privacidad" target="_blank" className="underline">Aviso de privacidad</Link>
                       </span>
                     </label>
@@ -731,7 +776,7 @@ export default function RecomendacionesFlow() {
                     </label>
                   </div>
 
-                  <Button type="button" onClick={submit} disabled={code.length !== 6 || !consent || busy || !!nameProblem}
+                  <Button type="button" onClick={submit} disabled={code.length !== 6 || !consent || busy || nameMissing || !!nameProblem}
                     className="w-full mt-5 h-12 rounded-xl bg-brand-flowSlate hover:bg-brand-flowSlate/90 text-white font-semibold">
                     {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enviar recomendación"}
                   </Button>
@@ -751,7 +796,7 @@ export default function RecomendacionesFlow() {
             <div className="text-center py-4">
               <div className="w-14 h-14 rounded-full bg-brand-flowMist text-brand-flowSlate flex items-center justify-center mx-auto"><CheckCircle2 className="w-8 h-8" /></div>
               <h2 className="font-heading font-bold text-xl text-foreground mt-4">¡Gracias por recomendar{she ? "la" : "lo"}!</h2>
-              <p className="text-sm text-muted-foreground mt-2">Tu recomendación quedó en revisión. Tu apellido y tu correo nunca se muestran.</p>
+              <p className="text-sm text-muted-foreground mt-2">Tu recomendación quedó en revisión. {hideLastName ? "Tu apellido y tu correo no se muestran." : "Tu correo nunca se muestra."}</p>
               <Button type="button" onClick={reset} className="w-full mt-6 h-12 rounded-xl bg-brand-flowSlate hover:bg-brand-flowSlate/90 text-white font-semibold">Recomendar a otro doctor</Button>
               <Button asChild variant="outline" className="w-full mt-3 h-12 rounded-xl gap-2">
                 <a href={shareHref} target="_blank" rel="noopener noreferrer"><Share2 className="w-4 h-4" /> Compartir con un amigo</a>

@@ -399,12 +399,20 @@ export default function AdminRecomendaciones() {
                   {(r.tags || []).length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">{r.tags.map((t) => <span key={t} className="text-xs bg-muted px-2 py-0.5 rounded-full">{recommendationTagLabel(t)}</span>)}</div>
                   )}
-                  {r.display_name && (
-                    <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
+                  {r.first_name && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Quién recomienda (solo lo ve el equipo): <span className="font-medium text-foreground">{r.first_name} {r.last_name}</span>
+                      {r.show_last_name === false && " · pidió no mostrar su apellido"}
+                    </p>
+                  )}
+                  {r.display_name ? (
+                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                       Mostrará el nombre: <span className="font-medium text-foreground">{r.display_name}</span>
                       <button type="button" disabled={busy === `n-${r.id}`} onClick={() => run(`n-${r.id}`, () => invoke("adminClearRecommendationName", { id: r.id }), "Nombre quitado")} className="text-red-700 hover:underline">Quitar nombre</button>
                     </p>
-                  )}
+                  ) : r.first_name ? (
+                    <p className="text-xs text-muted-foreground mt-1">No mostrará ningún nombre.</p>
+                  ) : null}
                   {r.public_comment && (
                     <div className="mt-2 rounded-lg bg-brand-bluePale/60 p-2.5">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
