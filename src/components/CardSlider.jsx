@@ -12,7 +12,9 @@ export const slideWidth = (n) => (n === 1 ? "w-full max-w-md mx-auto" : "w-[calc
 // (uno por tarjeta; el marcado es la primera tarjeta visible). Si `onSeen` existe, cada tarjeta con `data-slug` cuenta como
 // impresión solo cuando se ve de verdad (IntersectionObserver), no por estar fuera de pantalla.
 // `dots={false}` quita los puntos de abajo (la copia /recomendaciones-nueva no los usa).
-export default function CardSlider({ children, resetKey, onSeen, label, prevLabel, nextLabel, className = "mt-6", dots = true }) {
+// `bleed`: en celular el carrusel llega hasta los bordes de la pantalla (se come el margen de 1 rem de la página)
+// en vez de cortar las tarjetas antes; la primera sigue alineada con el margen (scroll-padding).
+export default function CardSlider({ children, resetKey, onSeen, label, prevLabel, nextLabel, className = "mt-6", dots = true, bleed = false }) {
   const ref = useRef(null);
   const seen = useRef(new Set());
   const [edge, setEdge] = useState({ prev: false, next: false });
@@ -59,7 +61,7 @@ export default function CardSlider({ children, resetKey, onSeen, label, prevLabe
   return (
     <div className={className}>
       <div className="relative">
-        <div ref={ref} onScroll={update} className="flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="list" aria-label={label}>
+        <div ref={ref} onScroll={update} className={`flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${bleed ? "-mx-4 px-4 scroll-px-4 sm:mx-0 sm:px-0 sm:scroll-px-0" : ""}`} role="list" aria-label={label}>
           {children}
         </div>
         {edge.prev && <button type="button" onClick={() => go(-1)} aria-label={prevLabel} className={`${arrow} left-0 -translate-x-1/2`}><ChevronLeft className="w-5 h-5" /></button>}

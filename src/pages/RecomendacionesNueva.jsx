@@ -33,19 +33,26 @@ const CONSENT_VERSION = "v1";
 const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
 const isFemale = (name) => /^\s*(dra|doctora)\b/i.test(name || "");
 
-// Contador del hero ("doctores recomendados"): sube de 0 al número de doctores de la lista de la landing
-// (`doctors` de list_recommendations_landing) en ~1.5 s, en cuanto termina de entrar el título. Con "reducir movimiento" activado en el sistema, muestra el número directo.
-// Título del hero: cada palabra entra HERO_WORD_STEP ms después de la anterior (los dos renglones seguidos) y
-// tarda HERO_WORD_MS (index.css: hero-word). HERO_TITLE_MS = cuándo terminó de entrar la última.
-const HERO_LINE_1 = ["Los", "doctores", "que"];
-const HERO_LINE_2 = ["Monterrey", "recomienda."];
+// Título del hero: cada palabra entra HERO_WORD_STEP ms después de la anterior y tarda HERO_WORD_MS
+// (index.css: hero-word); luego las burbujas de ciudades. HERO_TITLE_MS = cuándo terminó de entrar la última palabra.
+const HERO_WORDS = [{ w: "Doctores" }, { w: "Recomendados", accent: true }];
+const HERO_CITIES = ["Monterrey", "San Pedro Garza García"];
 const HERO_WORD_STEP = 140;
 const HERO_WORD_MS = 550;
-const HERO_TITLE_MS = (HERO_LINE_1.length + HERO_LINE_2.length - 1) * HERO_WORD_STEP + HERO_WORD_MS;
+const HERO_TITLE_MS = (HERO_WORDS.length - 1) * HERO_WORD_STEP + HERO_WORD_MS;
 
+// Contador del hero: aparece desde el principio en ceros y, cuando termina de entrar el título (HERO_TITLE_MS)
+// y ya llegó el dato, sube hasta el número de doctores de la lista (`doctors` de list_recommendations_landing)
+// en ~1.5 s. `total` es null mientras carga. Con "reducir movimiento", muestra el número directo.
 function RecommendationCounter({ total }) {
   const [n, setN] = useState(0);
+  const [titleDone, setTitleDone] = useState(false);
   useEffect(() => {
+    const t = setTimeout(() => setTitleDone(true), HERO_TITLE_MS);
+    return () => clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    if (total == null || !titleDone) return undefined;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setN(total); return undefined; }
     const ms = 1500;
     let start = null;
@@ -56,13 +63,12 @@ function RecommendationCounter({ total }) {
       setN(Math.round(total * (1 - Math.pow(1 - p, 3)))); // arranca rápido y frena al llegar
       if (p < 1) raf = requestAnimationFrame(tick);
     };
-    // Espera a que termine de entrar el título (HERO_TITLE_MS) antes de empezar a contar.
-    const wait = setTimeout(() => { raf = requestAnimationFrame(tick); }, HERO_TITLE_MS);
-    return () => { clearTimeout(wait); cancelAnimationFrame(raf); };
-  }, [total]);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [total, titleDone]);
   // Tipo reloj: una cajita por dígito, con tantas cajitas como dígitos tiene el total (rellena con ceros
   // mientras sube: 000 → 125), para que no cambie de ancho durante la animación.
-  const digits = String(n).padStart(String(total).length, "0").split("");
+  const digits = String(n).padStart(String(total ?? 0).length, "0").split("");
   return (
     <div className="mt-5 text-white/85">
       <div className="flex justify-center gap-1.5" aria-hidden="true">
@@ -75,7 +81,7 @@ function RecommendationCounter({ total }) {
         ))}
       </div>
       <p className="mt-2 text-sm sm:text-base" aria-hidden="true">{total === 1 ? "doctor recomendado" : "doctores recomendados"}</p>
-      <span className="sr-only">{total} {total === 1 ? "doctor recomendado" : "doctores recomendados"}</span>
+      {total != null && <span className="sr-only">{total} {total === 1 ? "doctor recomendado" : "doctores recomendados"}</span>}
     </div>
   );
 }
@@ -366,24 +372,27 @@ export default function RecomendacionesNueva() {
           </>
         )}
         <Link to="/" className="inline-block">
-          <img src="/logo.webp" alt="BuscoUnDoctor" className="h-12 sm:h-8 w-auto brightness-0 invert" />
+          <img src="/logo.webp" alt="BuscoUnDoctor" className="h-12 sm:h-8 lg:h-12 w-auto brightness-0 invert" />
         </Link>
         {step === 1 && (
-          <div className="max-w-xl mx-auto mt-6">
-            {/* Al cargar: las palabras entran una por una, primero el renglón 1 y luego el 2 al mismo ritmo (index.css: hero-word). */}
-            <h1 className="font-heading font-bold text-[2.45rem] sm:text-[2.95rem] leading-tight">
-              <span className="block">
-                {HERO_LINE_1.map((w, i) => (
-                  <span key={w}>{i > 0 && " "}<span className="hero-word" style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
-                ))}
-              </span>
-              <span className="block text-emerald-300">
-                {HERO_LINE_2.map((w, i) => (
-                  <span key={w}>{i > 0 && " "}<span className="hero-word" style={{ animationDelay: `${(HERO_LINE_1.length + i) * HERO_WORD_STEP}ms` }}>{w}</span></span>
-                ))}
-              </span>
+          <div className="max-w-xl lg:max-w-3xl mx-auto mt-6">
+            {/* Al cargar: las palabras entran una por una (index.css: hero-word), luego las ciudades. El contador
+                está desde el principio en ceros y empieza a subir cuando termina de entrar el título. */}
+            <h1 className="font-heading font-bold text-[2.45rem] sm:text-[2.95rem] leading-tight lg:whitespace-nowrap">
+              {HERO_WORDS.map(({ w, accent }, i) => (
+                <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-emerald-300" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
+              ))}
             </h1>
-            {landing && landing.doctors.length > 0 && <RecommendationCounter total={landing.doctors.length} />}
+            <div className="flex flex-wrap justify-center gap-2 mt-3">
+              {HERO_CITIES.map((c, i) => (
+                <span key={c} className="hero-word" style={{ animationDelay: `${(HERO_WORDS.length + i) * HERO_WORD_STEP}ms` }}>
+                  <span className="inline-flex items-center gap-1 h-7 px-3 rounded-full bg-white/10 border border-white/20 text-xs sm:text-sm font-medium text-white/90">
+                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" /> {c}
+                  </span>
+                </span>
+              ))}
+            </div>
+            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.doctors.length : null} />}
             {hasDoctors && (
               <a href="#doctores" className="lg:hidden inline-flex items-center gap-1.5 mt-4 h-9 px-4 rounded-full border border-white/30 text-sm font-medium text-white hover:bg-white/10 transition-colors">
                 Ver doctores recomendados <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
