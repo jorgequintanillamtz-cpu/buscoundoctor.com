@@ -76,13 +76,13 @@ const FAQ = [
 // cada pocos segundos y al pasar el ratón (index.css: medal, medal-shine). Ids únicos por sello (useId).
 const SEAL = "50.0,1.0 56.2,6.9 63.8,3.0 68.1,10.4 76.5,8.8 78.5,17.1 87.0,17.9 86.6,26.5 94.6,29.6 91.7,37.7 98.5,43.0 93.5,50.0 98.5,57.0 91.7,62.3 94.6,70.4 86.6,73.5 87.0,82.1 78.5,82.9 76.5,91.2 68.1,89.6 63.8,97.0 56.2,93.1 50.0,99.0 43.8,93.1 36.2,97.0 31.9,89.6 23.5,91.2 21.5,82.9 13.0,82.1 13.4,73.5 5.4,70.4 8.3,62.3 1.5,57.0 6.5,50.0 1.5,43.0 8.3,37.7 5.4,29.6 13.4,26.5 13.0,17.9 21.5,17.1 23.5,8.8 31.9,10.4 36.2,3.0 43.8,6.9";
 
-function RecommendationMedal({ count, className = "" }) {
+export function RecommendationMedal({ count, className = "", size = "w-[41px] h-[41px]" }) {
   const id = useId().replace(/:/g, "");
   const label = `Recomendado por ${count} ${count === 1 ? "paciente" : "pacientes"}`;
   const digits = String(count).length;
   const numSize = digits >= 3 ? 20 : digits === 2 ? 25 : 30;
   return (
-    <span className={`medal w-[41px] h-[41px] drop-shadow-[0_2px_4px_rgba(180,120,0,0.45)] ${className}`} title={label}>
+    <span className={`medal ${size} drop-shadow-[0_2px_4px_rgba(180,120,0,0.45)] ${className}`} title={label}>
       <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
         <defs>
           <linearGradient id={`${id}-gold`} x1="0" y1="0" x2="1" y2="1">
@@ -128,19 +128,19 @@ const flowSlideWidth = (n) => (n === 1
 function DoctorCard({ d, count, showNew, onRecommend }) {
   return (
     <div data-slug={d.slug} role="listitem"
-      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 sm:px-4 sm:py-4 hover:bg-white/80 transition-all flex flex-col ${flowSlideWidth(count)}`}>
+      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 hover:bg-white/80 transition-all flex flex-col ${flowSlideWidth(count)}`}>
       {/* Recomendaciones: sello dorado "RECOMENDADO" en la esquina, con el número adentro. */}
       <RecommendationMedal count={d.count} className="absolute top-3 right-3" />
-      <Link to={`/recomendado/${d.slug}`} className="flex items-stretch sm:items-start gap-3 flex-1 pr-4 sm:pr-0">
-        {/* Foto con "Sin verificar" encima, abajo. En celular ocupa todo el lado izquierdo de la tarjeta, del borde
-            de arriba hasta la línea de los botones; desde tableta, un rectángulo con esquinas redondeadas. */}
-        <div className="relative flex-shrink-0 w-28 min-h-[10rem] sm:w-24 sm:h-32 sm:min-h-0 sm:rounded-xl sm:overflow-hidden">
+      <Link to={`/recomendado-flow/${d.slug}`} className="flex items-stretch gap-3 sm:gap-4 flex-1 pr-4">
+        {/* Foto con "Sin verificar" encima, abajo. Ocupa todo el lado izquierdo de la tarjeta, del borde de arriba
+            hasta la línea de los botones (celular y computadora). */}
+        <div className="relative flex-shrink-0 w-28 lg:w-32 min-h-[10rem] lg:min-h-[11rem]">
           <RecommendedAvatar photo={d.photo} name={d.full_name} className="absolute inset-0 w-full h-full" shape="rounded-none" />
           <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-white/90 shadow-sm px-1.5 py-0.5 rounded-full whitespace-nowrap">
             <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
           </span>
         </div>
-        <div className="min-w-0 flex-1 py-3.5 sm:py-0 sm:pr-12">
+        <div className="min-w-0 flex-1 py-3.5 sm:py-4 sm:pr-12">
           <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
           <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, d.zone].filter(Boolean).join(" · ")}</p>
           {showNew && isNew(d) && (
@@ -154,8 +154,8 @@ function DoctorCard({ d, count, showNew, onRecommend }) {
           )}
         </div>
       </Link>
-      <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mx-0 sm:mb-0 sm:mt-3 pt-3 border-t border-white/80">
-        <Link to={`/recomendado/${d.slug}`}
+      <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mb-4 pt-3 border-t border-white/80">
+        <Link to={`/recomendado-flow/${d.slug}`}
           className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
           Ver recomendaciones <ArrowRight className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" />
         </Link>

@@ -11,6 +11,7 @@ import RecommendationsLanding, { useLandingData } from "@/components/Recommendat
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
+import FlowNav from "@/components/FlowNav";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
 // TERCERA versión de prueba, en /recomendaciones-flow (2026-10-29, pedido de David): parte de la copia
@@ -90,25 +91,6 @@ function RecommendationCounter({ total }) {
   );
 }
 
-// Menú flotante tipo píldora de vidrio (siempre visible arriba, centrado): logo, enlaces a las secciones y un
-// solo botón azul. Fondo azul marino translúcido para que se lea igual sobre el tramo claro y el oscuro.
-function FlowNav() {
-  const link = "hidden md:inline-flex items-center h-9 px-3 rounded-full text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors";
-  return (
-    <nav className="fixed top-3 inset-x-0 z-50 flex justify-center px-3 pointer-events-none" aria-label="Secciones">
-      <div className="pointer-events-auto flex items-center gap-1 h-14 pl-4 pr-2 rounded-full bg-brand-navy/45 backdrop-blur-md border border-white/15 shadow-lg shadow-brand-navy/20 w-full max-w-md md:w-auto md:max-w-none">
-        <Link to="/" className="flex items-center mr-auto md:mr-3" aria-label="BuscoUnDoctor, inicio">
-          <img src="/logo.webp" alt="BuscoUnDoctor" className="h-6 w-auto brightness-0 invert" />
-        </Link>
-        <a href="#doctores" className={link}>Doctores</a>
-        <a href="#especialidades" className={link}>Especialidades</a>
-        <a href="#preguntas" className={link}>Preguntas</a>
-        <a href="#formulario" className="inline-flex items-center h-10 px-4 md:ml-2 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors">Recomendar</a>
-      </div>
-    </nav>
-  );
-}
-
 export default function RecomendacionesFlow() {
   const [step, setStep] = useState(1); // 1 doctor | 2 recomendación | 3 verificar | 4 gracias
   const [target, setTarget] = useState(null); // { mode: "existing", kind, id, full_name, specialty, zone } | { mode: "new", ... }
@@ -177,6 +159,13 @@ export default function RecomendacionesFlow() {
   // Botón flotante (solo celular): aparece al bajar por la landing y regresa al formulario.
   const [showFab, setShowFab] = useState(false);
   const landing = useLandingData(); // doctores y comentarios de la landing (también alimentan la columna de la derecha en escritorio)
+  // Si se llega con un ancla (#doctores, #especialidades…) desde otra página, baja a esa sección cuando ya cargó.
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash || !landing) return undefined;
+    const t = setTimeout(() => document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    return () => clearTimeout(t);
+  }, [landing]);
   useEffect(() => {
     const onScroll = () => setShowFab(window.scrollY > 700);
     onScroll();
