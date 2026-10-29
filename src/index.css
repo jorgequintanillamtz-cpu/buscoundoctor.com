@@ -132,3 +132,38 @@
     scroll-margin-top: 12rem;
   }
 }
+
+/* Título del hero de /recomendaciones-nueva (RecomendacionesNueva.jsx): cada palabra entra subiendo y
+   desenfocada, con su retraso en línea (HERO_WORD_STEP; la duración debe coincidir con HERO_WORD_MS). */
+.hero-word {
+  display: inline-block;
+  animation: hero-word-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes hero-word-in {
+  from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-word { animation: none; }
+}
+
+/* Medalla de recomendaciones de /recomendaciones-nueva (RecommendationsLandingNueva.jsx): un destello cruza la
+   roseta cada 4 s (la pasada dura ~1 s y el resto del ciclo queda quieta) y otra vez al pasar el ratón. */
+.medal-shine {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateX(-10px) skewX(-20deg);
+  animation: medal-shine 4s ease-in-out 1.2s infinite both;
+}
+.medal:hover .medal-shine { animation: medal-shine-hover 0.9s ease-in-out 1 both; }
+@keyframes medal-shine {
+  0% { transform: translateX(-10px) skewX(-20deg); }
+  25%, 100% { transform: translateX(150px) skewX(-20deg); }
+}
+@keyframes medal-shine-hover {
+  from { transform: translateX(-10px) skewX(-20deg); }
+  to { transform: translateX(150px) skewX(-20deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .medal-shine, .medal:hover .medal-shine { animation: none; }
+}
