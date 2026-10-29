@@ -218,7 +218,7 @@ export default function RecomendadoPerfil() {
         {(doc.recommendations || []).length > 0 && (
           <div className="bg-card rounded-3xl border border-brand-canvasBorder p-5 sm:p-6">
             <h2 className="font-heading font-semibold text-foreground">Recomendaciones de pacientes ({doc.recommendations.length})</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">Cada una se muestra sin apellido ni correo, después de que la revisamos. Solo mostramos recomendaciones positivas.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Cada una se muestra después de que la revisamos, sin el correo de quien recomienda. Solo mostramos recomendaciones positivas.</p>
             <div className="mt-3">
               <RecommendationCards slug={doc.slug} recommendations={doc.recommendations} />
             </div>

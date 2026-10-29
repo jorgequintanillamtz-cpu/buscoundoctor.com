@@ -20,7 +20,7 @@ import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 // /recomendaciones. Orden: doctores recomendados, lo que dicen los pacientes, invitar a un amigo,
 // preguntas frecuentes y pie.
 // Los datos salen de una sola consulta (`list_recommendations_landing`); si falla, solo se ocultan las partes
-// con datos. Reglas: nada de estrellas ni "mejores"; los doctores van como "Sin verificar"; nunca apellido ni correo.
+// con datos. Reglas: nada de estrellas ni "mejores"; los doctores van como "Sin verificar"; nunca el correo (el apellido, solo si quien recomienda no lo ocultó).
 
 const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
 // Burbujas de categorías principales (mismo orden que las 10 más comunes de topSpecialties.js). Al tocar una,
@@ -62,8 +62,8 @@ export function useLandingData() {
 }
 
 const FAQ = [
-  { q: "¿Quién ve mi nombre?", a: "Solo el primer nombre, y solo si decides escribirlo. Aparece junto a tu recomendación. Nunca mostramos tu apellido ni tu correo." },
-  { q: "¿El doctor se entera de que fui yo?", a: "El doctor puede ver lo que dejaste (las etiquetas, el comentario y el mensaje privado), pero no tu correo ni tu apellido. Si escribes tu primer nombre, aparece junto a tu recomendación." },
+  { q: "¿Quién ve mi nombre?", a: "Tu nombre y apellido aparecen junto a tu recomendación, para dar confianza. Si prefieres, marca \"No mostrar mi apellido\" y solo se verá tu nombre. Tu correo nunca se muestra." },
+  { q: "¿El doctor se entera de que fui yo?", a: "El doctor ve tu recomendación con el mismo nombre que ven todos (sin apellido si así lo elegiste), y también tu mensaje privado si le dejaste uno. Nunca ve tu correo." },
   { q: "¿Por qué piden mi correo?", a: "Para confirmar que eres una persona real y evitar recomendaciones repetidas o falsas. No se muestra públicamente." },
   { q: "¿Puedo recomendar a más de un doctor?", a: "Sí. Puedes recomendar a todos los doctores que quieras, una vez por cada uno." },
   { q: "¿Por qué mi recomendación no aparece de inmediato?", a: "Porque el equipo de BuscoUnDoctor revisa cada recomendación y cada comentario antes de publicarlos." },
