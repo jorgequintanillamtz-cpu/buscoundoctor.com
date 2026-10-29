@@ -18,6 +18,11 @@ const brand = {
 	flowSky: '#6FA3DE',
 	flowDeep: '#1F3457',
 	flowBright: '#4F8EE3',
+	// Portada de /recomendaciones-flow: azul pizarra más azulado que baja poco a poco (varios tonos de azul en
+	// vez de pasar directo al blanco, que se ensuciaba a gris en medio).
+	flowHeroTop: '#4B5E8C',
+	flowHeroMid: '#6F8DC2',
+	flowHeroLow: '#AFC6E8',
 };
 
 module.exports = {

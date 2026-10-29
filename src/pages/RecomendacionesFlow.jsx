@@ -350,8 +350,9 @@ export default function RecomendacionesFlow() {
     // #4A5B7D en HSL) solo en esta página; el resto del sitio conserva el suyo.
     <div id="top" className="min-h-screen bg-brand-flowMist" style={{ "--ring": "220 26% 39%" }}>
       <FlowNav />
-      {/* Portada: del azul pizarra arriba al azul casi blanco abajo (donde empieza la sección de doctores). */}
-      <div className="relative bg-gradient-to-b from-brand-flowSlate from-25% to-brand-flowMist">
+      {/* Portada: del azul pizarra arriba al azul casi blanco abajo (donde empieza la sección de doctores), pasando
+          por tonos de azul para que la transición sea lenta y no se vea gris. */}
+      <div className="relative bg-[linear-gradient(to_bottom,theme(colors.brand.flowHeroTop)_0%,theme(colors.brand.flowHeroTop)_12%,theme(colors.brand.flowHeroMid)_45%,theme(colors.brand.flowHeroLow)_75%,theme(colors.brand.flowMist)_100%)]">
       <header className={`relative text-white text-center px-5 ${step === 1 ? "pt-28 sm:pt-32 pb-16" : "pt-24 pb-12"}`}>
         {step === 1 && (
           <div className="max-w-xl lg:max-w-3xl mx-auto">
