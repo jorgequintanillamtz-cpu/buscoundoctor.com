@@ -4,6 +4,9 @@
 // escoge hasta MAX_TAGS en total (así no se puede marcar todo y las etiquetas sí distinguen a un doctor).
 // Solo cualidades positivas y generales: nada de promesas de curación ni de enfermedades concretas.
 export const MAX_TAGS = 5;
+// /recomendaciones-flow deja marcar varias opciones por tema: ahí el tope es 10 (2026-10-29, pedido de David).
+// La base de datos acepta hasta 10; las otras páginas, con una opción por tema, nunca pasan de 5.
+export const MAX_TAGS_FLOW = 10;
 
 export const RECOMMENDATION_SECTIONS = [
   { key: "doctor", label: "El doctor", tags: [

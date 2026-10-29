@@ -13,7 +13,7 @@ import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
 import FlowNav from "@/components/FlowNav";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
-import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
+import { RECOMMENDATION_SECTIONS, MAX_TAGS_FLOW as MAX_TAGS } from "@/lib/recommendationTags";
 
 // TERCERA versión de prueba, en /recomendaciones-flow (2026-10-29, pedido de David): parte de la copia
 // /recomendaciones-nueva con un estilo "flow" inspirado en oasishealth.app: un solo degradado que fluye de
