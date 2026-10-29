@@ -11,6 +11,13 @@ const brand = {
 	augusta: '#006747',
 	augustaDark: '#00432E',
 	augustaLight: '#E3F1EA',
+	// Degradado continuo de /recomendaciones-flow (estilo "flow"): cada sección empieza en el color en que
+	// terminó la anterior, así no se nota ningún corte entre secciones.
+	flowSlate: '#4A5B7D',
+	flowMist: '#DCE8F7',
+	flowSky: '#6FA3DE',
+	flowDeep: '#1F3457',
+	flowBright: '#4F8EE3',
 };
 
 module.exports = {
