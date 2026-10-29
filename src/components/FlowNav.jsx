@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
+import { Search } from "lucide-react";
 
 // Menú flotante tipo píldora de vidrio del estilo "flow" (/recomendaciones-flow y /recomendado-flow/:slug):
 // logo, enlaces a las secciones y un solo botón azul. Fondo azul marino translúcido para que se lea igual sobre
 // el tramo claro y el oscuro del degradado. `base`: vacío en la propia página (anclas #doctores…); en otra
 // página, la ruta de la landing ("/recomendaciones-flow"), que al cargar baja sola a la sección del ancla.
 // `ctaTo`: a dónde lleva el botón "Recomendar" (por defecto, al formulario de la landing).
-export default function FlowNav({ base = "", ctaTo = null }) {
+// `onSearch`: si existe, en celular el botón "Recomendar" se cambia por una lupa que abre el buscador de doctores.
+export default function FlowNav({ base = "", ctaTo = null, onSearch = null }) {
+  const cta = `${onSearch ? "hidden md:inline-flex" : "inline-flex"} items-center h-10 px-4 md:ml-2 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors`;
   const link = "hidden md:inline-flex items-center h-9 px-3 rounded-full text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors";
   const To = ({ hash, className, children }) => (base
     ? <Link to={`${base}#${hash}`} className={className}>{children}</Link>
@@ -21,8 +24,14 @@ export default function FlowNav({ base = "", ctaTo = null }) {
         <To hash="especialidades" className={link}>Especialidades</To>
         <To hash="preguntas" className={link}>Preguntas</To>
         {ctaTo
-          ? <Link to={ctaTo} className="inline-flex items-center h-10 px-4 md:ml-2 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors">Recomendar</Link>
-          : <To hash="formulario" className="inline-flex items-center h-10 px-4 md:ml-2 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors">Recomendar</To>}
+          ? <Link to={ctaTo} className={cta}>Recomendar</Link>
+          : <To hash="formulario" className={cta}>Recomendar</To>}
+        {onSearch && (
+          <button type="button" onClick={onSearch} aria-label="Buscar un doctor"
+            className="md:hidden w-10 h-10 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white flex items-center justify-center transition-colors">
+            <Search className="w-5 h-5" aria-hidden="true" />
+          </button>
+        )}
       </div>
     </nav>
   );

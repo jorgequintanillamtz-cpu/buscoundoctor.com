@@ -12,6 +12,7 @@ import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
 import FlowNav from "@/components/FlowNav";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS } from "@/lib/recommendationTags";
 
 // TERCERA versión de prueba, en /recomendaciones-flow (2026-10-29, pedido de David): parte de la copia
@@ -114,6 +115,7 @@ export default function RecomendacionesFlow() {
   const [results, setResults] = useState(null); // null = aún no busca
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false); // buscador de doctores de la lupa (celular)
   // Al agregar un doctor nuevo: ya elegida la especialidad, mientras se escribe el nombre se muestran los doctores
   // parecidos de esa especialidad, para elegirlos en vez de duplicarlos (CLAUDE.md §8r).
   const [similar, setSimilar] = useState([]);
@@ -345,7 +347,7 @@ export default function RecomendacionesFlow() {
     // --ring: el anillo de enfoque de los campos (Input/Textarea) en el azul gris de la portada (brand.flowSlate,
     // #4A5B7D en HSL) solo en esta página; el resto del sitio conserva el suyo.
     <div id="top" className="min-h-screen bg-brand-flowMist" style={{ "--ring": "220 26% 39%" }}>
-      <FlowNav />
+      <FlowNav onSearch={() => setSearchOpen(true)} />
       {/* Portada: del azul pizarra arriba al azul casi blanco abajo (donde empieza la sección de doctores), pasando
           por tonos de azul para que la transición sea lenta y no se vea gris. */}
       <div className="relative bg-[linear-gradient(to_bottom,theme(colors.brand.flowHeroTop)_0%,theme(colors.brand.flowHeroTop)_12%,theme(colors.brand.flowHeroMid)_45%,theme(colors.brand.flowHeroLow)_75%,theme(colors.brand.flowMist)_100%)]">
@@ -386,7 +388,9 @@ export default function RecomendacionesFlow() {
         )}
       </header>
 
-      <main id="formulario" className="relative z-10 max-w-lg mx-auto px-4 pb-16 scroll-mt-24">
+      {/* En celular, la caja del formulario solo aparece cuando ya se están llenando datos (escribir un doctor, paso 2
+          en adelante); para buscar un doctor está la lupa del menú. Desde tableta se ve siempre. */}
+      <main id="formulario" className={`relative z-10 max-w-lg mx-auto px-4 pb-16 scroll-mt-24 ${step === 1 && !adding ? "hidden sm:block" : ""}`}>
         {/* El formulario es la pieza central de la portada: tarjeta blanca sólida (para leerse perfecto) que flota. */}
         <div className="bg-white rounded-[2rem] border border-white/60 shadow-2xl shadow-brand-navy/20 p-5 sm:p-7">
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
@@ -753,12 +757,102 @@ export default function RecomendacionesFlow() {
       {(step === 1 || step === 4) && showFab && (
         <div className="sm:hidden fixed bottom-4 inset-x-4 z-40">
           <button type="button"
-            onClick={() => { if (step === 4) reset(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+            onClick={() => { if (step === 4) reset(); openAddDoctor(); }}
             className="w-full h-12 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white font-semibold shadow-lg shadow-brand-navy/30 flex items-center justify-center gap-2 transition-colors">
             <Heart className="w-4 h-4 fill-current" aria-hidden="true" /> {step === 4 ? "Recomendar a otro doctor" : "Recomendar a mi doctor"}
           </button>
         </div>
       )}
+
+      {/* Buscador de doctores de la lupa del menú (celular) */}
+      {searchOpen && (
+        <DoctorSearchSheet
+          onClose={() => setSearchOpen(false)}
+          onRecommend={(r) => { setSearchOpen(false); pickExisting(r); }}
+          onAddNew={() => { setSearchOpen(false); openAddDoctor(); }}
+        />
+      )}
+    </div>
+  );
+}
+
+// Buscador de doctores (la lupa del menú en celular): misma búsqueda que el formulario (doctores publicados y
+// propuestas ya aprobadas, tolera faltas de ortografía). Tocar un resultado abre su página; "Recomendar" lo elige
+// y pasa al paso 2; si no aparece, "Recomiéndalo" abre los campos para escribirlo.
+function DoctorSearchSheet({ onClose, onRecommend, onAddNew }) {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState(null); // null = aún no busca
+  const [busy, setBusy] = useState(false);
+  const seq = useRef(0);
+  useBodyScrollLock(true);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  useEffect(() => {
+    const query = q.trim();
+    if (query.length < 3) { setResults(null); setBusy(false); return undefined; }
+    const mine = ++seq.current;
+    setBusy(true);
+    const t = setTimeout(async () => {
+      try {
+        const { data } = await base44.functions.invoke("searchRecommendableDoctors", { query });
+        if (mine === seq.current) setResults(Array.isArray(data) ? data : []);
+      } catch {
+        if (mine === seq.current) setResults([]);
+      }
+      if (mine === seq.current) setBusy(false);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  const pageOf = (r) => (r.slug ? (r.kind === "specialist" ? `/especialista/${r.slug}` : `/recomendado-flow/${r.slug}`) : null);
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-brand-navy/50 backdrop-blur-sm" onClick={onClose} role="dialog" aria-modal="true" aria-label="Buscar un doctor">
+      <div className="mx-3 mt-3 rounded-3xl bg-white shadow-2xl p-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
+            <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Busca a un doctor por su nombre" className="h-12 rounded-full pl-10 pr-10" />
+            {busy && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground absolute right-3.5 top-1/2 -translate-y-1/2" />}
+          </div>
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="w-10 h-10 rounded-full flex items-center justify-center text-brand-navy hover:bg-muted"><X className="w-5 h-5" /></button>
+        </div>
+
+        {results === null ? (
+          <p className="text-sm text-muted-foreground px-1 pt-3">Escribe al menos 3 letras del nombre.</p>
+        ) : results.length === 0 && !busy ? (
+          <p className="text-sm text-brand-navy px-1 pt-3">No lo encontramos.</p>
+        ) : (
+          <ul className="mt-3 max-h-[60vh] overflow-y-auto space-y-2">
+            {results.map((r) => {
+              const to = pageOf(r);
+              const info = (
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium text-brand-navy break-words">{r.full_name}</span>
+                  <span className="block text-xs text-muted-foreground">{[aliasLabel(r.specialty), r.zone].filter(Boolean).join(" · ")}</span>
+                </span>
+              );
+              return (
+                <li key={`${r.kind}-${r.id}`} className="flex items-center gap-2 rounded-2xl border border-border/60 pl-4 pr-2 py-2.5">
+                  {to ? <Link to={to} onClick={onClose} className="min-w-0 flex-1 flex">{info}</Link> : info}
+                  <button type="button" onClick={() => onRecommend(r)} className="flex-shrink-0 h-9 px-3 rounded-full bg-brand-navy text-white text-xs font-semibold">Recomendar</button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {results !== null && !busy && (
+          <button type="button" onClick={onAddNew} className="mt-3 w-full rounded-2xl bg-brand-flowMist px-4 py-3 text-left text-sm text-brand-navy">
+            ¿No lo encuentras? <span className="font-semibold underline">Recomiéndalo tú</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
