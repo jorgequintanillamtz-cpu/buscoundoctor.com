@@ -11,7 +11,8 @@ export const slideWidth = (n) => (n === 1 ? "w-full max-w-md mx-auto" : "w-[calc
 // Carrusel horizontal (doctores y comentarios): se desliza con el dedo, con las flechas (escritorio) o tocando los puntos de abajo
 // (uno por tarjeta; el marcado es la primera tarjeta visible). Si `onSeen` existe, cada tarjeta con `data-slug` cuenta como
 // impresión solo cuando se ve de verdad (IntersectionObserver), no por estar fuera de pantalla.
-export default function CardSlider({ children, resetKey, onSeen, label, prevLabel, nextLabel, className = "mt-6" }) {
+// `dots={false}` quita los puntos de abajo (la copia /recomendaciones-nueva no los usa).
+export default function CardSlider({ children, resetKey, onSeen, label, prevLabel, nextLabel, className = "mt-6", dots = true }) {
   const ref = useRef(null);
   const seen = useRef(new Set());
   const [edge, setEdge] = useState({ prev: false, next: false });
@@ -64,7 +65,7 @@ export default function CardSlider({ children, resetKey, onSeen, label, prevLabe
         {edge.prev && <button type="button" onClick={() => go(-1)} aria-label={prevLabel} className={`${arrow} left-0 -translate-x-1/2`}><ChevronLeft className="w-5 h-5" /></button>}
         {edge.next && <button type="button" onClick={() => go(1)} aria-label={nextLabel} className={`${arrow} right-0 translate-x-1/2`}><ChevronRight className="w-5 h-5" /></button>}
       </div>
-      {pos.count > 1 && (
+      {dots && pos.count > 1 && (
         <div className="flex justify-center items-center mt-3" role="group" aria-label={`${label}: ${pos.count} en total`}>
           {Array.from({ length: pos.count }, (_, i) => (
             <button key={i} type="button" onClick={() => goTo(i)} aria-label={`Ir al ${i + 1} de ${pos.count}`} aria-current={i === pos.active ? "true" : undefined} className="p-1.5">
