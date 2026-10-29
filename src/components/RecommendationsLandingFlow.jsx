@@ -1,10 +1,10 @@
 // Parte de abajo de /recomendaciones-flow (ver RecomendacionesFlow.jsx), copiada de RecommendationsLandingNueva.jsx.
 // Degradado continuo: doctores (flowMist → flowSky), especialidades (flowSky → flowDeep), invitar y preguntas
 // (flowDeep), cierre y pie (flowDeep → flowBright). Cada sección empieza donde terminó la anterior.
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Heart, ShieldQuestion, Share2,
+  ArrowRight, ChevronRight, Heart, ShieldQuestion, Share2,
   Stethoscope, Flower2, HeartPulse, Brain, Sparkles, Apple, Eye, Bone, Ear, Wind, Pill, Droplet, Activity,
   Scissors, Leaf, Ribbon, Hand, Dumbbell, Syringe, ShieldPlus,
 } from "lucide-react";
@@ -237,6 +237,43 @@ function SpecialtyCards({ doctors }) {
   );
 }
 
+// Burbujas de categorías. En celular, una sola fila que se desliza de lado (llega hasta los bordes de la pantalla):
+// la orilla derecha se desvanece y sale una flechita, para que se note que hay más aunque la fila se corte justo
+// entre dos burbujas; las dos señales desaparecen al llegar al final. Desde tableta, varias filas centradas.
+function BubbleRow({ groups, current, onPick }) {
+  const ref = useRef(null);
+  const [atEnd, setAtEnd] = useState(false);
+  const update = () => {
+    const el = ref.current;
+    if (el) setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+  };
+  useEffect(() => {
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [groups.length]);
+  return (
+    <div className="relative mt-5">
+      <div ref={ref} onScroll={update}
+        className={`flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:pb-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:[mask-image:none] ${atEnd ? "" : "[mask-image:linear-gradient(to_right,#000_75%,transparent)]"}`}
+        role="group" aria-label="Elegir especialidad">
+        {groups.map((g) => (
+          <button key={g.key} type="button" onClick={() => onPick(g.key)} aria-pressed={current.key === g.key}
+            className={`shrink-0 whitespace-nowrap px-3.5 h-9 rounded-full border text-sm font-medium transition-colors ${current.key === g.key ? "border-brand-navy bg-brand-navy text-white" : "border-white/80 bg-white/60 backdrop-blur-sm text-brand-navy hover:bg-white/80"}`}>
+            {g.title}{g.items.length > 0 && <span className={current.key === g.key ? "text-white/80" : "text-brand-navy/60"}> · {g.items.length}</span>}
+          </button>
+        ))}
+      </div>
+      {!atEnd && (
+        <button type="button" onClick={() => ref.current?.scrollBy({ left: 180, behavior: "smooth" })} aria-label="Ver más especialidades"
+          className="sm:hidden absolute -right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 border border-white shadow-md text-brand-navy flex items-center justify-center">
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function RecommendationsLanding({ data, onRecommend }) {
   const [cat, setCat] = useState("todos");
 
@@ -283,18 +320,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h2 className="font-heading font-medium tracking-tight text-2xl sm:text-3xl text-brand-navy text-center">Doctores recomendados</h2>
 
-          {doctors.length > 0 && (
-            // En celular, una sola fila que se desliza de lado (llega hasta los bordes de la pantalla);
-            // desde tableta, varias filas centradas.
-            <div className="flex gap-2 mt-5 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:pb-0 sm:flex-wrap sm:justify-center sm:overflow-visible" role="group" aria-label="Elegir especialidad">
-              {groups.map((g) => (
-                <button key={g.key} type="button" onClick={() => setCat(g.key)} aria-pressed={current.key === g.key}
-                  className={`shrink-0 whitespace-nowrap px-3.5 h-9 rounded-full border text-sm font-medium transition-colors ${current.key === g.key ? "border-brand-navy bg-brand-navy text-white" : "border-white/80 bg-white/60 backdrop-blur-sm text-brand-navy hover:bg-white/80"}`}>
-                  {g.title}{g.items.length > 0 && <span className={current.key === g.key ? "text-white/80" : "text-brand-navy/60"}> · {g.items.length}</span>}
-                </button>
-              ))}
-            </div>
-          )}
+          {doctors.length > 0 && <BubbleRow groups={groups} current={current} onPick={setCat} />}
 
           {data === null ? (
             <p className="text-center text-sm text-muted-foreground mt-8">Cargando…</p>
