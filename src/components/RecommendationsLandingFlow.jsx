@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
-import CardSlider, { slideWidth } from "@/components/CardSlider";
+import CardSlider from "@/components/CardSlider";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
@@ -117,11 +117,18 @@ function RecommendationMedal({ count, className = "" }) {
   );
 }
 
+// Ancho de cada tarjeta en los carruseles de esta página: en celular una y un pedacito de la siguiente; en tableta
+// dos y un pedacito; desde computadora (sección más ancha, 1400 px) tres y un pedacito de la cuarta. Con una sola
+// tarjeta, centrada.
+const flowSlideWidth = (n) => (n === 1
+  ? "w-full max-w-md mx-auto"
+  : "w-[calc(100%_-_3rem)] sm:w-[calc((100%_-_3.75rem)/2)] lg:w-[calc((100%_-_4.5rem)/3)]");
+
 // Tarjeta de un doctor recomendado (la usan todos los carruseles). `count` = cuántas hay en su carrusel (ancho).
 function DoctorCard({ d, count, showNew, onRecommend }) {
   return (
     <div data-slug={d.slug} role="listitem"
-      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 sm:px-4 sm:py-4 hover:bg-white/80 transition-all flex flex-col ${slideWidth(count)}`}>
+      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 sm:px-4 sm:py-4 hover:bg-white/80 transition-all flex flex-col ${flowSlideWidth(count)}`}>
       {/* Recomendaciones: sello dorado "RECOMENDADO" en la esquina, con el número adentro. */}
       <RecommendationMedal count={d.count} className="absolute top-3 right-3" />
       <Link to={`/recomendado/${d.slug}`} className="flex items-stretch sm:items-start gap-3 flex-1 pr-4 sm:pr-0">
@@ -133,7 +140,7 @@ function DoctorCard({ d, count, showNew, onRecommend }) {
             <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
           </span>
         </div>
-        <div className="min-w-0 flex-1 py-3.5 sm:py-0">
+        <div className="min-w-0 flex-1 py-3.5 sm:py-0 sm:pr-12">
           <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
           <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, d.zone].filter(Boolean).join(" · ")}</p>
           {showNew && isNew(d) && (
@@ -155,8 +162,8 @@ function DoctorCard({ d, count, showNew, onRecommend }) {
         {onRecommend && (
           <button type="button" onClick={() => onRecommend(d.slug)} aria-label={`Yo también lo recomiendo: ${d.full_name}`}
             className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full border border-white bg-white/70 text-brand-navy hover:bg-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
-            {/* Celular y tableta: etiqueta corta (y sin corazón en celular) para que los dos botones quepan en una fila; si no caben, el segundo baja */}
-            <Heart className="w-3.5 h-3.5 hidden lg:block" aria-hidden="true" /> <span className="lg:hidden">Yo también</span><span className="hidden lg:inline">Yo también lo recomiendo</span>
+            {/* Etiqueta corta "Yo también" (el nombre completo va en aria-label) para que los dos botones quepan en una fila; corazón desde computadora. */}
+            <Heart className="w-3.5 h-3.5 hidden lg:block" aria-hidden="true" /> Yo también
           </button>
         )}
       </div>
@@ -299,7 +306,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
   // Categoría sin doctores: una tarjeta (del mismo tamaño que las de los doctores) para recomendar al primero.
   const renderEmpty = (g) => (
     <div className="flex justify-center">
-      <div className="w-full sm:w-[calc(50%-0.375rem)] rounded-2xl border-2 border-dashed border-white/80 bg-white/50 backdrop-blur-sm px-5 py-8 text-center">
+      <div className="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc((100%_-_1.5rem)/3)] rounded-2xl border-2 border-dashed border-white/80 bg-white/50 backdrop-blur-sm px-5 py-8 text-center">
         <Heart className="w-8 h-8 text-brand-blue mx-auto mb-2" aria-hidden="true" />
         <p className="font-heading font-semibold text-foreground">¿Conoces a {g.one}?</p>
         <p className="text-sm text-muted-foreground mt-1">Todavía nadie lo ha recomendado. Sé el primero: toma un minuto.</p>
@@ -317,7 +324,8 @@ export default function RecommendationsLanding({ data, onRecommend }) {
     <div>
       {/* Doctores recomendados */}
       <section id="doctores" className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky py-12 sm:py-16 scroll-mt-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        {/* Más ancha que el resto (1400 px) para que los carruseles lleguen más lejos en computadora. */}
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
           <h2 className="font-heading font-medium tracking-tight text-2xl sm:text-3xl text-brand-navy text-center">Doctores recomendados</h2>
 
           {doctors.length > 0 && <BubbleRow groups={groups} current={current} onPick={setCat} />}

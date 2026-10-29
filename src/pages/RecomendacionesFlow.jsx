@@ -368,7 +368,7 @@ export default function RecomendacionesFlow() {
             <p className="hero-word font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">Monterrey · San Pedro Garza García</p>
             <h1 className="mt-4 font-heading font-medium tracking-tight text-[2.6rem] sm:text-[3.4rem] leading-[1.05] lg:whitespace-nowrap">
               {HERO_WORDS.map(({ w, accent }, i) => (
-                <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-brand-navy" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
+                <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-emerald-200" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
               ))}
             </h1>
             {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.doctors.length : null} />}
