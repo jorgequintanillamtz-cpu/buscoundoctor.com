@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart } from "lucide-react";
+import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart, ChevronDown, Check } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
 import RecommendationsLanding, { useLandingData } from "@/components/RecommendationsLandingFlow";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
@@ -96,6 +96,7 @@ export default function RecomendacionesFlow() {
   const [step, setStep] = useState(1); // 1 doctor | 2 recomendación | 3 verificar | 4 gracias
   const [target, setTarget] = useState(null); // { mode: "existing", kind, id, full_name, specialty, zone } | { mode: "new", ... }
   const [tags, setTags] = useState([]);
+  const [openSection, setOpenSection] = useState(null); // tema abierto en "¿Qué destacas?"
   const [message, setMessage] = useState("");
   const [firstName, setFirstName] = useState(""); // primer nombre opcional: si se escribe, se muestra junto a la recomendación
   const [comment, setComment] = useState(""); // comentario público corto (lo revisa el equipo; sin nombre)
@@ -279,13 +280,11 @@ export default function RecomendacionesFlow() {
     : /(https?:|www\.|@|\.com|\.mx|\.net|\.org)/i.test(commentClean) || commentClean.replace(/\D/g, "").length >= 7 ? "Sin enlaces, correos ni teléfonos, por favor."
     : "";
 
-  // "¿Qué destacas?": un selector por tema (El doctor, El consultorio, Tiempo…); cada uno solo trae las
-  // opciones de su tema y se puede escoger una. En total, hasta MAX_TAGS (el servidor también lo exige).
-  const sectionTag = (sec) => tags.find((t) => sec.tags.some((x) => x.v === t)) || "";
-  const setSection = (sec, v) => setTags((cur) => {
-    const rest = cur.filter((t) => !sec.tags.some((x) => x.v === t));
-    return v ? [...rest, v] : rest;
-  });
+  // "¿Qué destacas?": un renglón por tema (El doctor, El consultorio, Tiempo…) que se abre y deja marcar
+  // varias opciones de ese tema (2026-10-29, pedido de David). En total, hasta MAX_TAGS (el servidor
+  // también lo exige; no pide una por tema).
+  const toggleTag = (v) => setTags((cur) =>
+    cur.includes(v) ? cur.filter((t) => t !== v) : cur.length >= MAX_TAGS ? cur : [...cur, v]);
 
   const requestCode = async () => {
     if (!emailValid || busy || cooldown > 0) return;
@@ -334,7 +333,7 @@ export default function RecomendacionesFlow() {
   };
 
   const reset = () => {
-    setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setShowPrivate(false);
+    setStep(1); setTarget(null); setTags([]); setOpenSection(null); setMessage(""); setComment(""); setShowPrivate(false);
     // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
     if (!verified) { setFirstName(""); setCode(""); setCodeSent(false); setConsent(false); setMarketing(false); }
     setQuery(""); setResults(null); setAdding(false);
@@ -597,27 +596,50 @@ export default function RecomendacionesFlow() {
                 <CheckCircle2 className="w-5 h-5" /> Sí, {she ? "la" : "lo"} recomiendo
               </div>
 
-              <p className="text-sm font-medium text-foreground mt-5">¿Qué destacas? <span className="text-muted-foreground font-normal">(opcional)</span></p>
-              <p className="text-xs text-muted-foreground mt-0.5 mb-3">Elige una por tema, hasta {MAX_TAGS} en total: lo que más destaca {she ? "de ella" : "de él"}.</p>
+              <div className="flex items-baseline justify-between gap-3 mt-5">
+                <p className="text-sm font-medium text-foreground">¿Qué destacas? <span className="text-muted-foreground font-normal">(opcional)</span></p>
+                {tags.length > 0 && <span className="text-xs font-medium text-brand-flowDeep flex-shrink-0">{tags.length} de {MAX_TAGS}</span>}
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-3">Elige las que quieras de cada tema, hasta {MAX_TAGS} en total: lo que más destaca {she ? "de ella" : "de él"}.</p>
               <div className="space-y-2">
                 {RECOMMENDATION_SECTIONS.map((sec) => {
-                  const picked = sectionTag(sec);
-                  const full = !picked && tags.length >= MAX_TAGS;
+                  const picked = sec.tags.filter((t) => tags.includes(t.v));
+                  const open = openSection === sec.key;
                   return (
-                    <select
-                      key={sec.key}
-                      value={picked}
-                      onChange={(e) => setSection(sec, e.target.value)}
-                      disabled={full}
-                      aria-label={`Qué destacas: ${sec.label}`}
-                      className={`w-full h-12 px-3.5 rounded-xl border text-sm bg-background disabled:opacity-50 ${picked ? "border-brand-flowSlate bg-brand-flowMist text-brand-flowDeep font-medium" : "border-input text-muted-foreground"}`}
-                    >
-                      <option value="">{full ? `${sec.label}: ya elegiste ${MAX_TAGS}` : `${sec.label}: elige una`}</option>
-                      {sec.tags.map((t) => <option key={t.v} value={t.v}>{t.label}</option>)}
-                    </select>
+                    <div key={sec.key} className={`rounded-xl border transition-colors ${picked.length ? "border-brand-flowSlate bg-brand-flowMist" : "border-input bg-background"}`}>
+                      <button type="button" onClick={() => setOpenSection(open ? null : sec.key)} aria-expanded={open}
+                        className="w-full min-h-12 px-3.5 py-2 flex items-center gap-2 text-left">
+                        <span className="flex-1 min-w-0">
+                          <span className={`block text-sm font-medium ${picked.length ? "text-brand-flowDeep" : "text-foreground"}`}>{sec.label}</span>
+                          <span className="block text-xs text-muted-foreground truncate">
+                            {picked.length ? picked.map((t) => t.label).join(", ") : "Elige una o varias"}
+                          </span>
+                        </span>
+                        {picked.length > 0 && (
+                          <span className="flex-shrink-0 min-w-6 h-6 px-1.5 rounded-full bg-brand-flowSlate text-white text-xs font-semibold inline-flex items-center justify-center">{picked.length}</span>
+                        )}
+                        <ChevronDown className={`w-4 h-4 flex-shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+                      </button>
+                      {open && (
+                        <div className="px-3 pb-3 flex flex-wrap gap-2">
+                          {sec.tags.map((t) => {
+                            const on = tags.includes(t.v);
+                            return (
+                              <button key={t.v} type="button" onClick={() => toggleTag(t.v)} disabled={!on && tags.length >= MAX_TAGS} aria-pressed={on}
+                                className={`inline-flex items-center gap-1.5 min-h-10 px-3.5 py-2 rounded-full border text-sm transition-colors disabled:opacity-40 ${on ? "bg-brand-flowSlate border-brand-flowSlate text-white" : "bg-white border-input text-foreground hover:border-brand-flowSlate"}`}>
+                                {on && <Check className="w-3.5 h-3.5" aria-hidden="true" />}{t.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
+              {tags.length >= MAX_TAGS && (
+                <p className="text-xs text-brand-flowDeep mt-2">Ya elegiste {MAX_TAGS}. Quita una para cambiarla.</p>
+              )}
 
               <p className="text-sm font-medium text-foreground mt-6 mb-1.5">Cuéntanos qué hace {she ? "a esta doctora" : "a este doctor"} excelente <span className="text-muted-foreground font-normal">(opcional)</span></p>
               <Textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, 160))} rows={3} placeholder="Ej. Me explicó todo con calma y siempre contestó mis dudas."
