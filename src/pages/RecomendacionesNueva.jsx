@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart, ArrowDown } from "lucide-react";
+import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
 import RecommendationsLanding, { useLandingData } from "@/components/RecommendationsLandingNueva";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
@@ -80,7 +80,6 @@ function RecommendationCounter({ total }) {
           </span>
         ))}
       </div>
-      <p className="mt-2 text-sm sm:text-base" aria-hidden="true">{total === 1 ? "doctor recomendado" : "doctores recomendados"}</p>
       {total != null && <span className="sr-only">{total} {total === 1 ? "doctor recomendado" : "doctores recomendados"}</span>}
     </div>
   );
@@ -182,7 +181,6 @@ export default function RecomendacionesNueva() {
   // Botón flotante (solo celular): aparece al bajar por la landing y regresa al formulario.
   const [showFab, setShowFab] = useState(false);
   const landing = useLandingData(); // doctores y comentarios de la landing (también alimentan la columna de la derecha en escritorio)
-  const hasDoctors = !!landing && landing.doctors.length > 0;
   useEffect(() => {
     const onScroll = () => setShowFab(window.scrollY > 700);
     onScroll();
@@ -376,14 +374,15 @@ export default function RecomendacionesNueva() {
         </Link>
         {step === 1 && (
           <div className="max-w-xl lg:max-w-3xl mx-auto mt-6">
-            {/* Al cargar: las palabras entran una por una (index.css: hero-word), luego las ciudades. El contador
-                está desde el principio en ceros y empieza a subir cuando termina de entrar el título. */}
+            {/* Al cargar: las palabras entran una por una (index.css: hero-word). Debajo, el contador (desde el principio
+                en ceros; sube cuando termina de entrar el título) y luego las burbujas de ciudades. */}
             <h1 className="font-heading font-bold text-[2.45rem] sm:text-[2.95rem] leading-tight lg:whitespace-nowrap">
               {HERO_WORDS.map(({ w, accent }, i) => (
                 <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-emerald-300" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
               ))}
             </h1>
-            <div className="flex flex-wrap justify-center gap-2 mt-3">
+            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.doctors.length : null} />}
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
               {HERO_CITIES.map((c, i) => (
                 <span key={c} className="hero-word" style={{ animationDelay: `${(HERO_WORDS.length + i) * HERO_WORD_STEP}ms` }}>
                   <span className="inline-flex items-center gap-1 h-7 px-3 rounded-full bg-white/10 border border-white/20 text-xs sm:text-sm font-medium text-white/90">
@@ -392,12 +391,6 @@ export default function RecomendacionesNueva() {
                 </span>
               ))}
             </div>
-            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.doctors.length : null} />}
-            {hasDoctors && (
-              <a href="#doctores" className="lg:hidden inline-flex items-center gap-1.5 mt-4 h-9 px-4 rounded-full border border-white/30 text-sm font-medium text-white hover:bg-white/10 transition-colors">
-                Ver doctores recomendados <ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
-              </a>
-            )}
           </div>
         )}
         {step === 2 && target && (

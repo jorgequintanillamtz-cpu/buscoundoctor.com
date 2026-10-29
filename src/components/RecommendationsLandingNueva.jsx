@@ -119,19 +119,20 @@ function RecommendationMedal({ count, className = "" }) {
 function DoctorCard({ d, count, showNew, onRecommend }) {
   return (
     <div data-slug={d.slug} role="listitem"
-      className={`relative snap-start shrink-0 rounded-2xl border border-border/60 bg-card px-4 py-3.5 sm:py-4 hover:border-brand-blue/50 hover:shadow-md transition-all flex flex-col ${slideWidth(count)}`}>
+      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-border/60 bg-card sm:px-4 sm:py-4 hover:border-brand-blue/50 hover:shadow-md transition-all flex flex-col ${slideWidth(count)}`}>
       {/* Recomendaciones: sello dorado "RECOMENDADO" en la esquina, con el número adentro. */}
       <RecommendationMedal count={d.count} className="absolute top-3 right-3" />
-      <Link to={`/recomendado/${d.slug}`} className="flex items-start gap-3 flex-1 pr-10">
-        {/* Foto y, debajo, "Sin verificar". */}
-        <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-          <RecommendedAvatar photo={d.photo} name={d.full_name} className="w-20 h-28 sm:w-24 sm:h-32" shape="rounded-xl" />
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full whitespace-nowrap">
+      <Link to={`/recomendado/${d.slug}`} className="flex items-stretch sm:items-start gap-3 flex-1 pr-4 sm:pr-0">
+        {/* Foto con "Sin verificar" encima, abajo. En celular ocupa todo el lado izquierdo de la tarjeta, del borde
+            de arriba hasta la línea de los botones; desde tableta, un rectángulo con esquinas redondeadas. */}
+        <div className="relative flex-shrink-0 w-28 min-h-[10rem] sm:w-24 sm:h-32 sm:min-h-0 sm:rounded-xl sm:overflow-hidden">
+          <RecommendedAvatar photo={d.photo} name={d.full_name} className="absolute inset-0 w-full h-full" shape="rounded-none" />
+          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-white/90 shadow-sm px-1.5 py-0.5 rounded-full whitespace-nowrap">
             <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
           </span>
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-heading font-semibold text-foreground break-words leading-snug">{d.full_name}</p>
+        <div className="min-w-0 flex-1 py-3.5 sm:py-0">
+          <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
           <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, d.zone].filter(Boolean).join(" · ")}</p>
           {showNew && isNew(d) && (
             <span className="inline-flex items-center mt-1.5 text-[11px] font-semibold text-brand-augustaDark bg-brand-augustaLight px-2 py-0.5 rounded-full">Nuevo</span>
@@ -144,7 +145,7 @@ function DoctorCard({ d, count, showNew, onRecommend }) {
           )}
         </div>
       </Link>
-      <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border/50">
+      <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mx-0 sm:mb-0 sm:mt-3 pt-3 border-t border-border/50">
         <Link to={`/recomendado/${d.slug}`}
           className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
           Ver recomendaciones <ArrowRight className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" />
