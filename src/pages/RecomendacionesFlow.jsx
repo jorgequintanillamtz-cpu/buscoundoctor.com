@@ -335,6 +335,13 @@ export default function RecomendacionesFlow() {
     setBusy(false);
   };
 
+  // Botón del hero: abre "Escribir su nombre" (campos del doctor) y baja al formulario.
+  const openAddDoctor = () => {
+    trackEvent("rec_escribir_nombre");
+    setAdding(true);
+    requestAnimationFrame(() => document.getElementById("formulario")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+
   const reset = () => {
     setStep(1); setTarget(null); setTags([]); setMessage(""); setComment(""); setShowPrivate(false);
     // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
@@ -361,15 +368,16 @@ export default function RecomendacionesFlow() {
             <p className="hero-word font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">Monterrey · San Pedro Garza García</p>
             <h1 className="mt-4 font-heading font-medium tracking-tight text-[2.6rem] sm:text-[3.4rem] leading-[1.05] lg:whitespace-nowrap">
               {HERO_WORDS.map(({ w, accent }, i) => (
-                <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-emerald-200" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
+                <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-brand-navy" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
               ))}
             </h1>
             {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.doctors.length : null} />}
             <div className="flex flex-wrap justify-center gap-3 mt-7">
-              <a href="#formulario" className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
+              {/* Abre directo los campos del doctor (especialidad, doctor o doctora, nombre), sin pasar por el buscador. */}
+              <button type="button" onClick={openAddDoctor} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
                 Recomendar a mi doctor
-              </a>
-              <a href="#doctores" className="inline-flex items-center justify-center h-12 px-6 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-semibold hover:bg-white/20 transition-colors">
+              </button>
+              <a href="#doctores" className="hidden sm:inline-flex items-center justify-center h-12 px-6 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-semibold hover:bg-white/20 transition-colors">
                 Ver doctores
               </a>
             </div>
