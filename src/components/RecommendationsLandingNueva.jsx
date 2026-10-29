@@ -280,10 +280,12 @@ export default function RecommendationsLanding({ data, onRecommend }) {
           <h2 className="font-heading font-bold text-xl sm:text-2xl text-brand-navy text-center">Doctores recomendados</h2>
 
           {doctors.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 mt-5" role="group" aria-label="Elegir especialidad">
+            // En celular, una sola fila que se desliza de lado (llega hasta los bordes de la pantalla);
+            // desde tableta, varias filas centradas.
+            <div className="flex gap-2 mt-5 overflow-x-auto -mx-4 px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:pb-0 sm:flex-wrap sm:justify-center sm:overflow-visible" role="group" aria-label="Elegir especialidad">
               {groups.map((g) => (
                 <button key={g.key} type="button" onClick={() => setCat(g.key)} aria-pressed={current.key === g.key}
-                  className={`px-3.5 h-9 rounded-full border text-sm font-medium transition-colors ${current.key === g.key ? "border-brand-augusta bg-brand-augusta text-white" : "border-input bg-background text-foreground hover:border-brand-augusta/50"}`}>
+                  className={`shrink-0 whitespace-nowrap px-3.5 h-9 rounded-full border text-sm font-medium transition-colors ${current.key === g.key ? "border-brand-augusta bg-brand-augusta text-white" : "border-input bg-background text-foreground hover:border-brand-augusta/50"}`}>
                   {g.title}{g.items.length > 0 && <span className={current.key === g.key ? "text-white/80" : "text-muted-foreground"}> · {g.items.length}</span>}
                 </button>
               ))}
