@@ -121,7 +121,7 @@ function RecommendationMedal({ count, className = "" }) {
 function DoctorCard({ d, count, showNew, onRecommend }) {
   return (
     <div data-slug={d.slug} role="listitem"
-      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/70 bg-white/90 backdrop-blur-sm shadow-lg shadow-brand-navy/10 sm:px-4 sm:py-4 hover:border-white hover:shadow-xl transition-all flex flex-col ${slideWidth(count)}`}>
+      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 sm:px-4 sm:py-4 hover:bg-white/80 transition-all flex flex-col ${slideWidth(count)}`}>
       {/* Recomendaciones: sello dorado "RECOMENDADO" en la esquina, con el número adentro. */}
       <RecommendationMedal count={d.count} className="absolute top-3 right-3" />
       <Link to={`/recomendado/${d.slug}`} className="flex items-stretch sm:items-start gap-3 flex-1 pr-4 sm:pr-0">
@@ -147,14 +147,14 @@ function DoctorCard({ d, count, showNew, onRecommend }) {
           )}
         </div>
       </Link>
-      <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mx-0 sm:mb-0 sm:mt-3 pt-3 border-t border-border/50">
+      <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mx-0 sm:mb-0 sm:mt-3 pt-3 border-t border-white/80">
         <Link to={`/recomendado/${d.slug}`}
-          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
+          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
           Ver recomendaciones <ArrowRight className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" />
         </Link>
         {onRecommend && (
           <button type="button" onClick={() => onRecommend(d.slug)} aria-label={`Yo también lo recomiendo: ${d.full_name}`}
-            className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full border border-brand-blue bg-white text-brand-blue hover:bg-brand-blueLight text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
+            className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full border border-white bg-white/70 text-brand-navy hover:bg-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
             {/* Celular y tableta: etiqueta corta (y sin corazón en celular) para que los dos botones quepan en una fila; si no caben, el segundo baja */}
             <Heart className="w-3.5 h-3.5 hidden lg:block" aria-hidden="true" /> <span className="lg:hidden">Yo también</span><span className="hidden lg:inline">Yo también lo recomiendo</span>
           </button>
