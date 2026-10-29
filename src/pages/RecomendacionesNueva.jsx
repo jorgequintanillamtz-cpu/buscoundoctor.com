@@ -366,7 +366,7 @@ export default function RecomendacionesNueva() {
           </>
         )}
         <Link to="/" className="inline-block">
-          <img src="/logo.webp" alt="BuscoUnDoctor" className="h-8 w-auto brightness-0 invert" />
+          <img src="/logo.webp" alt="BuscoUnDoctor" className="h-12 sm:h-8 w-auto brightness-0 invert" />
         </Link>
         {step === 1 && (
           <div className="max-w-xl mx-auto mt-6">
