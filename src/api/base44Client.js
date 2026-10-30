@@ -17,6 +17,8 @@ const ENTITY_TABLE_MAP = {
   DoctorProduct: 'doctor_product',
   Guide: 'guide',
   Specialty: 'specialty',
+  // Servicios por especialidad para las recomendaciones (lista cerrada del equipo; anon solo ve los activos).
+  SpecialtyService: 'specialty_service',
   Zone: 'zone',
   Insurer: 'insurer',
   Language: 'language',
@@ -480,7 +482,7 @@ const FUNCTION_MAP = {
   adminMergeSuggestion: ({ source, target_suggestion, target_specialist } = {}) =>
     supabase.rpc('admin_merge_suggestion', { p_source: source, p_target_suggestion: target_suggestion || null, p_target_specialist: target_specialist || null }),
   adminCreateSpecialistFromSuggestion: ({ suggestion } = {}) => supabase.rpc('admin_create_specialist_from_suggestion', { p_suggestion: suggestion }),
-  submitRecommendation: ({ email, code, target, tags, message, comment, name, first_name, last_name, show_last_name, consent, marketing, consent_version } = {}) =>
+  submitRecommendation: ({ email, code, target, tags, message, comment, name, first_name, last_name, show_last_name, services, consent, marketing, consent_version } = {}) =>
     supabase.rpc('submit_recommendation', {
       p_email: email, p_code: code, p_target: target, p_tags: tags || [], p_message: message || null,
       p_consent: consent === true, p_marketing: marketing === true, p_consent_version: consent_version || 'v1',
@@ -489,6 +491,9 @@ const FUNCTION_MAP = {
       // Nombre y apellido (solo /recomendaciones-flow): se mandan solo si vienen, así las páginas que
       // piden únicamente el primer nombre siguen llamando a la función igual que antes.
       ...(first_name ? { p_first_name: first_name, p_last_name: last_name || null, p_show_last_name: show_last_name === true } : {}),
+      // Servicios (slugs de specialty_service, 0 a 3; solo /recomendaciones-flow): sin servicios no se manda la
+      // llave, así la llamada es idéntica a la de antes y las demás páginas no cambian.
+      ...(Array.isArray(services) && services.length ? { p_services: services.slice(0, 3) } : {}),
     }),
   markNotificationsRead: ({ ids } = {}) => supabase.rpc('mark_doctor_notifications_read', { p_ids: ids && ids.length ? ids : null }),
   getPublicConsultSummary: ({ id }) => supabase.rpc('get_public_consult_summary', { p_id: id }),
