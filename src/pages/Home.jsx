@@ -301,6 +301,11 @@ export default function Home() {
 
   useEffect(() => {
     document.title = "Directorio Médico Verificado en Monterrey y San Pedro Garza García | BuscoUnDoctor";
+    // Desde 2026-10-30 esta página vive en /home2 (el inicio es la página de recomendaciones): oculta para
+    // Google para que no compita con el inicio. Si vuelve a ser el inicio, quitar esto.
+    let robots = document.querySelector('meta[name="robots"]');
+    if (!robots) { robots = document.createElement('meta'); robots.setAttribute('name', 'robots'); document.head.appendChild(robots); }
+    robots.setAttribute('content', 'noindex, follow');
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
       metaDesc = document.createElement('meta');

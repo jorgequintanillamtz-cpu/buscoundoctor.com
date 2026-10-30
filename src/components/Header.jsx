@@ -28,7 +28,8 @@ export default function Header() {
   const [searchZone, setSearchZone] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const isHome = location.pathname === "/";
+  // El inicio con buscador vive en /home2 desde 2026-10-30 (en "/" está la página de recomendaciones, sin este menú).
+  const isHome = location.pathname === "/" || location.pathname === "/home2";
   // Buscador compacto del header: en el Home arranca oculto (el buscador
   // grande del hero ya cumple ese rol) y solo aparece cuando ese buscador
   // grande desaparece de la vista al hacer scroll hacia abajo. En el resto

@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, Heart, ChevronDown, Check } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
-import RecommendationsLanding, { useLandingData } from "@/components/RecommendationsLandingFlow";
+import RecommendationsLanding, { useLandingData, FAQ } from "@/components/RecommendationsLandingFlow";
+import { setOpenGraph, buildAbsoluteUrl } from "@/lib/seoMeta";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
@@ -15,7 +16,12 @@ import FlowNav from "@/components/FlowNav";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS_FLOW as MAX_TAGS } from "@/lib/recommendationTags";
 
-// TERCERA versión de prueba, en /recomendaciones-flow (2026-10-29, pedido de David): parte de la copia
+// INICIO DEL SITIO ("/") desde 2026-10-30 (Jorge y David: la estrategia ahora es juntar la mayor cantidad de
+// recomendaciones; el directorio de antes quedó en /home2, oculto para Google). Se indexa, con título,
+// descripción y datos estructurados (WebSite, Organization y FAQPage) propios: ver HOME_SEO abajo.
+// /recomendaciones-flow redirige aquí.
+//
+// (Historia) TERCERA versión de prueba, en /recomendaciones-flow (2026-10-29, pedido de David): parte de la copia
 // /recomendaciones-nueva con un estilo "flow" inspirado en oasishealth.app: un solo degradado que fluye de
 // sección en sección sin cortes (cada sección empieza en el color en que terminó la anterior; tokens
 // brand.flow* en tailwind.config.js), menú píldora de vidrio, títulos en peso medio y tarjetas translúcidas.
@@ -40,6 +46,13 @@ const REASONS = {
 // v2 (2026-10-29, solo esta página): el paciente da nombre y apellido y acepta que se publiquen con su
 // recomendación (o solo el nombre si marca "No mostrar mi apellido").
 const CONSENT_VERSION = "v2";
+
+// Lo que lee Google del inicio. index.html trae los mismos textos para WhatsApp/Facebook, que no ejecutan el sitio.
+const HOME_SEO = {
+  title: "Doctores recomendados por pacientes en Monterrey y San Pedro | BuscoUnDoctor",
+  description: "Descubre a los doctores que otros pacientes recomiendan en Monterrey y San Pedro Garza García, y recomienda al tuyo en un minuto. Gratis; cada recomendación se revisa antes de publicarse.",
+};
+const LOGO_URL = "https://iiklgyzyvbrtrxjfucoc.supabase.co/storage/v1/object/public/site-assets/email-logo.png";
 
 // Nombre y apellido(s) de quien recomienda: letras, hasta 4 palabras separadas por espacio o guion. Si lo
 // escribieron todo en minúsculas o todo en mayúsculas se pone con mayúscula inicial ("maría lópez" → "María
@@ -175,7 +188,7 @@ export default function RecomendacionesFlow() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Medición (Clarity): visita, y cada paso al que se llega (el 4 es "enviada").
-  useEffect(() => { trackTag("landing", "recomendaciones-flow"); }, []);
+  useEffect(() => { trackTag("landing", "inicio-recomendaciones"); }, []);
   useEffect(() => { trackEvent(step === 4 ? "rec_enviada" : `rec_paso_${step}`); }, [step]);
 
   // Botón flotante (solo celular): aparece al bajar por la landing y regresa al formulario.
@@ -196,13 +209,34 @@ export default function RecomendacionesFlow() {
   }, []);
 
   useEffect(() => {
-    document.title = "Recomienda a tu doctor | BuscoUnDoctor";
-    let robots = document.querySelector('meta[name="robots"]');
-    if (!robots) { robots = document.createElement("meta"); robots.setAttribute("name", "robots"); document.head.appendChild(robots); }
-    robots.setAttribute("content", "noindex, nofollow");
+    document.title = HOME_SEO.title;
+    const setMeta = (name, content) => {
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
+      el.setAttribute("content", content);
+    };
+    setMeta("robots", "index, follow");
+    setMeta("description", HOME_SEO.description);
+    // Layout aplica los OG por defecto en el mismo ciclo (después que esta página): se fijan los propios un tick después.
+    const og = setTimeout(() => setOpenGraph({ title: HOME_SEO.title, description: HOME_SEO.description, url: buildAbsoluteUrl("/") }), 0);
+    const home = buildAbsoluteUrl("/");
+    const ld = [
+      { "@context": "https://schema.org", "@type": "WebSite", name: "BuscoUnDoctor", url: home, inLanguage: "es-MX" },
+      { "@context": "https://schema.org", "@type": "Organization", name: "BuscoUnDoctor", url: home, logo: LOGO_URL,
+        areaServed: [{ "@type": "City", name: "Monterrey" }, { "@type": "City", name: "San Pedro Garza García" }] },
+      { "@context": "https://schema.org", "@type": "FAQPage",
+        mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+    ];
+    const scripts = ld.map((data, i) => {
+      const el = document.createElement("script");
+      el.type = "application/ld+json"; el.id = `home-jsonld-${i}`; el.text = JSON.stringify(data);
+      document.head.appendChild(el);
+      return el;
+    });
     base44.entities.Specialty.filter({ active: true }).then((l) => setSpecialties([...l].sort((a, b) => (a.display_name || a.name).localeCompare(b.display_name || b.name, "es")))).catch(() => {});
     base44.entities.Zone.filter({ active: true }).then(setZones).catch(() => {});
     base44.entities.Subspecialty.filter({ active: true }).then((l) => setSubspecialties(l)).catch(() => {});
+    return () => { clearTimeout(og); scripts.forEach((el) => el.remove()); };
   }, []);
 
   // Empezar cada paso desde arriba (en celular "Siguiente" queda abajo; ver CLAUDE.md §10).
