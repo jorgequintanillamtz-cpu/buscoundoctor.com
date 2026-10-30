@@ -14,6 +14,7 @@ import { specialtyLabel as aliasLabel } from "@/lib/specialtyAliases";
 import { trackEvent, trackTag } from "@/lib/trackEvent";
 import FlowNav from "@/components/FlowNav";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
+import RecommendationServicePicker from "@/components/RecommendationServicePicker";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS_FLOW as MAX_TAGS } from "@/lib/recommendationTags";
 
 // INICIO DEL SITIO ("/") desde 2026-10-30 (Jorge y David: la estrategia ahora es juntar la mayor cantidad de
@@ -127,6 +128,10 @@ export default function RecomendacionesFlow() {
   const [target, setTarget] = useState(null); // { mode: "existing", kind, id, full_name, specialty, zone } | { mode: "new", ... }
   const [tags, setTags] = useState([]);
   const [openSection, setOpenSection] = useState(null); // tema abierto en "¿Qué destacas?"
+  // "¿Para qué lo recomiendas?": slugs elegidos (0 a 3) y los servicios activos de la especialidad del doctor.
+  const [services, setServices] = useState([]);
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const servicesCache = useRef(new Map()); // id de especialidad -> promesa con sus servicios (una lectura por especialidad)
   const [message, setMessage] = useState("");
   // Nombre y apellido(s), obligatorios (2026-10-29, pedido de David: dan confianza y el equipo tiene el dato).
   // Se publican con la recomendación; con "No mostrar mi apellido" solo se ve el nombre (el equipo sí lo ve completo).
@@ -285,6 +290,29 @@ export default function RecomendacionesFlow() {
 
   const targetName = target?.full_name || "";
   const she = isFemale(targetName);
+
+  // Especialidad del doctor elegido en el catálogo: primero por name y, si no aparece, por display_name
+  // (el doctor trae su especialidad como texto). Sin especialidad reconocida no hay servicios que mostrar.
+  const targetSpecialty = target
+    ? specialties.find((s) => s.name === target.specialty) || specialties.find((s) => s.display_name === target.specialty) || null
+    : null;
+  const targetSpecialtyId = targetSpecialty?.id || null;
+  useEffect(() => {
+    setServices([]);
+    setServiceOptions([]);
+    if (!targetSpecialtyId) return undefined;
+    let alive = true;
+    let pending = servicesCache.current.get(targetSpecialtyId);
+    if (!pending) {
+      // active: true aunque anon solo vea los activos: un admin con sesión vería también los inactivos.
+      pending = base44.entities.SpecialtyService.filter({ specialty_id: targetSpecialtyId, active: true }, "display_order")
+        .then((list) => list.map((x) => ({ slug: x.slug, name: x.name })))
+        .catch(() => { servicesCache.current.delete(targetSpecialtyId); return []; }); // si falla, sin bloque
+      servicesCache.current.set(targetSpecialtyId, pending);
+    }
+    pending.then((list) => { if (alive) setServiceOptions(list); });
+    return () => { alive = false; };
+  }, [targetSpecialtyId]);
   const splitTitle = (raw) => {
     const m = String(raw || "").trim().match(/^(dra|doctora|dr|doctor)\.?\s+/i);
     if (!m) return { title: "", name: String(raw || "").trim() };
@@ -366,7 +394,7 @@ export default function RecomendacionesFlow() {
       : target.kind === "suggestion" ? { suggestion_id: target.id } : { specialist_id: target.id };
     try {
       const { data } = await base44.functions.invoke("submitRecommendation", {
-        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null,
+        email: email.trim(), code, target: dest, tags, message: message.trim() || null, comment: commentClean || null, services,
         first_name: firstNameClean, last_name: lastNameClean, show_last_name: !hideLastName,
         consent: true, marketing, consent_version: CONSENT_VERSION,
       });
@@ -393,7 +421,7 @@ export default function RecomendacionesFlow() {
   };
 
   const reset = () => {
-    setStep(1); setTarget(null); setTags([]); setOpenSection(null); setMessage(""); setComment(""); setShowPrivate(false);
+    setStep(1); setTarget(null); setTags([]); setServices([]); setOpenSection(null); setMessage(""); setComment(""); setShowPrivate(false);
     // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
     if (!verified) { setFirstName(""); setLastName(""); setHideLastName(false); setCode(""); setCodeSent(false); setConsent(false); setMarketing(false); }
     setQuery(""); setResults(null); setAdding(false);
@@ -655,6 +683,9 @@ export default function RecomendacionesFlow() {
               <div className="rounded-2xl border-2 border-brand-flowSlate bg-brand-flowMist text-brand-flowDeep text-center font-heading font-semibold text-lg py-4 flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-5 h-5" /> Sí, {she ? "la" : "lo"} recomiendo
               </div>
+
+              <RecommendationServicePicker key={`${targetSpecialtyId}-${target?.id || target?.full_name}`}
+                options={serviceOptions} value={services} onChange={setServices} she={she} />
 
               <div className="flex items-baseline justify-between gap-3 mt-5">
                 <p className="text-sm font-medium text-foreground">¿Qué destacas? <span className="text-muted-foreground font-normal">(opcional)</span></p>
