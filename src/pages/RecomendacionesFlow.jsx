@@ -71,13 +71,15 @@ const isFemale = (name) => /^\s*(dra|doctora)\b/i.test(name || "");
 
 // Título del hero: cada palabra entra HERO_WORD_STEP ms después de la anterior y tarda HERO_WORD_MS
 // (index.css: hero-word); luego las burbujas de ciudades. HERO_TITLE_MS = cuándo terminó de entrar la última palabra.
-const HERO_WORDS = [{ w: "Doctores" }, { w: "Recomendados", accent: true }];
+// Título del hero (2026-10-30, pedido de David; antes "Doctores Recomendados").
+const HERO_WORDS = [{ w: "Recomendaciones" }, { w: "Compartidas", accent: true }];
 const HERO_WORD_STEP = 140;
 const HERO_WORD_MS = 550;
 const HERO_TITLE_MS = (HERO_WORDS.length - 1) * HERO_WORD_STEP + HERO_WORD_MS;
 
 // Contador del hero: aparece desde el principio en ceros y, cuando termina de entrar el título (HERO_TITLE_MS)
-// y ya llegó el dato, sube hasta el número de doctores de la lista (`doctors` de list_recommendations_landing)
+// y ya llegó el dato, sube hasta el total de recomendaciones aprobadas (`total` de list_recommendations_landing;
+// antes contaba doctores)
 // en ~1.5 s. `total` es null mientras carga. Con "reducir movimiento", muestra el número directo.
 function RecommendationCounter({ total }) {
   const [n, setN] = useState(0);
@@ -414,12 +416,12 @@ export default function RecomendacionesFlow() {
             {/* Texto técnico arriba (mayúsculas monoespaciadas y separadas), título en peso medio que entra palabra
                 por palabra (index.css: hero-word), contador de vidrio (en ceros hasta que termina el título) y botones. */}
             <p className="hero-word font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">Monterrey · San Pedro Garza García</p>
-            <h1 className="mt-4 font-heading font-medium tracking-tight text-[2.6rem] sm:text-[3.4rem] leading-[1.05] lg:whitespace-nowrap">
+            <h1 className="mt-4 font-heading font-medium tracking-tight text-[clamp(1.85rem,9.5vw,2.6rem)] sm:text-[3.4rem] leading-[1.05] lg:whitespace-nowrap">
               {HERO_WORDS.map(({ w, accent }, i) => (
                 <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-emerald-200" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
               ))}
             </h1>
-            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.doctors.length : null} />}
+            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.total : null} />}
             <div className="flex flex-wrap justify-center gap-3 mt-7">
               {/* Abre directo los campos del doctor (especialidad, doctor o doctora, nombre), sin pasar por el buscador. */}
               <button type="button" onClick={openAddDoctor} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
