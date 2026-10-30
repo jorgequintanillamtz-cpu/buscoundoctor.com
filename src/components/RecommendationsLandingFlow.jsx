@@ -61,7 +61,8 @@ export function useLandingData() {
   return data;
 }
 
-const FAQ = [
+// También se publica como datos estructurados (FAQPage) en el inicio: RecomendacionesFlow.jsx.
+export const FAQ = [
   { q: "¿Quién ve mi nombre?", a: "Tu nombre y apellido aparecen junto a tu recomendación, para dar confianza. Si prefieres, marca \"No mostrar mi apellido\" y solo se verá tu nombre. Tu correo nunca se muestra." },
   { q: "¿El doctor se entera de que fui yo?", a: "El doctor ve tu recomendación con el mismo nombre que ven todos (sin apellido si así lo elegiste), y también tu mensaje privado si le dejaste uno. Nunca ve tu correo." },
   { q: "¿Por qué piden mi correo?", a: "Para confirmar que eres una persona real y evitar recomendaciones repetidas o falsas. No se muestra públicamente." },

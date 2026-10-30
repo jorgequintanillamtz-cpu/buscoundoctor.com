@@ -44,7 +44,7 @@ const mapsUrl = (doc) => {
 
 const BARS_FROM = 3; // las etiquetas se dibujan como barras desde 3 recomendaciones (con menos, etiquetas sueltas)
 const INTEREST_BANNER_FROM = 3; // "N pacientes pidieron que les avisen" solo desde 3
-const LANDING = "/recomendaciones-flow";
+const LANDING = "/"; // la landing de recomendaciones es el inicio del sitio desde 2026-10-30
 
 // /recomendado-flow/:slug -- la página de un doctor recomendado (la misma información que /recomendado/:slug,
 // RecomendadoPerfil.jsx) con el estilo "flow" de /recomendaciones-flow: un solo degradado continuo, menú píldora

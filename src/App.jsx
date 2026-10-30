@@ -16,6 +16,11 @@ import DoctorSupportWhatsApp from './components/DoctorSupportWhatsApp';
 import LoadingLogo from "@/components/LoadingLogo";
 import TiendasPanelGuard from './components/TiendasPanelGuard';
 
+function RedirectToHome() {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: "/", search, hash }} replace />;
+}
+
 // Cada página se carga en su propio bloque de código, bajo demanda, en vez de
 // venir toda junta en un solo archivo de ~700KB que cualquier visitante
 // descargaba completo aunque solo quisiera leer un artículo del blog. Esto
@@ -122,14 +127,18 @@ const AuthenticatedApp = () => {
         <Route path="/recomendaciones" element={<Recomendaciones />} />
         {/* Copia de prueba para rediseñar /recomendaciones (noindex, sin enlaces). */}
         <Route path="/recomendaciones-nueva" element={<RecomendacionesNueva />} />
-        {/* Tercera versión de prueba, estilo "flow" (un solo degradado continuo, vidrio). noindex, sin enlaces. */}
-        <Route path="/recomendaciones-flow" element={<RecomendacionesFlow />} />
-        {/* Página del doctor con el estilo "flow"; solo la enlazan las tarjetas de /recomendaciones-flow (noindex). */}
+        {/* INICIO del sitio desde 2026-10-30 (decisión de Jorge y David: concentrarse en juntar recomendaciones).
+            Es la página de recomendaciones estilo "flow"; el directorio de antes quedó en /home2. */}
+        <Route path="/" element={<RecomendacionesFlow />} />
+        {/* Dirección anterior de esta misma página: redirige al inicio conservando ?doctor= y el #ancla. */}
+        <Route path="/recomendaciones-flow" element={<RedirectToHome />} />
+        {/* Página del doctor con el estilo "flow"; la enlazan las tarjetas del inicio (noindex). */}
         <Route path="/recomendado-flow/:slug" element={<RecomendadoFlow />} />
       </Route>
 
       <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
+        {/* Inicio anterior (directorio con buscador), oculto para Google: ver Home.jsx. */}
+        <Route path="/home2" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
         <Route path="/recomendados" element={<RecomendadosLista />} />
