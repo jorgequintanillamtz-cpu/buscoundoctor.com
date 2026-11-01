@@ -67,7 +67,7 @@ const tidyName = (s) => {
   return t.toLowerCase().split(" ").map((w, i) => (i > 0 && NAME_PARTICLES.has(w) ? w
     : w.replace(/(^|-)(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase()))).join(" ");
 };
-const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
+const PAGE_URL = "https://buscoundoctor.com/"; // el inicio (antes /recomendaciones, que ahora redirige aquí)
 const isFemale = (name) => /^\s*(dra|doctora)\b/i.test(name || "");
 
 // Título del hero: cada palabra entra HERO_WORD_STEP ms después de la anterior y tarda HERO_WORD_MS

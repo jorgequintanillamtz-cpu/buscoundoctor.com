@@ -159,7 +159,7 @@ export default function RecomendadosLista() {
       </Link>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mt-3 pt-3 border-t border-border/50">
         <Link to={`/recomendado/${d.slug}`} className="text-sm font-medium text-brand-augusta hover:underline inline-flex items-center gap-1">Ver recomendaciones <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></Link>
-        <Link to={`/recomendaciones?doctor=${d.slug}`}
+        <Link to={`/?doctor=${d.slug}`}
           className="inline-flex items-center justify-center gap-1.5 h-10 sm:h-9 px-3.5 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white text-sm font-semibold transition-colors w-full sm:w-auto">
           <Heart className="w-3.5 h-3.5 fill-current" aria-hidden="true" /> Yo también lo recomiendo
         </Link>
@@ -180,7 +180,7 @@ export default function RecomendadosLista() {
           </p>
           <div className="flex flex-wrap gap-2.5 mt-4">
             <Button asChild className="rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augustaDark text-white">
-              <Link to="/recomendaciones"><PenLine className="w-4 h-4" /> Recomendar a un doctor</Link>
+              <Link to="/"><PenLine className="w-4 h-4" /> Recomendar a un doctor</Link>
             </Button>
             {list.length > 0 && (
               <Button asChild variant="outline" className="rounded-xl min-h-[44px] gap-2">
@@ -262,7 +262,7 @@ export default function RecomendadosLista() {
                   <p className="font-heading font-semibold text-foreground">¿Conoces a otro doctor de {specialtyLabel(selected.specialty)}?</p>
                   <p className="text-sm text-muted-foreground mt-1">Sé el primero en recomendarlo: toma menos de un minuto.</p>
                   <Button asChild className="mt-3 rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augustaDark text-white">
-                    <Link to="/recomendaciones"><PenLine className="w-4 h-4" /> Recomendar a un doctor</Link>
+                    <Link to="/"><PenLine className="w-4 h-4" /> Recomendar a un doctor</Link>
                   </Button>
                 </div>
               </section>

@@ -72,7 +72,7 @@ export default function RecommendedDoctorsSection() {
           </Link>
           <p className="text-xs text-muted-foreground">
             {list.length} {list.length === 1 ? "doctor" : "doctores"} en {specialties} {specialties === 1 ? "especialidad" : "especialidades"} ·{" "}
-            <Link to="/recomendaciones" className="underline hover:text-foreground">Recomienda a tu doctor</Link>
+            <Link to="/" className="underline hover:text-foreground">Recomienda a tu doctor</Link>
           </p>
         </div>
       </div>

@@ -110,7 +110,7 @@ export default function ReviewsSection({ specialistId, specialist }) {
             </button>
           )}
           <Link
-            to={`/recomendaciones?doctor=${specialist?.slug}`}
+            to={`/?doctor=${specialist?.slug}`}
             className="text-sm font-medium text-foreground border border-border bg-card hover:bg-muted px-4 py-1.5 rounded-full transition-colors"
           >
             Recomendar
