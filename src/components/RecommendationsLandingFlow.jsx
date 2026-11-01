@@ -22,7 +22,7 @@ import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 // Los datos salen de una sola consulta (`list_recommendations_landing`); si falla, solo se ocultan las partes
 // con datos. Reglas: nada de estrellas ni "mejores"; los doctores van como "Sin verificar"; nunca el correo (el apellido, solo si quien recomienda no lo ocultó).
 
-const PAGE_URL = "https://buscoundoctor.com/recomendaciones";
+const PAGE_URL = "https://buscoundoctor.com/"; // el inicio (antes /recomendaciones, que ahora redirige aquí)
 // Burbujas de categorías principales (mismo orden que las 10 más comunes de topSpecialties.js). Al tocar una,
 // abajo sale el carrusel de esa categoría; si no tiene doctores, una tarjeta para recomendar al primero.
 // `match` compara contra la especialidad sin acentos ni mayúsculas; un doctor entra en la PRIMERA que coincida.

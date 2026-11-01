@@ -576,7 +576,7 @@ export default function AdminRecomendaciones() {
         <div className="min-w-0">
           <h1 className="font-heading font-bold text-2xl text-foreground flex items-center gap-2"><HeartHandshake className="w-6 h-6 text-brand-blue" /> Recomendaciones de pacientes</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Lo que los pacientes recomiendan desde <Link to="/recomendaciones" target="_blank" className="underline">/recomendaciones</Link>. Nada se ve en el sitio hasta que lo apruebas.
+            Lo que los pacientes recomiendan desde <Link to="/" target="_blank" className="underline">el inicio del sitio</Link>. Nada se ve en el sitio hasta que lo apruebas.
           </p>
         </div>
         {commentsPublic !== null && (

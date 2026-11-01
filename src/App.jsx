@@ -78,8 +78,6 @@ const DoctoresRegistro = lazy(() => import('./pages/DoctoresRegistro'));
 const LandingRegistroGratis = lazy(() => import('./pages/LandingRegistroGratis'));
 const BajaCorreos = lazy(() => import('./pages/BajaCorreos'));
 const ReclamarPerfil = lazy(() => import('./pages/ReclamarPerfil'));
-const Recomendaciones = lazy(() => import('./pages/Recomendaciones'));
-const RecomendacionesNueva = lazy(() => import('./pages/RecomendacionesNueva'));
 const RecomendacionesFlow = lazy(() => import('./pages/RecomendacionesFlow'));
 const RecomendadoFlow = lazy(() => import('./pages/RecomendadoFlow'));
 const RecomendadosLista = lazy(() => import('./pages/RecomendadosLista'));
@@ -124,9 +122,11 @@ const AuthenticatedApp = () => {
         <Route path="/registro-medico" element={<RegistroMedico />} />
         <Route path="/baja-correos" element={<BajaCorreos />} />
         <Route path="/reclamar/:token" element={<ReclamarPerfil />} />
-        <Route path="/recomendaciones" element={<Recomendaciones />} />
-        {/* Copia de prueba para rediseñar /recomendaciones (noindex, sin enlaces). */}
-        <Route path="/recomendaciones-nueva" element={<RecomendacionesNueva />} />
+        {/* Versiones anteriores de la página de recomendaciones (2026-11-01): redirigen al inicio conservando
+            ?doctor= y el #ancla, igual que /recomendaciones-flow. Sus archivos (Recomendaciones.jsx,
+            RecomendacionesNueva.jsx y sus landings) se quedan en el repo sin ruta, por ahora. */}
+        <Route path="/recomendaciones" element={<RedirectToHome />} />
+        <Route path="/recomendaciones-nueva" element={<RedirectToHome />} />
         {/* INICIO del sitio desde 2026-10-30 (decisión de Jorge y David: concentrarse en juntar recomendaciones).
             Es la página de recomendaciones estilo "flow"; el directorio de antes quedó en /home2. */}
         <Route path="/" element={<RecomendacionesFlow />} />

@@ -206,7 +206,7 @@ export default function RecomendadoPerfil() {
 
           <div className="mt-5 flex flex-col sm:flex-row gap-2.5">
             <Button asChild className="rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augusta/90 text-white">
-              <Link to={`/recomendaciones?doctor=${doc.slug}`}><PenLine className="w-4 h-4" /> Yo también lo recomiendo</Link>
+              <Link to={`/?doctor=${doc.slug}`}><PenLine className="w-4 h-4" /> Yo también lo recomiendo</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-xl min-h-[44px] gap-2">
               <a href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer"><Share2 className="w-4 h-4" /> Compartir</a>
@@ -269,7 +269,7 @@ export default function RecomendadoPerfil() {
       {/* Botón fijo del celular: baja con la persona */}
       {showFab && (
         <div className="sm:hidden fixed bottom-4 inset-x-4 z-40">
-          <Link to={`/recomendaciones?doctor=${doc.slug}`}
+          <Link to={`/?doctor=${doc.slug}`}
             className="w-full h-12 rounded-full bg-brand-augusta hover:bg-brand-augustaDark text-white font-semibold shadow-lg flex items-center justify-center gap-2 transition-colors">
             <Heart className="w-4 h-4 fill-current" aria-hidden="true" /> Yo también lo recomiendo
           </Link>
