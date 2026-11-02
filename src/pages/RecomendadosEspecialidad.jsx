@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
-import { ArrowRight, Info } from "lucide-react";
+import { ArrowRight, ChevronDown, Info } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
@@ -18,14 +18,13 @@ import { utmQuery } from "@/lib/utm";
 // Datos: una sola llamada a get_specialty_recommendations_landing (base de datos), que ya cuenta solo a los doctores
 // visibles, ordena por redes distintas y excluye los servicios con seo_restricted.
 // Reglas: "Recomendado por N personas para…", nunca "mejor", "ofrece" ni "#1"; los servicios solo como conteos, nunca
-// junto al nombre de quien recomienda; contador desde 1 recomendación (antes 3; con 1 o 2 decía "Sé el primero…" aunque
-// ya hubiera doctores, pedido de David 2026-11-02); aviso de que son opiniones de pacientes.
+// junto al nombre de quien recomienda; contador SIEMPRE, también en 0 (antes desde 3; con 1 o 2 decía "Sé el primero…"
+// aunque ya hubiera doctores; pedido de David 2026-11-02); aviso de que son opiniones de pacientes.
 // Sin enlaces desde el resto del sitio por ahora (bloque 5, pendiente de aprobar).
 
 // Indexación: por decisión de David (2026-11-01) la página va SIEMPRE con noindex, nofollow, aunque la base diga
 // `indexable` (3+ doctores y 5+ recomendaciones). Para dejar que Google indexe las que cumplan, cámbialo a true.
 const ALLOW_INDEXING = false;
-const COUNTER_FROM = 1; // sin recomendaciones, en lugar del contador: "Sé el primero en recomendar a tu …"
 
 const HERO_BG = "bg-[linear-gradient(to_bottom,theme(colors.brand.flowHeroTop)_0%,theme(colors.brand.flowHeroTop)_12%,theme(colors.brand.flowHeroMid)_45%,theme(colors.brand.flowHeroLow)_75%,theme(colors.brand.flowMist)_100%)]";
 
@@ -105,21 +104,15 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
     <div className="min-h-screen bg-brand-flowMist" style={{ "--ring": "220 26% 39%" }}>
       <FlowNav base="/" ctaTo={recommendTo} />
 
-      {/* 1. Portada: título, contador de recomendaciones de la especialidad (desde 1) y botón para recomendar. */}
+      {/* 1. Portada: título, contador de recomendaciones de la especialidad (también en 0) y botón para recomendar. */}
       <section className={`${HERO_BG} pt-24 sm:pt-28 pb-14 text-center text-white`}>
         <div className="max-w-3xl mx-auto px-4">
           <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">Monterrey · San Pedro Garza García</p>
           <h1 className="mt-4 font-heading font-medium tracking-tight text-[clamp(1.85rem,9vw,2.6rem)] sm:text-[3.4rem] leading-[1.05]">
             {tpl.plural} <span className="text-emerald-200">recomendados</span>
           </h1>
-          {total >= COUNTER_FROM ? (
-            <>
-              <RecommendationCounter total={total} srLabel={`recomendaciones de ${tpl.lower}`} />
-              <p className="mt-2 text-sm text-white/85" aria-hidden="true">recomendaciones de {tpl.lower}</p>
-            </>
-          ) : (
-            <p className="mt-5 text-lg text-white/90">Sé el primero en recomendar a {tpl.your}</p>
-          )}
+          <RecommendationCounter total={total} srLabel={`recomendaciones de ${tpl.lower}`} />
+          <p className="mt-2 text-sm text-white/85" aria-hidden="true">recomendaciones de {tpl.lower}</p>
           <Link to={recommendTo}
             className="mt-7 inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
             Recomendar a {tpl.my} <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -175,19 +168,24 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
           </h2>
           <div className="mt-5 flex flex-col sm:flex-row gap-2">
             <label htmlFor={servicioId} className="sr-only">Elige para qué lo recomiendas</label>
-            <select id={servicioId} value={servicio} onChange={(e) => setServicio(e.target.value)}
-              className="flex-1 min-h-12 px-4 rounded-full border border-white/80 bg-white/80 text-sm font-medium text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-navy">
-              <option value="">Elige para qué…</option>
-              {withoutDoctors.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
-            </select>
+            {/* Misma altura (h-12) y mismo texto (14 px, seminegritas) que el botón "Recomendar"; appearance-none con su propia
+                flecha para que Safari del iPhone no la dibuje más baja o más alta que el botón. */}
+            <div className="relative flex-1">
+              <select id={servicioId} value={servicio} onChange={(e) => setServicio(e.target.value)}
+                className="appearance-none w-full h-12 pl-5 pr-11 rounded-full border border-white/80 bg-white/80 text-sm font-semibold text-brand-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-navy">
+                <option value="">Elige para qué…</option>
+                {withoutDoctors.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-navy" aria-hidden="true" />
+            </div>
             {servicio ? (
               <Link to={`/?especialidad=${tpl.key}&servicio=${encodeURIComponent(servicio)}${utm ? `&${utm}` : ""}`}
-                className="inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-full bg-brand-navy text-white text-sm font-semibold hover:bg-brand-navy/90 transition-colors">
+                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-brand-navy text-white text-sm font-semibold hover:bg-brand-navy/90 transition-colors">
                 Recomendar <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             ) : (
               <button type="button" disabled aria-disabled="true"
-                className="inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-full bg-brand-navy/40 text-white text-sm font-semibold cursor-not-allowed">
+                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-brand-navy/40 text-white text-sm font-semibold cursor-not-allowed">
                 Recomendar <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
             )}
