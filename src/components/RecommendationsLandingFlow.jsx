@@ -152,7 +152,7 @@ function SpecialtyCards({ doctors }) {
   );
 }
 
-export default function RecommendationsLanding({ data, onRecommend }) {
+export default function RecommendationsLanding({ data }) {
   const doctors = useMemo(() => (data ? data.doctors : []), [data]);
   // Doctores de cada categoría (aunque esté vacía), para los carruseles fijos.
   const groups = useMemo(() => {
@@ -164,7 +164,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
 
   const renderSlider = (items, label) => (
     <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed>
-      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} onRecommend={onRecommend} />)}
+      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} />)}
     </CardSlider>
   );
 
@@ -188,7 +188,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
   return (
     <div>
       {/* Doctores recomendados */}
-      <section id="doctores" className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky py-12 sm:py-16 scroll-mt-20">
+      <section id="doctores" className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky pt-8 pb-12 sm:py-16 scroll-mt-20">
         {/* Más ancha que el resto (1400 px) para que los carruseles lleguen más lejos en computadora. */}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
           {/* Primero los carruseles por especialidad y al final el de todos los doctores (2026-11-02, pedido de David).
