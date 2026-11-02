@@ -466,6 +466,7 @@ const FUNCTION_MAP = {
   adminRecommendedInterest: () => supabase.rpc('admin_recommended_interest'),
   adminSetSuggestionSubspecialty: ({ id, subspecialty } = {}) => supabase.rpc('admin_set_suggestion_subspecialty', { p_id: id, p_subspecialty: subspecialty || null }),
   listRecommendationsLanding: () => supabase.rpc('list_recommendations_landing'),
+  getSpecialtyRecommendationsLanding: ({ especialidad } = {}) => supabase.rpc('get_specialty_recommendations_landing', { p_especialidad: especialidad }),
   submitRecommendationReport: ({ slug, comment_id, kind, reason, details, email } = {}) =>
     supabase.rpc('submit_recommendation_report', { p_slug: slug, p_comment_id: comment_id || null, p_reason: reason, p_details: details || null, p_email: email || null, p_kind: kind || null }),
   adminReviewReport: ({ id, action } = {}) => supabase.rpc('admin_review_report', { p_id: id, p_action: action }),
