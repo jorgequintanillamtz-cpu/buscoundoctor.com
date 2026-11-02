@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useParams } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import Layout from './components/Layout';
@@ -15,10 +15,33 @@ import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
 import DoctorSupportWhatsApp from './components/DoctorSupportWhatsApp';
 import LoadingLogo from "@/components/LoadingLogo";
 import TiendasPanelGuard from './components/TiendasPanelGuard';
+import { SPECIALTY_LANDINGS, findSpecialtyLanding } from '@/lib/specialtyLandings';
 
 function RedirectToHome() {
   const { search, hash } = useLocation();
   return <Navigate to={{ pathname: "/", search, hash }} replace />;
+}
+
+// Direcciones viejas de las landings por especialidad (2026-11-02): /recomendados/<llave o slug> -> /<llave>,
+// conservando parámetros (UTM, ?doctor=) y #ancla. Una especialidad que no es de las 10: la "no encontrada" de siempre.
+function RedirectOldSpecialty() {
+  const { especialidad } = useParams();
+  const { search, hash } = useLocation();
+  const tpl = findSpecialtyLanding(especialidad);
+  if (!tpl) return <RecomendadosEspecialidad especialidad={especialidad} />;
+  return <Navigate to={{ pathname: `/${tpl.key}`, search, hash }} replace />;
+}
+
+// /recomendados (la lista general) ya no se usa (2026-11-02): ?especialidad=esp-<x> de las 10 -> /<llave>; lo demás
+// -> "/". Se conservan los otros parámetros (UTM, ?doctor=) y el #ancla.
+function RedirectOldList() {
+  const { search, hash } = useLocation();
+  const params = new URLSearchParams(search);
+  const esp = params.get("especialidad");
+  params.delete("especialidad");
+  const tpl = esp ? findSpecialtyLanding(esp.replace(/^esp-/, "")) : null;
+  const rest = params.toString();
+  return <Navigate to={{ pathname: tpl ? `/${tpl.key}` : "/", search: rest ? `?${rest}` : "", hash }} replace />;
 }
 
 // Cada página se carga en su propio bloque de código, bajo demanda, en vez de
@@ -81,7 +104,6 @@ const ReclamarPerfil = lazy(() => import('./pages/ReclamarPerfil'));
 const RecomendacionesFlow = lazy(() => import('./pages/RecomendacionesFlow'));
 const RecomendadosEspecialidad = lazy(() => import('./pages/RecomendadosEspecialidad'));
 const RecomendadoFlow = lazy(() => import('./pages/RecomendadoFlow'));
-const RecomendadosLista = lazy(() => import('./pages/RecomendadosLista'));
 const RecomendadoPerfil = lazy(() => import('./pages/RecomendadoPerfil'));
 const StorefrontPublic = lazy(() => import('./pages/StorefrontPublic'));
 const StorefrontProductDetail = lazy(() => import('./pages/StorefrontProductDetail'));
@@ -135,9 +157,13 @@ const AuthenticatedApp = () => {
         <Route path="/recomendaciones-flow" element={<RedirectToHome />} />
         {/* Página del doctor con el estilo "flow"; la enlazan las tarjetas del inicio (noindex). */}
         <Route path="/recomendado-flow/:slug" element={<RecomendadoFlow />} />
-        {/* Landing por especialidad (2026-11-01): /recomendados/dentista (profession_slug; acepta specialty.slug y
-            redirige). Siempre noindex y sin enlaces desde el sitio por ahora. Gana a /:professionSlug/:citySlug. */}
-        <Route path="/recomendados/:especialidad" element={<RecomendadosEspecialidad />} />
+        {/* Landings por especialidad en la raíz (2026-11-02, para carruseles de TikTok): /dentista, /pediatra…
+            Lista CERRADA de 10 rutas fijas (llaves de SPECIALTY_LANDINGS = profession_slug); cualquier otra palabra o
+            error de escritura sigue cayendo en el 404. No chocan con /:professionSlug/:citySlug (dos segmentos). */}
+        {Object.keys(SPECIALTY_LANDINGS).map((key) => (
+          <Route key={key} path={`/${key}`} element={<RecomendadosEspecialidad especialidad={key} />} />
+        ))}
+        <Route path="/recomendados/:especialidad" element={<RedirectOldSpecialty />} />
       </Route>
 
       <Route element={<Layout />}>
@@ -145,7 +171,8 @@ const AuthenticatedApp = () => {
         <Route path="/home2" element={<Home />} />
         <Route path="/especialistas" element={<SpecialistList />} />
         <Route path="/especialista/:slug" element={<SpecialistProfile />} />
-        <Route path="/recomendados" element={<RecomendadosLista />} />
+        {/* La lista general ya no se usa: redirige (RecomendadosLista.jsx se queda en el repo sin ruta). */}
+        <Route path="/recomendados" element={<RedirectOldList />} />
         <Route path="/recomendado/:slug" element={<RecomendadoPerfil />} />
         <Route path="/hospital/:slug" element={<HospitalPage />} />
         <Route path="/hospitales" element={<HospitalsPage />} />

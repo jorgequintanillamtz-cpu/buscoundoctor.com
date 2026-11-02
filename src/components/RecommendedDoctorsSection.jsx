@@ -64,7 +64,7 @@ export default function RecommendedDoctorsSection() {
 
         <div className="flex flex-col items-center gap-3 mt-8">
           <Link
-            to="/recomendados"
+            to="/#doctores"
             className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue/90 text-white font-heading font-semibold text-sm px-6 py-3 rounded-full shadow-sm transition-colors"
           >
             Ver todos los doctores recomendados

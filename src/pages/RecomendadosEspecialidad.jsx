@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowRight, Info } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import LoadingLogo from "@/components/LoadingLogo";
@@ -12,7 +12,7 @@ import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { setCanonical } from "@/lib/seoMeta";
 import { findSpecialtyLanding } from "@/lib/specialtyLandings";
 
-// /recomendados/:especialidad -- landing por especialidad para mandar gente a recomendar a un doctor de ESA
+// /<especialidad> (antes /recomendados/:especialidad) -- landing por especialidad para mandar gente a recomendar a un doctor de ESA
 // especialidad (2026-11-01, pedido de David). Plantilla de las 10 especialidades en src/lib/specialtyLandings.js.
 // Datos: una sola llamada a get_specialty_recommendations_landing (base de datos), que ya cuenta solo a los doctores
 // visibles, ordena por redes distintas y excluye los servicios con seo_restricted.
@@ -36,8 +36,14 @@ const people = (n) => `${n} ${n === 1 ? "persona" : "personas"}`;
 // "Limpieza dental" -> "limpieza dental" dentro de una frase (sin tocar siglas como "VPH").
 const lowerFirst = (s) => (s && s.length > 1 && s[1] === s[1].toLowerCase() ? s[0].toLowerCase() + s.slice(1) : s || "");
 
-export default function RecomendadosEspecialidad() {
-  const { especialidad } = useParams();
+// `especialidad` llega como dato desde las 10 rutas fijas /<llave> (App.jsx); si no, de /recomendados/:especialidad.
+export default function RecomendadosEspecialidad({ especialidad: fixed }) {
+  const { especialidad: fromUrl } = useParams();
+  const especialidad = fixed || fromUrl;
+  // Los utm_* con que llegan (p. ej. desde TikTok) viajan en "Recomendar a mi …" y "Recomienda para X" hacia el
+  // formulario del inicio, para que la medición siga viendo de dónde vino la recomendación (2026-11-02).
+  const { search } = useLocation();
+  const utm = new URLSearchParams([...new URLSearchParams(search)].filter(([k]) => k.toLowerCase().startsWith("utm_"))).toString();
   const navigate = useNavigate();
   const tpl = findSpecialtyLanding(especialidad);
   const isCanonical = !!tpl && especialidad === tpl.key; // con specialty.slug (cardiologia) se redirige a la llave
@@ -63,10 +69,10 @@ export default function RecomendadosEspecialidad() {
     if (!tpl || state === "notfound") { document.title = "Especialidad no encontrada | BuscoUnDoctor"; return; }
     document.title = `${tpl.plural} recomendados por pacientes en Monterrey | BuscoUnDoctor`;
     setMeta("description", `${tpl.plural} de Monterrey y San Pedro Garza García recomendados por sus pacientes. Recomienda a ${tpl.your} en un minuto.`);
-    setCanonical(`/recomendados/${tpl.key}`);
+    setCanonical(`/${tpl.key}`);
   }, [tpl, state, data]);
 
-  if (tpl && !isCanonical) return <Navigate to={`/recomendados/${tpl.key}`} replace />;
+  if (tpl && !isCanonical) return <Navigate to={`/${tpl.key}`} replace />;
   if (state === "loading") return <div className="min-h-screen bg-brand-flowMist flex items-center justify-center"><LoadingLogo /></div>;
   if (state === "error") return <LoadError onRetry={load} />;
   if (state === "notfound") {
@@ -85,7 +91,7 @@ export default function RecomendadosEspecialidad() {
   const services = data.services || [];
   const withDoctors = services.filter((s) => (s.doctors || []).length > 0);
   const withoutDoctors = services.filter((s) => (s.doctors || []).length === 0);
-  const recommendTo = `/?especialidad=${tpl.key}`;
+  const recommendTo = `/?especialidad=${tpl.key}${utm ? `&${utm}` : ""}`;
   const recommend = (slug, servicio) => navigate(`/?doctor=${encodeURIComponent(slug)}${servicio ? `&servicio=${encodeURIComponent(servicio)}` : ""}`);
   // Vistas solo de doctores recomendados (las de perfiles registrados se cuentan en su propia página).
   const suggestionSlugs = new Set(doctors.filter((d) => d.kind === "suggestion").map((d) => d.slug));
@@ -164,7 +170,7 @@ export default function RecomendadosEspecialidad() {
           </h2>
           <div className="flex flex-wrap justify-center gap-2 mt-5">
             {withoutDoctors.map((s) => (
-              <Link key={s.slug} to={`/?especialidad=${tpl.key}&servicio=${encodeURIComponent(s.slug)}`}
+              <Link key={s.slug} to={`/?especialidad=${tpl.key}&servicio=${encodeURIComponent(s.slug)}${utm ? `&${utm}` : ""}`}
                 className="inline-flex items-center min-h-11 px-4 py-2 rounded-full border border-white/80 bg-white/60 backdrop-blur-sm text-sm font-medium text-brand-navy hover:bg-white transition-colors">
                 Recomienda para {lowerFirst(s.name)}
               </Link>
