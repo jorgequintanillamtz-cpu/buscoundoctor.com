@@ -158,7 +158,7 @@ export default function RecommendationsLanding({ data }) {
 
   const renderSlider = (items, label) => (
     <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed className="">
-      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} showSpecialty={false} tags={false} />)}
+      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} showSpecialty={false} maxTags={2} maxTagsMobile={1} />)}
     </CardSlider>
   );
 
