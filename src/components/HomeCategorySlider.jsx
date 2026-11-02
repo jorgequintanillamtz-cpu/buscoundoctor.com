@@ -26,7 +26,8 @@ const ICONS = {
   "medico-general": Stethoscope, ginecologo: Flower2, pediatra: Baby, dentista: ToothIcon, dermatologo: Sparkles,
   cardiologo: HeartPulse, psicologo: Brain, nutriologo: Apple, endocrinologo: Droplet, gastroenterologo: Pill,
 };
-// Contador de recomendaciones de cada tarjeta ("Ginecólogo – 5", pedido de David, 2026-11-02): suma `count` (sus
+// Contador de recomendaciones de cada tarjeta ("Ginecólogo 5", con el número en peso normal; pedido de David,
+// 2026-11-02): suma `count` (sus
 // recomendaciones aprobadas) de los doctores de la landing (list_recommendations_landing, la misma consulta que el
 // contador del hero) cuya especialidad coincide, sin acentos ni mayúsculas, con estas raíces (las mismas que usan los
 // carruseles y las tarjetas de especialidades de RecommendationsLandingFlow.jsx). Mientras carga o si falla, sin número.
@@ -102,7 +103,7 @@ export default function HomeCategorySlider({ data }) {
                 {c.title}
                 {recs !== null && (
                   <>
-                    <span aria-hidden="true"> – {recs}</span>
+                    <span aria-hidden="true" className="font-normal"> {recs}</span>
                     <span className="sr-only">, {recs} {recs === 1 ? "recomendación" : "recomendaciones"}</span>
                   </>
                 )}
