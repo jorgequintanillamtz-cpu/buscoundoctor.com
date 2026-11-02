@@ -24,9 +24,12 @@ export const flowSlideWidth = (n) => (n === 1 ? `${SLIDE_WIDTH} mx-auto` : SLIDE
 // `actions`: los botones "Ver recomendaciones" / "Yo también" de abajo (por defecto sí). El inicio los quita
 // (2026-11-02, pedido de David): ahí toda la tarjeta (foto y datos) es el enlace a su página.
 // `showSpecialty`: la especialidad en la línea de abajo del nombre (por defecto sí). `tags`: las etiquetas ("Buen trato",
-// "Da seguimiento"…) (por defecto sí). El inicio quita las dos (2026-11-02, pedido de David) para que la vista vaya al
-// sello de recomendaciones: ahí la línea queda solo con la subespecialidad (si tiene) y la zona.
-export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true, showSpecialty = true, tags = true }) {
+// "Da seguimiento"…) (por defecto sí). El inicio quita la especialidad (2026-11-02, pedido de David) para que la vista vaya
+// al sello de recomendaciones: la línea queda con la subespecialidad (si tiene) y la zona.
+// `maxTags` / `maxTagsMobile`: cuántas etiquetas salen desde tableta (640 px) y en celular. El inicio vuelve a mostrarlas,
+// 2 en computadora y 1 en celular (2026-11-02, pedido de David); sin estas props, como siempre (una línea en celular y
+// todas desde tableta).
+export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true, showSpecialty = true, tags = true, maxTags = 0, maxTagsMobile = 0 }) {
   const to = href || `/recomendado-flow/${d.slug}`;
   return (
     <div data-slug={d.slug} role="listitem"
@@ -57,7 +60,9 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
           {tags && (d.top_tags || []).length > 0 && (
             // En celular, una sola línea (lo que no cabe se oculta); desde tableta salen todas.
             <div className="flex flex-wrap gap-1.5 mt-2 max-h-6 overflow-hidden sm:max-h-none">
-              {d.top_tags.map((t) => <span key={t.tag} className="max-w-full truncate text-xs leading-4 bg-brand-bluePale text-brand-navy px-2.5 py-1 rounded-full whitespace-nowrap">{recommendationTagLabel(t.tag)}{t.n > 1 ? ` · ${t.n}` : ""}</span>)}
+              {(maxTags ? d.top_tags.slice(0, maxTags) : d.top_tags).map((t, i) => (
+                <span key={t.tag} className={`${maxTagsMobile && i >= maxTagsMobile ? "hidden sm:inline-block " : ""}max-w-full truncate text-xs leading-4 bg-brand-bluePale text-brand-navy px-2.5 py-1 rounded-full whitespace-nowrap`}>{recommendationTagLabel(t.tag)}{t.n > 1 ? ` · ${t.n}` : ""}</span>
+              ))}
             </div>
           )}
         </div>
