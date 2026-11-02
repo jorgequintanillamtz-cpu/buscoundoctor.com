@@ -6,11 +6,13 @@
 // `title`, `from` y `to` (2026-11-02): nombre y color de su tarjeta en el carrusel "Recomendados por especialidad"
 // del inicio. Hex EXACTOS de la paleta Pantone de David (Delicate Blue, Flushing Pink, Fall Fantasy, Ice Green,
 // Atomizer, Coral Chic, Orchid Bloom, Green Glow, Hot Pink, Sunshine), sin ajustar. Color plano (`from` = `to`): con un
-// degradado 4% más oscuro, Endocrinólogo bajaba a 4.41:1. Texto en azul marino de la marca (brand.navy #0B1E4D);
-// contraste del texto (WCAG): Médico General 11.21 · Ginecólogo 11.37 · Pediatra 7.18 · Dentista 9.65 ·
-// Dermatólogo 10.04 · Cardiólogo 6.64 · Psicólogo 7.87 · Nutriólogo 8.77 · Endocrinólogo 4.76 · Gastroenterólogo 12.07.
-// Si cambias un color, mantén 4.5:1 o más (y en `to` si vuelve a haber degradado). Excepción deliberada a la regla de
-// tokens de CLAUDE.md §11: van aquí como datos.
+// degradado 4% más oscuro, Endocrinólogo bajaba a 4.41:1. Las tarjetas son de "vidrio claro" (HomeCategorySlider.jsx):
+// este hex al 62% con desenfoque, o al 100% como respaldo sólido. Texto en azul marino de la marca (brand.navy #0B1E4D);
+// contraste medido en el navegador sobre el fondo real (vidrio, peor píxel bajo el texto): Médico General 11.75 ·
+// Ginecólogo 11.83 · Pediatra 8.68 · Dentista 10.74 · Dermatólogo 10.95 · Cardiólogo 8.36 · Psicólogo 9.55 ·
+// Nutriólogo 10.10 · Endocrinólogo 6.73 · Gastroenterólogo 12.23; con el hex sólido, de 4.76 (Endocrinólogo) a 12.07.
+// Si cambias un color, mantén 4.5:1 o más en los dos casos. Excepción deliberada a la regla de tokens de CLAUDE.md §11:
+// los colores van aquí como datos.
 const ENTRIES = [
   ["medico-general", { title: "Médico General", from: "#c4dbe9", to: "#c4dbe9", slug: "medicina-general", plural: "Médicos generales", lower: "médicos generales", your: "tu médico general", my: "mi médico general" }],
   ["ginecologo", { title: "Ginecólogo", from: "#fdccdd", to: "#fdccdd", slug: "ginecologia", plural: "Ginecólogos", lower: "ginecólogos", your: "tu ginecólogo", my: "mi ginecólogo" }],
