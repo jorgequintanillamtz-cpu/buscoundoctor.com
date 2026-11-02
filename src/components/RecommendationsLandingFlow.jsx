@@ -102,10 +102,7 @@ const SPECIALTY_CARDS = [
   { name: "Medicina interna", icon: Syringe, tone: "bg-zinc-50 border-zinc-200 text-zinc-700", iconBg: "bg-zinc-100", match: /medicina interna|internist/ },
 ];
 
-const PHONE_VISIBLE = 6; // en celular se ven 6 tarjetas y el resto tras "Ver más especialidades" (desde tableta, todas)
-
 function SpecialtyCards({ doctors }) {
-  const [showAll, setShowAll] = useState(false);
   const cards = SPECIALTY_CARDS.map((c) => {
     const mine = doctors.filter((d) => c.match.test(norm(d.specialty)));
     const sp = mine[0]?.specialty;
@@ -122,7 +119,7 @@ function SpecialtyCards({ doctors }) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <h2 className="font-heading font-medium tracking-tight text-2xl sm:text-3xl text-white text-center">Ver recomendaciones en estas especialidades</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
-          {cards.map((c, i) => {
+          {cards.map((c) => {
             const Icon = c.icon;
             const body = (
               <>
@@ -137,22 +134,13 @@ function SpecialtyCards({ doctors }) {
                 </span>
               </>
             );
-            const phoneHidden = !showAll && i >= PHONE_VISIBLE ? "hidden sm:block" : "block";
             // Vidrio: blanco translúcido con borde tenue; el color de cada especialidad queda solo en su ícono.
-            const cls = `${phoneHidden} rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/15 hover:-translate-y-0.5`;
+            const cls = `block rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/15 hover:-translate-y-0.5`;
             return c.href && !c.href.startsWith("#")
               ? <Link key={c.name} to={c.href} className={cls}>{body}</Link>
               : <a key={c.name} href={c.href || "#formulario"} className={cls}>{body}</a>;
           })}
         </div>
-        {cards.length > PHONE_VISIBLE && (
-          <div className="sm:hidden text-center mt-4">
-            <button type="button" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}
-              className="inline-flex items-center justify-center h-11 px-5 rounded-full border border-white/40 bg-white/10 text-white text-sm font-semibold hover:bg-white/20 transition-colors">
-              {showAll ? "Ver menos" : `Ver más especialidades (${cards.length - PHONE_VISIBLE})`}
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );
@@ -240,11 +228,6 @@ export default function RecommendationsLanding({ data }) {
               <div className="mt-3.5">{renderSlider(doctors, "Doctores recomendados")}</div>
             )}
           </div>
-
-          <p className="text-center mt-6 text-sm">
-            {/* Baja a "Ver recomendaciones en estas especialidades" (la lista /recomendados ya no existe). */}
-            <a href="#especialidades" className="font-medium text-brand-navy hover:underline">Ver todos los doctores recomendados por especialidad →</a>
-          </p>
         </div>
       </section>
 
