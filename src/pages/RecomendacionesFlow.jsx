@@ -16,6 +16,7 @@ import FlowNav from "@/components/FlowNav";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import RecommendationServicePicker from "@/components/RecommendationServicePicker";
 import RecommendationCounter from "@/components/RecommendationCounter";
+import HomeCategorySlider from "@/components/HomeCategorySlider";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS_FLOW as MAX_TAGS } from "@/lib/recommendationTags";
 
 // INICIO DEL SITIO ("/") desde 2026-10-30 (Jorge y David: la estrategia ahora es juntar la mayor cantidad de
@@ -868,6 +869,9 @@ export default function RecomendacionesFlow() {
         )}
       </main>
       </div>
+
+      {/* "Recomendados por especialidad": primer carrusel, solo en el paso 1, debajo del formulario. */}
+      {step === 1 && <HomeCategorySlider />}
 
       {/* Landing: debajo del formulario, solo al inicio y al terminar (durante los pasos 2 y 3 no distrae). */}
       {(step === 1 || step === 4) && <RecommendationsLanding data={landing} onRecommend={(slug) => { trackEvent("rec_desde_tarjeta"); startWithSlug(slug); }} />}

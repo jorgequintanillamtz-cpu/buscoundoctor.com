@@ -167,3 +167,26 @@
 @media (prefers-reduced-motion: reduce) {
   .medal-shine, .medal:hover .medal-shine { animation: none; }
 }
+
+/* Tarjetas de "Recomendados por especialidad" (HomeCategorySlider.jsx, que pone las variables por tarjeta) con efecto
+   vidrio (2026-11-02). Por defecto, color SÓLIDO (navegadores sin backdrop-filter); con soporte, vidrio; y sólido otra vez
+   si el usuario pide reducir transparencias. La sombra va aquí (no con clases de Tailwind) junto con el brillo interior. */
+.cat-card {
+  background-color: var(--cat-solid);
+  background-image: var(--cat-layers);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), 0 1px 2px rgb(11 30 77 / 0.10);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cat-card {
+    background-color: var(--cat-glass);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cat-card {
+    background-color: var(--cat-solid);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
