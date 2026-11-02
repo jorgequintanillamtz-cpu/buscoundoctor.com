@@ -287,9 +287,13 @@ export default function RecomendacionesFlow() {
   const paramSpecialty = espParam ? specialties.find((s) => s.profession_slug === espParam || s.slug === espParam) || null : null;
   // En celular el paso 1 está oculto (se busca con la lupa); con ?especialidad= se muestra y se baja hasta él,
   // para que quien llega desde la página de la especialidad vea "¿A qué dentista quieres recomendar?".
+  // Con ?servicio= (la lista "¿Para qué recomiendas a tu …?" de /<especialidad>, 2026-11-02, pedido de David) se abre
+  // directo el formulario de "escribir su nombre", con la especialidad ya elegida, en vez de la búsqueda; el servicio
+  // queda marcado en el paso 2 (pendingService). Con solo ?especialidad= sigue la búsqueda de siempre.
   useEffect(() => {
     if (!paramSpecialty) return;
     setNewDoc((d) => (d.specialty ? d : { ...d, specialty: paramSpecialty.name }));
+    if (params.get("servicio") && !params.get("doctor")) setAdding(true);
     if (!params.get("doctor")) requestAnimationFrame(() => document.getElementById("formulario")?.scrollIntoView({ block: "start" }));
   }, [paramSpecialty]); // eslint-disable-line react-hooks/exhaustive-deps
   const isParamSpecialty = (r) => !!paramSpecialty && (r.specialty === paramSpecialty.name || r.specialty === paramSpecialty.display_name);
