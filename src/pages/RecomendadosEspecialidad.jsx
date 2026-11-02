@@ -104,15 +104,18 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
     <div className="min-h-screen bg-brand-flowMist" style={{ "--ring": "220 26% 39%" }}>
       <FlowNav base="/" ctaTo={recommendTo} />
 
-      {/* 1. Portada: título, contador de recomendaciones de la especialidad (también en 0) y botón para recomendar. */}
-      <section className={`${HERO_BG} pt-24 sm:pt-28 pb-14 text-center text-white`}>
+      {/* 1. Portada: título (la palabra "recomendados" en el color de la tarjeta de su especialidad, `tpl.from`, 2026-11-02),
+          contador de recomendaciones (también en 0, sin el texto "recomendaciones de …" debajo; lo lee el lector de pantalla)
+          y botón para recomendar. */}
+      {/* Arriba, el mismo aire que el inicio entre el menú y "Monterrey · San Pedro…" (2026-11-02, pedido de David): ahí
+          el texto queda a 119 px del borde en celular y 134 px desde tableta (pt-28/pt-32 más ~7 px de su renglón). */}
+      <section className={`${HERO_BG} pt-[119px] sm:pt-[134px] pb-14 text-center text-white`}>
         <div className="max-w-3xl mx-auto px-4">
           <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">Monterrey · San Pedro Garza García</p>
           <h1 className="mt-4 font-heading font-medium tracking-tight text-[clamp(1.85rem,9vw,2.6rem)] sm:text-[3.4rem] leading-[1.05]">
-            {tpl.plural} <span className="text-emerald-200">recomendados</span>
+            {tpl.plural} <span style={{ color: tpl.from }}>recomendados</span>
           </h1>
           <RecommendationCounter total={total} srLabel={`recomendaciones de ${tpl.lower}`} />
-          <p className="mt-2 text-sm text-white/85" aria-hidden="true">recomendaciones de {tpl.lower}</p>
           <Link to={recommendTo}
             className="mt-7 inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
             Recomendar a {tpl.my} <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -123,11 +126,13 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
       {/* 2. Los más recomendados de la especialidad (orden de la base: redes distintas, total, la más reciente). */}
       {doctors.length > 0 && (
         <section aria-labelledby="esp-mas-recomendados" className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-2 pb-10">
-          <h2 id="esp-mas-recomendados" className="font-heading font-medium tracking-tight text-2xl sm:text-3xl text-brand-navy text-center">
-            {tpl.plural} con más recomendaciones
+          {/* Mismo estilo y lugar que "Dentistas con más recomendaciones" del inicio (2026-11-02, pedido de David): a la
+              izquierda, 18/20 px, la especialidad en seminegritas, y 14 px hasta el carrusel. */}
+          <h2 id="esp-mas-recomendados" className="font-heading text-lg sm:text-xl text-brand-navy">
+            <span className="font-semibold">{tpl.plural}</span> <span className="font-normal">con más recomendaciones</span>
           </h2>
           <CardSlider resetKey={doctors.map((d) => d.slug).join(",")} onSeen={onSeen} label={`${tpl.plural} con más recomendaciones`}
-            prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed>
+            prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed className="mt-3.5">
             {doctors.map((d) => (
               <RecommendedDoctorCard key={d.slug} d={d} count={doctors.length} href={d.href} unverified={d.kind !== "specialist"}
                 onRecommend={(slug) => recommend(slug)} />
