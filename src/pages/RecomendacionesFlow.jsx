@@ -15,6 +15,7 @@ import { trackEvent, trackTag } from "@/lib/trackEvent";
 import FlowNav from "@/components/FlowNav";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import RecommendationServicePicker from "@/components/RecommendationServicePicker";
+import RecommendationCounter from "@/components/RecommendationCounter";
 import { RECOMMENDATION_SECTIONS, MAX_TAGS_FLOW as MAX_TAGS } from "@/lib/recommendationTags";
 
 // INICIO DEL SITIO ("/") desde 2026-10-30 (Jorge y David: la estrategia ahora es juntar la mayor cantidad de
@@ -77,51 +78,6 @@ const HERO_WORDS = [{ w: "Recomendaciones" }, { w: "Compartidas", accent: true }
 const HERO_WORD_STEP = 140;
 const HERO_WORD_MS = 550;
 const HERO_TITLE_MS = (HERO_WORDS.length - 1) * HERO_WORD_STEP + HERO_WORD_MS;
-
-// Contador del hero: aparece desde el principio en ceros y, cuando termina de entrar el título (HERO_TITLE_MS)
-// y ya llegó el dato, sube hasta el total de recomendaciones aprobadas (`total` de list_recommendations_landing;
-// antes contaba doctores)
-// en ~1.5 s. `total` es null mientras carga. Con "reducir movimiento", muestra el número directo.
-function RecommendationCounter({ total }) {
-  const [n, setN] = useState(0);
-  const [titleDone, setTitleDone] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setTitleDone(true), HERO_TITLE_MS);
-    return () => clearTimeout(t);
-  }, []);
-  useEffect(() => {
-    if (total == null || !titleDone) return undefined;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setN(total); return undefined; }
-    const ms = 1500;
-    let start = null;
-    let raf = 0;
-    const tick = (t) => {
-      if (start === null) start = t;
-      const p = Math.min(1, (t - start) / ms);
-      setN(Math.round(total * (1 - Math.pow(1 - p, 3)))); // arranca rápido y frena al llegar
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [total, titleDone]);
-  // Tipo reloj: una cajita por dígito, con tantas cajitas como dígitos tiene el total (rellena con ceros
-  // mientras sube: 000 → 125), para que no cambie de ancho durante la animación.
-  const digits = String(n).padStart(String(total ?? 0).length, "0").split("");
-  return (
-    <div className="mt-5 text-white/85">
-      <div className="flex justify-center gap-1.5" aria-hidden="true">
-        {digits.map((dg, i) => (
-          <span key={i} className="relative w-11 h-14 sm:w-12 sm:h-16 rounded-lg bg-white/10 border border-white/20 shadow-inner flex items-center justify-center font-heading font-bold text-3xl sm:text-4xl text-white tabular-nums overflow-hidden">
-            {dg}
-            {/* Línea del medio, como en los relojes de paletas */}
-            <span className="absolute inset-x-0 top-1/2 h-px bg-brand-navy/60" />
-          </span>
-        ))}
-      </div>
-      {total != null && <span className="sr-only">{total} {total === 1 ? "doctor recomendado" : "doctores recomendados"}</span>}
-    </div>
-  );
-}
 
 export default function RecomendacionesFlow() {
   const [step, setStep] = useState(1); // 1 doctor | 2 recomendación | 3 verificar | 4 gracias
@@ -449,7 +405,7 @@ export default function RecomendacionesFlow() {
                 <span key={w}>{i > 0 && " "}<span className={`hero-word ${accent ? "text-emerald-200" : ""}`} style={{ animationDelay: `${i * HERO_WORD_STEP}ms` }}>{w}</span></span>
               ))}
             </h1>
-            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.total : null} />}
+            {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.total : null} delayMs={HERO_TITLE_MS} srLabel="recomendaciones" />}
             <div className="flex flex-wrap justify-center gap-3 mt-7">
               {/* Abre directo los campos del doctor (especialidad, doctor o doctora, nombre), sin pasar por el buscador. */}
               <button type="button" onClick={openAddDoctor} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">

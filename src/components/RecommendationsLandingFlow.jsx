@@ -1,18 +1,18 @@
 // Parte de abajo de /recomendaciones-flow (ver RecomendacionesFlow.jsx), copiada de RecommendationsLandingNueva.jsx.
 // Degradado continuo: doctores (flowMist → flowSky), especialidades (flowSky → flowDeep), invitar y preguntas
 // (flowDeep), cierre y pie (flowDeep → flowBright). Cada sección empieza donde terminó la anterior.
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, ChevronRight, Heart, ShieldQuestion, Share2,
+  ArrowRight, ChevronRight, Heart, Share2,
   Stethoscope, Flower2, HeartPulse, Brain, Sparkles, Apple, Eye, Bone, Ear, Wind, Pill, Droplet, Activity,
   Scissors, Leaf, Ribbon, Hand, Dumbbell, Syringe, ShieldPlus,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import RecommendedAvatar from "@/components/RecommendedAvatar";
 import CardSlider from "@/components/CardSlider";
+import DoctorCard from "@/components/RecommendedDoctorCard";
+import RecommendationMedal from "@/components/RecommendationMedal";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
 
@@ -61,6 +61,8 @@ export function useLandingData() {
   return data;
 }
 
+export { RecommendationMedal }; // RecomendadoFlow.jsx lo importa desde aquí
+
 // También se publica como datos estructurados (FAQPage) en el inicio: RecomendacionesFlow.jsx.
 export const FAQ = [
   { q: "¿Quién ve mi nombre?", a: "Tu nombre y apellido aparecen junto a tu recomendación, para dar confianza. Si prefieres, marca \"No mostrar mi apellido\" y solo se verá tu nombre. Tu correo nunca se muestra." },
@@ -71,106 +73,6 @@ export const FAQ = [
   { q: "¿Qué significa \"Sin verificar\"?", a: "Que ese doctor todavía no ha reclamado su perfil en BuscoUnDoctor. Los datos vienen de lo que escribieron los pacientes y, cuando se indica, de la consulta de su cédula en el registro público de la SEP." },
   { q: "¿Una recomendación es una opinión médica?", a: "No. Es la opinión de un paciente sobre el trato y la atención que recibió. No sustituye una valoración médica." },
 ];
-
-// Sello de recomendaciones (dibujo propio en SVG, estilo sello, dorado): borde en zigzag, dos aros cafés,
-// "RECOMENDADO" curvo arriba y abajo, un punto a cada lado y el número al centro. Un destello suave lo cruza
-// cada pocos segundos y al pasar el ratón (index.css: medal, medal-shine). Ids únicos por sello (useId).
-const SEAL = "50.0,1.0 56.2,6.9 63.8,3.0 68.1,10.4 76.5,8.8 78.5,17.1 87.0,17.9 86.6,26.5 94.6,29.6 91.7,37.7 98.5,43.0 93.5,50.0 98.5,57.0 91.7,62.3 94.6,70.4 86.6,73.5 87.0,82.1 78.5,82.9 76.5,91.2 68.1,89.6 63.8,97.0 56.2,93.1 50.0,99.0 43.8,93.1 36.2,97.0 31.9,89.6 23.5,91.2 21.5,82.9 13.0,82.1 13.4,73.5 5.4,70.4 8.3,62.3 1.5,57.0 6.5,50.0 1.5,43.0 8.3,37.7 5.4,29.6 13.4,26.5 13.0,17.9 21.5,17.1 23.5,8.8 31.9,10.4 36.2,3.0 43.8,6.9";
-
-export function RecommendationMedal({ count, className = "", size = "w-[41px] h-[41px]" }) {
-  const id = useId().replace(/:/g, "");
-  const label = `Recomendado por ${count} ${count === 1 ? "paciente" : "pacientes"}`;
-  const digits = String(count).length;
-  const numSize = digits >= 3 ? 20 : digits === 2 ? 25 : 30;
-  return (
-    <span className={`medal ${size} drop-shadow-[0_2px_4px_rgba(180,120,0,0.45)] ${className}`} title={label}>
-      <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
-        <defs>
-          <linearGradient id={`${id}-gold`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" className="[stop-color:theme(colors.yellow.200)]" />
-            <stop offset="35%" className="[stop-color:theme(colors.amber.400)]" />
-            <stop offset="60%" className="[stop-color:theme(colors.yellow.400)]" />
-            <stop offset="100%" className="[stop-color:theme(colors.amber.600)]" />
-          </linearGradient>
-          <path id={`${id}-top`} d="M 22,50 A 28,28 0 0 1 78,50" />
-          <path id={`${id}-bottom`} d="M 15,50 A 35,35 0 0 0 85,50" />
-          <clipPath id={`${id}-clip`}><polygon points={SEAL} /></clipPath>
-        </defs>
-        <polygon points={SEAL} fill={`url(#${id}-gold)`} />
-        <g fill="none" className="stroke-amber-900">
-          <circle cx="50" cy="50" r="39" strokeWidth="2" />
-          <circle cx="50" cy="50" r="21" strokeWidth="1.75" />
-        </g>
-        <g className="fill-amber-900 font-heading" fontWeight="800" fontSize="9.5" letterSpacing="0.6">
-          <text><textPath href={`#${id}-top`} startOffset="50%" textAnchor="middle">RECOMENDADO</textPath></text>
-          <text><textPath href={`#${id}-bottom`} startOffset="50%" textAnchor="middle">RECOMENDADO</textPath></text>
-          <circle cx="15.5" cy="50" r="2.2" />
-          <circle cx="84.5" cy="50" r="2.2" />
-          <text x="50" y="51" textAnchor="middle" dominantBaseline="central" fontSize={numSize} letterSpacing="0">{count}</text>
-        </g>
-        {/* Destello suave: una franja blanca que cruza el sello (recortada a su forma). */}
-        <g clipPath={`url(#${id}-clip)`}>
-          <rect className="medal-shine fill-white/40" x="-30" y="-10" width="18" height="120" />
-        </g>
-      </svg>
-      <span className="sr-only">{label}</span>
-    </span>
-  );
-}
-
-// Ancho de cada tarjeta en los carruseles de esta página: en celular una y un pedacito de la siguiente; en tableta
-// dos y un pedacito; desde computadora (sección más ancha, 1400 px) tres y un pedacito de la cuarta. Con una sola
-// tarjeta, centrada.
-const flowSlideWidth = (n) => (n === 1
-  ? "w-full max-w-md mx-auto"
-  : "w-[calc(100%_-_3rem)] sm:w-[calc((100%_-_3.75rem)/2)] lg:w-[calc((100%_-_4.5rem)/3)]");
-
-// Tarjeta de un doctor recomendado (la usan todos los carruseles). `count` = cuántas hay en su carrusel (ancho).
-function DoctorCard({ d, count, showNew, onRecommend }) {
-  return (
-    <div data-slug={d.slug} role="listitem"
-      className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 hover:bg-white/80 transition-all flex flex-col ${flowSlideWidth(count)}`}>
-      {/* Recomendaciones: sello dorado "RECOMENDADO" en la esquina, con el número adentro. */}
-      <RecommendationMedal count={d.count} className="absolute top-3 right-3" />
-      <Link to={`/recomendado-flow/${d.slug}`} className="flex items-stretch gap-3 sm:gap-4 flex-1 pr-4">
-        {/* Foto con "Sin verificar" encima, abajo. Ocupa todo el lado izquierdo de la tarjeta, del borde de arriba
-            hasta la línea de los botones (celular y computadora). */}
-        <div className="relative flex-shrink-0 w-28 lg:w-32 min-h-[10rem] lg:min-h-[11rem]">
-          <RecommendedAvatar photo={d.photo} name={d.full_name} className="absolute inset-0 w-full h-full" shape="rounded-none" />
-          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-white/90 shadow-sm px-1.5 py-0.5 rounded-full whitespace-nowrap">
-            <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
-          </span>
-        </div>
-        <div className="min-w-0 flex-1 py-3.5 sm:py-4 sm:pr-12">
-          <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
-          <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, d.zone].filter(Boolean).join(" · ")}</p>
-          {showNew && isNew(d) && (
-            <span className="inline-flex items-center mt-1.5 text-[11px] font-semibold text-brand-flowDeep bg-brand-flowMist px-2 py-0.5 rounded-full">Nuevo</span>
-          )}
-          {(d.top_tags || []).length > 0 && (
-            // En celular, una sola línea (lo que no cabe se oculta); desde tableta salen todas.
-            <div className="flex flex-wrap gap-1.5 mt-2 max-h-6 overflow-hidden sm:max-h-none">
-              {d.top_tags.map((t) => <span key={t.tag} className="max-w-full truncate text-xs leading-4 bg-brand-bluePale text-brand-navy px-2.5 py-1 rounded-full whitespace-nowrap">{recommendationTagLabel(t.tag)}{t.n > 1 ? ` · ${t.n}` : ""}</span>)}
-            </div>
-          )}
-        </div>
-      </Link>
-      <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mb-4 pt-3 border-t border-white/80">
-        <Link to={`/recomendado-flow/${d.slug}`}
-          className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
-          Ver recomendaciones <ArrowRight className="w-3.5 h-3.5 hidden sm:block" aria-hidden="true" />
-        </Link>
-        {onRecommend && (
-          <button type="button" onClick={() => onRecommend(d.slug)} aria-label={`Yo también lo recomiendo: ${d.full_name}`}
-            className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full border border-white bg-white/70 text-brand-navy hover:bg-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 lg:flex-1 min-w-fit">
-            {/* Etiqueta corta "Yo también" (el nombre completo va en aria-label) para que los dos botones quepan en una fila; corazón desde computadora. */}
-            <Heart className="w-3.5 h-3.5 hidden lg:block" aria-hidden="true" /> Yo también
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // Tarjetas de "Ver recomendaciones en estas especialidades": cada una con su color e ícono. `match` compara contra
 // la especialidad del doctor sin acentos ni mayúsculas (para contar cuántos hay y armar el enlace a /recomendados,
