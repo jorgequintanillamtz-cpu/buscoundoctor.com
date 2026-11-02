@@ -12,10 +12,10 @@ const isNew = (d) => !!d.last_at && Date.now() - new Date(d.last_at).getTime() <
 
 // Ancho de cada tarjeta en los carruseles de esta página: en celular una y un pedacito de la siguiente; en tableta
 // dos y un pedacito; desde computadora (sección más ancha, 1400 px) tres y un pedacito de la cuarta. Con una sola
-// tarjeta, centrada.
-export const flowSlideWidth = (n) => (n === 1
-  ? "w-full max-w-md mx-auto"
-  : "w-[calc(100%_-_3rem)] sm:w-[calc((100%_-_3.75rem)/2)] lg:w-[calc((100%_-_4.5rem)/3)]");
+// tarjeta, del MISMO ancho que las demás y centrada (antes `w-full max-w-md`: se veía más larga que las de los otros
+// carruseles; pedido de David, 2026-11-02).
+const SLIDE_WIDTH = "w-[calc(100%_-_3rem)] sm:w-[calc((100%_-_3.75rem)/2)] lg:w-[calc((100%_-_4.5rem)/3)]";
+export const flowSlideWidth = (n) => (n === 1 ? `${SLIDE_WIDTH} mx-auto` : SLIDE_WIDTH);
 
 // Tarjeta de un doctor recomendado (la usan todos los carruseles). `count` = cuántas hay en su carrusel (ancho).
 // `href`: a dónde lleva (por defecto su página de recomendado; un doctor registrado va a /especialista/…).
