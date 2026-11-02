@@ -7,12 +7,12 @@
 // del inicio. Hex EXACTOS de la paleta Pantone de David (Delicate Blue, Flushing Pink, Fall Fantasy, Ice Green,
 // Atomizer, Coral Chic, Orchid Bloom, Green Glow, Hot Pink, Sunshine), sin ajustar. Color plano (`from` = `to`): con un
 // degradado 4% más oscuro, Endocrinólogo bajaba a 4.41:1. Las tarjetas son de "vidrio claro" (HomeCategorySlider.jsx):
-// este hex al 62% con desenfoque, o al 100% como respaldo sólido. Texto en azul marino de la marca (brand.navy #0B1E4D);
-// contraste medido en el navegador sobre el fondo real (vidrio, peor píxel bajo el texto): Médico General 11.75 ·
-// Ginecólogo 11.83 · Pediatra 8.68 · Dentista 10.74 · Dermatólogo 10.95 · Cardiólogo 8.36 · Psicólogo 9.55 ·
-// Nutriólogo 10.10 · Endocrinólogo 6.73 · Gastroenterólogo 12.23; con el hex sólido, de 4.76 (Endocrinólogo) a 12.07.
-// Si cambias un color, mantén 4.5:1 o más en los dos casos. Excepción deliberada a la regla de tokens de CLAUDE.md §11:
-// los colores van aquí como datos.
+// este hex al 74% con desenfoque, o al 100% como respaldo sólido. Texto en BLANCO por decisión de David (2026-11-02),
+// sabiendo que NO llega a 4.5:1; medido en el navegador sobre el fondo real (peor píxel bajo el texto): Médico General
+// 1.37 · Ginecólogo 1.36 · Pediatra 1.96 · Dentista 1.54 · Dermatólogo 1.49 · Cardiólogo 2.07 · Psicólogo 1.77 ·
+// Nutriólogo 1.64 · Endocrinólogo 2.66 · Gastroenterólogo 1.30. Con texto azul marino (brand.navy) pasaban todas (de
+// 6.73 a 12.31 con el vidrio al 62%). Excepción deliberada a la regla de tokens de CLAUDE.md §11: los colores van aquí
+// como datos.
 const ENTRIES = [
   ["medico-general", { title: "Médico General", from: "#c4dbe9", to: "#c4dbe9", slug: "medicina-general", plural: "Médicos generales", lower: "médicos generales", your: "tu médico general", my: "mi médico general" }],
   ["ginecologo", { title: "Ginecólogo", from: "#fdccdd", to: "#fdccdd", slug: "ginecologia", plural: "Ginecólogos", lower: "ginecólogos", your: "tu ginecólogo", my: "mi ginecólogo" }],

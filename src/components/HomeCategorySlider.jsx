@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
-import { Apple, Baby, Brain, Droplet, Flower2, HeartPulse, Pill, Smile, Sparkles, Stethoscope } from "lucide-react";
+import { Apple, Baby, Brain, Droplet, Flower2, HeartPulse, Pill, Sparkles, Stethoscope } from "lucide-react";
+import ToothIcon from "@/components/icons/ToothIcon";
 import CardSlider from "@/components/CardSlider";
 import { findSpecialtyLanding } from "@/lib/specialtyLandings";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
@@ -10,22 +11,23 @@ import { trackEvent } from "@/lib/trackEvent";
 // antes de los carruseles de doctores; solo en el paso 1 (RecomendacionesFlow.jsx). Una tarjeta por cada una de las 10
 // especialidades principales, en el orden de topSpecialties.js (title/from en specialtyLandings.js), con enlace a su
 // página /<llave>, conservando los utm_* de la visita.
-// Estilo "vidrio claro" (versión A, elegida por David entre dos propuestas): el hex de la especialidad al 62% con
-// desenfoque del fondo, borde blanco fino, brillo suave arriba y el nombre en azul marino (de 6.7:1 a 12.3:1 medido en
-// el navegador sobre el fondo real). Las capas viven en .cat-card (index.css), que pone el color SÓLIDO si el navegador
-// no tiene backdrop-filter o el usuario pidió reducir transparencias. Ícono de la especialidad en blanco arriba a la
-// derecha (decorativo, aria-hidden: el nombre ya lo dice).
+// Estilo "vidrio claro" (elegido por David el 2026-11-02 entre dos propuestas): el hex de la especialidad al 74% con
+// desenfoque del fondo (antes 62%; se subió para que el color no se viera apagado), borde blanco fino y brillo suave
+// arriba. Las capas viven en .cat-card (index.css), que pone el color SÓLIDO si el navegador no tiene backdrop-filter o
+// el usuario pidió reducir transparencias. Nombre e ícono de la especialidad en BLANCO por decisión de David, sabiendo
+// que el nombre NO llega a 4.5:1 sobre estos tonos (medidos en specialtyLandings.js); con azul marino sí llegaba. El
+// ícono es decorativo (aria-hidden: el nombre ya lo dice). Dentista usa ToothIcon (lucide no trae diente).
 // Medición (Clarity): al tocar una categoría se registra "home_categoria_<llave>" (sin datos personales). Para apagarlo,
 // cambia esto a false.
 const TRACK_HOME_CATEGORY = true;
 const ICONS = {
-  "medico-general": Stethoscope, ginecologo: Flower2, pediatra: Baby, dentista: Smile, dermatologo: Sparkles,
+  "medico-general": Stethoscope, ginecologo: Flower2, pediatra: Baby, dentista: ToothIcon, dermatologo: Sparkles,
   cardiologo: HeartPulse, psicologo: Brain, nutriologo: Apple, endocrinologo: Droplet, gastroenterologo: Pill,
 };
 const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(" ");
 const cardVars = (c) => ({
   "--cat-solid": c.from,
-  "--cat-glass": `rgb(${rgbOf(c.from)} / 0.62)`,
+  "--cat-glass": `rgb(${rgbOf(c.from)} / 0.74)`,
   "--cat-layers": "linear-gradient(180deg, rgb(255 255 255 / 0.30) 0%, rgb(255 255 255 / 0) 22%)",
 });
 // Ancho: en celular 2 tarjetas y un pedazo de la tercera; en tableta 3 y un pedazo; en computadora 4 y un pedazo.
@@ -65,10 +67,10 @@ export default function HomeCategorySlider() {
               className={`cat-card snap-start shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 flex items-end
                 outline-none focus-visible:ring-4 focus-visible:ring-brand-navy focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
                 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5`}>
-              <span className="font-heading font-semibold text-brand-navy text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
+              <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
                 {c.title}
               </span>
-              {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-2 right-2 sm:top-3.5 sm:right-3.5 w-4 h-4 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />}
+              {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-1 right-1.5 sm:top-3.5 sm:right-3.5 w-[1.2rem] h-[1.2rem] sm:w-[2.1rem] sm:h-[2.1rem] lg:w-[2.4rem] lg:h-[2.4rem] text-white" />}
             </Link>
           );
         })}

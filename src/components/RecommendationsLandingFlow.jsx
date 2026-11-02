@@ -39,7 +39,7 @@ const CATEGORIES = [
   { key: "psicologos", title: "Psicólogos", one: "un buen psicólogo", match: (sp) => /psicolog/.test(sp) },
   { key: "nutriologos", title: "Nutriólogos", one: "un buen nutriólogo", match: (sp) => /nutri/.test(sp) },
 ];
-// Carruseles fijos que van debajo del de todos los doctores, en este orden (claves de CATEGORIES).
+// Carruseles fijos que van ARRIBA del de todos los doctores, en este orden (claves de CATEGORIES).
 const FIXED_CATEGORIES = ["dentistas", "pediatras", "dermatologos"];
 const NEW_DAYS = 7; // "Nuevo": recomendado en los últimos 7 días
 const DAY_MS = 86400000;
@@ -191,36 +191,20 @@ export default function RecommendationsLanding({ data, onRecommend }) {
       <section id="doctores" className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky py-12 sm:py-16 scroll-mt-20">
         {/* Más ancha que el resto (1400 px) para que los carruseles lleguen más lejos en computadora. */}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-          <h2 className="font-heading font-medium tracking-tight text-2xl sm:text-3xl text-brand-navy text-center">Doctores recomendados</h2>
-
-          {data === null ? (
-            <p className="text-center text-sm text-muted-foreground mt-8">Cargando…</p>
-          ) : doctors.length === 0 ? (
-            <div className="mt-8 rounded-3xl border border-dashed border-brand-flowSlate/40 bg-brand-flowMist/40 p-8 text-center">
-              <Heart className="w-8 h-8 text-brand-flowSlate mx-auto mb-2" aria-hidden="true" />
-              <p className="font-heading font-semibold text-foreground">Aquí aparecerán los doctores recomendados</p>
-              <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">Sé el primero: recomienda a tu doctor arriba, en menos de un minuto.</p>
-              <a href="#formulario" className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-brand-flowSlate hover:underline">Recomendar a mi doctor <ArrowRight className="w-4 h-4" /></a>
-            </div>
-          ) : (
-            <div className="mt-6">
-              {renderSlider(doctors, "Doctores recomendados")}
-            </div>
-          )}
-
-          {/* Carruseles fijos por especialidad, debajo del de todos los doctores. */}
-          {data && doctors.length > 0 && fixedGroups.map((g) => (
-            <div key={g.key} className="mt-12 relative">
+          {/* Primero los carruseles por especialidad y al final el de todos los doctores (2026-11-02, pedido de David).
+              Sin título grande de sección: cada carrusel lleva el suyo, con el mismo tamaño y lugar. */}
+          {data && doctors.length > 0 && fixedGroups.map((g, i) => (
+            <div key={g.key} className={`${i ? "mt-12" : ""} relative`}>
               {/* "Dentistas con más recomendaciones": la especialidad en negritas y el complemento en normal
                   (si todavía no hay doctores, "recomendados por pacientes", para no contradecir la tarjeta vacía).
                   "Ver todos →" lleva a /<especialidad> sin cambiar la altura: desde tableta va en la misma
                   fila que el título; en celular (donde el título ya ocupa el ancho) va arriba a la derecha, dentro del
                   margen que ya existe sobre el título. */}
               <div className="sm:flex sm:items-baseline sm:justify-between sm:gap-4">
-                <h3 className="font-heading text-lg sm:text-xl text-brand-navy">
+                <h2 className="font-heading text-lg sm:text-xl text-brand-navy">
                   <span className="font-semibold">{g.title}</span>{" "}
                   <span className="font-normal">{g.items.length > 0 ? "con más recomendaciones" : "recomendados por pacientes"}</span>
-                </h3>
+                </h2>
                 {g.landing && (
                   <Link to={`/${g.landing}`} aria-label={`Ver todos los ${g.title.toLowerCase()} recomendados`}
                     className="absolute right-0 -top-7 sm:static sm:shrink-0 text-sm font-medium text-brand-navy/80 hover:text-brand-navy hover:underline whitespace-nowrap">
@@ -231,6 +215,25 @@ export default function RecommendationsLanding({ data, onRecommend }) {
               <div className="mt-3">{g.items.length > 0 ? renderSlider(g.items, g.title) : renderEmpty(g)}</div>
             </div>
           ))}
+
+          {/* Todos los doctores, al final, con título del mismo estilo que los de arriba. */}
+          <div className={data && doctors.length > 0 && fixedGroups.length > 0 ? "mt-12" : ""}>
+            <h2 className="font-heading text-lg sm:text-xl text-brand-navy">
+              <span className="font-semibold">Doctores</span> <span className="font-normal">recomendados</span>
+            </h2>
+            {data === null ? (
+              <p className="text-center text-sm text-muted-foreground mt-6">Cargando…</p>
+            ) : doctors.length === 0 ? (
+              <div className="mt-3 rounded-3xl border border-dashed border-brand-flowSlate/40 bg-brand-flowMist/40 p-8 text-center">
+                <Heart className="w-8 h-8 text-brand-flowSlate mx-auto mb-2" aria-hidden="true" />
+                <p className="font-heading font-semibold text-foreground">Aquí aparecerán los doctores recomendados</p>
+                <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">Sé el primero: recomienda a tu doctor arriba, en menos de un minuto.</p>
+                <a href="#formulario" className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-brand-flowSlate hover:underline">Recomendar a mi doctor <ArrowRight className="w-4 h-4" /></a>
+              </div>
+            ) : (
+              <div className="mt-3">{renderSlider(doctors, "Doctores recomendados")}</div>
+            )}
+          </div>
 
           <p className="text-center mt-6 text-sm">
             {/* Baja a "Ver recomendaciones en estas especialidades" (la lista /recomendados ya no existe). */}
