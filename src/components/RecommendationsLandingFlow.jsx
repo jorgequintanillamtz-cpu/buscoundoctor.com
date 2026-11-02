@@ -77,7 +77,7 @@ export const FAQ = [
 // Tarjetas de "Ver recomendaciones en estas especialidades": cada una con su color e ícono. `match` compara contra
 // la especialidad del doctor sin acentos ni mayúsculas (para contar cuántos hay y armar el enlace a /recomendados,
 // que usa el id "esp-<especialidad>"). Dentistas, pediatras y dermatólogos no van aquí: ya tienen carrusel fijo.
-// `landing`: las que tienen página propia /recomendados/<landing> (CLAUDE.md pasos 45-47); su tarjeta lleva ahí.
+// `landing`: las que tienen página propia /<landing> (CLAUDE.md pasos 45-47); su tarjeta lleva ahí.
 // Para agregar o quitar una, edita esta lista.
 const SPECIALTY_CARDS = [
   { name: "Medicina general", landing: "medico-general", icon: Stethoscope, tone: "bg-sky-50 border-sky-100 text-sky-700", iconBg: "bg-sky-100", match: /medic(o|ina) general/ },
@@ -109,9 +109,10 @@ function SpecialtyCards({ doctors }) {
   const cards = SPECIALTY_CARDS.map((c) => {
     const mine = doctors.filter((d) => c.match.test(norm(d.specialty)));
     const sp = mine[0]?.specialty;
-    // Con página propia (/recomendados/:especialidad) va ahí, aunque no tenga doctores (la página dice "Sé el
-    // primero…"); las demás, como antes: a /recomendados?especialidad=… si tienen doctores, o al formulario.
-    const href = c.landing ? `/recomendados/${c.landing}` : sp ? `/recomendados?especialidad=esp-${norm(sp).replace(/[^a-z0-9]+/g, "-")}` : null;
+    // Con página propia (/<especialidad>) va ahí, aunque no tenga doctores (la página dice "Sé el primero…"); sin
+    // página propia pero con doctores, al carrusel de doctores de esta misma página (la lista /recomendados ya no
+    // existe desde 2026-11-02); sin doctores, al formulario.
+    const href = c.landing ? `/${c.landing}` : sp ? "#doctores" : null;
     return { ...c, count: mine.length, href };
   });
   return (
@@ -133,9 +134,9 @@ function SpecialtyCards({ doctors }) {
             const phoneHidden = !showAll && i >= PHONE_VISIBLE ? "hidden sm:block" : "block";
             // Vidrio: blanco translúcido con borde tenue; el color de cada especialidad queda solo en su ícono.
             const cls = `${phoneHidden} rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/15 hover:-translate-y-0.5`;
-            return c.href
+            return c.href && !c.href.startsWith("#")
               ? <Link key={c.name} to={c.href} className={cls}>{body}</Link>
-              : <a key={c.name} href="#formulario" className={cls}>{body}</a>;
+              : <a key={c.name} href={c.href || "#formulario"} className={cls}>{body}</a>;
           })}
         </div>
         {cards.length > PHONE_VISIBLE && (
@@ -257,7 +258,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
             <div key={g.key} className="mt-12 relative">
               {/* "Dentistas con más recomendaciones": la especialidad en negritas y el complemento en normal
                   (si todavía no hay doctores, "recomendados por pacientes", para no contradecir la tarjeta vacía).
-                  "Ver todos →" lleva a /recomendados/<especialidad> sin cambiar la altura: desde tableta va en la misma
+                  "Ver todos →" lleva a /<especialidad> sin cambiar la altura: desde tableta va en la misma
                   fila que el título; en celular (donde el título ya ocupa el ancho) va arriba a la derecha, dentro del
                   margen que ya existe sobre el título. */}
               <div className="sm:flex sm:items-baseline sm:justify-between sm:gap-4">
@@ -266,7 +267,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
                   <span className="font-normal">{g.items.length > 0 ? "con más recomendaciones" : "recomendados por pacientes"}</span>
                 </h3>
                 {g.landing && (
-                  <Link to={`/recomendados/${g.landing}`} aria-label={`Ver todos los ${g.title.toLowerCase()} recomendados`}
+                  <Link to={`/${g.landing}`} aria-label={`Ver todos los ${g.title.toLowerCase()} recomendados`}
                     className="absolute right-0 -top-7 sm:static sm:shrink-0 text-sm font-medium text-brand-navy/80 hover:text-brand-navy hover:underline whitespace-nowrap">
                     Ver todos →
                   </Link>
@@ -277,13 +278,14 @@ export default function RecommendationsLanding({ data, onRecommend }) {
           ))}
 
           <p className="text-center mt-6 text-sm">
-            <Link to="/recomendados" className="font-medium text-brand-navy hover:underline">Ver todos los doctores recomendados por especialidad →</Link>
+            {/* Baja a "Ver recomendaciones en estas especialidades" (la lista /recomendados ya no existe). */}
+            <a href="#especialidades" className="font-medium text-brand-navy hover:underline">Ver todos los doctores recomendados por especialidad →</a>
           </p>
         </div>
       </section>
 
-      {/* Más especialidades: tarjetas de color, cada una con su ícono. Con doctores, llevan a su lista en
-          /recomendados; sin doctores, suben al formulario para recomendar al primero. */}
+      {/* Más especialidades: tarjetas de color, cada una con su ícono. Las que tienen página propia llevan a
+          /<especialidad>; las demás, con doctores, al carrusel de doctores; sin doctores, al formulario. */}
       <SpecialtyCards doctors={doctors} />
 
       {/* Invitar a un amigo y preguntas frecuentes: azul profundo, acordeones de vidrio. */}

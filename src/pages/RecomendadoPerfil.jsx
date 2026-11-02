@@ -129,7 +129,7 @@ export default function RecomendadoPerfil() {
           </Link>
         ))}
       </div>
-      <p className="text-center mt-3 text-sm"><Link to="/recomendados" className="font-medium text-brand-augusta hover:underline">Ver todos los doctores recomendados →</Link></p>
+      <p className="text-center mt-3 text-sm"><Link to="/#doctores" className="font-medium text-brand-augusta hover:underline">Ver todos los doctores recomendados →</Link></p>
     </div>
   ) : null;
 

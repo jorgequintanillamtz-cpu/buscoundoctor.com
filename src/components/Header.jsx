@@ -37,8 +37,7 @@ export default function Header() {
   const [showCompactSearch, setShowCompactSearch] = useState(!isHome);
   // En /recomendados (lista de doctores recomendados por pacientes) no va el buscador de arriba: esa página
   // tiene su propio buscador y el de arriba confundía (CLAUDE.md §8r, 2026-10-26).
-  const hideHeaderSearch = location.pathname === "/recomendados";
-  const searchVisible = showCompactSearch && !hideHeaderSearch;
+  const searchVisible = showCompactSearch;
 
   // Bloquea el scroll del fondo mientras el menú móvil a pantalla completa está abierto
   useEffect(() => {
@@ -253,7 +252,7 @@ export default function Header() {
 
           <div className="hidden md:flex items-center gap-4 flex-shrink-0">
             <Link
-              to="/recomendados"
+              to="/#doctores"
               className={`text-sm font-medium transition-colors whitespace-nowrap ${
                 isHome ? "text-white/80 hover:text-white" : "text-brand-navy/70 hover:text-brand-navy"
               }`}
@@ -362,7 +361,7 @@ export default function Header() {
               Especialistas
             </Link>
             <Link
-              to="/recomendados"
+              to="/#doctores"
               onClick={() => setOpen(false)}
               className="flex items-center gap-3 py-3.5 border-b border-border/50 text-base font-medium text-brand-navy hover:text-brand-blue transition-colors">
               <ThumbsUp className="w-5 h-5 flex-shrink-0 text-muted-foreground" />

@@ -307,9 +307,9 @@ export default function AdminRecomendaciones() {
     const n = approvedOf(g);
     const checked = !!g.suggestion.license_checked_at;
     if (n < 1) return { tone: "bg-muted text-muted-foreground", short: "Solo con el enlace", long: "Solo con el enlace: falta al menos 1 recomendación aprobada para salir en la lista." };
-    if (n >= 3 && checked) return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista y en Google", long: "Aparece en la lista /recomendados y en Google." };
+    if (n >= 3 && checked) return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista y en Google", long: "Aparece en la lista del inicio y en Google." };
     const falta = [n < 3 ? `${3 - n} ${3 - n === 1 ? "recomendación aprobada más" : "recomendaciones aprobadas más"}` : null, !checked ? "marcar la cédula como comprobada" : null].filter(Boolean).join(" y ");
-    return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista", long: `Aparece en la lista /recomendados. Para salir también en Google falta: ${falta}.` };
+    return { tone: "bg-emerald-50 text-emerald-700", short: "Sale en la lista", long: `Aparece en la lista del inicio. Para salir también en Google falta: ${falta}.` };
   };
   const phoneFmt = (t) => t.replace(/(\d{2})(\d{4})(\d{4})/, "$1 $2 $3");
   const copy = (text, okText, failText) => navigator.clipboard?.writeText(text).then(() => setNotice({ ok: true, text: okText })).catch(() => setNotice({ ok: false, text: failText }));
