@@ -3,11 +3,15 @@ import CardSlider from "@/components/CardSlider";
 import { findSpecialtyLanding } from "@/lib/specialtyLandings";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { utmQuery, withUtm } from "@/lib/utm";
+import { trackEvent } from "@/lib/trackEvent";
 
 // "Recomendados por especialidad" (2026-11-02, pedido de David): primer carrusel del inicio, debajo del formulario y
 // antes de los carruseles de doctores; solo en el paso 1 (RecomendacionesFlow.jsx). Una tarjeta por cada una de las 10
 // especialidades principales, en el orden de topSpecialties.js, con su color (title/from/to en specialtyLandings.js) y
 // enlace a su página /<llave>, conservando los utm_* de la visita.
+// Medición (Clarity): al tocar una categoría se registra "home_categoria_<llave>" (sin datos personales). Para apagarlo,
+// cambia esto a false.
+const TRACK_HOME_CATEGORY = true;
 // Ancho: en celular 2 tarjetas y un pedazo de la tercera; en tableta 3 y un pedazo; en computadora 4 y un pedazo.
 const SLIDE = "w-[calc((100%_-_1.5rem)/2.3)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
 // Con teclado: si la tarjeta que recibe el foco no se ve completa (el navegador no desplaza el carrusel si ya se ve a
@@ -38,6 +42,7 @@ export default function HomeCategorySlider() {
         nextLabel="Ver más especialidades" dots={false} bleed className="mt-4">
         {items.map((c) => (
           <Link key={c.key} to={withUtm(`/${c.key}`, utm)} role="listitem" lang="es" onFocus={showWhole}
+            onClick={() => { if (TRACK_HOME_CATEGORY) trackEvent(`home_categoria_${c.key}`); }}
             style={{ backgroundImage: `linear-gradient(135deg, ${c.from}, ${c.to})` }}
             className={`snap-start shrink-0 ${SLIDE} aspect-[16/9] min-h-11 rounded-2xl p-3 sm:p-4 flex items-end shadow-sm shadow-brand-navy/10
               outline-none focus-visible:ring-4 focus-visible:ring-brand-navy/40 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
