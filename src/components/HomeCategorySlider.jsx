@@ -46,14 +46,16 @@ const cardVars = (c) => ({
   "--cat-layers": "linear-gradient(180deg, rgb(255 255 255 / 0.30) 0%, rgb(255 255 255 / 0) 22%)",
 });
 // Ancho: en celular, media tarjeta + una entera + media (pedido de David, 2026-11-02, para que se note que hay más):
-// el carrusel llega de orilla a orilla (100% + los 2 rem de margen), menos 2 huecos de 0.75 rem, entre 2. Las tarjetas
-// se centran al deslizar (snap-center) y al cargar se centra Ginecólogo. En tableta 3 y un pedazo; en computadora 4 y
-// un pedazo (alineadas al inicio). El alto sigue la proporción 16:9.
+// el carrusel llega de orilla a orilla (100% + los 2 rem de margen), menos 2 huecos de 0.75 rem, entre 2. Al cargar se
+// centra Ginecólogo. En tableta 3 y un pedazo; en computadora 4 y un pedazo. El alto sigue la proporción 16:9.
+// Deslizamiento libre, SIN "snap" (2026-11-02, pedido de David: "que no se frene"): antes cada tarjeta jalaba a su lugar
+// y el deslizamiento se detenía en cada una; ahora sigue con la inercia del dedo o del trackpad. Las flechas (desde
+// tableta) siguen avanzando de tarjeta en tarjeta.
 const MOBILE = "(max-width: 639px)";
 const SLIDE = "w-[calc((100%_+_0.5rem)/2)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
 // Con teclado: si la tarjeta que recibe el foco no se ve completa (el navegador no desplaza el carrusel si ya se ve a
-// medias, como la que asoma), se centra (celular) o se alinea al inicio (tableta y computadora), igual que el "snap" de
-// las tarjetas. Sin animación si el usuario pidió reducir el movimiento.
+// medias, como la que asoma), se centra (celular) o se alinea al inicio (tableta y computadora). Sin animación si el
+// usuario pidió reducir el movimiento.
 const showWhole = (e) => {
   const card = e.currentTarget;
   const list = card.parentElement;
@@ -96,14 +98,16 @@ export default function HomeCategorySlider({ data }) {
             <Link key={c.key} to={withUtm(`/${c.key}`, utm)} role="listitem" lang="es" onFocus={showWhole}
               onClick={() => { if (TRACK_HOME_CATEGORY) trackEvent(`home_categoria_${c.key}`); }}
               style={cardVars(c)}
-              className={`cat-card snap-center sm:snap-start shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 flex items-end
+              className={`cat-card shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 flex items-end
                 outline-none focus-visible:ring-4 focus-visible:ring-brand-navy focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
                 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5`}>
               <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
                 {c.title}
                 {recs !== null && (
                   <>
-                    <span aria-hidden="true" className="font-normal"> {recs}</span>
+                    {/* Número 10% más chico (0.9em) y 10% más separado del nombre: el espacio de antes medía 0.171em del texto del
+                        nombre; ahora es margen de 0.209em del número = 0.188em del nombre (+10%). Pedido de David, 2026-11-02. */}
+                    <span aria-hidden="true" className="font-normal text-[0.9em] ml-[0.209em]">{recs}</span>
                     <span className="sr-only">, {recs} {recs === 1 ? "recomendación" : "recomendaciones"}</span>
                   </>
                 )}
