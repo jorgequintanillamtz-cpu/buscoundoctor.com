@@ -52,7 +52,10 @@ const cardVars = (c) => ({
 // y el deslizamiento se detenía en cada una; ahora sigue con la inercia del dedo o del trackpad. Las flechas (desde
 // tableta) siguen avanzando de tarjeta en tarjeta.
 const MOBILE = "(max-width: 639px)";
-const SLIDE = "w-[calc((100%_+_0.5rem)/2)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
+// Computadora desde 1280 px (xl): 20% más chicas que en lg ((100% − 3 rem)/5.625 en vez de /4.5; pedido de David,
+// 2026-11-02), así se ven 5 completas y un pedazo de la sexta; texto, ícono y relleno también al 80%. De 1024 a 1279 px
+// se quedan como antes (4 y media): más chicas, los nombres se partían y tocaban el ícono.
+const SLIDE = "w-[calc((100%_+_0.5rem)/2)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)] xl:w-[calc((100%_-_3rem)/5.625)]";
 // Con teclado: si la tarjeta que recibe el foco no se ve completa (el navegador no desplaza el carrusel si ya se ve a
 // medias, como la que asoma), se centra (celular) o se alinea al inicio (tableta y computadora). Sin animación si el
 // usuario pidió reducir el movimiento.
@@ -98,10 +101,10 @@ export default function HomeCategorySlider({ data }) {
             <Link key={c.key} to={withUtm(`/${c.key}`, utm)} role="listitem" lang="es" onFocus={showWhole}
               onClick={() => { if (TRACK_HOME_CATEGORY) trackEvent(`home_categoria_${c.key}`); }}
               style={cardVars(c)}
-              className={`cat-card shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 flex items-end
+              className={`cat-card shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 xl:p-[0.8rem] flex items-end
                 outline-none focus-visible:ring-4 focus-visible:ring-brand-navy focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
                 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5`}>
-              <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
+              <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl xl:text-[1.2rem] leading-tight hyphens-auto break-words min-w-0">
                 {c.title}
                 {recs !== null && (
                   <>
@@ -112,7 +115,7 @@ export default function HomeCategorySlider({ data }) {
                   </>
                 )}
               </span>
-              {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-2 right-2 sm:top-3.5 sm:right-3.5 w-[1.44rem] h-[1.44rem] sm:w-[2.1rem] sm:h-[2.1rem] lg:w-[2.4rem] lg:h-[2.4rem] text-white" />}
+              {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-2 right-2 sm:top-3.5 sm:right-3.5 xl:top-[0.7rem] xl:right-[0.7rem] w-[1.44rem] h-[1.44rem] sm:w-[2.1rem] sm:h-[2.1rem] lg:w-[2.4rem] lg:h-[2.4rem] xl:w-[1.92rem] xl:h-[1.92rem] text-white" />}
             </Link>
           );
         })}
