@@ -420,13 +420,16 @@ export default function RecomendacionesFlow() {
     // --ring: el anillo de enfoque de los campos (Input/Textarea) en el azul gris de la portada (brand.flowSlate,
     // #4A5B7D en HSL) solo en esta página; el resto del sitio conserva el suyo.
     <div id="top" className="min-h-screen bg-brand-flowMist" style={{ "--ring": "220 26% 39%" }}>
-      <FlowNav onSearch={() => setSearchOpen(true)} />
+      <FlowNav onSearch={() => setSearchOpen(true)} zoomDesktop />
       {/* Portada: del azul pizarra arriba al azul casi blanco abajo (donde empieza la sección de doctores), pasando
           por tonos de azul para que la transición sea lenta y no se vea gris. */}
       <div className="relative bg-[linear-gradient(to_bottom,theme(colors.brand.flowHeroTop)_0%,theme(colors.brand.flowHeroTop)_12%,theme(colors.brand.flowHeroMid)_45%,theme(colors.brand.flowHeroLow)_75%,theme(colors.brand.flowMist)_100%)]">
-      <header className={`relative text-white text-center px-5 ${step === 1 ? "pt-28 sm:pt-32 pb-16" : "pt-24 pb-12"}`}>
+      {/* Computadora (desde lg, 1024 px), paso 1: la portada entera (texto de arriba, título y contador, con sus márgenes)
+          se ve al 115%, como un zoom del navegador (2026-11-02, pedido de David; primero se probó 125%, pero a 1024 px el
+          título ya no cabía). El formulario y los carruseles no cambian. */}
+      <header className={`relative text-white text-center px-5 ${step === 1 ? "pt-28 sm:pt-32 pb-16 lg:[zoom:1.15]" : "pt-24 pb-12"}`}>
         {step === 1 && (
-          <div className="max-w-xl lg:max-w-3xl mx-auto">
+          <div className="max-w-xl lg:max-w-4xl mx-auto">
             {/* Texto técnico arriba (mayúsculas monoespaciadas y separadas), título en peso medio que entra palabra
                 por palabra (index.css: hero-word), contador de vidrio (en ceros hasta que termina el título) y botones. */}
             <p className="hero-word font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">Monterrey · San Pedro Garza García</p>
@@ -436,7 +439,8 @@ export default function RecomendacionesFlow() {
               ))}
             </h1>
             {landing !== false && !(landing && landing.doctors.length === 0) && <RecommendationCounter total={landing ? landing.total : null} delayMs={HERO_TITLE_MS} srLabel="recomendaciones" />}
-            <div className="flex flex-wrap justify-center gap-3 mt-7">
+            {/* Sin estos botones en computadora (desde lg, 2026-11-02, pedido de David): ahí el formulario ya se ve justo debajo. */}
+            <div className="flex flex-wrap justify-center gap-3 mt-7 lg:hidden">
               {/* Abre directo los campos del doctor (especialidad, doctor o doctora, nombre), sin pasar por el buscador. */}
               <button type="button" onClick={openAddDoctor} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
                 Recomendar a mi doctor

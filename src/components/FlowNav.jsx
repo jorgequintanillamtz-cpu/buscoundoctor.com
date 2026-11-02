@@ -7,7 +7,8 @@ import { Search } from "lucide-react";
 // página, la ruta de la landing ("/recomendaciones-flow"), que al cargar baja sola a la sección del ancla.
 // `ctaTo`: a dónde lleva el botón "Recomendar" (por defecto, al formulario de la landing).
 // `onSearch`: si existe, en celular el botón "Recomendar" se cambia por una lupa que abre el buscador de doctores.
-export default function FlowNav({ base = "", ctaTo = null, onSearch = null }) {
+// `zoomDesktop`: en computadora (desde lg, 1024 px) el menú se ve al 115% (lo usa el inicio, cuya portada también va al 115%).
+export default function FlowNav({ base = "", ctaTo = null, onSearch = null, zoomDesktop = false }) {
   const cta = `${onSearch ? "hidden md:inline-flex" : "inline-flex"} items-center h-10 px-4 md:ml-2 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors`;
   const link = "hidden md:inline-flex items-center h-9 px-3 rounded-full text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors";
   const To = ({ hash, className, children }) => (base
@@ -15,7 +16,7 @@ export default function FlowNav({ base = "", ctaTo = null, onSearch = null }) {
     : <a href={`#${hash}`} className={className}>{children}</a>);
   return (
     <nav className="fixed top-3 inset-x-0 z-50 flex justify-center px-3 pointer-events-none" aria-label="Secciones">
-      <div className="pointer-events-auto flex items-center gap-1 h-14 pl-4 pr-2 rounded-full bg-brand-navy/45 backdrop-blur-md border border-white/15 shadow-lg shadow-brand-navy/20 w-full max-w-md md:w-auto md:max-w-none">
+      <div className={`pointer-events-auto flex items-center gap-1 h-14 pl-4 pr-2 rounded-full bg-brand-navy/45 backdrop-blur-md border border-white/15 shadow-lg shadow-brand-navy/20 w-full max-w-md md:w-auto md:max-w-none ${zoomDesktop ? "lg:[zoom:1.15]" : ""}`}>
         <Link to={base || "/"} className="flex items-center mr-auto md:mr-3" aria-label="BuscoUnDoctor, inicio">
           {/* En celular, 20% más grande (29 px) que en computadora (24 px). */}
           <img src="/logo.webp" alt="BuscoUnDoctor" className="h-[29px] md:h-6 w-auto brightness-0 invert" />
