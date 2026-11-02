@@ -20,7 +20,8 @@ export const flowSlideWidth = (n) => (n === 1
 // Tarjeta de un doctor recomendado (la usan todos los carruseles). `count` = cuántas hay en su carrusel (ancho).
 // `href`: a dónde lleva (por defecto su página de recomendado; un doctor registrado va a /especialista/…).
 // `note`: una línea extra bajo la especialidad (p. ej. "Recomendado por 3 personas para limpieza dental").
-export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note }) {
+// `unverified`: la etiqueta "Sin verificar" (por defecto sí; un perfil registrado y publicado no la lleva).
+export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true }) {
   const to = href || `/recomendado-flow/${d.slug}`;
   return (
     <div data-slug={d.slug} role="listitem"
@@ -32,9 +33,11 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
             hasta la línea de los botones (celular y computadora). */}
         <div className="relative flex-shrink-0 w-28 lg:w-32 min-h-[10rem] lg:min-h-[11rem]">
           <RecommendedAvatar photo={d.photo} name={d.full_name} className="absolute inset-0 w-full h-full" shape="rounded-none" />
-          <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-white/90 shadow-sm px-1.5 py-0.5 rounded-full whitespace-nowrap">
-            <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
-          </span>
+          {unverified && (
+            <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-white/90 shadow-sm px-1.5 py-0.5 rounded-full whitespace-nowrap">
+              <ShieldQuestion className="w-3 h-3" aria-hidden="true" /> Sin verificar
+            </span>
+          )}
         </div>
         <div className="min-w-0 flex-1 py-3.5 sm:py-4 sm:pr-12">
           <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>

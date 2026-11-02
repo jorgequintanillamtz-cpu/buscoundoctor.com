@@ -79,6 +79,7 @@ const LandingRegistroGratis = lazy(() => import('./pages/LandingRegistroGratis')
 const BajaCorreos = lazy(() => import('./pages/BajaCorreos'));
 const ReclamarPerfil = lazy(() => import('./pages/ReclamarPerfil'));
 const RecomendacionesFlow = lazy(() => import('./pages/RecomendacionesFlow'));
+const RecomendadosEspecialidad = lazy(() => import('./pages/RecomendadosEspecialidad'));
 const RecomendadoFlow = lazy(() => import('./pages/RecomendadoFlow'));
 const RecomendadosLista = lazy(() => import('./pages/RecomendadosLista'));
 const RecomendadoPerfil = lazy(() => import('./pages/RecomendadoPerfil'));
@@ -134,6 +135,9 @@ const AuthenticatedApp = () => {
         <Route path="/recomendaciones-flow" element={<RedirectToHome />} />
         {/* Página del doctor con el estilo "flow"; la enlazan las tarjetas del inicio (noindex). */}
         <Route path="/recomendado-flow/:slug" element={<RecomendadoFlow />} />
+        {/* Landing por especialidad (2026-11-01): /recomendados/dentista (profession_slug; acepta specialty.slug y
+            redirige). Siempre noindex y sin enlaces desde el sitio por ahora. Gana a /:professionSlug/:citySlug. */}
+        <Route path="/recomendados/:especialidad" element={<RecomendadosEspecialidad />} />
       </Route>
 
       <Route element={<Layout />}>
