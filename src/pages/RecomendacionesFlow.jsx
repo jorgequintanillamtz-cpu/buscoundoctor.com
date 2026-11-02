@@ -88,6 +88,9 @@ export default function RecomendacionesFlow() {
   const [services, setServices] = useState([]);
   const [serviceOptions, setServiceOptions] = useState([]);
   const servicesCache = useRef(new Map()); // id de especialidad -> promesa con sus servicios (una lectura por especialidad)
+  // ?servicio=<slug> (viene de /recomendados/:especialidad): se marca solo cuando cargan los servicios del doctor
+  // elegido, si ese servicio está activo en su especialidad. Se queda pendiente hasta aplicarse o reiniciar.
+  const [pendingService, setPendingService] = useState(() => new URLSearchParams(window.location.search).get("servicio") || "");
   const [message, setMessage] = useState("");
   // Nombre y apellido(s), obligatorios (2026-10-29, pedido de David: dan confianza y el equipo tiene el dato).
   // Se publican con la recomendación; con "No mostrar mi apellido" solo se ve el nombre (el equipo sí lo ve completo).
@@ -269,6 +272,27 @@ export default function RecomendacionesFlow() {
     pending.then((list) => { if (alive) setServiceOptions(list); });
     return () => { alive = false; };
   }, [targetSpecialtyId]);
+  useEffect(() => {
+    if (pendingService && serviceOptions.some((o) => o.slug === pendingService)) {
+      setServices([pendingService]);
+      setPendingService("");
+    }
+  }, [serviceOptions, pendingService]);
+
+  // ?especialidad=<profession_slug o slug> (viene de /recomendados/:especialidad): el paso 1 pregunta por esa
+  // especialidad, la búsqueda muestra primero a sus doctores y "Escribir su nombre" ya la trae elegida.
+  // ?doctor= manda: si viene, se abre ese doctor en el paso 2 como siempre.
+  const espParam = (params.get("especialidad") || "").toLowerCase();
+  const paramSpecialty = espParam ? specialties.find((s) => s.profession_slug === espParam || s.slug === espParam) || null : null;
+  // En celular el paso 1 está oculto (se busca con la lupa); con ?especialidad= se muestra y se baja hasta él,
+  // para que quien llega desde la página de la especialidad vea "¿A qué dentista quieres recomendar?".
+  useEffect(() => {
+    if (!paramSpecialty) return;
+    setNewDoc((d) => (d.specialty ? d : { ...d, specialty: paramSpecialty.name }));
+    if (!params.get("doctor")) requestAnimationFrame(() => document.getElementById("formulario")?.scrollIntoView({ block: "start" }));
+  }, [paramSpecialty]); // eslint-disable-line react-hooks/exhaustive-deps
+  const isParamSpecialty = (r) => !!paramSpecialty && (r.specialty === paramSpecialty.name || r.specialty === paramSpecialty.display_name);
+  const shownResults = results && paramSpecialty ? [...results].sort((a, b) => isParamSpecialty(b) - isParamSpecialty(a)) : results;
   const splitTitle = (raw) => {
     const m = String(raw || "").trim().match(/^(dra|doctora|dr|doctor)\.?\s+/i);
     if (!m) return { title: "", name: String(raw || "").trim() };
@@ -381,7 +405,8 @@ export default function RecomendacionesFlow() {
     // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
     if (!verified) { setFirstName(""); setLastName(""); setHideLastName(false); setCode(""); setCodeSent(false); setConsent(false); setMarketing(false); }
     setQuery(""); setResults(null); setAdding(false);
-    setNewDoc({ title: "", full_name: "", specialty: "", zone: "", hospital: "", license_number: "", contact_phone: "", subspecialty: "" }); setError(""); setShowOtherSpecialties(false);
+    setNewDoc({ title: "", full_name: "", specialty: paramSpecialty?.name || "", zone: "", hospital: "", license_number: "", contact_phone: "", subspecialty: "" }); setError(""); setShowOtherSpecialties(false);
+    setPendingService("");
   };
 
   const shareHref = `https://wa.me/?text=${encodeURIComponent(`Acabo de recomendar a mi doctor en BuscoUnDoctor. Tú también puedes recomendar al tuyo, toma un minuto: ${PAGE_URL}`)}`;
@@ -433,7 +458,7 @@ export default function RecomendacionesFlow() {
 
       {/* En celular, la caja del formulario solo aparece cuando ya se están llenando datos (escribir un doctor, paso 2
           en adelante); para buscar un doctor está la lupa del menú. Desde tableta se ve siempre. */}
-      <main id="formulario" className={`relative z-10 max-w-lg mx-auto px-4 pb-16 scroll-mt-24 ${step === 1 && !adding ? "hidden sm:block" : ""}`}>
+      <main id="formulario" className={`relative z-10 max-w-lg mx-auto px-4 pb-16 scroll-mt-24 ${step === 1 && !adding && !paramSpecialty ? "hidden sm:block" : ""}`}>
         {/* El formulario es la pieza central de la portada: tarjeta blanca sólida (para leerse perfecto) que flota. */}
         <div className="bg-white rounded-[2rem] border border-white/60 shadow-2xl shadow-brand-navy/20 p-5 sm:p-7">
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
@@ -455,7 +480,11 @@ export default function RecomendacionesFlow() {
           {step === 1 && (
             <div>
               {/* En el formulario de "escribir su nombre" no va este título: ahí solo se pregunta lo que sigue. */}
-              {!(adding && !target) && <h2 className="font-heading font-semibold text-lg text-foreground mb-3">¿A quién quieres recomendar?</h2>}
+              {!(adding && !target) && (
+                <h2 className="font-heading font-semibold text-lg text-foreground mb-3">
+                  {paramSpecialty && !target ? `¿A qué ${(paramSpecialty.display_name || paramSpecialty.name).toLowerCase()} quieres recomendar?` : "¿A quién quieres recomendar?"}
+                </h2>
+              )}
 
               {target ? (
                 <div className="rounded-2xl border border-brand-flowSlate bg-brand-flowMist p-4 flex items-start justify-between gap-3">
@@ -474,9 +503,9 @@ export default function RecomendacionesFlow() {
                         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Busca por nombre del doctor" className="h-12 rounded-xl pl-10" />
                         {searching && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground absolute right-3.5 top-1/2 -translate-y-1/2" />}
                       </div>
-                      {results && results.length > 0 && (
+                      {shownResults && shownResults.length > 0 && (
                         <ul className="mt-2 space-y-2">
-                          {results.map((r) => (
+                          {shownResults.map((r) => (
                             <li key={`${r.kind}-${r.id}`}>
                               <button type="button" onClick={() => pickExisting(r)} className="w-full text-left rounded-xl border border-border/60 hover:border-brand-flowSlate/50 px-4 py-3 transition-colors">
                                 <p className="font-medium text-foreground">{r.full_name}</p>
