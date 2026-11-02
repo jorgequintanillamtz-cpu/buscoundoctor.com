@@ -30,9 +30,9 @@ const PAGE_URL = "https://buscoundoctor.com/"; // el inicio (antes /recomendacio
 const CATEGORIES = [
   { key: "medicina-general", title: "Médicos generales", one: "un buen médico general", match: (sp) => /medic(o|ina) general/.test(sp) },
   { key: "ginecologos", title: "Ginecólogos", one: "un buen ginecólogo", match: (sp) => /ginecolog/.test(sp) },
-  { key: "pediatras", title: "Pediatras", one: "un buen pediatra", match: (sp) => /^pediatr/.test(sp) },
-  { key: "dentistas", title: "Dentistas", one: "un buen dentista", match: (sp) => /dentist|odont/.test(sp) },
-  { key: "dermatologos", title: "Dermatólogos", one: "un buen dermatólogo", match: (sp) => /dermatolog/.test(sp) },
+  { key: "pediatras", title: "Pediatras", one: "un buen pediatra", landing: "pediatra", match: (sp) => /^pediatr/.test(sp) },
+  { key: "dentistas", title: "Dentistas", one: "un buen dentista", landing: "dentista", match: (sp) => /dentist|odont/.test(sp) },
+  { key: "dermatologos", title: "Dermatólogos", one: "un buen dermatólogo", landing: "dermatologo", match: (sp) => /dermatolog/.test(sp) },
   { key: "cardiologos", title: "Cardiólogos", one: "un buen cardiólogo", match: (sp) => /cardiolog/.test(sp) },
   { key: "ortopedistas", title: "Ortopedistas", one: "un buen ortopedista", match: (sp) => /ortoped|traumatolog/.test(sp) },
   { key: "oftalmologos", title: "Oftalmólogos", one: "un buen oftalmólogo", match: (sp) => /oftalmolog/.test(sp) },
@@ -77,20 +77,21 @@ export const FAQ = [
 // Tarjetas de "Ver recomendaciones en estas especialidades": cada una con su color e ícono. `match` compara contra
 // la especialidad del doctor sin acentos ni mayúsculas (para contar cuántos hay y armar el enlace a /recomendados,
 // que usa el id "esp-<especialidad>"). Dentistas, pediatras y dermatólogos no van aquí: ya tienen carrusel fijo.
+// `landing`: las que tienen página propia /recomendados/<landing> (CLAUDE.md pasos 45-47); su tarjeta lleva ahí.
 // Para agregar o quitar una, edita esta lista.
 const SPECIALTY_CARDS = [
-  { name: "Medicina general", icon: Stethoscope, tone: "bg-sky-50 border-sky-100 text-sky-700", iconBg: "bg-sky-100", match: /medic(o|ina) general/ },
-  { name: "Ginecología", icon: Flower2, tone: "bg-pink-50 border-pink-100 text-pink-700", iconBg: "bg-pink-100", match: /ginecolog/ },
-  { name: "Cardiología", icon: HeartPulse, tone: "bg-red-50 border-red-100 text-red-700", iconBg: "bg-red-100", match: /cardiolog/ },
-  { name: "Psicología", icon: Brain, tone: "bg-violet-50 border-violet-100 text-violet-700", iconBg: "bg-violet-100", match: /psicolog/ },
+  { name: "Medicina general", landing: "medico-general", icon: Stethoscope, tone: "bg-sky-50 border-sky-100 text-sky-700", iconBg: "bg-sky-100", match: /medic(o|ina) general/ },
+  { name: "Ginecología", landing: "ginecologo", icon: Flower2, tone: "bg-pink-50 border-pink-100 text-pink-700", iconBg: "bg-pink-100", match: /ginecolog/ },
+  { name: "Cardiología", landing: "cardiologo", icon: HeartPulse, tone: "bg-red-50 border-red-100 text-red-700", iconBg: "bg-red-100", match: /cardiolog/ },
+  { name: "Psicología", landing: "psicologo", icon: Brain, tone: "bg-violet-50 border-violet-100 text-violet-700", iconBg: "bg-violet-100", match: /psicolog/ },
   { name: "Psiquiatría", icon: Sparkles, tone: "bg-indigo-50 border-indigo-100 text-indigo-700", iconBg: "bg-indigo-100", match: /psiquiatr/ },
-  { name: "Nutrición", icon: Apple, tone: "bg-lime-50 border-lime-100 text-lime-700", iconBg: "bg-lime-100", match: /nutri/ },
+  { name: "Nutrición", landing: "nutriologo", icon: Apple, tone: "bg-lime-50 border-lime-100 text-lime-700", iconBg: "bg-lime-100", match: /nutri/ },
   { name: "Oftalmología", icon: Eye, tone: "bg-cyan-50 border-cyan-100 text-cyan-700", iconBg: "bg-cyan-100", match: /oftalmolog/ },
   { name: "Ortopedia", icon: Bone, tone: "bg-amber-50 border-amber-100 text-amber-700", iconBg: "bg-amber-100", match: /ortoped|traumatolog/ },
   { name: "Otorrinolaringología", icon: Ear, tone: "bg-orange-50 border-orange-100 text-orange-700", iconBg: "bg-orange-100", match: /otorrino/ },
   { name: "Neumología", icon: Wind, tone: "bg-blue-50 border-blue-100 text-blue-700", iconBg: "bg-blue-100", match: /neumolog/ },
-  { name: "Gastroenterología", icon: Pill, tone: "bg-yellow-50 border-yellow-100 text-yellow-700", iconBg: "bg-yellow-100", match: /gastro/ },
-  { name: "Endocrinología", icon: Droplet, tone: "bg-teal-50 border-teal-100 text-teal-700", iconBg: "bg-teal-100", match: /endocrin/ },
+  { name: "Gastroenterología", landing: "gastroenterologo", icon: Pill, tone: "bg-yellow-50 border-yellow-100 text-yellow-700", iconBg: "bg-yellow-100", match: /gastro/ },
+  { name: "Endocrinología", landing: "endocrinologo", icon: Droplet, tone: "bg-teal-50 border-teal-100 text-teal-700", iconBg: "bg-teal-100", match: /endocrin/ },
   { name: "Neurología", icon: Activity, tone: "bg-purple-50 border-purple-100 text-purple-700", iconBg: "bg-purple-100", match: /neurolog/ },
   { name: "Urología", icon: ShieldPlus, tone: "bg-slate-50 border-slate-200 text-slate-700", iconBg: "bg-slate-100", match: /urolog/ },
   { name: "Cirugía plástica", icon: Scissors, tone: "bg-rose-50 border-rose-100 text-rose-700", iconBg: "bg-rose-100", match: /cirugia plastica/ },
@@ -108,7 +109,10 @@ function SpecialtyCards({ doctors }) {
   const cards = SPECIALTY_CARDS.map((c) => {
     const mine = doctors.filter((d) => c.match.test(norm(d.specialty)));
     const sp = mine[0]?.specialty;
-    return { ...c, count: mine.length, href: sp ? `/recomendados?especialidad=esp-${norm(sp).replace(/[^a-z0-9]+/g, "-")}` : null };
+    // Con página propia (/recomendados/:especialidad) va ahí, aunque no tenga doctores (la página dice "Sé el
+    // primero…"); las demás, como antes: a /recomendados?especialidad=… si tienen doctores, o al formulario.
+    const href = c.landing ? `/recomendados/${c.landing}` : sp ? `/recomendados?especialidad=esp-${norm(sp).replace(/[^a-z0-9]+/g, "-")}` : null;
+    return { ...c, count: mine.length, href };
   });
   return (
     <section id="especialidades" className="bg-gradient-to-b from-brand-flowSky to-brand-flowDeep py-16 scroll-mt-20">
@@ -250,13 +254,24 @@ export default function RecommendationsLanding({ data, onRecommend }) {
 
           {/* Carruseles fijos (siempre visibles, no dependen de la burbuja elegida). */}
           {data && doctors.length > 0 && fixedGroups.map((g) => (
-            <div key={g.key} className="mt-12">
+            <div key={g.key} className="mt-12 relative">
               {/* "Dentistas con más recomendaciones": la especialidad en negritas y el complemento en normal
-                  (si todavía no hay doctores, "recomendados por pacientes", para no contradecir la tarjeta vacía). */}
-              <h3 className="font-heading text-lg sm:text-xl text-brand-navy">
-                <span className="font-semibold">{g.title}</span>{" "}
-                <span className="font-normal">{g.items.length > 0 ? "con más recomendaciones" : "recomendados por pacientes"}</span>
-              </h3>
+                  (si todavía no hay doctores, "recomendados por pacientes", para no contradecir la tarjeta vacía).
+                  "Ver todos →" lleva a /recomendados/<especialidad> sin cambiar la altura: desde tableta va en la misma
+                  fila que el título; en celular (donde el título ya ocupa el ancho) va arriba a la derecha, dentro del
+                  margen que ya existe sobre el título. */}
+              <div className="sm:flex sm:items-baseline sm:justify-between sm:gap-4">
+                <h3 className="font-heading text-lg sm:text-xl text-brand-navy">
+                  <span className="font-semibold">{g.title}</span>{" "}
+                  <span className="font-normal">{g.items.length > 0 ? "con más recomendaciones" : "recomendados por pacientes"}</span>
+                </h3>
+                {g.landing && (
+                  <Link to={`/recomendados/${g.landing}`} aria-label={`Ver todos los ${g.title.toLowerCase()} recomendados`}
+                    className="absolute right-0 -top-7 sm:static sm:shrink-0 text-sm font-medium text-brand-navy/80 hover:text-brand-navy hover:underline whitespace-nowrap">
+                    Ver todos →
+                  </Link>
+                )}
+              </div>
               <div className="mt-3">{g.items.length > 0 ? renderSlider(g.items, g.title) : renderEmpty(g)}</div>
             </div>
           ))}
