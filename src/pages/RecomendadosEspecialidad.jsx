@@ -134,7 +134,7 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
           <CardSlider resetKey={doctors.map((d) => d.slug).join(",")} onSeen={onSeen} label={`${tpl.plural} con más recomendaciones`}
             prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed className="mt-3.5">
             {doctors.map((d) => (
-              <RecommendedDoctorCard key={d.slug} d={d} count={doctors.length} href={d.href} unverified={d.kind !== "specialist"}
+              <RecommendedDoctorCard key={d.slug} d={d} count={doctors.length} href={d.href} unverified={d.kind !== "specialist"} showSpecialty={false}
                 onRecommend={(slug) => recommend(slug)} />
             ))}
           </CardSlider>
@@ -155,7 +155,7 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
             <CardSlider resetKey={docs.map((d) => d.slug).join(",")} onSeen={onSeen} label={`Recomendados para ${lowerFirst(s.name)}`}
               prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed className="mt-4">
               {docs.map((d) => (
-                <RecommendedDoctorCard key={d.slug} d={d} count={docs.length} href={d.href} unverified={d.kind !== "specialist"}
+                <RecommendedDoctorCard key={d.slug} d={d} count={docs.length} href={d.href} unverified={d.kind !== "specialist"} showSpecialty={false}
                   note={`Recomendado por ${people(d.count)} para ${lowerFirst(s.name)}`}
                   onRecommend={(slug) => recommend(slug, s.slug)} />
               ))}
