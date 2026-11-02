@@ -871,7 +871,7 @@ export default function RecomendacionesFlow() {
       </div>
 
       {/* "Recomendados por especialidad": primer carrusel, solo en el paso 1, debajo del formulario. */}
-      {step === 1 && <HomeCategorySlider />}
+      {step === 1 && <HomeCategorySlider data={landing} />}
 
       {/* Landing: debajo del formulario, solo al inicio y al terminar (durante los pasos 2 y 3 no distrae). */}
       {(step === 1 || step === 4) && <RecommendationsLanding data={landing} />}

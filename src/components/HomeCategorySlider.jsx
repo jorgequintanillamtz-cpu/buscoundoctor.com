@@ -26,6 +26,18 @@ const ICONS = {
   "medico-general": Stethoscope, ginecologo: Flower2, pediatra: Baby, dentista: ToothIcon, dermatologo: Sparkles,
   cardiologo: HeartPulse, psicologo: Brain, nutriologo: Apple, endocrinologo: Droplet, gastroenterologo: Pill,
 };
+// Contador de recomendaciones de cada tarjeta ("Ginecólogo – 5", pedido de David, 2026-11-02): suma `count` (sus
+// recomendaciones aprobadas) de los doctores de la landing (list_recommendations_landing, la misma consulta que el
+// contador del hero) cuya especialidad coincide, sin acentos ni mayúsculas, con estas raíces (las mismas que usan los
+// carruseles y las tarjetas de especialidades de RecommendationsLandingFlow.jsx). Mientras carga o si falla, sin número.
+const MATCH = {
+  "medico-general": /medic(o|ina) general/, ginecologo: /ginecolog/, pediatra: /^pediatr/, dentista: /dentist|odont/,
+  dermatologo: /dermatolog/, cardiologo: /cardiolog/, psicologo: /psicolog/, nutriologo: /nutri/, endocrinologo: /endocrin/,
+  gastroenterologo: /gastro/,
+};
+const norm = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const recsFor = (key, doctors) => doctors.filter((d) => MATCH[key]?.test(norm(d.specialty)))
+  .reduce((n, d) => n + (Number(d.count) || 0), 0);
 const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(" ");
 const cardVars = (c) => ({
   "--cat-solid": c.from,
@@ -54,7 +66,7 @@ const showWhole = (e) => {
   list.scrollTo({ left: list.scrollLeft + (c.left - l.left) - offset, behavior: reduce ? "auto" : "smooth" });
 };
 
-export default function HomeCategorySlider() {
+export default function HomeCategorySlider({ data }) {
   const { search } = useLocation();
   const utm = utmQuery(search);
   const items = TOP_SPECIALTY_SLUGS.map((slug) => findSpecialtyLanding(slug)).filter(Boolean);
@@ -75,9 +87,10 @@ export default function HomeCategorySlider() {
     <section ref={ref} aria-labelledby="home-categorias" className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-6 pb-0 sm:pt-2 sm:pb-10">
       <h2 id="home-categorias" className="sr-only sm:not-sr-only font-heading font-medium tracking-tight text-xl sm:text-2xl text-brand-navy">Recomendados por especialidad</h2>
       <CardSlider resetKey="categorias" label="Recomendados por especialidad" prevLabel="Ver especialidades anteriores"
-        nextLabel="Ver más especialidades" dots={false} bleed className="sm:mt-4">
+        nextLabel="Ver más especialidades" dots={false} bleed className="sm:mt-2.5">
         {items.map((c) => {
           const Icon = ICONS[c.key];
+          const recs = data && Array.isArray(data.doctors) ? recsFor(c.key, data.doctors) : null;
           return (
             <Link key={c.key} to={withUtm(`/${c.key}`, utm)} role="listitem" lang="es" onFocus={showWhole}
               onClick={() => { if (TRACK_HOME_CATEGORY) trackEvent(`home_categoria_${c.key}`); }}
@@ -87,6 +100,12 @@ export default function HomeCategorySlider() {
                 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5`}>
               <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
                 {c.title}
+                {recs !== null && (
+                  <>
+                    <span aria-hidden="true"> – {recs}</span>
+                    <span className="sr-only">, {recs} {recs === 1 ? "recomendación" : "recomendaciones"}</span>
+                  </>
+                )}
               </span>
               {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-2 right-2 sm:top-3.5 sm:right-3.5 w-[1.44rem] h-[1.44rem] sm:w-[2.1rem] sm:h-[2.1rem] lg:w-[2.4rem] lg:h-[2.4rem] text-white" />}
             </Link>
