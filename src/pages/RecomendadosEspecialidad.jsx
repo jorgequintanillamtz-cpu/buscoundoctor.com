@@ -11,6 +11,7 @@ import RecommendationCounter from "@/components/RecommendationCounter";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { setCanonical } from "@/lib/seoMeta";
 import { findSpecialtyLanding } from "@/lib/specialtyLandings";
+import { utmQuery } from "@/lib/utm";
 
 // /<especialidad> (antes /recomendados/:especialidad) -- landing por especialidad para mandar gente a recomendar a un doctor de ESA
 // especialidad (2026-11-01, pedido de David). Plantilla de las 10 especialidades en src/lib/specialtyLandings.js.
@@ -43,7 +44,7 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
   // Los utm_* con que llegan (p. ej. desde TikTok) viajan en "Recomendar a mi …" y "Recomienda para X" hacia el
   // formulario del inicio, para que la medición siga viendo de dónde vino la recomendación (2026-11-02).
   const { search } = useLocation();
-  const utm = new URLSearchParams([...new URLSearchParams(search)].filter(([k]) => k.toLowerCase().startsWith("utm_"))).toString();
+  const utm = utmQuery(search);
   const navigate = useNavigate();
   const tpl = findSpecialtyLanding(especialidad);
   const isCanonical = !!tpl && especialidad === tpl.key; // con specialty.slug (cardiologia) se redirige a la llave
