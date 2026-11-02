@@ -23,7 +23,9 @@ export const flowSlideWidth = (n) => (n === 1
 // `unverified`: la etiqueta "Sin verificar" (por defecto sí; un perfil registrado y publicado no la lleva).
 // `actions`: los botones "Ver recomendaciones" / "Yo también" de abajo (por defecto sí). El inicio los quita
 // (2026-11-02, pedido de David): ahí toda la tarjeta (foto y datos) es el enlace a su página.
-export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true }) {
+// `details`: la zona ("Monterrey", "San Pedro…") y las etiquetas ("Buen trato", "Da seguimiento"…) (por defecto sí). El
+// inicio las quita (2026-11-02, pedido de David) para que la vista vaya al sello de recomendaciones.
+export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true, details = true }) {
   const to = href || `/recomendado-flow/${d.slug}`;
   return (
     <div data-slug={d.slug} role="listitem"
@@ -43,12 +45,12 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
         </div>
         <div className="min-w-0 flex-1 py-3.5 sm:py-4 sm:pr-12">
           <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
-          <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, d.zone].filter(Boolean).join(" · ")}</p>
+          <p className="text-sm text-muted-foreground break-words">{[d.specialty, d.subspecialty, details && d.zone].filter(Boolean).join(" · ")}</p>
           {note && <p className="text-sm font-medium text-brand-flowDeep mt-1 break-words">{note}</p>}
           {showNew && isNew(d) && (
             <span className="inline-flex items-center mt-1.5 text-[11px] font-semibold text-brand-flowDeep bg-brand-flowMist px-2 py-0.5 rounded-full">Nuevo</span>
           )}
-          {(d.top_tags || []).length > 0 && (
+          {details && (d.top_tags || []).length > 0 && (
             // En celular, una sola línea (lo que no cabe se oculta); desde tableta salen todas.
             <div className="flex flex-wrap gap-1.5 mt-2 max-h-6 overflow-hidden sm:max-h-none">
               {d.top_tags.map((t) => <span key={t.tag} className="max-w-full truncate text-xs leading-4 bg-brand-bluePale text-brand-navy px-2.5 py-1 rounded-full whitespace-nowrap">{recommendationTagLabel(t.tag)}{t.n > 1 ? ` · ${t.n}` : ""}</span>)}

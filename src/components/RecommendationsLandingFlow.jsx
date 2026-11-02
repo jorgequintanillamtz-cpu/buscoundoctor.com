@@ -163,8 +163,8 @@ export default function RecommendationsLanding({ data }) {
   const showNew = doctors.some(isNew) && !doctors.every(isNew);
 
   const renderSlider = (items, label) => (
-    <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed>
-      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} />)}
+    <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed className="">
+      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} details={false} />)}
     </CardSlider>
   );
 
@@ -211,11 +211,12 @@ export default function RecommendationsLanding({ data }) {
                   </Link>
                 )}
               </div>
-              <div className="mt-3">{g.items.length > 0 ? renderSlider(g.items, g.title) : renderEmpty(g)}</div>
+              <div className="mt-3.5">{g.items.length > 0 ? renderSlider(g.items, g.title) : renderEmpty(g)}</div>
             </div>
           ))}
 
-          {/* Todos los doctores, al final, con título del mismo estilo que los de arriba. */}
+          {/* Todos los doctores, al final, con título del mismo estilo que los de arriba. Entre cada título y su carrusel,
+              14 px (antes 24; pedido de David, 2026-11-02: 40% más cerca). */}
           <div className={data && doctors.length > 0 && fixedGroups.length > 0 ? "mt-12" : ""}>
             <h2 className="font-heading text-lg sm:text-xl text-brand-navy">
               <span className="font-semibold">Doctores</span> <span className="font-normal">recomendados</span>
@@ -223,14 +224,14 @@ export default function RecommendationsLanding({ data }) {
             {data === null ? (
               <p className="text-center text-sm text-muted-foreground mt-6">Cargando…</p>
             ) : doctors.length === 0 ? (
-              <div className="mt-3 rounded-3xl border border-dashed border-brand-flowSlate/40 bg-brand-flowMist/40 p-8 text-center">
+              <div className="mt-3.5 rounded-3xl border border-dashed border-brand-flowSlate/40 bg-brand-flowMist/40 p-8 text-center">
                 <Heart className="w-8 h-8 text-brand-flowSlate mx-auto mb-2" aria-hidden="true" />
                 <p className="font-heading font-semibold text-foreground">Aquí aparecerán los doctores recomendados</p>
                 <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">Sé el primero: recomienda a tu doctor arriba, en menos de un minuto.</p>
                 <a href="#formulario" className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-brand-flowSlate hover:underline">Recomendar a mi doctor <ArrowRight className="w-4 h-4" /></a>
               </div>
             ) : (
-              <div className="mt-3">{renderSlider(doctors, "Doctores recomendados")}</div>
+              <div className="mt-3.5">{renderSlider(doctors, "Doctores recomendados")}</div>
             )}
           </div>
 
