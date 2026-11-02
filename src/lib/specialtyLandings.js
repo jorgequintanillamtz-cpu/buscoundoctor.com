@@ -4,22 +4,24 @@
 // "Sé el primero en recomendar a tu dentista" y `my` en el botón "Recomendar a mi dentista".
 // Solo estas 10 tienen página; cualquier otra especialidad da "no encontrada".
 // `title`, `from` y `to` (2026-11-02): nombre y degradado de su tarjeta en el carrusel "Recomendados por
-// especialidad" del inicio. Excepción deliberada a la regla de tokens de CLAUDE.md §11: van aquí como datos para
-// editarlos en un solo lugar. Contraste contra texto blanco (WCAG), `from` -> `to` (el `to` es 18% más oscuro):
-// Médico General 6.70/8.82 · Ginecólogo 6.04/8.10 · Pediatra 5.18/7.03 · Dentista 5.47/7.40 · Dermatólogo 5.36/7.20 ·
-// Cardiólogo 6.47/8.60 · Psicólogo 7.10/9.27 · Nutriólogo 5.02/6.89 · Endocrinólogo 10.36/12.47 ·
-// Gastroenterólogo 7.09/9.21. Si cambias un color, mantén 4.5:1 o más en el más claro de los dos.
+// especialidad" del inicio. Tonos pastel (paleta Pantone de David: Delicate Blue, Flushing Pink, Fall Fantasy, Ice Green,
+// Atomizer, Coral Chic, Orchid Bloom, Green Glow, Hot Pink, Sunshine); el `to` es el mismo tono 6% más oscuro. El texto
+// es azul marino de la marca (brand.navy #0B1E4D). Contraste del texto contra `from` / `to` (WCAG):
+// Médico General 11.20/9.85 · Ginecólogo 11.24/9.90 · Pediatra 6.93/6.14 · Dentista 9.85/8.67 · Dermatólogo 9.93/8.72 ·
+// Cardiólogo 6.45/5.73 · Psicólogo 7.95/7.00 · Nutriólogo 8.84/7.79 · Endocrinólogo 5.09/4.53 · Gastroenterólogo 11.96/10.51.
+// Hot Pink (#D56383) se aclaró 8.5% (#D9708E) para que también el `to` pase 4.5:1. Si cambias un color, mantén 4.5:1 o
+// más en los dos extremos. Excepción deliberada a la regla de tokens de CLAUDE.md §11: van aquí como datos.
 const ENTRIES = [
-  ["medico-general", { title: "Médico General", from: "#1D4ED8", to: "#173FB1", slug: "medicina-general", plural: "Médicos generales", lower: "médicos generales", your: "tu médico general", my: "mi médico general" }],
-  ["ginecologo", { title: "Ginecólogo", from: "#BE185D", to: "#9B134C", slug: "ginecologia", plural: "Ginecólogos", lower: "ginecólogos", your: "tu ginecólogo", my: "mi ginecólogo" }],
-  ["pediatra", { title: "Pediatra", from: "#C2410C", to: "#9F3509", slug: "pediatria", plural: "Pediatras", lower: "pediatras", your: "tu pediatra", my: "mi pediatra" }],
-  ["dentista", { title: "Dentista", from: "#0F766E", to: "#0C605A", slug: "dentista", plural: "Dentistas", lower: "dentistas", your: "tu dentista", my: "mi dentista" }],
-  ["dermatologo", { title: "Dermatólogo", from: "#8A6416", to: "#715212", slug: "dermatologia", plural: "Dermatólogos", lower: "dermatólogos", your: "tu dermatólogo", my: "mi dermatólogo" }],
-  ["cardiologo", { title: "Cardiólogo", from: "#B91C1C", to: "#971616", slug: "cardiologia", plural: "Cardiólogos", lower: "cardiólogos", your: "tu cardiólogo", my: "mi cardiólogo" }],
-  ["psicologo", { title: "Psicólogo", from: "#6D28D9", to: "#5920B1", slug: "psicologia", plural: "Psicólogos", lower: "psicólogos", your: "tu psicólogo", my: "mi psicólogo" }],
-  ["nutriologo", { title: "Nutriólogo", from: "#15803D", to: "#116832", slug: "nutricion", plural: "Nutriólogos", lower: "nutriólogos", your: "tu nutriólogo", my: "mi nutriólogo" }],
-  ["endocrinologo", { title: "Endocrinólogo", from: "#1E3A8A", to: "#182F71", slug: "endocrinologia", plural: "Endocrinólogos", lower: "endocrinólogos", your: "tu endocrinólogo", my: "mi endocrinólogo" }],
-  ["gastroenterologo", { title: "Gastroenterólogo", from: "#92400E", to: "#77340B", slug: "gastroenterologia", plural: "Gastroenterólogos", lower: "gastroenterólogos", your: "tu gastroenterólogo", my: "mi gastroenterólogo" }],
+  ["medico-general", { title: "Médico General", from: "#C8DAE7", to: "#BCCDD9", slug: "medicina-general", plural: "Médicos generales", lower: "médicos generales", your: "tu médico general", my: "mi médico general" }],
+  ["ginecologo", { title: "Ginecólogo", from: "#F4CEDB", to: "#E5C2CE", slug: "ginecologia", plural: "Ginecólogos", lower: "ginecólogos", your: "tu ginecólogo", my: "mi ginecólogo" }],
+  ["pediatra", { title: "Pediatra", from: "#EF9544", to: "#E18C40", slug: "pediatria", plural: "Pediatras", lower: "pediatras", your: "tu pediatra", my: "mi pediatra" }],
+  ["dentista", { title: "Dentista", from: "#9AD7C2", to: "#91CAB6", slug: "dentista", plural: "Dentistas", lower: "dentistas", your: "tu dentista", my: "mi dentista" }],
+  ["dermatologo", { title: "Dermatólogo", from: "#A6D2E6", to: "#9CC5D8", slug: "dermatologia", plural: "Dermatólogos", lower: "dermatólogos", your: "tu dermatólogo", my: "mi dermatólogo" }],
+  ["cardiologo", { title: "Cardiólogo", from: "#EE8878", to: "#E08071", slug: "cardiologia", plural: "Cardiólogos", lower: "cardiólogos", your: "tu cardiólogo", my: "mi cardiólogo" }],
+  ["psicologo", { title: "Psicólogo", from: "#C4AFD0", to: "#B8A4C4", slug: "psicologia", plural: "Psicólogos", lower: "psicólogos", your: "tu psicólogo", my: "mi psicólogo" }],
+  ["nutriologo", { title: "Nutriólogo", from: "#B5C96F", to: "#AABD68", slug: "nutricion", plural: "Nutriólogos", lower: "nutriólogos", your: "tu nutriólogo", my: "mi nutriólogo" }],
+  ["endocrinologo", { title: "Endocrinólogo", from: "#D9708E", to: "#CC6985", slug: "endocrinologia", plural: "Endocrinólogos", lower: "endocrinólogos", your: "tu endocrinólogo", my: "mi endocrinólogo" }],
+  ["gastroenterologo", { title: "Gastroenterólogo", from: "#F2DE90", to: "#E3D187", slug: "gastroenterologia", plural: "Gastroenterólogos", lower: "gastroenterólogos", your: "tu gastroenterólogo", my: "mi gastroenterólogo" }],
 ];
 
 export const SPECIALTY_LANDINGS = Object.fromEntries(ENTRIES.map(([key, v]) => [key, { key, ...v }]));

@@ -7,7 +7,7 @@ import { trackEvent } from "@/lib/trackEvent";
 
 // "Recomendados por especialidad" (2026-11-02, pedido de David): primer carrusel del inicio, debajo del formulario y
 // antes de los carruseles de doctores; solo en el paso 1 (RecomendacionesFlow.jsx). Una tarjeta por cada una de las 10
-// especialidades principales, en el orden de topSpecialties.js, con su color (title/from/to en specialtyLandings.js) y
+// especialidades principales, en el orden de topSpecialties.js, con su color pastel y el nombre en azul marino (title/from/to en specialtyLandings.js) y
 // enlace a su página /<llave>, conservando los utm_* de la visita.
 // Medición (Clarity): al tocar una categoría se registra "home_categoria_<llave>" (sin datos personales). Para apagarlo,
 // cambia esto a false.
@@ -45,9 +45,9 @@ export default function HomeCategorySlider() {
             onClick={() => { if (TRACK_HOME_CATEGORY) trackEvent(`home_categoria_${c.key}`); }}
             style={{ backgroundImage: `linear-gradient(135deg, ${c.from}, ${c.to})` }}
             className={`snap-start shrink-0 ${SLIDE} aspect-[16/9] min-h-11 rounded-2xl p-3 sm:p-4 flex items-end shadow-sm shadow-brand-navy/10
-              outline-none focus-visible:ring-4 focus-visible:ring-brand-navy/40 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
+              outline-none focus-visible:ring-4 focus-visible:ring-brand-navy focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
               motion-safe:transition-transform motion-safe:hover:-translate-y-0.5`}>
-            <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
+            <span className="font-heading font-semibold text-brand-navy text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
               {c.title}
             </span>
           </Link>
