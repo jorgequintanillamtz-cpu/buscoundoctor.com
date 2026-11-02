@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Heart, ShieldQuestion } from "lucide-react";
+import { ArrowRight, Heart, ShieldQuestion, Star } from "lucide-react";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import RecommendationMedal from "@/components/RecommendationMedal";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
@@ -29,13 +29,18 @@ export const flowSlideWidth = (n) => (n === 1 ? `${SLIDE_WIDTH} mx-auto` : SLIDE
 // `maxTags` / `maxTagsMobile`: cuántas etiquetas salen desde tableta (640 px) y en celular. El inicio vuelve a mostrarlas,
 // 2 en computadora y 1 en celular (2026-11-02, pedido de David); sin estas props, como siempre (una línea en celular y
 // todas desde tableta).
-export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true, showSpecialty = true, tags = true, maxTags = 0, maxTagsMobile = 0 }) {
+// `counter`: cómo se muestra el número de recomendaciones: "medal" (por defecto) = el sello dorado arriba a la derecha;
+// "star" = una estrella verde con "5 Recomendaciones" justo bajo el nombre, sin sello (prueba del inicio, 2026-11-02,
+// pedido de David).
+export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true, showSpecialty = true, tags = true, maxTags = 0, maxTagsMobile = 0, counter = "medal" }) {
   const to = href || `/recomendado-flow/${d.slug}`;
+  const medal = counter !== "star"; // con el sello, nombre y zona dejan libre su lugar a la derecha
+  const recs = Number(d.count) || 0;
   return (
     <div data-slug={d.slug} role="listitem"
       className={`relative snap-start shrink-0 overflow-hidden rounded-2xl border border-white/80 bg-white/60 backdrop-blur-sm shadow-sm shadow-brand-navy/5 hover:bg-white/80 transition-all flex flex-col ${flowSlideWidth(count)}`}>
       {/* Recomendaciones: sello dorado "RECOMENDADO" en la esquina, con el número adentro. */}
-      <RecommendationMedal count={d.count} className="absolute top-3 right-3" />
+      {medal && <RecommendationMedal count={d.count} className="absolute top-3 right-3" />}
       <Link to={to} className="flex items-stretch gap-3 sm:gap-4 flex-1 pr-4">
         {/* Foto con "Sin verificar" encima, abajo. Ocupa todo el lado izquierdo de la tarjeta, del borde de arriba
             hasta la línea de los botones (celular y computadora). */}
@@ -48,22 +53,31 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
           )}
         </div>
         <div className="min-w-0 flex-1 py-3.5 sm:py-4 sm:pr-12">
-          <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
-          {/* pr-[2.4rem]: deja libre el lugar del sello (empieza a ~37 px del borde derecho del contenido); un poco menos que el nombre (pr-12) para que "📍 San Pedro G. G." quepa en un renglón en celular. */}
+          <p className={`font-heading font-semibold text-foreground break-words leading-snug ${medal ? "pr-12" : ""}`}>{d.full_name}</p>
+          {!medal && (
+            // 13 px en celular (a 14 "3 Recomendaciones" no cabía en un renglón en la tarjeta de 295 px) y el número va pegado a la
+            // palabra (espacio sin salto) para que no se parta "3 / Recomendaciones"; en pantallas de menos de 360 px (la palabra
+            // ya no cabe ni partida) solo quedan la estrella y el número, y la palabra la lee el lector de pantalla.
+            <p className="mt-0.5 flex items-center gap-1 text-[13px] sm:text-sm text-brand-navy">
+              <Star className="w-4 h-4 shrink-0 fill-emerald-500 text-emerald-500" aria-hidden="true" />
+              <span><span className="font-semibold">{recs}</span><span className="max-[359px]:sr-only">{"\u00A0"}{recs === 1 ? "Recomendación" : "Recomendaciones"}</span></span>
+            </p>
+          )}
+          {/* Con sello (pr-[2.4rem]): deja libre su lugar, que empieza a ~37 px del borde derecho del contenido. Sin sello, sin relleno. */}
           {[showSpecialty && d.specialty, d.subspecialty, d.zone].some(Boolean) && (
-            <p className="text-sm text-muted-foreground break-words pr-[2.4rem]">
+            <p className={`text-sm text-muted-foreground break-words ${medal ? "pr-[2.4rem]" : ""}`}>
               {[showSpecialty && d.specialty, d.subspecialty].filter(Boolean).join(" · ")}
               {[showSpecialty && d.specialty, d.subspecialty].some(Boolean) && d.zone && " "}
-              {/* Ícono de ubicación (pin relleno con punto blanco, un poco gris) junto a la zona, sin punto de separación con
-                  la subespecialidad ni con la especialidad; "San Pedro Garza García" se abrevia "San Pedro G. G." (pedido de David,
-                  2026-11-02). */}
+              {/* Ícono de ubicación (pin relleno con punto blanco, azul marino) junto a la zona, sin punto de separación con la
+                  subespecialidad ni con la especialidad; "San Pedro Garza García" se muestra solo "San Pedro" (pedido de David,
+                  2026-11-02; "San Pedro G. G." no le gustó). */}
               {d.zone && (() => {
-                // El pin va pegado a la primera palabra de la zona (nunca solo al final de un renglón) y "G. G." no se parte.
-                const [first, ...rest] = d.zone.replace(/San Pedro Garza Garc[ií]a/i, "San Pedro G.\u00A0G.").split(" ");
+                // El pin va pegado a la primera palabra de la zona (nunca solo al final de un renglón).
+                const [first, ...rest] = d.zone.replace(/San Pedro Garza Garc[ií]a/i, "San Pedro").split(" ");
                 return (
                   <>
                     <span className="whitespace-nowrap">
-                      <svg viewBox="0 0 24 24" aria-hidden="true" className="inline-block w-[15px] h-[15px] -mt-0.5 mr-1 align-middle text-brand-navy/65">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" className="inline-block w-[15px] h-[15px] -mt-0.5 mr-1 align-middle text-brand-navy">
                         <path fill="currentColor" d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 5.3 6 11.3 6.8 12.1a1 1 0 0 0 1.4 0c.8-.8 6.8-6.8 6.8-12.1A7.5 7.5 0 0 0 12 2Z" />
                         <circle cx="12" cy="9.5" r="2.7" fill="#fff" />
                       </svg>
