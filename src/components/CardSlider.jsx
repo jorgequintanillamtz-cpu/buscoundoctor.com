@@ -52,16 +52,18 @@ export default function CardSlider({ children, resetKey, onSeen, label, prevLabe
     }
     return () => { window.removeEventListener("resize", update); if (io) io.disconnect(); };
   }, [resetKey]);
-  const go = (dir) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.9, behavior: "smooth" });
+  // Con "reducir movimiento" (prefers-reduced-motion) el desplazamiento es instantáneo; si no, suave como siempre.
+  const behavior = () => (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
+  const go = (dir) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.9, behavior: behavior() });
   const goTo = (i) => {
     const el = ref.current; const k = el?.children[i];
-    if (el && k) el.scrollTo({ left: el.scrollLeft + k.getBoundingClientRect().left - el.getBoundingClientRect().left, behavior: "smooth" });
+    if (el && k) el.scrollTo({ left: el.scrollLeft + k.getBoundingClientRect().left - el.getBoundingClientRect().left, behavior: behavior() });
   };
   const arrow = "hidden md:flex absolute top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white border border-border shadow-md text-foreground hover:border-brand-augusta hover:text-brand-augusta transition-colors";
   return (
     <div className={className}>
       <div className="relative">
-        <div ref={ref} onScroll={update} className={`flex gap-3 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${bleed ? "-mx-4 px-4 scroll-px-4 sm:mx-0 sm:px-0 sm:scroll-px-0" : ""}`} role="list" aria-label={label}>
+        <div ref={ref} onScroll={update} className={`flex gap-3 overflow-x-auto snap-x snap-mandatory motion-safe:scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${bleed ? "-mx-4 px-4 scroll-px-4 sm:mx-0 sm:px-0 sm:scroll-px-0" : ""}`} role="list" aria-label={label}>
           {children}
         </div>
         {edge.prev && <button type="button" onClick={() => go(-1)} aria-label={prevLabel} className={`${arrow} left-0 -translate-x-1/2`}><ChevronLeft className="w-5 h-5" /></button>}
