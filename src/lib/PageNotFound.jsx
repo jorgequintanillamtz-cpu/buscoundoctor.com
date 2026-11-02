@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +7,21 @@ import { useQuery } from '@tanstack/react-query';
 export default function PageNotFound({}) {
     const location = useLocation();
     const pageName = location.pathname.substring(1);
+
+    // Vercel responde 200 a cualquier dirección: para que Google no indexe páginas que no existen (/dentistas,
+    // errores de escritura…), el 404 pone noindex. Al salir lo deja como estaba (o lo quita si lo creó), para que la
+    // siguiente página del sitio no lo herede (2026-11-02).
+    useEffect(() => {
+        let el = document.head.querySelector('meta[name="robots"]');
+        const created = !el;
+        const previous = el ? el.getAttribute('content') : null;
+        if (!el) { el = document.createElement('meta'); el.setAttribute('name', 'robots'); document.head.appendChild(el); }
+        el.setAttribute('content', 'noindex, nofollow');
+        return () => {
+            if (created) el.remove();
+            else el.setAttribute('content', previous);
+        };
+    }, []);
 
     const { data: authData, isFetched } = useQuery({
         queryKey: ['user'],
