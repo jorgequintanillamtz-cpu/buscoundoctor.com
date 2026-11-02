@@ -113,7 +113,9 @@ function SpecialtyCards({ doctors }) {
     // página propia pero con doctores, al carrusel de doctores de esta misma página (la lista /recomendados ya no
     // existe desde 2026-11-02); sin doctores, al formulario.
     const href = c.landing ? `/${c.landing}` : sp ? "#doctores" : null;
-    return { ...c, count: mine.length, href };
+    // Recomendaciones aprobadas de la especialidad (suma de `count`), el mismo número que las tarjetas de arriba.
+    const recs = mine.reduce((n, d) => n + (Number(d.count) || 0), 0);
+    return { ...c, count: mine.length, recs, href };
   });
   return (
     <section id="especialidades" className="bg-gradient-to-b from-brand-flowSky to-brand-flowDeep py-16 scroll-mt-20">
@@ -125,7 +127,11 @@ function SpecialtyCards({ doctors }) {
             const body = (
               <>
                 <span className={`w-11 h-11 rounded-xl flex items-center justify-center ${c.iconBg} ${c.tone.split(" ").find((k) => k.startsWith("text-"))}`}><Icon className="w-6 h-6" aria-hidden="true" /></span>
-                <span className="mt-3 block font-heading font-medium text-white text-sm sm:text-base leading-snug break-words">{c.name}</span>
+                <span className="mt-3 block font-heading font-medium text-white text-sm sm:text-base leading-snug break-words">
+                  {c.name}
+                  <span aria-hidden="true" className="font-normal"> {c.recs}</span>
+                  <span className="sr-only">, {c.recs} {c.recs === 1 ? "recomendación" : "recomendaciones"}</span>
+                </span>
                 <span className="mt-1 block text-xs text-white/70">
                   {c.count > 0 ? `${c.count} ${c.count === 1 ? "doctor recomendado" : "doctores recomendados"}` : "Sé el primero en recomendar"}
                 </span>
@@ -164,7 +170,7 @@ export default function RecommendationsLanding({ data }) {
 
   const renderSlider = (items, label) => (
     <CardSlider resetKey={items.map((d) => d.slug).join(",")} onSeen={(slug) => recordRecommendedViews([slug], "impression")} label={label} prevLabel="Ver doctores anteriores" nextLabel="Ver más doctores" dots={false} bleed className="">
-      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} details={false} />)}
+      {items.map((d) => <DoctorCard key={d.slug} d={d} count={items.length} showNew={showNew} actions={false} showSpecialty={false} tags={false} />)}
     </CardSlider>
   );
 
