@@ -10,7 +10,8 @@ import { trackEvent } from "@/lib/trackEvent";
 // "Recomendados por especialidad" (2026-11-02, pedido de David): primer carrusel del inicio, debajo del formulario y
 // antes de los carruseles de doctores; solo en el paso 1 (RecomendacionesFlow.jsx). Una tarjeta por cada una de las 10
 // especialidades principales, en el orden de topSpecialties.js (title/from en specialtyLandings.js), con enlace a su
-// página /<llave>, conservando los utm_* de la visita.
+// página /<llave>, conservando los utm_* de la visita. En celular el título no se ve (sigue para lectores de pantalla,
+// sr-only) y las tarjetas son 20% más grandes (pedido de David, 2026-11-02).
 // Estilo "vidrio claro" (elegido por David el 2026-11-02 entre dos propuestas): el hex de la especialidad al 74% con
 // desenfoque del fondo (antes 62%; se subió para que el color no se viera apagado), borde blanco fino y brillo suave
 // arriba. Las capas viven en .cat-card (index.css), que pone el color SÓLIDO si el navegador no tiene backdrop-filter o
@@ -30,8 +31,9 @@ const cardVars = (c) => ({
   "--cat-glass": `rgb(${rgbOf(c.from)} / 0.74)`,
   "--cat-layers": "linear-gradient(180deg, rgb(255 255 255 / 0.30) 0%, rgb(255 255 255 / 0) 22%)",
 });
-// Ancho: en celular 2 tarjetas y un pedazo de la tercera; en tableta 3 y un pedazo; en computadora 4 y un pedazo.
-const SLIDE = "w-[calc((100%_-_1.5rem)/2.3)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
+// Ancho: en celular, 20% más ancha que "2 tarjetas y un pedazo" (pedido de David, 2026-11-02): se ven 1.9 tarjetas;
+// en tableta 3 y un pedazo; en computadora 4 y un pedazo. El alto sigue la proporción 16:9.
+const SLIDE = "w-[calc((100%_-_1.5rem)*0.5217)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
 // Con teclado: si la tarjeta que recibe el foco no se ve completa (el navegador no desplaza el carrusel si ya se ve a
 // medias, como la que asoma), se alinea al inicio del carrusel, que coincide con el "snap" de las tarjetas. Sin
 // animación si el usuario pidió reducir el movimiento.
@@ -55,9 +57,9 @@ export default function HomeCategorySlider() {
 
   return (
     <section aria-labelledby="home-categorias" className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-2 pb-8 sm:pb-10">
-      <h2 id="home-categorias" className="font-heading font-medium tracking-tight text-xl sm:text-2xl text-brand-navy">Recomendados por especialidad</h2>
+      <h2 id="home-categorias" className="sr-only sm:not-sr-only font-heading font-medium tracking-tight text-xl sm:text-2xl text-brand-navy">Recomendados por especialidad</h2>
       <CardSlider resetKey="categorias" label="Recomendados por especialidad" prevLabel="Ver especialidades anteriores"
-        nextLabel="Ver más especialidades" dots={false} bleed className="mt-4">
+        nextLabel="Ver más especialidades" dots={false} bleed className="sm:mt-4">
         {items.map((c) => {
           const Icon = ICONS[c.key];
           return (

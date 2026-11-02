@@ -197,9 +197,8 @@ export default function RecommendationsLanding({ data, onRecommend }) {
             <div key={g.key} className={`${i ? "mt-12" : ""} relative`}>
               {/* "Dentistas con más recomendaciones": la especialidad en negritas y el complemento en normal
                   (si todavía no hay doctores, "recomendados por pacientes", para no contradecir la tarjeta vacía).
-                  "Ver todos →" lleva a /<especialidad> sin cambiar la altura: desde tableta va en la misma
-                  fila que el título; en celular (donde el título ya ocupa el ancho) va arriba a la derecha, dentro del
-                  margen que ya existe sobre el título. */}
+                  "Ver todos →" lleva a /<especialidad>, en la misma fila que el título; en celular no se muestra
+                  (pedido de David, 2026-11-02: las tarjetas de especialidad de arriba ya llevan ahí). */}
               <div className="sm:flex sm:items-baseline sm:justify-between sm:gap-4">
                 <h2 className="font-heading text-lg sm:text-xl text-brand-navy">
                   <span className="font-semibold">{g.title}</span>{" "}
@@ -207,7 +206,7 @@ export default function RecommendationsLanding({ data, onRecommend }) {
                 </h2>
                 {g.landing && (
                   <Link to={`/${g.landing}`} aria-label={`Ver todos los ${g.title.toLowerCase()} recomendados`}
-                    className="absolute right-0 -top-7 sm:static sm:shrink-0 text-sm font-medium text-brand-navy/80 hover:text-brand-navy hover:underline whitespace-nowrap">
+                    className="hidden sm:inline sm:shrink-0 text-sm font-medium text-brand-navy/80 hover:text-brand-navy hover:underline whitespace-nowrap">
                     Ver todos →
                   </Link>
                 )}
