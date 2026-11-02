@@ -15,6 +15,7 @@ import LegacyConditionRedirect from './lib/LegacyConditionRedirect';
 import DoctorSupportWhatsApp from './components/DoctorSupportWhatsApp';
 import LoadingLogo from "@/components/LoadingLogo";
 import TiendasPanelGuard from './components/TiendasPanelGuard';
+import { SPECIALTY_LANDINGS } from '@/lib/specialtyLandings';
 
 function RedirectToHome() {
   const { search, hash } = useLocation();
@@ -135,8 +136,12 @@ const AuthenticatedApp = () => {
         <Route path="/recomendaciones-flow" element={<RedirectToHome />} />
         {/* Página del doctor con el estilo "flow"; la enlazan las tarjetas del inicio (noindex). */}
         <Route path="/recomendado-flow/:slug" element={<RecomendadoFlow />} />
-        {/* Landing por especialidad (2026-11-01): /recomendados/dentista (profession_slug; acepta specialty.slug y
-            redirige). Siempre noindex y sin enlaces desde el sitio por ahora. Gana a /:professionSlug/:citySlug. */}
+        {/* Landings por especialidad en la raíz (2026-11-02, para carruseles de TikTok): /dentista, /pediatra…
+            Lista CERRADA de 10 rutas fijas (llaves de SPECIALTY_LANDINGS = profession_slug); cualquier otra palabra o
+            error de escritura sigue cayendo en el 404. No chocan con /:professionSlug/:citySlug (dos segmentos). */}
+        {Object.keys(SPECIALTY_LANDINGS).map((key) => (
+          <Route key={key} path={`/${key}`} element={<RecomendadosEspecialidad especialidad={key} />} />
+        ))}
         <Route path="/recomendados/:especialidad" element={<RecomendadosEspecialidad />} />
       </Route>
 

@@ -12,7 +12,7 @@ import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { setCanonical } from "@/lib/seoMeta";
 import { findSpecialtyLanding } from "@/lib/specialtyLandings";
 
-// /recomendados/:especialidad -- landing por especialidad para mandar gente a recomendar a un doctor de ESA
+// /<especialidad> (antes /recomendados/:especialidad) -- landing por especialidad para mandar gente a recomendar a un doctor de ESA
 // especialidad (2026-11-01, pedido de David). Plantilla de las 10 especialidades en src/lib/specialtyLandings.js.
 // Datos: una sola llamada a get_specialty_recommendations_landing (base de datos), que ya cuenta solo a los doctores
 // visibles, ordena por redes distintas y excluye los servicios con seo_restricted.
@@ -36,8 +36,10 @@ const people = (n) => `${n} ${n === 1 ? "persona" : "personas"}`;
 // "Limpieza dental" -> "limpieza dental" dentro de una frase (sin tocar siglas como "VPH").
 const lowerFirst = (s) => (s && s.length > 1 && s[1] === s[1].toLowerCase() ? s[0].toLowerCase() + s.slice(1) : s || "");
 
-export default function RecomendadosEspecialidad() {
-  const { especialidad } = useParams();
+// `especialidad` llega como dato desde las 10 rutas fijas /<llave> (App.jsx); si no, de /recomendados/:especialidad.
+export default function RecomendadosEspecialidad({ especialidad: fixed }) {
+  const { especialidad: fromUrl } = useParams();
+  const especialidad = fixed || fromUrl;
   const navigate = useNavigate();
   const tpl = findSpecialtyLanding(especialidad);
   const isCanonical = !!tpl && especialidad === tpl.key; // con specialty.slug (cardiologia) se redirige a la llave
@@ -63,10 +65,10 @@ export default function RecomendadosEspecialidad() {
     if (!tpl || state === "notfound") { document.title = "Especialidad no encontrada | BuscoUnDoctor"; return; }
     document.title = `${tpl.plural} recomendados por pacientes en Monterrey | BuscoUnDoctor`;
     setMeta("description", `${tpl.plural} de Monterrey y San Pedro Garza García recomendados por sus pacientes. Recomienda a ${tpl.your} en un minuto.`);
-    setCanonical(`/recomendados/${tpl.key}`);
+    setCanonical(`/${tpl.key}`);
   }, [tpl, state, data]);
 
-  if (tpl && !isCanonical) return <Navigate to={`/recomendados/${tpl.key}`} replace />;
+  if (tpl && !isCanonical) return <Navigate to={`/${tpl.key}`} replace />;
   if (state === "loading") return <div className="min-h-screen bg-brand-flowMist flex items-center justify-center"><LoadingLogo /></div>;
   if (state === "error") return <LoadError onRetry={load} />;
   if (state === "notfound") {
