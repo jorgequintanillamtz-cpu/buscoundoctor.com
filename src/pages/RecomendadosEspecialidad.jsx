@@ -118,7 +118,7 @@ export default function RecomendadosEspecialidad({ especialidad: fixed }) {
           <RecommendationCounter total={total} srLabel={`recomendaciones de ${tpl.lower}`} />
           <Link to={recommendTo}
             className="mt-7 inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
-            Recomendar a {tpl.my} <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            Recomendar a {tpl.my}
           </Link>
         </div>
       </section>
