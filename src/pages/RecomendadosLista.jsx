@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { Heart, ShieldQuestion, Search, PenLine, ChevronRight, ChevronDown, ArrowLeft, ArrowRight, Share2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { TOP_SPECIALTY_SLUGS } from "@/lib/topSpecialties";
 import { specialtyLabel, specialtySearchText } from "@/lib/specialtyAliases";
+import { findSpecialtyLanding } from "@/lib/specialtyLandings";
 
 function setMeta(name, content) {
   let el = document.querySelector(`meta[name="${name}"]`);
@@ -128,6 +129,14 @@ export default function RecomendadosLista() {
   // Impresión: los doctores que se ven en la lista (especialidad abierta, o la franja de los más recomendados).
   useEffect(() => { if (selected) recordRecommendedViews(shown.map((d) => d.slug), "impression"); }, [selected, shown]);
   useEffect(() => { if (showFeatured) recordRecommendedViews(featured.map((d) => d.slug), "impression"); }, [showFeatured, featured]);
+
+  // Las 10 especialidades con página propia (/recomendados/:especialidad, CLAUDE.md pasos 45-47) se ven ahí, no aquí:
+  // el id "esp-<nombre>" sin "esp-" es su specialty.slug (esp-pediatria -> pediatria). Un enlace viejo
+  // ?especialidad=esp-pediatria redirige a /recomendados/pediatra sin dejar paso en el historial; las demás
+  // especialidades siguen abriéndose aquí como antes.
+  const landingFor = (id) => findSpecialtyLanding(String(id || "").replace(/^esp-/, ""));
+  const redirectTo = selectedId ? landingFor(selectedId) : null;
+  if (redirectTo) return <Navigate to={`/recomendados/${redirectTo.key}`} replace />;
 
   if (state === "loading") return <div className="min-h-[60vh] flex items-center justify-center"><LoadingLogo /></div>;
   if (state === "error") return <LoadError onRetry={load} />;
@@ -272,20 +281,23 @@ export default function RecomendadosLista() {
               <div>
                 <h2 className="font-heading font-semibold text-foreground mb-3">Elige una especialidad</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {visibleGroups.map((g) => (
-                    <button
-                      key={g.id}
-                      type="button"
-                      onClick={() => setParams({ especialidad: g.id })}
-                      className="flex items-center justify-between gap-3 text-left bg-card rounded-2xl border border-brand-canvasBorder px-4 py-4 hover:border-primary/40 hover:shadow-card transition-all min-h-[64px]"
-                    >
-                      <span className="min-w-0">
-                        <span className="block font-heading font-semibold text-foreground break-words">{specialtyLabel(g.specialty)}</span>
-                        <span className="block text-sm text-muted-foreground">{g.doctors.length} {g.doctors.length === 1 ? "doctor" : "doctores"}</span>
-                      </span>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />
-                    </button>
-                  ))}
+                  {visibleGroups.map((g) => {
+                    const landing = landingFor(g.id);
+                    const cls = "flex items-center justify-between gap-3 text-left bg-card rounded-2xl border border-brand-canvasBorder px-4 py-4 hover:border-primary/40 hover:shadow-card transition-all min-h-[64px]";
+                    const body = (
+                      <>
+                        <span className="min-w-0">
+                          <span className="block font-heading font-semibold text-foreground break-words">{specialtyLabel(g.specialty)}</span>
+                          <span className="block text-sm text-muted-foreground">{g.doctors.length} {g.doctors.length === 1 ? "doctor" : "doctores"}</span>
+                        </span>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                      </>
+                    );
+                    // Con página propia: enlace a /recomendados/<profession_slug>. Si no: se abre aquí, como siempre.
+                    return landing
+                      ? <Link key={g.id} to={`/recomendados/${landing.key}`} className={cls}>{body}</Link>
+                      : <button key={g.id} type="button" onClick={() => setParams({ especialidad: g.id })} className={cls}>{body}</button>;
+                  })}
                 </div>
                 {fold && (
                   <button type="button" onClick={() => setShowRest((v) => !v)} aria-expanded={showRest}
