@@ -21,7 +21,9 @@ export const flowSlideWidth = (n) => (n === 1
 // `href`: a dónde lleva (por defecto su página de recomendado; un doctor registrado va a /especialista/…).
 // `note`: una línea extra bajo la especialidad (p. ej. "Recomendado por 3 personas para limpieza dental").
 // `unverified`: la etiqueta "Sin verificar" (por defecto sí; un perfil registrado y publicado no la lleva).
-export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true }) {
+// `actions`: los botones "Ver recomendaciones" / "Yo también" de abajo (por defecto sí). El inicio los quita
+// (2026-11-02, pedido de David): ahí toda la tarjeta (foto y datos) es el enlace a su página.
+export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, href, note, unverified = true, actions = true }) {
   const to = href || `/recomendado-flow/${d.slug}`;
   return (
     <div data-slug={d.slug} role="listitem"
@@ -54,6 +56,7 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
           )}
         </div>
       </Link>
+      {actions && (
       <div className="flex flex-wrap gap-2 mx-4 mb-3.5 sm:mb-4 pt-3 border-t border-white/80">
         <Link to={to}
           className="inline-flex items-center justify-center gap-1.5 h-10 lg:h-9 px-2.5 sm:px-3 rounded-full bg-brand-navy hover:bg-brand-navy/90 text-white text-[13px] font-semibold whitespace-nowrap transition-colors flex-1 min-w-fit">
@@ -67,6 +70,7 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
           </button>
         )}
       </div>
+      )}
     </div>
   );
 }

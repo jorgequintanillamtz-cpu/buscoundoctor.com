@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Apple, Baby, Brain, Droplet, Flower2, HeartPulse, Pill, Sparkles, Stethoscope } from "lucide-react";
 import ToothIcon from "@/components/icons/ToothIcon";
@@ -31,12 +32,15 @@ const cardVars = (c) => ({
   "--cat-glass": `rgb(${rgbOf(c.from)} / 0.74)`,
   "--cat-layers": "linear-gradient(180deg, rgb(255 255 255 / 0.30) 0%, rgb(255 255 255 / 0) 22%)",
 });
-// Ancho: en celular, 20% más ancha que "2 tarjetas y un pedazo" (pedido de David, 2026-11-02): se ven 1.9 tarjetas;
-// en tableta 3 y un pedazo; en computadora 4 y un pedazo. El alto sigue la proporción 16:9.
-const SLIDE = "w-[calc((100%_-_1.5rem)*0.5217)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
+// Ancho: en celular, media tarjeta + una entera + media (pedido de David, 2026-11-02, para que se note que hay más):
+// el carrusel llega de orilla a orilla (100% + los 2 rem de margen), menos 2 huecos de 0.75 rem, entre 2. Las tarjetas
+// se centran al deslizar (snap-center) y al cargar se centra Ginecólogo. En tableta 3 y un pedazo; en computadora 4 y
+// un pedazo (alineadas al inicio). El alto sigue la proporción 16:9.
+const MOBILE = "(max-width: 639px)";
+const SLIDE = "w-[calc((100%_+_0.5rem)/2)] sm:w-[calc((100%_-_2.25rem)/3.3)] lg:w-[calc((100%_-_3rem)/4.5)]";
 // Con teclado: si la tarjeta que recibe el foco no se ve completa (el navegador no desplaza el carrusel si ya se ve a
-// medias, como la que asoma), se alinea al inicio del carrusel, que coincide con el "snap" de las tarjetas. Sin
-// animación si el usuario pidió reducir el movimiento.
+// medias, como la que asoma), se centra (celular) o se alinea al inicio (tableta y computadora), igual que el "snap" de
+// las tarjetas. Sin animación si el usuario pidió reducir el movimiento.
 const showWhole = (e) => {
   const card = e.currentTarget;
   const list = card.parentElement;
@@ -46,17 +50,29 @@ const showWhole = (e) => {
   if (c.left >= l.left - 1 && c.right <= l.right + 1) return;
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   const pad = parseFloat(getComputedStyle(list).scrollPaddingLeft) || 0;
-  list.scrollTo({ left: list.scrollLeft + (c.left - l.left) - pad, behavior: reduce ? "auto" : "smooth" });
+  const offset = window.matchMedia?.(MOBILE).matches ? (l.width - c.width) / 2 : pad;
+  list.scrollTo({ left: list.scrollLeft + (c.left - l.left) - offset, behavior: reduce ? "auto" : "smooth" });
 };
 
 export default function HomeCategorySlider() {
   const { search } = useLocation();
   const utm = utmQuery(search);
   const items = TOP_SPECIALTY_SLUGS.map((slug) => findSpecialtyLanding(slug)).filter(Boolean);
+  const ref = useRef(null);
+  // Celular: al cargar, la segunda tarjeta (Ginecólogo) centrada, con media de Médico General y media de Pediatra.
+  useEffect(() => {
+    if (!window.matchMedia?.(MOBILE).matches) return;
+    const list = ref.current?.querySelector("[role=list]");
+    const card = list?.children[1];
+    if (!card) return;
+    const l = list.getBoundingClientRect();
+    const c = card.getBoundingClientRect();
+    list.scrollLeft += c.left + c.width / 2 - (l.left + l.width / 2);
+  }, []);
   if (items.length === 0) return null;
 
   return (
-    <section aria-labelledby="home-categorias" className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-2 pb-8 sm:pb-10">
+    <section ref={ref} aria-labelledby="home-categorias" className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-6 pb-0 sm:pt-2 sm:pb-10">
       <h2 id="home-categorias" className="sr-only sm:not-sr-only font-heading font-medium tracking-tight text-xl sm:text-2xl text-brand-navy">Recomendados por especialidad</h2>
       <CardSlider resetKey="categorias" label="Recomendados por especialidad" prevLabel="Ver especialidades anteriores"
         nextLabel="Ver más especialidades" dots={false} bleed className="sm:mt-4">
@@ -66,13 +82,13 @@ export default function HomeCategorySlider() {
             <Link key={c.key} to={withUtm(`/${c.key}`, utm)} role="listitem" lang="es" onFocus={showWhole}
               onClick={() => { if (TRACK_HOME_CATEGORY) trackEvent(`home_categoria_${c.key}`); }}
               style={cardVars(c)}
-              className={`cat-card snap-start shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 flex items-end
+              className={`cat-card snap-center sm:snap-start shrink-0 ${SLIDE} aspect-[16/9] min-h-11 relative rounded-2xl border border-white/50 p-3 sm:p-4 flex items-end
                 outline-none focus-visible:ring-4 focus-visible:ring-brand-navy focus-visible:ring-offset-2 focus-visible:ring-offset-brand-flowMist
                 motion-safe:transition-transform motion-safe:hover:-translate-y-0.5`}>
               <span className="font-heading font-semibold text-white text-base sm:text-xl lg:text-2xl leading-tight hyphens-auto break-words min-w-0">
                 {c.title}
               </span>
-              {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-1 right-1.5 sm:top-3.5 sm:right-3.5 w-[1.2rem] h-[1.2rem] sm:w-[2.1rem] sm:h-[2.1rem] lg:w-[2.4rem] lg:h-[2.4rem] text-white" />}
+              {Icon && <Icon aria-hidden="true" strokeWidth={1.75} className="absolute top-2 right-2 sm:top-3.5 sm:right-3.5 w-[1.44rem] h-[1.44rem] sm:w-[2.1rem] sm:h-[2.1rem] lg:w-[2.4rem] lg:h-[2.4rem] text-white" />}
             </Link>
           );
         })}

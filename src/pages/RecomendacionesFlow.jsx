@@ -874,7 +874,7 @@ export default function RecomendacionesFlow() {
       {step === 1 && <HomeCategorySlider />}
 
       {/* Landing: debajo del formulario, solo al inicio y al terminar (durante los pasos 2 y 3 no distrae). */}
-      {(step === 1 || step === 4) && <RecommendationsLanding data={landing} onRecommend={(slug) => { trackEvent("rec_desde_tarjeta"); startWithSlug(slug); }} />}
+      {(step === 1 || step === 4) && <RecommendationsLanding data={landing} />}
 
       {/* Botón flotante del celular: baja con la persona y la regresa al formulario. */}
       {(step === 1 || step === 4) && showFab && (
