@@ -49,21 +49,30 @@ export default function RecommendedDoctorCard({ d, count, showNew, onRecommend, 
         </div>
         <div className="min-w-0 flex-1 py-3.5 sm:py-4 sm:pr-12">
           <p className="font-heading font-semibold text-foreground break-words leading-snug pr-12">{d.full_name}</p>
-          {/* pr-12: como el nombre, deja libre el lugar del sello (una zona larga como "San Pedro Garza García" se le encimaba). */}
+          {/* pr-[2.4rem]: deja libre el lugar del sello (empieza a ~37 px del borde derecho del contenido); un poco menos que el nombre (pr-12) para que "📍 San Pedro G. G." quepa en un renglón en celular. */}
           {[showSpecialty && d.specialty, d.subspecialty, d.zone].some(Boolean) && (
-            <p className="text-sm text-muted-foreground break-words pr-12">
+            <p className="text-sm text-muted-foreground break-words pr-[2.4rem]">
               {[showSpecialty && d.specialty, d.subspecialty].filter(Boolean).join(" · ")}
-              {[showSpecialty && d.specialty, d.subspecialty].some(Boolean) && d.zone && " · "}
-              {/* Ícono de ubicación (pin relleno con punto blanco) junto a la zona; pedido de David, 2026-11-02. */}
-              {d.zone && (
-                <>
-                  <svg viewBox="0 0 24 24" aria-hidden="true" className="inline-block w-[15px] h-[15px] -mt-0.5 mr-1 align-middle text-brand-navy">
-                    <path fill="currentColor" d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 5.3 6 11.3 6.8 12.1a1 1 0 0 0 1.4 0c.8-.8 6.8-6.8 6.8-12.1A7.5 7.5 0 0 0 12 2Z" />
-                    <circle cx="12" cy="9.5" r="2.7" fill="#fff" />
-                  </svg>
-                  {d.zone}
-                </>
-              )}
+              {[showSpecialty && d.specialty, d.subspecialty].some(Boolean) && d.zone && " "}
+              {/* Ícono de ubicación (pin relleno con punto blanco, un poco gris) junto a la zona, sin punto de separación con
+                  la subespecialidad ni con la especialidad; "San Pedro Garza García" se abrevia "San Pedro G. G." (pedido de David,
+                  2026-11-02). */}
+              {d.zone && (() => {
+                // El pin va pegado a la primera palabra de la zona (nunca solo al final de un renglón) y "G. G." no se parte.
+                const [first, ...rest] = d.zone.replace(/San Pedro Garza Garc[ií]a/i, "San Pedro G.\u00A0G.").split(" ");
+                return (
+                  <>
+                    <span className="whitespace-nowrap">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" className="inline-block w-[15px] h-[15px] -mt-0.5 mr-1 align-middle text-brand-navy/65">
+                        <path fill="currentColor" d="M12 2a7.5 7.5 0 0 0-7.5 7.5c0 5.3 6 11.3 6.8 12.1a1 1 0 0 0 1.4 0c.8-.8 6.8-6.8 6.8-12.1A7.5 7.5 0 0 0 12 2Z" />
+                        <circle cx="12" cy="9.5" r="2.7" fill="#fff" />
+                      </svg>
+                      {first}
+                    </span>
+                    {rest.length > 0 && ` ${rest.join(" ")}`}
+                  </>
+                );
+              })()}
             </p>
           )}
           {note && <p className="text-sm font-medium text-brand-flowDeep mt-1 break-words">{note}</p>}
