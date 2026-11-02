@@ -54,7 +54,18 @@ export default function CardSlider({ children, resetKey, onSeen, label, prevLabe
   }, [resetKey]);
   // Con "reducir movimiento" (prefers-reduced-motion) el desplazamiento es instantáneo; si no, suave como siempre.
   const behavior = () => (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth");
-  const go = (dir) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.9, behavior: behavior() });
+  // Flechas: avanzan ~90% del ancho y terminan con una tarjeta alineada al inicio (la más cercana a ese punto). Antes era
+  // un scrollBy y el "snap" acomodaba la tarjeta; el carrusel de especialidades del inicio ya no tiene snap (desliza
+  // libre, 2026-11-02), así que la alineación se calcula aquí. En los carruseles con snap el resultado es el mismo.
+  const go = (dir) => {
+    const el = ref.current;
+    if (!el || !el.children.length) return;
+    const target = el.scrollLeft + dir * el.clientWidth * 0.9;
+    const base = el.getBoundingClientRect().left + (parseFloat(getComputedStyle(el).scrollPaddingLeft) || 0);
+    const starts = [...el.children].map((k) => el.scrollLeft + k.getBoundingClientRect().left - base);
+    const left = starts.reduce((best, x) => (Math.abs(x - target) < Math.abs(best - target) ? x : best), starts[0]);
+    el.scrollTo({ left, behavior: behavior() });
+  };
   const goTo = (i) => {
     const el = ref.current; const k = el?.children[i];
     if (el && k) el.scrollTo({ left: el.scrollLeft + k.getBoundingClientRect().left - el.getBoundingClientRect().left, behavior: behavior() });
