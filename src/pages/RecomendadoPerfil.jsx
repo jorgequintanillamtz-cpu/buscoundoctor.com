@@ -239,7 +239,7 @@ export default function RecomendadoPerfil() {
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
             <Button asChild className="rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augustaDark text-white">
-              <Link to="/registro-medico">Registrarme gratis <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
+              <Link to={`/registro-medico?doctor=${doc.slug}`}>Registrarme gratis <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
             </Button>
             <Link to="/contacto" className="text-sm text-white/80 underline hover:text-white">Ya tengo perfil o quiero corregir o retirar esta página</Link>
           </div>
