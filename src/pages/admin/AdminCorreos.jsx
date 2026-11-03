@@ -22,6 +22,8 @@ const EMAIL_TYPE_LABELS = {
   nueva_resena: "Nueva reseña",
   nueva_recomendacion: "Nueva recomendación",
   nueva_recomendacion_admin: "Nueva recomendación (aviso al equipo)",
+  solicitud_reclamo_admin: "Solicitud para reclamar un perfil (aviso al equipo)",
+  enlace_reclamo_doctor: "Enlace para reclamar el perfil (al doctor)",
   reporte_recomendacion: "Reporte en recomendaciones (aviso al equipo)",
   contacto_publico: "Formulario de contacto",
   nuevo_interes_especialidad: "Interés en especialidad",

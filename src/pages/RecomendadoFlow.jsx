@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
 import FlowNav from "@/components/FlowNav";
+import ClaimRequestDialog from "@/components/ClaimRequestDialog";
 import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { ReportMenu, commentMonth } from "@/components/RecommendationCards";
@@ -60,6 +61,7 @@ export default function RecomendadoFlow() {
   const [showFab, setShowFab] = useState(false);
   const [showAllRecs, setShowAllRecs] = useState(false);
   const [interestOpen, setInterestOpen] = useState(false); // "Avísame" abierto (también desde la barra del celular)
+  const [claimOpen, setClaimOpen] = useState(false); // ventana "Reclama tu perfil"
 
   const load = useCallback(async () => {
     setState("loading");
@@ -294,9 +296,11 @@ export default function RecomendadoFlow() {
               {interest >= INTEREST_BANNER_FROM && (
                 <p className="mt-3 text-sm text-brand-navy/70"><strong className="text-brand-navy">{interest} pacientes</strong> ya pidieron que les avisemos cuando puedas recibir citas.</p>
               )}
-              <Link to={`/registro-medico?doctor=${doc.slug}`} className="mt-5 w-full inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-brand-navy text-white font-semibold shadow-lg shadow-brand-navy/20 hover:bg-brand-navy/90 transition-colors">
-                Registrarme gratis <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </Link>
+              <button type="button" onClick={() => setClaimOpen(true)} className="mt-5 w-full inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-brand-navy text-white font-semibold shadow-lg shadow-brand-navy/20 hover:bg-brand-navy/90 transition-colors">
+                Reclamar mi perfil <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </button>
+              <p className="mt-2 text-center text-xs text-brand-navy/60">Revisamos tu cédula y te mandamos el enlace a tu correo.</p>
+              <ClaimRequestDialog doc={doc} open={claimOpen} onOpenChange={setClaimOpen} />
               <p className="mt-3 text-center"><Link to="/contacto" className="text-xs text-brand-navy/70 underline hover:text-brand-navy">Ya tengo perfil o quiero corregir o retirar esta página</Link></p>
             </div>
           </div>

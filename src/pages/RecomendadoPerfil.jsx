@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import LoadingLogo from "@/components/LoadingLogo";
 import LoadError from "@/components/LoadError";
+import ClaimRequestDialog from "@/components/ClaimRequestDialog";
 import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import RecommendationCards, { ReportMenu } from "@/components/RecommendationCards";
@@ -38,6 +39,7 @@ export default function RecomendadoPerfil() {
   const [report, setReport] = useState(null); // { id, kind, what } cuando se abre la ventana de reportar
   const [related, setRelated] = useState([]); // otros doctores de la misma especialidad
   const [showFab, setShowFab] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false); // ventana "Reclama tu perfil"
 
   const load = useCallback(async () => {
     setState("loading");
@@ -238,9 +240,10 @@ export default function RecomendadoPerfil() {
             {interest >= INTEREST_BANNER_FROM ? <> <strong className="text-white">{interest} pacientes</strong> ya pidieron que les avisemos cuando puedas recibir citas.</> : null}
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4">
-            <Button asChild className="rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augustaDark text-white">
-              <Link to={`/registro-medico?doctor=${doc.slug}`}>Registrarme gratis <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
+            <Button type="button" onClick={() => setClaimOpen(true)} className="rounded-xl min-h-[44px] gap-2 bg-brand-augusta hover:bg-brand-augustaDark text-white">
+              Reclamar mi perfil <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Button>
+            <ClaimRequestDialog doc={doc} open={claimOpen} onOpenChange={setClaimOpen} />
             <Link to="/contacto" className="text-sm text-white/80 underline hover:text-white">Ya tengo perfil o quiero corregir o retirar esta página</Link>
           </div>
         </div>

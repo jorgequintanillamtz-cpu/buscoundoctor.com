@@ -483,6 +483,11 @@ const FUNCTION_MAP = {
   adminMergeSuggestion: ({ source, target_suggestion, target_specialist } = {}) =>
     supabase.rpc('admin_merge_suggestion', { p_source: source, p_target_suggestion: target_suggestion || null, p_target_specialist: target_specialist || null }),
   adminCreateSpecialistFromSuggestion: ({ suggestion } = {}) => supabase.rpc('admin_create_specialist_from_suggestion', { p_suggestion: suggestion }),
+  submitProfileClaimRequest: ({ slug, license, email, whatsapp, consent } = {}) =>
+    supabase.rpc('submit_profile_claim_request', { p_slug: slug, p_license: license, p_email: email, p_whatsapp: whatsapp, p_consent: consent === true }),
+  adminClaimRequests: () => supabase.rpc('admin_claim_requests'),
+  adminApproveClaimRequest: ({ id } = {}) => supabase.rpc('admin_approve_claim_request', { p_request: id }),
+  adminRejectClaimRequest: ({ id, note } = {}) => supabase.rpc('admin_reject_claim_request', { p_request: id, p_note: note || null }),
   submitRecommendation: ({ email, code, target, tags, message, comment, name, first_name, last_name, show_last_name, services, consent, marketing, consent_version } = {}) =>
     supabase.rpc('submit_recommendation', {
       p_email: email, p_code: code, p_target: target, p_tags: tags || [], p_message: message || null,
