@@ -58,9 +58,8 @@ export default function RecomendadoFlow() {
   const [state, setState] = useState("loading"); // loading | ok | notfound | error
   const [report, setReport] = useState(null);
   const [related, setRelated] = useState([]);
-  const [showFab, setShowFab] = useState(false);
   const [showAllRecs, setShowAllRecs] = useState(false);
-  const [interestOpen, setInterestOpen] = useState(false); // "Avísame" abierto (también desde la barra del celular)
+  const [interestOpen, setInterestOpen] = useState(false); // "Avísame" abierto
   const [claimOpen, setClaimOpen] = useState(false); // ventana "Reclama tu perfil"
 
   const load = useCallback(async () => {
@@ -97,13 +96,6 @@ export default function RecomendadoFlow() {
     return () => { active = false; };
   }, [state, doc]);
 
-  useEffect(() => {
-    const onScroll = () => setShowFab(window.scrollY > 500);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   // Copia de prueba: nunca se indexa; el canonical apunta a la página original del doctor.
   useEffect(() => {
     setMeta("robots", "noindex, nofollow");
@@ -137,10 +129,6 @@ export default function RecomendadoFlow() {
   // Primero las que traen comentario (convencen más que "Recomienda a este doctor.") y, dentro de cada grupo, las más recientes.
   const recs = [...(doc.recommendations || [])].sort((a, b) => (Boolean(b.comment) - Boolean(a.comment)) || String(b.month || "").localeCompare(String(a.month || "")));
   const lastRec = lastRecommendationLabel(recs);
-  const openInterest = () => {
-    setInterestOpen(true);
-    requestAnimationFrame(() => document.getElementById("agendar")?.scrollIntoView({ behavior: "smooth", block: "center" }));
-  };
   const license = doc.license
     ? `Cédula ${doc.license} · consultada en la SEP`
     : doc.license_checked ? "Cédula consultada en la SEP" : "Cédula aún sin comprobar";
@@ -358,20 +346,6 @@ export default function RecomendadoFlow() {
           </p>
         </div>
       </footer>
-
-      {/* Barra fija del celular (aparece al bajar): las dos acciones del paciente, recomendar y pedir aviso. */}
-      {showFab && (
-        <div className="sm:hidden fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] inset-x-3 z-40 flex gap-2 p-1.5 rounded-full bg-brand-navy/90 backdrop-blur-md border border-white/15 shadow-lg shadow-brand-navy/30">
-          <Link to={recommendTo}
-            className="flex-1 h-11 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors">
-            <Heart className="w-4 h-4 fill-current" aria-hidden="true" /> Recomendar
-          </Link>
-          <button type="button" onClick={openInterest}
-            className="flex-1 h-11 rounded-full bg-white text-brand-navy text-sm font-semibold flex items-center justify-center gap-1.5">
-            <Bell className="w-4 h-4" aria-hidden="true" /> Avísame
-          </button>
-        </div>
-      )}
 
       <ReportRecommendationDialog open={!!report} onOpenChange={(o) => { if (!o) setReport(null); }} slug={doc.slug} commentId={report?.id || null} kind={report?.kind || null} what={report?.what || "la recomendación"} />
     </div>
