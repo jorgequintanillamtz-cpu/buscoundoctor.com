@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { Heart, ShieldQuestion, MapPin, Building2, Share2, Phone, Clock, Lock, Eye, Bell, Check, Loader2, ArrowRight, Sparkles, BadgeCheck, Info, Navigation, Quote, CalendarClock } from "lucide-react";
+import { Heart, ShieldQuestion, MapPin, Building2, Share2, Phone, Clock, Lock, Eye, Bell, Check, Loader2, ArrowRight, Sparkles, BadgeCheck, Info, Navigation, Quote, CalendarClock, UserRound, Stethoscope, ShieldCheck, Camera } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,7 +10,6 @@ import FlowNav from "@/components/FlowNav";
 import ReportRecommendationDialog from "@/components/ReportRecommendationDialog";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { ReportMenu, commentMonth } from "@/components/RecommendationCards";
-import CardSlider from "@/components/CardSlider";
 import { RecommendationMedal } from "@/components/RecommendationsLandingFlow";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
@@ -44,6 +43,7 @@ const mapsUrl = (doc) => {
 
 const BARS_FROM = 3; // las etiquetas se dibujan como barras desde 3 recomendaciones (con menos, etiquetas sueltas)
 const INTEREST_BANNER_FROM = 3; // "N pacientes pidieron que les avisen" solo desde 3
+const RECS_FIRST = 4; // recomendaciones que se ven al inicio desde tableta (2 filas de 2); en celular, 3 (el resto, con "Ver las N")
 const LANDING = "/"; // la landing de recomendaciones es el inicio del sitio desde 2026-10-30
 
 // /recomendado-flow/:slug -- la página de un doctor recomendado (la misma información que /recomendado/:slug,
@@ -58,6 +58,7 @@ export default function RecomendadoFlow() {
   const [report, setReport] = useState(null);
   const [related, setRelated] = useState([]);
   const [showFab, setShowFab] = useState(false);
+  const [showAllRecs, setShowAllRecs] = useState(false);
   const [interestOpen, setInterestOpen] = useState(false); // "Avísame" abierto (también desde la barra del celular)
 
   const load = useCallback(async () => {
@@ -130,7 +131,8 @@ export default function RecomendadoFlow() {
   const showBars = n >= BARS_FROM && doc.tags.length > 0;
   const top = doc.tags[0];
   const interest = Number(doc.interest_count) || 0;
-  const recs = doc.recommendations || [];
+  // Primero las que traen comentario (convencen más que "Recomienda a este doctor.") y, dentro de cada grupo, las más recientes.
+  const recs = [...(doc.recommendations || [])].sort((a, b) => (Boolean(b.comment) - Boolean(a.comment)) || String(b.month || "").localeCompare(String(a.month || "")));
   const lastRec = lastRecommendationLabel(recs);
   const openInterest = () => {
     setInterestOpen(true);
@@ -146,19 +148,29 @@ export default function RecomendadoFlow() {
 
       {/* 1. Portada: foto grande, nombre, sello con el número y lo más destacado. Del azul pizarra al casi blanco. */}
       <section className="bg-[linear-gradient(to_bottom,theme(colors.brand.flowHeroTop)_0%,theme(colors.brand.flowHeroTop)_12%,theme(colors.brand.flowHeroMid)_45%,theme(colors.brand.flowHeroLow)_75%,theme(colors.brand.flowMist)_100%)] pt-24 sm:pt-28 pb-14">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center sm:items-end gap-6 sm:gap-8">
-          {/* Foto grande con "Perfil sin verificar" encima, abajo */}
-          <div className="relative flex-shrink-0 w-40 h-52 sm:w-48 sm:h-60 rounded-3xl overflow-hidden border border-white/40 shadow-2xl shadow-brand-navy/30 bg-white/30">
-            <RecommendedAvatar photo={doc.photo} name={doc.full_name} className="absolute inset-0 w-full h-full" shape="rounded-none" />
-            <span className="absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-white/90 shadow-sm px-2 py-0.5 rounded-full whitespace-nowrap">
-              <ShieldQuestion className="w-3.5 h-3.5" aria-hidden="true" /> Perfil sin verificar
-            </span>
-          </div>
+        <div className={`max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 ${doc.photo ? "sm:items-end" : "sm:items-center"}`}>
+          {/* Con foto real: foto grande con "Perfil sin verificar" encima. Sin foto (casi todos): avatar chico, para no gastar
+              media portada en una silueta gris (la etiqueta pasa junto al nombre). */}
+          {doc.photo ? (
+            <div className="relative flex-shrink-0 w-40 h-52 sm:w-48 sm:h-60 rounded-3xl overflow-hidden border border-white/40 shadow-2xl shadow-brand-navy/30 bg-white/30">
+              <RecommendedAvatar photo={doc.photo} name={doc.full_name} className="absolute inset-0 w-full h-full" shape="rounded-none" />
+              <span className="absolute bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground bg-white/90 shadow-sm px-2 py-0.5 rounded-full whitespace-nowrap">
+                <ShieldQuestion className="w-3.5 h-3.5" aria-hidden="true" /> Perfil sin verificar
+              </span>
+            </div>
+          ) : (
+            <RecommendedAvatar photo={null} name={doc.full_name} className="w-24 h-24 sm:w-28 sm:h-28 ring-4 ring-white/40 shadow-xl shadow-brand-navy/20" />
+          )}
 
           <div className="min-w-0 flex-1 text-center sm:text-left text-white">
             <p className="font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.3em] text-white/75">
               {[doc.specialty, doc.zone].filter(Boolean).join(" · ")}
             </p>
+            {!doc.photo && (
+              <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-brand-navy bg-white/90 shadow-sm px-2 py-0.5 rounded-full whitespace-nowrap">
+                <ShieldQuestion className="w-3.5 h-3.5" aria-hidden="true" /> Perfil sin verificar
+              </span>
+            )}
             <h1 className="mt-3 font-heading font-medium tracking-tight text-[2.1rem] sm:text-5xl leading-[1.05] break-words">{doc.full_name}</h1>
             {doc.subspecialty && <p className="mt-2 text-white/80">{doc.subspecialty}</p>}
 
@@ -169,7 +181,12 @@ export default function RecomendadoFlow() {
                 <p className="font-heading font-medium text-lg leading-tight">
                   {n > 0 ? `Recomendado por ${n} ${n === 1 ? "paciente" : "pacientes"}` : "Aún sin recomendaciones publicadas"}
                 </p>
-                {top && <p className="text-sm text-white/80 mt-0.5">Lo que más destacan: <span className="text-emerald-200 font-medium">{recommendationTagLabel(top.tag)}</span></p>}
+                {!showBars && doc.tags.length > 0 ? (
+                  // Con menos de 3 recomendaciones no hay barras: las etiquetas van aquí, una sola vez.
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {doc.tags.slice(0, 4).map((t) => <span key={t.tag} className="text-xs bg-white/90 text-brand-navy px-2.5 py-1 rounded-full">{recommendationTagLabel(t.tag)}{t.n > 1 ? ` · ${t.n}` : ""}</span>)}
+                  </div>
+                ) : top && <p className="text-sm text-white/80 mt-0.5">Lo que más destacan: <span className="text-emerald-200 font-medium">{recommendationTagLabel(top.tag)}</span></p>}
                 {lastRec && <p className="text-xs text-white/70 mt-1 flex items-center gap-1"><CalendarClock className="w-3.5 h-3.5" aria-hidden="true" /> Última recomendación: {lastRec}</p>}
               </div>
             </div>
@@ -204,62 +221,99 @@ export default function RecomendadoFlow() {
       {/* 2. Lo que destacan y las recomendaciones: del casi blanco al azul cielo, en paneles de vidrio claro. */}
       <section className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky pb-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 grid lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 lg:items-start">
-          {doc.tags.length > 0 && (
+          {showBars && (
             <div className="rounded-3xl border border-white/80 bg-white/60 backdrop-blur-sm p-5 sm:p-6">
               <div className="flex items-start justify-between gap-3">
                 <h2 className="font-heading font-medium tracking-tight text-xl text-brand-navy">Lo que más destacan</h2>
                 <ReportMenu items={[{ label: "Reportar recomendaciones", onSelect: () => setReport({ id: null, kind: null, what: "las recomendaciones" }) }]} />
               </div>
-              {showBars ? (
-                <div className="mt-4 space-y-3">
-                  {doc.tags.slice(0, 6).map((t) => (
-                    <div key={t.tag}>
-                      {/* Porcentaje grande ("75% destaca…") y el conteo chico al lado */}
-                      <div className="flex items-baseline justify-between gap-3 text-brand-navy">
-                        <span className="text-sm truncate">{recommendationTagLabel(t.tag)}</span>
-                        <span className="flex-shrink-0">
-                          <span className="font-heading font-medium text-xl tabular-nums">{Math.round((t.n / n) * 100)}%</span>
-                          <span className="ml-1.5 text-xs text-brand-navy/60">{t.n} de {n}</span>
-                        </span>
-                      </div>
-                      <span className="mt-1 block h-2 rounded-full bg-white/80 overflow-hidden" aria-hidden="true">
-                        <span className="block h-full rounded-full bg-brand-navy" style={{ width: `${Math.max(8, Math.round((t.n / n) * 100))}%` }} />
+              <div className="mt-4 space-y-3">
+                {doc.tags.slice(0, 6).map((t) => (
+                  <div key={t.tag}>
+                    {/* Porcentaje grande ("75% destaca…") y el conteo chico al lado */}
+                    <div className="flex items-baseline justify-between gap-3 text-brand-navy">
+                      <span className="text-sm truncate">{recommendationTagLabel(t.tag)}</span>
+                      <span className="flex-shrink-0">
+                        <span className="font-heading font-medium text-xl tabular-nums">{Math.round((t.n / n) * 100)}%</span>
+                        <span className="ml-1.5 text-xs text-brand-navy/60">{t.n} de {n}</span>
                       </span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {doc.tags.map((t) => (
-                    <span key={t.tag} className="text-sm bg-white/80 text-brand-navy px-3 py-1 rounded-full border border-white">
-                      {recommendationTagLabel(t.tag)}{t.n > 1 ? ` · ${t.n}` : ""}
+                    <span className="mt-1 block h-2 rounded-full bg-white/80 overflow-hidden" aria-hidden="true">
+                      <span className="block h-full rounded-full bg-brand-navy" style={{ width: `${Math.max(8, Math.round((t.n / n) * 100))}%` }} />
                     </span>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {recs.length > 0 && (
-            <div className={`rounded-3xl border border-white/80 bg-white/60 backdrop-blur-sm p-5 sm:p-6 ${doc.tags.length === 0 ? "lg:col-span-2" : ""}`}>
-              <h2 className="font-heading font-medium tracking-tight text-xl text-brand-navy">Recomendaciones de pacientes ({recs.length})</h2>
+            <div className={`rounded-3xl border border-white/80 bg-white/60 backdrop-blur-sm p-5 sm:p-6 ${!showBars ? "lg:col-span-2" : ""}`}>
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="font-heading font-medium tracking-tight text-xl text-brand-navy">Lo que dicen sus pacientes ({recs.length})</h2>
+                {!showBars && <ReportMenu items={[{ label: "Reportar recomendaciones", onSelect: () => setReport({ id: null, kind: null, what: "las recomendaciones" }) }]} />}
+              </div>
               <p className="text-xs text-brand-navy/60 mt-0.5">Revisadas antes de publicarse; nunca mostramos el correo de quien recomienda. Solo mostramos recomendaciones positivas.</p>
-              {/* Una cita grande por recomendación; con dos o más, en carrusel (desliza o usa las flechas). */}
-              <CardSlider className="mt-4" dots={false} resetKey={recs.map((r) => r.id).join(",")} label="Recomendaciones de pacientes" prevLabel="Ver recomendaciones anteriores" nextLabel="Ver más recomendaciones">
-                {recs.map((r) => (
-                  <QuoteCard key={r.id} r={r} single={recs.length === 1}
+              {/* Una cita grande por recomendación, una debajo de otra (2026-11-02, pedido de Jorge: "mejor para abajo que laterales");
+                  desde tableta, en dos columnas que también van hacia abajo (si al lado está el panel de barras, una sola). Las primeras 6; "Ver las N" muestra el resto. */}
+              <div className={`mt-4 grid gap-3 ${showBars ? "" : "md:grid-cols-2"}`} role="list" aria-label="Recomendaciones de pacientes">
+                {(showAllRecs ? recs : recs.slice(0, RECS_FIRST)).map((r, i) => (
+                  <QuoteCard key={r.id} r={r} className={!showAllRecs && i === RECS_FIRST - 1 ? "hidden md:flex" : ""}
                     onReport={(kind) => setReport({ id: r.id, kind, what: kind === "comment" ? "el comentario" : "la recomendación" })} />
                 ))}
-              </CardSlider>
+              </div>
+              {/* Celular muestra 3 y tableta 4: con 4 recomendaciones el botón solo hace falta en celular. */}
+              {recs.length > RECS_FIRST - 1 && !showAllRecs && (
+                <button type="button" onClick={() => setShowAllRecs(true)} className={`mt-4 w-full sm:w-auto inline-flex items-center justify-center h-11 px-6 rounded-full border border-brand-navy/30 bg-white/70 text-brand-navy text-sm font-semibold hover:bg-white transition-colors ${recs.length > RECS_FIRST ? "" : "md:hidden"}`}>
+                  Ver las {recs.length} recomendaciones
+                </button>
+              )}
             </div>
           )}
         </div>
       </section>
 
-      {/* 3. Agendar (bloqueado) + avísame, y otros doctores: del azul cielo al profundo. */}
+      {/* 3. Agendar (bloqueado) + avísame y, al lado, la invitación al DOCTOR con lo que gana (el objetivo de la página es que
+          se registre; antes iba hasta el final de la página). Después, otros doctores. Del azul cielo al profundo. */}
       <section className="bg-gradient-to-b from-brand-flowSky to-brand-flowDeep pb-14">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-4">
-          <AgendarCita doc={doc} open={interestOpen} setOpen={setInterestOpen} />
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-4 lg:items-start">
+            <AgendarCita doc={doc} open={interestOpen} setOpen={setInterestOpen} />
+
+            <div className="rounded-3xl border-2 border-white bg-white/85 backdrop-blur-sm p-5 sm:p-6 text-brand-navy">
+              <p className="inline-flex items-center gap-2 text-brand-flowDeep text-sm font-semibold"><Sparkles className="w-4 h-4" aria-hidden="true" /> ¿Eres {doc.full_name}?</p>
+              <h2 className="mt-2 font-heading font-medium tracking-tight text-2xl leading-tight">
+                {n > 0 ? `${n} ${n === 1 ? "paciente te recomienda" : "pacientes te recomiendan"}.` : "Tu página ya está lista."} Reclama tu perfil gratis.
+              </h2>
+              <ul className="mt-4 space-y-2 text-sm">
+                {["Tu foto y tu presentación", "Tus horarios, precio y consultorio", "Citas directo a tu WhatsApp"].map((t) => (
+                  <li key={t} className="flex items-start gap-2"><Check className="w-4 h-4 text-brand-flowDeep flex-shrink-0 mt-0.5" aria-hidden="true" /> {t}</li>
+                ))}
+              </ul>
+              {interest >= INTEREST_BANNER_FROM && (
+                <p className="mt-3 text-sm text-brand-navy/70"><strong className="text-brand-navy">{interest} pacientes</strong> ya pidieron que les avisemos cuando puedas recibir citas.</p>
+              )}
+              <Link to="/registro-medico" className="mt-5 w-full inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-brand-navy text-white font-semibold shadow-lg shadow-brand-navy/20 hover:bg-brand-navy/90 transition-colors">
+                Registrarme gratis <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+              <p className="mt-3 text-center"><Link to="/contacto" className="text-xs text-brand-navy/70 underline hover:text-brand-navy">Ya tengo perfil o quiero corregir o retirar esta página</Link></p>
+            </div>
+          </div>
+
+          {/* Su perfil, por completar: lo que habrá aquí cuando el doctor se registre (refuerza "Avísame" y el registro). */}
+          <div className="rounded-3xl border border-white/80 bg-white/60 backdrop-blur-sm p-5 sm:p-6 text-brand-navy">
+            <h2 className="font-heading font-medium tracking-tight text-xl">Su perfil, por completar</h2>
+            <p className="text-sm text-brand-navy/70 mt-0.5">Esto es lo que verás aquí cuando {doc.full_name} reclame su perfil.</p>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              {[[UserRound, "Sobre el doctor"], [Stethoscope, "Servicios y precios"], [Clock, "Horarios"], [ShieldCheck, "Seguros que acepta"], [Camera, "Fotos del consultorio"]].map(([Icon, label]) => (
+                <div key={label} className="rounded-2xl border border-dashed border-brand-navy/25 bg-white/50 px-3 py-3 flex items-center gap-2.5 text-brand-navy/75">
+                  <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                  <span className="text-sm leading-tight flex-1">{label}</span>
+                  <Lock className="w-3.5 h-3.5 flex-shrink-0 text-brand-navy/50" aria-hidden="true" />
+                </div>
+              ))}
+            </div>
+          </div>
 
           {related.length > 0 && (
             <div className="rounded-3xl border border-white/30 bg-white/10 backdrop-blur-sm p-5 sm:p-6">
@@ -281,24 +335,8 @@ export default function RecomendadoFlow() {
         </div>
       </section>
 
-      {/* 4. Llamado para el DOCTOR (el objetivo de la página es que se registre): azul profundo. */}
-      <section className="bg-brand-flowDeep px-4 sm:px-6 pb-16 text-center text-white">
-        <p className="inline-flex items-center gap-2 text-emerald-200 text-sm font-medium"><Sparkles className="w-4 h-4" aria-hidden="true" /> ¿Eres {doc.full_name}?</p>
-        <h2 className="mt-3 font-heading font-medium tracking-tight text-3xl sm:text-4xl leading-tight max-w-2xl mx-auto">
-          {n > 0 ? `${n} ${n === 1 ? "paciente te recomienda" : "pacientes te recomiendan"}.` : "Tu página ya está lista."} Reclama tu perfil gratis.
-        </h2>
-        <p className="mt-3 text-white/75 max-w-lg mx-auto">
-          Agrega tu foto y tus datos, y que los pacientes puedan agendar contigo.
-          {interest >= INTEREST_BANNER_FROM ? <> <strong className="text-white">{interest} pacientes</strong> ya pidieron que les avisemos cuando puedas recibir citas.</> : null}
-        </p>
-        <Link to="/registro-medico" className="mt-7 inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
-          Registrarme gratis <ArrowRight className="w-4 h-4" aria-hidden="true" />
-        </Link>
-        <p className="mt-4"><Link to="/contacto" className="text-sm text-white/75 underline hover:text-white">Ya tengo perfil o quiero corregir o retirar esta página</Link></p>
-      </section>
-
-      {/* 5. Aviso y pie: del azul profundo al brillante. */}
-      <footer className="bg-gradient-to-b from-brand-flowDeep to-brand-flowBright px-4 sm:px-6 pt-6 pb-24 sm:pb-12 text-sm text-white/80">
+      {/* 4. Aviso y pie: del azul profundo al brillante. */}
+      <footer className="bg-gradient-to-b from-brand-flowDeep to-brand-flowBright px-4 sm:px-6 pt-10 pb-24 sm:pb-12 text-sm text-white/80">
         <div className="max-w-2xl mx-auto">
           <p className="flex items-start gap-2"><Info className="w-4 h-4 flex-shrink-0 mt-0.5" aria-hidden="true" /> Perfil sin verificar: los datos los dieron pacientes. Son opiniones, no una valoración médica.</p>
           <details className="mt-2 ml-6">
@@ -336,11 +374,10 @@ export default function RecomendadoFlow() {
 }
 
 // Una recomendación como cita grande: el comentario (si lo hay) en letra grande, sus etiquetas, y el primer nombre
-// (si lo dejó) con el mes. Con varias, ocupan el ancho de un carrusel; se pueden reportar sin cuenta.
-function QuoteCard({ r, single, onReport }) {
-  const width = single ? "w-full" : "w-[calc(100%_-_2.5rem)] md:w-[calc((100%_-_3.75rem)/2)]";
+// (si lo dejó) con el mes. Van una debajo de otra; se pueden reportar sin cuenta.
+function QuoteCard({ r, onReport, className = "" }) {
   return (
-    <div role="listitem" className={`snap-start shrink-0 flex flex-col rounded-2xl bg-white/80 border border-white px-5 py-5 ${width}`}>
+    <div role="listitem" className={`flex flex-col rounded-2xl bg-white/80 border border-white px-5 py-5 ${className}`}>
       <div className="flex items-start justify-between gap-3">
         <Quote className="w-7 h-7 text-brand-navy/25 flex-shrink-0" aria-hidden="true" />
         <ReportMenu ariaLabel="Reportar" items={[
