@@ -361,7 +361,7 @@ export default function RecomendadoFlow() {
 
       {/* Barra fija del celular (aparece al bajar): las dos acciones del paciente, recomendar y pedir aviso. */}
       {showFab && (
-        <div className="sm:hidden fixed bottom-3 inset-x-3 z-40 flex gap-2 p-1.5 rounded-full bg-brand-navy/45 backdrop-blur-md border border-white/15 shadow-lg shadow-brand-navy/30">
+        <div className="sm:hidden fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] inset-x-3 z-40 flex gap-2 p-1.5 rounded-full bg-brand-navy/90 backdrop-blur-md border border-white/15 shadow-lg shadow-brand-navy/30">
           <Link to={recommendTo}
             className="flex-1 h-11 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors">
             <Heart className="w-4 h-4 fill-current" aria-hidden="true" /> Recomendar
