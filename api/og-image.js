@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { PUBLIC_PREFIX, loadPublicSpecialist, validSlug } from "./_lib/og.js";
+import { PUBLIC_PREFIX, loadPublicSpecialist, loadRecommendedDoctor, validSlug } from "./_lib/og.js";
 
 // Imagen para la vista previa al compartir un perfil. Las fotos que suben los doctores
 // pueden pesar varios MB (una real pesaba 2 MB) y WhatsApp no muestra imágenes pesadas,
@@ -8,7 +8,10 @@ import { PUBLIC_PREFIX, loadPublicSpecialist, validSlug } from "./_lib/og.js";
 //    de BuscoUnDoctor en una esquina. Si la foto es vertical se recorta anclada ARRIBA (la
 //    cabeza casi siempre queda arriba; el recorte automático "por atención" llegó a cortarle
 //    la cabeza a una foto real); si es horizontal, centrada.
-//  - Sin foto, o si algo falla: tarjeta 1200×630 con el logo sobre blanco.
+//  - Sin foto (2026-11-02, pedido de Jorge): la MISMA tarjeta cuadrada con la silueta gris de siempre (la que se ve en las
+//    listas) en lugar de la foto, con el logo en la esquina. Aplica a perfiles registrados y a doctores recomendados por
+//    pacientes (`?tipo=recomendado`; su foto solo llega si el doctor ya tiene cuenta y subió una, regla de privacidad de §8r).
+//  - Si algo falla o el doctor no existe: tarjeta 1200×630 con el logo sobre blanco (la genérica del sitio).
 // Solo lee fotos de nuestro propio Storage público. CLAUDE.md §8p.
 const S = 1200;
 const W = 1200;
@@ -35,14 +38,8 @@ async function getTightLogo() {
   return tightLogo;
 }
 
-async function photoCard(buf) {
-  const upright = await sharp(buf).rotate().toBuffer(); // aplica la orientación EXIF antes de medir
-  const { width, height } = await sharp(upright).metadata();
-  const photo = await sharp(upright)
-    .resize(S, S, { fit: "cover", position: height > width ? "top" : "centre" })
-    .toBuffer();
-
-  // Logo en una "píldora" blanca semitransparente abajo a la izquierda.
+// Pone el logo en una "píldora" blanca semitransparente abajo a la izquierda de una imagen cuadrada.
+async function withLogo(base) {
   const logo = await sharp(await getTightLogo()).resize({ width: 300 }).toBuffer();
   const lm = await sharp(logo).metadata();
   const padX = 34;
@@ -54,11 +51,30 @@ async function photoCard(buf) {
     `<svg width="${pw}" height="${ph}"><rect width="${pw}" height="${ph}" rx="${ph / 2}" fill="white" fill-opacity="0.94"/></svg>`
   );
   return toJpeg(
-    sharp(photo).composite([
+    sharp(base).composite([
       { input: pill, left: margin, top: S - ph - margin },
       { input: logo, left: margin + padX, top: S - ph - margin + padY },
     ])
   );
+}
+
+async function photoCard(buf) {
+  const upright = await sharp(buf).rotate().toBuffer(); // aplica la orientación EXIF antes de medir
+  const { width, height } = await sharp(upright).metadata();
+  const photo = await sharp(upright)
+    .resize(S, S, { fit: "cover", position: height > width ? "top" : "centre" })
+    .toBuffer();
+  return withLogo(photo);
+}
+
+// Sin foto: la silueta gris (cabeza y hombros) sobre fondo gris claro, del mismo tamaño que la tarjeta con foto.
+async function silhouetteCard() {
+  const svg = Buffer.from(
+    `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}"><rect width="${S}" height="${S}" fill="#E6E8EC"/>` +
+      `<circle cx="600" cy="470" r="175" fill="#9AA0AB"/>` +
+      `<path d="M170 1200 C170 850 390 705 600 705 C810 705 1030 850 1030 1200 Z" fill="#9AA0AB"/></svg>`
+  );
+  return withLogo(await sharp(svg).png().toBuffer());
 }
 
 async function logoCard() {
@@ -74,10 +90,24 @@ export default async function handler(req, res) {
   let cache = "public, s-maxage=86400, stale-while-revalidate=604800";
   try {
     if (validSlug(slug)) {
-      const s = await loadPublicSpecialist(slug);
-      const photo = s?.profile_photo;
-      if (photo && photo.startsWith(PUBLIC_PREFIX)) {
-        out = await photoCard(await download(photo));
+      // De dónde sale la foto: el doctor recomendado (RPC pública) o el perfil registrado y publicado.
+      let found = false;
+      let photo = null;
+      if (req.query.tipo === "recomendado") {
+        const d = await loadRecommendedDoctor(slug);
+        found = !!d;
+        photo = d?.photo;
+      } else {
+        const sp = await loadPublicSpecialist(slug);
+        found = !!sp;
+        photo = sp?.profile_photo;
+      }
+      if (found) {
+        // Con foto, la foto; sin foto (o si no se puede descargar), la silueta gris. Solo se descargan fotos de nuestro Storage.
+        if (photo && photo.startsWith(PUBLIC_PREFIX)) {
+          try { out = await photoCard(await download(photo)); } catch { out = null; }
+        }
+        if (!out) out = await silhouetteCard();
         if (req.query.v) cache = "public, max-age=31536000, s-maxage=31536000, immutable";
       }
     }
