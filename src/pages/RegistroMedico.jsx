@@ -355,11 +355,16 @@ export default function RegistroMedico() {
       // Autenticado pero sin datos guardados (ej. lo mandó el panel por no
       // tener perfil): arranca el wizard con lo que Google/Microsoft ya sabe,
       // incluido el correo, para no pedirle nada dos veces.
-      setData((prev) => ({
-        ...prev,
-        full_name: prev.full_name || u.full_name || "",
-        email: prev.email || u.email || "",
-      }));
+      // Excepción: si viene de la página de un doctor recomendado (?doctor=), la cuenta con la que
+      // entró puede no ser la del doctor (y nadie ha dado su correo), así que no se precarga nada de la sesión.
+      const fromRecommended = new URLSearchParams(window.location.search).has("doctor");
+      if (!fromRecommended) {
+        setData((prev) => ({
+          ...prev,
+          full_name: prev.full_name || u.full_name || "",
+          email: prev.email || u.email || "",
+        }));
+      }
       setPhase("wizard");
     })();
     return () => { active = false; };
