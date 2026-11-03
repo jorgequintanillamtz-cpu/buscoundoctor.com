@@ -47,11 +47,73 @@ function Section({ title, icon, children }) {
   );
 }
 
+const WA_CLAIM_TEXT = (name, url) => `Hola ${name}, soy del equipo de BuscoUnDoctor. Ya revisamos tu solicitud. Reclama tu perfil aquí: ${url}`;
+
+// Una solicitud de un doctor para reclamar su perfil (CLAUDE.md §8r Paso 55): el equipo revisa la cédula en la SEP y,
+// si cuadra, "Aprobar" crea su perfil privado con sus recomendaciones y le manda el enlace por correo.
+function ClaimRequestCard({ req, link, busy, onApprove, onReject, onCopy }) {
+  const pending = req.status === "pending";
+  const mismatch = req.suggestion_license && req.suggestion_license !== req.license_number;
+  const statusPill = pending ? { label: "Por revisar", cls: "bg-amber-50 text-amber-700" }
+    : req.status === "approved" ? { label: "Aprobada", cls: "bg-emerald-50 text-emerald-700" }
+    : { label: "Rechazada", cls: "bg-red-50 text-red-700" };
+  return (
+    <div className="bg-card rounded-2xl border border-border/50 p-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <p className="font-heading font-semibold text-foreground">{req.doctor_name}</p>
+        <span className={`inline-flex text-xs font-medium px-2.5 py-1 rounded-full ${statusPill.cls}`}>{statusPill.label}</span>
+        <span className="text-xs text-muted-foreground ml-auto">{fmtDate(req.created_date)}</span>
+      </div>
+      <p className="text-sm text-muted-foreground mt-0.5">
+        {[req.specialty, req.zone].filter(Boolean).join(" · ") || "—"} · <span className="text-foreground font-medium">{req.recs_total}</span> {req.recs_total === 1 ? "recomendación" : "recomendaciones"}
+        {req.slug && <> · <a href={`/recomendado-flow/${req.slug}`} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline inline-flex items-center gap-1">Ver su página <ExternalLink className="w-3 h-3" /></a></>}
+      </p>
+
+      <dl className="mt-3 grid sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
+        <div><dt className="text-xs text-muted-foreground">Cédula que dio</dt><dd className="font-mono font-semibold text-foreground break-all">{req.license_number}</dd></div>
+        <div className="min-w-0"><dt className="text-xs text-muted-foreground">Correo</dt><dd><a href={`mailto:${req.email}`} className="text-brand-blue hover:underline break-all">{req.email}</a></dd></div>
+        <div><dt className="text-xs text-muted-foreground">WhatsApp</dt><dd><a href={`https://wa.me/52${req.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:underline inline-flex items-center gap-1">{req.whatsapp} <ExternalLink className="w-3 h-3" /></a></dd></div>
+      </dl>
+      {mismatch && <p className="mt-2 text-xs rounded-lg bg-amber-50 text-amber-800 px-3 py-2">Los pacientes habían dado otra cédula ({req.suggestion_license}). Al aprobar se usa la que dio el doctor.</p>}
+      {req.already_owned && <p className="mt-2 text-xs rounded-lg bg-red-50 text-red-700 px-3 py-2">Este doctor ya tiene un perfil con dueño. No se puede aprobar.</p>}
+
+      {pending && (
+        <div className="flex flex-wrap gap-2 mt-3">
+          <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs"><a href={SEP_URL} target="_blank" rel="noopener noreferrer">Consultar la cédula en la SEP <ExternalLink className="w-3 h-3 ml-1" /></a></Button>
+          <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs" onClick={() => onCopy(req.license_number, "Cédula copiada", "No se pudo copiar")}>Copiar cédula</Button>
+          <Button size="sm" disabled={busy || req.already_owned} onClick={() => onApprove(req)} className="rounded-lg h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white ml-auto">Aprobar y mandar enlace</Button>
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => onReject(req)} className="rounded-lg h-8 text-xs text-red-700">Rechazar</Button>
+        </div>
+      )}
+      {req.status === "approved" && (
+        <div className="mt-3 text-sm">
+          <p className={req.link_sent_at || link?.emailSent ? "text-emerald-700" : "text-amber-700"}>
+            {req.link_sent_at || link?.emailSent ? "El enlace se mandó por correo." : "El correo no salió: manda el enlace por WhatsApp."}
+          </p>
+          {link?.url ? (
+            <div className="mt-2 rounded-xl bg-muted/60 p-3">
+              <p className="text-xs text-muted-foreground">Enlace personal (solo se muestra ahora; vence en 30 días):</p>
+              <p className="text-xs font-mono break-all mt-1">{link.url}</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs" onClick={() => onCopy(link.url, "Enlace copiado", "No se pudo copiar")}>Copiar enlace</Button>
+                <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs"><a href={`https://wa.me/52${req.whatsapp}?text=${encodeURIComponent(WA_CLAIM_TEXT(req.doctor_name, link.url))}`} target="_blank" rel="noopener noreferrer">Mandar por WhatsApp</a></Button>
+              </div>
+            </div>
+          ) : (
+            req.specialist_id && <p className="text-xs text-muted-foreground mt-1">Si no le llegó, genera otro enlace desde su perfil: <Link to={`/admin/doctores/editar/${req.specialist_id}`} className="text-brand-blue hover:underline">abrir su perfil</Link>.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS = [
   { key: "pending", label: "Por revisar" },
   { key: "approved", label: "Aprobados" },
   { key: "rejected", label: "Rechazados" },
   { key: "all", label: "Todos" },
+  { key: "requests", label: "Solicitudes" },
   { key: "reports", label: "Reportes" },
 ];
 
@@ -72,6 +134,8 @@ export default function AdminRecomendaciones() {
   const [notes, setNotes] = useState({});
   const [mergeTarget, setMergeTarget] = useState({});
   const [reports, setReports] = useState([]); // reportes de visitantes sobre comentarios o páginas
+  const [claimRequests, setClaimRequests] = useState([]); // solicitudes de doctores para reclamar su perfil
+  const [claimLinks, setClaimLinks] = useState({}); // enlaces recién generados { idSolicitud: { url, emailSent } }; solo viven en esta pantalla
   const [viewStats, setViewStats] = useState({}); // vistas e impresiones por propuesta
   const [catalog, setCatalog] = useState({ specialties: [], subspecialties: [] }); // para el menú de subespecialidad de cada doctor
   const [interest, setInterest] = useState({}); // pacientes que pidieron aviso por propuesta: { id: { count, contacts[] } }
@@ -87,6 +151,7 @@ export default function AdminRecomendaciones() {
       ]);
       setSuggestions(s); setRecs(r); setSpecialists(sp.filter((x) => !x.deleted_at));
       try { setReports(await base44.entities.RecommendationReport.list("-created_at", 500)); } catch { setReports([]); }
+      try { const { data } = await base44.functions.invoke("adminClaimRequests"); setClaimRequests(Array.isArray(data) ? data : []); } catch { setClaimRequests([]); }
       try { const { data } = await base44.functions.invoke("adminRecommendedViewStats"); setViewStats(data && typeof data === "object" ? data : {}); } catch { setViewStats({}); }
       try { const { data } = await base44.functions.invoke("adminRecommendedInterest"); setInterest(data && typeof data === "object" ? data : {}); } catch { setInterest({}); }
       try { const [sp, ss] = await Promise.all([base44.entities.Specialty.filter({ active: true }), base44.entities.Subspecialty.filter({ active: true })]); setCatalog({ specialties: sp, subspecialties: ss }); } catch { setCatalog({ specialties: [], subspecialties: [] }); }
@@ -131,7 +196,7 @@ export default function AdminRecomendaciones() {
 
   const needsReview = (g) => g.status !== "rejected" && (g.status === "pending" || g.pendingIds.length > 0 || g.pendingCommentIds.length > 0);
   const matchTab = (key, g) => {
-    if (key === "reports") return false;
+    if (key === "reports" || key === "requests") return false;
     if (key === "pending") return needsReview(g);
     if (key === "approved") return g.status === "approved" && g.pendingIds.length === 0 && g.pendingCommentIds.length === 0;
     if (key === "rejected") return g.status === "rejected";
@@ -149,6 +214,26 @@ export default function AdminRecomendaciones() {
   const openReports = reports.filter((r) => r.status === "open");
   const doneReports = reports.filter((r) => r.status !== "open");
   const reasonLabel = (v) => REPORT_REASONS.find((x) => x.v === v)?.label || v;
+  const pendingClaims = claimRequests.filter((r) => r.status === "pending");
+  const doneClaims = claimRequests.filter((r) => r.status !== "pending");
+  const approveClaim = async (req) => {
+    const ok = await confirm({
+      title: `Aprobar a ${req.doctor_name}`,
+      description: `Antes de aprobar, confirma en la SEP que la cédula ${req.license_number} es de esta persona. Se creará su perfil privado con sus ${req.recs_total} ${req.recs_total === 1 ? "recomendación" : "recomendaciones"} y se le mandará el enlace a ${req.email}.`,
+      confirmLabel: "Aprobar y mandar enlace",
+    });
+    if (!ok) return;
+    const res = await run(`claim-${req.id}`, () => invoke("adminApproveClaimRequest", { id: req.id }), "Solicitud aprobada: se le mandó el enlace por correo.");
+    if (res?.ok && res.token) {
+      setClaimLinks((prev) => ({ ...prev, [req.id]: { url: `https://buscoundoctor.com/reclamar/${res.token}`, emailSent: !!res.email_sent } }));
+      if (!res.email_sent) setNotice({ ok: false, text: "Solicitud aprobada, pero el correo no salió. Copia el enlace y mándalo por WhatsApp." });
+    }
+  };
+  const rejectClaim = async (req) => {
+    const ok = await confirm({ title: `Rechazar la solicitud de ${req.doctor_name}`, description: "No se crea ningún perfil y no se le manda nada. Podrá volver a solicitarlo.", confirmLabel: "Rechazar" });
+    if (!ok) return;
+    await run(`claim-${req.id}`, () => invoke("adminRejectClaimRequest", { id: req.id }), "Solicitud rechazada.");
+  };
   const reviewReport = (rep, action, okText) => run(`rep-${rep.id}`, () => invoke("adminReviewReport", { id: rep.id, action }), okText);
 
   const run = async (key, fn, okText) => {
@@ -162,6 +247,9 @@ export default function AdminRecomendaciones() {
           ya_juntada: "Esta propuesta ya fue juntada con otra.",
           cedula_duplicada: "Ya existe un doctor con esa cédula. Júntala con ese doctor en vez de crear otro perfil.",
           no_disponible: "Esta propuesta ya no está disponible.",
+          ya_revisada: "Esta solicitud ya fue revisada.",
+          ya_reclamado: "Este doctor ya tiene un perfil con dueño.",
+          en_papelera: "El perfil de este doctor está en la papelera.",
         };
         setNotice({ ok: false, text: reasons[res.reason] || "No se pudo completar la acción." });
       } else {
@@ -568,7 +656,7 @@ export default function AdminRecomendaciones() {
     );
   };
 
-  const TABS_WITH_COUNT = TABS.map((t) => ({ ...t, count: t.key === "reports" ? openReports.length : tabCounts[t.key] }));
+  const TABS_WITH_COUNT = TABS.map((t) => ({ ...t, count: t.key === "reports" ? openReports.length : t.key === "requests" ? pendingClaims.length : tabCounts[t.key] }));
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl">
@@ -598,7 +686,7 @@ export default function AdminRecomendaciones() {
               className={`px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${tab === t.key ? "bg-brand-navy text-white" : "bg-muted text-muted-foreground hover:text-foreground"}`}>
               {t.label}
               {t.count > 0 && (
-                <span className={`ml-1.5 text-xs font-semibold rounded-full px-1.5 py-0.5 ${tab === t.key ? "bg-white/20 text-white" : (t.key === "pending" || t.key === "reports") ? "bg-amber-100 text-amber-800" : "bg-background text-muted-foreground"}`}>{t.count}</span>
+                <span className={`ml-1.5 text-xs font-semibold rounded-full px-1.5 py-0.5 ${tab === t.key ? "bg-white/20 text-white" : (t.key === "pending" || t.key === "reports" || t.key === "requests") ? "bg-amber-100 text-amber-800" : "bg-background text-muted-foreground"}`}>{t.count}</span>
               )}
             </button>
           ))}
@@ -661,13 +749,31 @@ export default function AdminRecomendaciones() {
           </>
         )}
 
-        {tab !== "reports" && visible.length === 0 && (
+        {tab === "requests" && (
+          <>
+            {claimRequests.length === 0 && (
+              <div className="text-center py-16 bg-card rounded-2xl border border-border/50"><p className="text-muted-foreground">No hay solicitudes de doctores.</p></div>
+            )}
+            {[["Por revisar", pendingClaims], ["Ya revisadas", doneClaims]].map(([title, list]) => list.length > 0 && (
+              <div key={title}>
+                <h2 className="text-sm font-heading font-semibold text-foreground mb-2">{title} ({list.length})</h2>
+                <div className="space-y-3">
+                  {list.map((req) => (
+                    <ClaimRequestCard key={req.id} req={req} link={claimLinks[req.id]} busy={busy === `claim-${req.id}`} onApprove={approveClaim} onReject={rejectClaim} onCopy={copy} />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {tab !== "reports" && tab !== "requests" && visible.length === 0 && (
           <div className="text-center py-16 bg-card rounded-2xl border border-border/50">
             <p className="text-muted-foreground">{tab === "pending" ? "No hay nada por revisar." : "No hay doctores en esta lista."}</p>
           </div>
         )}
 
-        {tab !== "reports" && visible.length > 0 && (
+        {tab !== "reports" && tab !== "requests" && visible.length > 0 && (
           <ul className="space-y-2.5">
             {visible.map((g) => {
               const vis = visibilityOf(g);
