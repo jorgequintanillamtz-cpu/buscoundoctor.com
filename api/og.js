@@ -1,4 +1,4 @@
-import { SITE, GENERIC, loadPublicSpecialist, loadRecommendedDoctor, buildProfileMeta, renderHtml, validSlug, hasUsablePhoto } from "./_lib/og.js";
+import { SITE, GENERIC, loadPublicSpecialist, loadRecommendedDoctor, buildProfileMeta, renderHtml, validSlug } from "./_lib/og.js";
 
 // Vista previa al compartir un perfil (WhatsApp, Facebook, iMessage, Telegram, LinkedIn,
 // X, Slack, Discord). Esas apps leen la página SIN ejecutar código, y el sitio es una
@@ -6,6 +6,14 @@ import { SITE, GENERIC, loadPublicSpecialist, loadRecommendedDoctor, buildProfil
 // tarjeta genérica del inicio. vercel.json manda aquí SOLO las visitas de esas apps
 // (por su user-agent) a /especialista/:slug; las personas y Google reciben el sitio normal.
 // CLAUDE.md §8p.
+// Huella corta de la foto para la dirección de la imagen: si el doctor sube otra foto cambia sola; sin foto, 0.
+const photoVersion = (photo) => {
+  if (!photo) return 0;
+  let h = 0;
+  for (const ch of String(photo)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h;
+};
+
 export default async function handler(req, res) {
   const slug = String(req.query.slug || "").toLowerCase();
   res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -32,8 +40,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Doctor recomendado por pacientes (/recomendado/:slug): tarjeta con su nombre y cuántos pacientes lo recomiendan,
-  // con el logo (nunca su foto: es un perfil sin verificar). Perfil sin verificar = lo dice la descripción.
+  // Doctor recomendado por pacientes (/recomendado/:slug y /recomendado-flow/:slug): tarjeta con su nombre y cuántos pacientes lo
+  // recomiendan. Imagen (2026-11-02, pedido de Jorge): su foto de perfil si tiene (solo llega si ya tiene cuenta y subió una) y,
+  // si no, la silueta gris; en las dos, con el logo en la esquina. Perfil sin verificar = lo dice la descripción.
   if (req.query.tipo === "recomendado") {
     let card = null;
     try {
@@ -46,8 +55,10 @@ export default async function handler(req, res) {
           ogTitle: `${d.full_name}${d.specialty ? ` — ${d.specialty}` : ""}`,
           description: `${n} ${n === 1 ? "paciente recomienda" : "pacientes recomiendan"} a ${d.full_name}. Perfil sin verificar: son opiniones de pacientes, no una valoración médica.`,
           url: `${SITE}/recomendado/${d.slug}`,
-          image: `${SITE}/api/og-image`,
-          imageAlt: "BuscoUnDoctor",
+          // v = huella de la foto (cambia si el doctor sube otra) y d = versión del diseño: al cambiar, CDN y apps vuelven a pedirla.
+          image: `${SITE}/api/og-image?tipo=recomendado&slug=${encodeURIComponent(d.slug)}&v=${photoVersion(d.photo)}&d=4`,
+          imageHeight: 1200,
+          imageAlt: `${d.full_name}${d.specialty ? `, ${d.specialty}` : ""}`,
           heading: d.full_name,
           bodyText: `${n} ${n === 1 ? "paciente recomienda" : "pacientes recomiendan"} a ${d.full_name}.`,
           noindex: !d.indexable,
@@ -82,9 +93,9 @@ export default async function handler(req, res) {
           description: meta.description,
           url: `${SITE}/especialista/${s.slug}`,
           // d = versión del diseño de la imagen: al cambiarlo, CDN y apps de mensajes la vuelven a pedir.
-          image: `${SITE}/api/og-image?slug=${encodeURIComponent(s.slug)}&v=${v}&d=3`,
-          // con foto la imagen es cuadrada (1200×1200); sin foto, la tarjeta del logo (1200×630)
-          imageHeight: hasUsablePhoto(s) ? 1200 : 630,
+          image: `${SITE}/api/og-image?slug=${encodeURIComponent(s.slug)}&v=${v}&d=4`,
+          // la imagen es cuadrada (1200×1200) con su foto o, si no tiene, con la silueta gris
+          imageHeight: 1200,
           imageAlt: `${s.full_name}, ${meta.specialtyName} en ${meta.zoneLabel}`,
           heading: s.full_name,
           bodyText: meta.description,

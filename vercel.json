@@ -54,6 +54,17 @@
       "destination": "/api/og?tipo=recomendado&slug=:slug"
     },
     {
+      "source": "/recomendado-flow/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|LinkedInBot|Slackbot|Slack-ImgProxy|Discordbot|Pinterest|SkypeUriPreview|Applebot|redditbot).*"
+        }
+      ],
+      "destination": "/api/og?tipo=recomendado&slug=:slug"
+    },
+    {
       "source": "/reclamar/:token",
       "has": [
         {

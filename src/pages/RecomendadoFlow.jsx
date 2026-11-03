@@ -125,7 +125,8 @@ export default function RecomendadoFlow() {
   if (doc.redirect) return <Navigate to={doc.redirect} replace />;
 
   const n = doc.count;
-  const url = buildAbsoluteUrl(`/recomendado/${doc.slug}`);
+  // Lo que se comparte es ESTA página (la nueva), no la vieja /recomendado/:slug; la vista previa (foto o silueta) sale de api/og.js.
+  const url = buildAbsoluteUrl(`/recomendado-flow/${doc.slug}`);
   const shareText = `${doc.full_name} está recomendado por ${n} ${n === 1 ? "paciente" : "pacientes"} en BuscoUnDoctor: ${url}`;
   const recommendTo = `${LANDING}?doctor=${doc.slug}`;
   const showBars = n >= BARS_FROM && doc.tags.length > 0;
