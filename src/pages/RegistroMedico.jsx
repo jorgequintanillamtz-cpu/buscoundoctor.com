@@ -17,6 +17,7 @@ import StepUbicacion from "@/components/registro/StepUbicacion";
 import PasswordInput from "@/components/PasswordInput";
 import PasswordChecklist from "@/components/PasswordChecklist";
 import { checkPassword, passwordProblem } from "@/lib/passwordRules";
+import { buildPrefillFromRecommended, fillEmptyFields } from "@/lib/registroPrefillRecomendado";
 
 const passwordRulesOk = (pw, email) => checkPassword(pw, email).valid;
 
@@ -109,6 +110,36 @@ export default function RegistroMedico() {
   useEffect(() => {
     const ref = new URLSearchParams(window.location.search).get("ref");
     if (ref) setData((prev) => (prev.referral_code ? prev : { ...prev, referral_code: ref.toUpperCase() }));
+  }, []);
+
+  // Viene de la página de un doctor recomendado por pacientes (/registro-medico?doctor=<slug>): arranca con lo que ya sabemos
+  // de él (nombre, especialidad, subespecialidad, zona, hospital y cédula; nunca teléfono ni correo) para que solo lo revise y
+  // complete. Solo llena campos vacíos: lo que escribió o recuperó de un borrador manda. Si algo falla, el registro sigue en blanco.
+  const [prefilledFrom, setPrefilledFrom] = useState(""); // nombre del doctor cuyos datos se precargaron
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get("doctor");
+    if (!slug || !/^[a-z0-9][a-z0-9-]{0,150}$/.test(slug)) return undefined;
+    let active = true;
+    (async () => {
+      try {
+        const { data: doc } = await base44.functions.invoke("getRecommendedDoctor", { slug });
+        if (!active || !doc?.ok || doc.redirect) return; // con perfil publicado ya no hay nada que reclamar aquí
+        const [specs, subs, zoneList, hospitals] = await Promise.all([
+          base44.entities.Specialty.filter({ active: true }).catch(() => []),
+          base44.entities.Subspecialty.filter({ active: true }).catch(() => []),
+          base44.entities.Zone.filter({ active: true }).catch(() => []),
+          base44.entities.Hospital.filter({ active: true }).catch(() => []),
+        ]);
+        if (!active) return;
+        const fill = buildPrefillFromRecommended(doc, { specialties: specs, subspecialties: subs, zones: zoneList, hospitals });
+        if (Object.keys(fill).length === 0) return;
+        setData((prev) => fillEmptyFields(prev, fill));
+        setPrefilledFrom(doc.full_name);
+      } catch {
+        // Silencioso: sin el prellenado, el registro es el de siempre.
+      }
+    })();
+    return () => { active = false; };
   }, []);
 
   const update = (field, value) => setData((prev) => ({ ...prev, [field]: value }));
@@ -463,6 +494,13 @@ export default function RegistroMedico() {
                 <div className="h-1.5 bg-brand-blue rounded-full transition-all duration-300" style={{ width: `${progressPct}%` }} />
               </div>
             </div>
+
+            {prefilledFrom && stepKey === "datos" && (
+              <div className="rounded-2xl border border-brand-augusta/30 bg-brand-augustaLight px-4 py-3 text-sm text-foreground flex gap-2.5">
+                <Sparkles className="w-4 h-4 text-brand-augusta flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <p>Ya tenemos algunos datos de <strong>{prefilledFrom}</strong> de las recomendaciones de tus pacientes. Revísalos, corrígelos si hace falta y completa lo que falte.</p>
+              </div>
+            )}
 
             {stepKey === "datos" && (
               <StepDatos data={data} update={update} error={error} specialties={specialties} />
