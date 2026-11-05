@@ -134,6 +134,7 @@ export default function AdminRecomendaciones() {
   const [notes, setNotes] = useState({});
   const [mergeTarget, setMergeTarget] = useState({});
   const [reports, setReports] = useState([]); // reportes de visitantes sobre comentarios o páginas
+  const [contactByRec, setContactByRec] = useState({}); // correo de quien hizo cada recomendación { idRecomendación: correo } (solo lo lee el equipo)
   const [claimRequests, setClaimRequests] = useState([]); // solicitudes de doctores para reclamar su perfil
   const [claimLinks, setClaimLinks] = useState({}); // enlaces recién generados { idSolicitud: { url, emailSent } }; solo viven en esta pantalla
   const [viewStats, setViewStats] = useState({}); // vistas e impresiones por propuesta
@@ -151,6 +152,10 @@ export default function AdminRecomendaciones() {
       ]);
       setSuggestions(s); setRecs(r); setSpecialists(sp.filter((x) => !x.deleted_at));
       try { setReports(await base44.entities.RecommendationReport.list("-created_at", 500)); } catch { setReports([]); }
+      try {
+        const contacts = await base44.entities.DoctorRecommendationContact.list("-created_at", 5000);
+        setContactByRec(Object.fromEntries(contacts.map((c) => [c.recommendation_id, c.email])));
+      } catch { setContactByRec({}); }
       try { const { data } = await base44.functions.invoke("adminClaimRequests"); setClaimRequests(Array.isArray(data) ? data : []); } catch { setClaimRequests([]); }
       try { const { data } = await base44.functions.invoke("adminRecommendedViewStats"); setViewStats(data && typeof data === "object" ? data : {}); } catch { setViewStats({}); }
       try { const { data } = await base44.functions.invoke("adminRecommendedInterest"); setInterest(data && typeof data === "object" ? data : {}); } catch { setInterest({}); }
@@ -487,10 +492,13 @@ export default function AdminRecomendaciones() {
                   {(r.tags || []).length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-2">{r.tags.map((t) => <span key={t} className="text-xs bg-muted px-2 py-0.5 rounded-full">{recommendationTagLabel(t)}</span>)}</div>
                   )}
-                  {r.first_name && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Quién recomienda (solo lo ve el equipo): <span className="font-medium text-foreground">{r.first_name} {r.last_name}</span>
-                      {r.show_last_name === false && " · pidió no mostrar su apellido"}
+                  {(r.first_name || contactByRec[r.id]) && (
+                    <p className="text-xs text-muted-foreground mt-2 break-words">
+                      Quién recomienda (solo lo ve el equipo):{" "}
+                      {r.first_name && <span className="font-medium text-foreground">{r.first_name} {r.last_name}</span>}
+                      {r.first_name && contactByRec[r.id] && " · "}
+                      {contactByRec[r.id] && <a href={`mailto:${contactByRec[r.id]}`} className="font-medium text-brand-blue hover:underline break-all">{contactByRec[r.id]}</a>}
+                      {r.first_name && r.show_last_name === false && " · pidió no mostrar su apellido"}
                     </p>
                   )}
                   {r.display_name ? (

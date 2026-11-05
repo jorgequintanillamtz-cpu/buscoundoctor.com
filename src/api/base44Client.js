@@ -37,6 +37,7 @@ const ENTITY_TABLE_MAP = {
   SpecialistQuestion: 'specialist_question',
   DoctorSuggestion: 'doctor_suggestion',
   DoctorRecommendation: 'doctor_recommendation',
+  DoctorRecommendationContact: 'doctor_recommendation_contact',
   RecommendationReport: 'recommendation_report',
   DoctorNotification: 'doctor_notification',
   AppointmentRequest: 'appointment_request',
