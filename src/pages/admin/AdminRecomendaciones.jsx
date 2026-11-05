@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { logActivity } from "@/api/activityLog";
@@ -198,6 +198,21 @@ export default function AdminRecomendaciones() {
     });
     return out.map((g) => ({ ...g, pendingIds: g.recs.filter((r) => r.status === "pending").map((r) => r.id), pendingCommentIds: g.recs.filter((r) => r.comment_status === "pending").map((r) => r.id) }));
   }, [suggestions, recs, specialists]);
+
+  // Enlace del correo "Nueva recomendación" (/admin/recomendaciones?revisar=<id>): abre directo la ventana del doctor con esa
+  // recomendación arriba y lista para aprobar con un toque (CLAUDE.md §8r Paso 59). Si no hay sesión de admin, RequireAdmin pide
+  // iniciar sesión y regresa aquí con el mismo enlace.
+  const revisarParam = useRef(new URLSearchParams(window.location.search).get("revisar"));
+  const [focusRecId, setFocusRecId] = useState(null);
+  useEffect(() => {
+    const id = revisarParam.current;
+    if (loading || !id) return;
+    revisarParam.current = null;
+    const g = groups.find((x) => x.recs.some((r) => r.id === id));
+    if (g) { setFocusRecId(id); setNotice(null); setDetailTab("recs"); setDetail(g.key); }
+    else setNotice({ ok: false, text: "No encontramos esa recomendación (puede que ya se haya quitado o que se haya juntado con otro doctor)." });
+    try { const u = new URL(window.location.href); u.searchParams.delete("revisar"); window.history.replaceState({}, "", u.toString()); } catch { /* sin efecto */ }
+  }, [loading, groups]);
 
   const needsReview = (g) => g.status !== "rejected" && (g.status === "pending" || g.pendingIds.length > 0 || g.pendingCommentIds.length > 0);
   const matchTab = (key, g) => {
@@ -408,6 +423,25 @@ export default function AdminRecomendaciones() {
   const copy = (text, okText, failText) => navigator.clipboard?.writeText(text).then(() => setNotice({ ok: true, text: okText })).catch(() => setNotice({ ok: false, text: failText }));
   const selected = detail ? groups.find((g) => g.key === detail) : null;
   const openDetail = (g, startTab = "recs") => { setNotice(null); setDetailTab(startTab); setDetail(g.key); };
+
+  // "Aprobar y publicar" desde el correo: si el doctor aún está por aprobar, se aprueba también (y con él sus recomendaciones
+  // pendientes, que así lo hace la base); si ya está aprobado, solo esta recomendación. Su comentario, si lo tiene, se aprueba
+  // también (se ve en el sitio solo si el interruptor de comentarios está encendido).
+  const approveFocused = (g, r) => run(`f-${r.id}`, async () => {
+    let res = { ok: true };
+    if (g.kind === "suggestion" && g.status === "pending") res = await invoke("adminReviewSuggestion", { id: g.suggestion.id, action: "approve" });
+    if (res?.ok === false) return res;
+    if (r.status !== "approved" && g.status !== "pending") res = await invoke("adminReviewRecommendation", { ids: [r.id], status: "approved" });
+    if (res?.ok === false) return res;
+    if (r.comment_status === "pending") await invoke("adminReviewRecommendationComment", { id: r.id, status: "approved" });
+    logActivity({ type: "recomendacion_aprobada", description: `Se aprobó una recomendación de ${g.name} desde el correo`, specialistId: g.specialist?.id, specialistName: g.name });
+    return res;
+  }, "Aprobada y publicada");
+  const rejectFocused = (g, r) => run(`f-${r.id}`, async () => {
+    const res = await invoke("adminReviewRecommendation", { ids: [r.id], status: "rejected" });
+    if (res?.ok !== false) logActivity({ type: "recomendacion_rechazada", description: `Se rechazó una recomendación de ${g.name} desde el correo`, specialistId: g.specialist?.id, specialistName: g.name });
+    return res;
+  }, "Recomendación rechazada");
   const noticeBox = notice && (
     <p role="status" className={`text-sm rounded-xl px-4 py-2.5 ${notice.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"}`}>{notice.text}</p>
   );
@@ -474,6 +508,53 @@ export default function AdminRecomendaciones() {
 
         <div className="px-5 py-4 space-y-5">
           {noticeBox}
+
+          {tab2 === "recs" && (() => {
+            const fr = focusRecId ? g.recs.find((x) => x.id === focusRecId) : null;
+            if (!fr) return null;
+            const doctorPending = g.kind === "suggestion" && g.status === "pending";
+            const needsAction = fr.status === "pending" || fr.comment_status === "pending" || doctorPending;
+            const otherPending = Math.max(0, g.pendingIds.length - (fr.status === "pending" ? 1 : 0));
+            const email = contactByRec[fr.id];
+            return (
+              <div className="rounded-2xl border-2 border-brand-augusta/40 bg-emerald-50/50 p-4">
+                <p className="text-xs font-semibold text-brand-augusta uppercase tracking-wide">Recomendación del correo</p>
+                {(fr.tags || []).length > 0 && <div className="flex flex-wrap gap-1.5 mt-2">{fr.tags.map((t) => <span key={t} className="text-xs bg-white border border-border/60 px-2 py-0.5 rounded-full">{recommendationTagLabel(t)}</span>)}</div>}
+                {fr.public_comment && <p className="text-sm text-foreground mt-2 break-words">“{fr.public_comment}”</p>}
+                {(fr.first_name || email) && (
+                  <p className="text-xs text-muted-foreground mt-2 break-words">
+                    Quién recomienda: {fr.first_name && <span className="font-medium text-foreground">{fr.first_name} {fr.last_name}</span>}
+                    {fr.first_name && email && " · "}{email && <a href={`mailto:${email}`} className="font-medium text-brand-blue hover:underline break-all">{email}</a>}
+                  </p>
+                )}
+                {fr.private_message && <p className="text-xs text-muted-foreground mt-1 break-words">Mensaje privado: {fr.private_message}</p>}
+                {fr.status === "rejected" ? (
+                  <p className="mt-3 text-sm text-red-700 font-medium">Esta recomendación ya fue rechazada.</p>
+                ) : needsAction ? (
+                  <>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      <Button disabled={busy === `f-${fr.id}`} onClick={() => approveFocused(g, fr)} className="rounded-xl gap-1.5 bg-brand-augusta hover:bg-brand-augusta/90 text-white">
+                        <CheckCircle2 className="w-4 h-4" /> Aprobar y publicar
+                      </Button>
+                      {fr.status === "pending" && (
+                        <Button variant="outline" disabled={busy === `f-${fr.id}`} onClick={() => rejectFocused(g, fr)} className="rounded-xl gap-1.5 text-red-700 border-red-200 hover:bg-red-50">
+                          <XCircle className="w-4 h-4" /> Rechazar
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {doctorPending
+                        ? `Como ${g.name} aún no está aprobado, también se aprueba al doctor${otherPending === 1 ? " y su otra recomendación pendiente" : otherPending > 1 ? ` y sus otras ${otherPending} recomendaciones pendientes` : ""}. `
+                        : "Se aprueba esta recomendación. "}
+                      {fr.comment_status === "pending" && "Su comentario también se aprueba (se ve en el sitio solo si el interruptor de comentarios está encendido)."}
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-3 text-sm text-emerald-700 font-medium flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Ya está aprobada y publicada.</p>
+                )}
+              </div>
+            );
+          })()}
 
           {tab2 === "recs" && (
             <ul className="space-y-2.5">
