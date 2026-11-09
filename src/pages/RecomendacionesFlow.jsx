@@ -156,7 +156,7 @@ export default function RecomendacionesFlow() {
   useEffect(() => { trackTag("landing", "inicio-recomendaciones"); }, []);
   useEffect(() => { trackEvent(step === 4 ? "rec_enviada" : `rec_paso_${step}`); }, [step]);
 
-  const vistaLista = new URLSearchParams(window.location.search).get("vista") === "lista"; // vista de prueba (Paso 60), no publicada
+  const vistaLista = new URLSearchParams(window.location.search).get("vista") !== "carruseles"; // Paso 60: la lista con buscador es el inicio; ?vista=carruseles trae los carruseles anteriores
   const landing = useLandingData(); // doctores y comentarios de la landing (también alimentan la columna de la derecha en escritorio)
   // Si se llega con un ancla (#doctores, #especialidades…) desde otra página, baja a esa sección cuando ya cargó.
   useEffect(() => {

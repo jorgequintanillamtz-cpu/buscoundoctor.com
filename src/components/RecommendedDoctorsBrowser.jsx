@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ChevronDown, Search, X } from "lucide-react";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
 import { utmQuery, withUtm } from "@/lib/utm";
+import { recordRecommendedViews } from "@/lib/recommendedViews";
 
 // VISTA DE PRUEBA (CLAUDE.md §8r, Paso 60; solo con ?vista=lista, no es lo publicado): un solo bloque "Doctores recomendados" en lugar de
 // los carruseles apilados. Arriba: un buscador por nombre y dos menús (especialidad y ciudad). Debajo, una lista ordenada de más a
@@ -85,12 +86,25 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
       .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || String(a.full_name).localeCompare(String(b.full_name), "es"));
   }, [doctors, specialty, sub, city, q]);
   const visible = list.slice(0, shown);
+  // Impresiones (CLAUDE.md §8r, paso 30): cuando el bloque está en pantalla, cuenta a los doctores que se ven en la lista
+  // (la base cuenta una por visitante por doctor por día).
+  const sectionRef = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return undefined;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [doctors.length]);
+  const visibleKey = visible.map((d) => d.slug).join(",");
+  useEffect(() => { if (inView && visibleKey) recordRecommendedViews(visibleKey.split(","), "impression"); }, [inView, visibleKey]);
   const filtering = q.trim() !== "" || specialty !== "todas" || city !== "todas";
   const reset = () => { setQ(""); setSpecialty("todas"); setSub("todas"); setCity("todas"); setShown(PAGE_SIZE); };
   const selectCls = "h-11 rounded-xl border border-white bg-white/80 px-3 text-sm text-brand-navy font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue/40 w-full";
 
   return (
-    <section id="doctores" className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky pt-8 pb-12 sm:py-14 scroll-mt-20">
+    <section id="doctores" ref={sectionRef} className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky pt-8 pb-12 sm:py-14 scroll-mt-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <h2 className="font-heading text-xl sm:text-2xl text-brand-navy"><span className="font-semibold">Doctores</span> <span className="font-normal">recomendados</span></h2>
         <p className="mt-1 text-sm text-brand-navy/70">Perfiles sin verificar: son opiniones de pacientes, no una valoración médica.</p>
