@@ -156,6 +156,7 @@ export default function RecomendacionesFlow() {
   useEffect(() => { trackTag("landing", "inicio-recomendaciones"); }, []);
   useEffect(() => { trackEvent(step === 4 ? "rec_enviada" : `rec_paso_${step}`); }, [step]);
 
+  const vistaLista = new URLSearchParams(window.location.search).get("vista") === "lista"; // vista de prueba (Paso 60), no publicada
   const landing = useLandingData(); // doctores y comentarios de la landing (también alimentan la columna de la derecha en escritorio)
   // Si se llega con un ancla (#doctores, #especialidades…) desde otra página, baja a esa sección cuando ya cargó.
   useEffect(() => {
@@ -868,10 +869,10 @@ export default function RecomendacionesFlow() {
       </div>
 
       {/* "Recomendados por especialidad": primer carrusel, solo en el paso 1, debajo del formulario. */}
-      {step === 1 && <HomeCategorySlider data={landing} />}
+      {step === 1 && !vistaLista && <HomeCategorySlider data={landing} />}
 
       {/* Landing: debajo del formulario, solo al inicio y al terminar (durante los pasos 2 y 3 no distrae). */}
-      {(step === 1 || step === 4) && <RecommendationsLanding data={landing} />}
+      {(step === 1 || step === 4) && <RecommendationsLanding data={landing} variant={vistaLista ? "lista" : "carruseles"} onRecommend={(name) => { if (step === 4) reset(); if (name) setNewDoc((p) => ({ ...p, full_name: name })); openAddDoctor(); }} />}
 
     </div>
   );

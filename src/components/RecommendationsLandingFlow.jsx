@@ -12,6 +12,7 @@ import { base44 } from "@/api/base44Client";
 import CardSlider from "@/components/CardSlider";
 import DoctorCard from "@/components/RecommendedDoctorCard";
 import RecommendationMedal from "@/components/RecommendationMedal";
+import RecommendedDoctorsBrowser from "@/components/RecommendedDoctorsBrowser";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { recordRecommendedViews } from "@/lib/recommendedViews";
 import { supportWhatsAppLink } from "@/components/DoctorSupportWhatsApp";
@@ -146,7 +147,7 @@ function SpecialtyCards({ doctors }) {
   );
 }
 
-export default function RecommendationsLanding({ data }) {
+export default function RecommendationsLanding({ data, variant = "carruseles", onRecommend }) {
   const doctors = useMemo(() => (data ? data.doctors : []), [data]);
   // Doctores de cada categoría (aunque esté vacía), para los carruseles fijos.
   const groups = useMemo(() => {
@@ -181,7 +182,9 @@ export default function RecommendationsLanding({ data }) {
 
   return (
     <div>
-      {/* Doctores recomendados */}
+      {/* Doctores recomendados (vista de prueba "lista": ?vista=lista, ver RecommendedDoctorsBrowser.jsx) */}
+      {variant === "lista" && <RecommendedDoctorsBrowser data={data} onRecommend={onRecommend} />}
+      {variant !== "lista" && (
       <section id="doctores" className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky pt-8 pb-12 sm:py-16 scroll-mt-20">
         {/* Más ancha que el resto (1400 px) para que los carruseles lleguen más lejos en computadora. */}
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
@@ -230,6 +233,7 @@ export default function RecommendationsLanding({ data }) {
           </div>
         </div>
       </section>
+      )}
 
       {/* Más especialidades: tarjetas de color, cada una con su ícono. Las que tienen página propia llevan a
           /<especialidad>; las demás, con doctores, al carrusel de doctores; sin doctores, al formulario. */}
