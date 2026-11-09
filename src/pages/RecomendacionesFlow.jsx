@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, ChevronDown, Check } from "lucide-react";
+import { Loader2, ArrowLeft, CheckCircle2, MapPin, Share2, X, PenLine, ChevronDown, Check } from "lucide-react";
 import { formErrorMessage } from "@/lib/formErrors";
 import RecommendationsLanding, { useLandingData, FAQ } from "@/components/RecommendationsLandingFlow";
 import { setOpenGraph, buildAbsoluteUrl } from "@/lib/seoMeta";
@@ -395,6 +395,15 @@ export default function RecomendacionesFlow() {
     requestAnimationFrame(() => document.getElementById("formulario")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
+  // Botón del hero y "Recomendar" del menú (2026-11-09, pedido de Jorge): la caja de búsqueda ya se ve también en celular, así que
+  // solo lleva hasta ella y deja el cursor listo para escribir el nombre (sin abrir aún el formulario largo).
+  const focusSearch = () => {
+    trackEvent("rec_buscar_nombre");
+    const box = document.getElementById("formulario");
+    box?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => document.getElementById("rec-buscar")?.focus({ preventScroll: true }), 450);
+  };
+
   const reset = () => {
     setStep(1); setTarget(null); setTags([]); setServices([]); setOpenSection(null); setMessage(""); setComment(""); setShowPrivate(false);
     // Si ya confirmó su correo, conserva correo, código, nombre y aceptación: puede recomendar a todos sus doctores sin repetir nada.
@@ -410,7 +419,7 @@ export default function RecomendacionesFlow() {
     // --ring: el anillo de enfoque de los campos (Input/Textarea) en el azul gris de la portada (brand.flowSlate,
     // #4A5B7D en HSL) solo en esta página; el resto del sitio conserva el suyo.
     <div id="top" className="min-h-screen bg-brand-flowMist" style={{ "--ring": "220 26% 39%" }}>
-      <FlowNav onRecommend={() => { if (step === 4) reset(); openAddDoctor(); }} zoomDesktop />
+      <FlowNav onRecommend={() => { if (step === 4) { reset(); window.setTimeout(focusSearch, 50); } else focusSearch(); }} zoomDesktop />
       {/* Portada: del azul pizarra arriba al azul casi blanco abajo (donde empieza la sección de doctores), pasando
           por tonos de azul para que la transición sea lenta y no se vea gris. */}
       <div className="relative bg-[linear-gradient(to_bottom,theme(colors.brand.flowHeroTop)_0%,theme(colors.brand.flowHeroTop)_12%,theme(colors.brand.flowHeroMid)_45%,theme(colors.brand.flowHeroLow)_75%,theme(colors.brand.flowMist)_100%)]">
@@ -432,7 +441,7 @@ export default function RecomendacionesFlow() {
             {/* Sin estos botones en computadora (desde lg, 2026-11-02, pedido de David): ahí el formulario ya se ve justo debajo. */}
             <div className="flex flex-wrap justify-center gap-3 mt-7 lg:hidden">
               {/* Abre directo los campos del doctor (especialidad, doctor o doctora, nombre), sin pasar por el buscador. */}
-              <button type="button" onClick={openAddDoctor} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
+              <button type="button" onClick={focusSearch} className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-brand-navy font-semibold shadow-lg shadow-black/10 hover:bg-white/90 transition-colors">
                 Recomendar a mi doctor
               </button>
               <a href="#doctores" className="hidden sm:inline-flex items-center justify-center h-12 px-6 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-semibold hover:bg-white/20 transition-colors">
@@ -455,9 +464,8 @@ export default function RecomendacionesFlow() {
         )}
       </header>
 
-      {/* En celular, la caja del formulario solo aparece cuando ya se están llenando datos (escribir un doctor, paso 2
-          en adelante); para buscar un doctor está la lupa del menú. Desde tableta se ve siempre. */}
-      <main id="formulario" className={`relative z-10 max-w-lg mx-auto px-4 pb-16 scroll-mt-24 ${step === 1 && !adding && !paramSpecialty ? "hidden sm:block" : ""}`}>
+      {/* La caja del formulario se ve siempre, también en celular (2026-11-09, pedido de Jorge: "igual en modo móvil, para solo escribir"). */}
+      <main id="formulario" className="relative z-10 max-w-lg mx-auto px-4 pb-16 scroll-mt-24">
         {/* El formulario es la pieza central de la portada: tarjeta blanca sólida (para leerse perfecto) que flota. */}
         <div className="bg-white rounded-[2rem] border border-white/60 shadow-2xl shadow-brand-navy/20 p-5 sm:p-7">
           {(step === 2 || step === 3 || (step === 1 && adding && !target)) && (
@@ -498,8 +506,9 @@ export default function RecomendacionesFlow() {
                   {!adding && (
                     <>
                       <div className="relative">
-                        <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Busca por nombre del doctor" className="h-12 rounded-xl pl-10" />
+                        {/* "Dr./Dra." fijo antes del espacio para escribir: da a entender que solo se escribe el nombre y apellido. */}
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-brand-flowSlate pointer-events-none select-none" aria-hidden="true">Dr./Dra.</span>
+                        <Input id="rec-buscar" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Nombre y apellido" aria-label="Nombre y apellido del doctor, sin Dr. ni Dra." autoComplete="off" className="h-12 rounded-xl pl-[4.9rem]" />
                         {searching && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground absolute right-3.5 top-1/2 -translate-y-1/2" />}
                       </div>
                       {shownResults && shownResults.length > 0 && (
