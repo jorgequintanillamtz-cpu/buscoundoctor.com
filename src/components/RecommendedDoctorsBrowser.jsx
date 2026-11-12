@@ -14,7 +14,9 @@ import { recordRecommendedViews } from "@/lib/recommendedViews";
 // una pantalla con los campos. Debajo, pestañas con ícono por especialidad (las 10 principales + "Otras"), una fila de botones de
 // subespecialidad cuando la especialidad tiene y la lista ordenada de más a menos recomendaciones (filas del mismo alto y "Ver más").
 // Todo filtra al momento. "Sin verificar" va UNA vez arriba, no en cada fila. Si no encuentra a nadie, invita a recomendarlo.
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 8; // computadora y tableta
+const PAGE_SIZE_MOBILE = 4; // celular (< 640 px): solo 4 doctores y "Ver más" (pedido de Jorge, 2026-11-11)
+const MOBILE_QUERY = "(max-width: 639px)";
 const norm = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 // Especialidades con página propia (/dentista, /pediatra…): mismas raíces que usa HomeCategorySlider.
 const LANDING_MATCH = {
@@ -57,11 +59,24 @@ function nameMatches(fullName, query) {
 function Tab({ icon: Icon, label, on, onClick }) {
   return (
     <button type="button" role="tab" aria-selected={on} onClick={onClick}
-      className={`flex-none flex flex-col items-center gap-1 pb-2 pt-1 border-b-2 text-[13px] whitespace-nowrap transition-colors ${on ? "border-brand-navy text-brand-navy font-semibold" : "border-transparent text-brand-navy/60 hover:text-brand-navy"}`}>
-      <Icon className="w-6 h-6" aria-hidden="true" />
+      className={`flex-none flex flex-col items-center gap-1.5 pb-2.5 pt-1.5 border-b-2 text-sm whitespace-nowrap transition-colors ${on ? "border-brand-navy text-brand-navy font-semibold" : "border-transparent text-brand-navy/60 hover:text-brand-navy"}`}>
+      <Icon className="w-8 h-8" strokeWidth={1.75} aria-hidden="true" />
       {label}
     </button>
   );
+}
+
+function useIsMobile() {
+  const [m, setM] = useState(() => (typeof window !== "undefined" && window.matchMedia ? window.matchMedia(MOBILE_QUERY).matches : false));
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return m;
 }
 
 export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
@@ -70,11 +85,13 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const [specialty, setSpecialty] = useState("todas");
   const [city, setCity] = useState("todas");
   const [sub, setSub] = useState("todas");
-  const [shown, setShown] = useState(PAGE_SIZE);
+  const [pages, setPages] = useState(1); // cuántas "tandas" de doctores se ven (cada "Ver más" suma una)
+  const pageSize = useIsMobile() ? PAGE_SIZE_MOBILE : PAGE_SIZE;
+  const shown = pages * pageSize;
   const [sheetOpen, setSheetOpen] = useState(false);
   // Al cambiar de especialidad se limpia la subespecialidad (cada especialidad tiene las suyas).
   // `specialty` es "todas", "g:<llave>" (una de las 10 con pestaña, junta Dentista + Odontopediatría, etc.), "otras" o la clave de una especialidad suelta.
-  const pickSpecialty = (value) => { setSpecialty(value); setSub("todas"); setShown(PAGE_SIZE); };
+  const pickSpecialty = (value) => { setSpecialty(value); setSub("todas"); setPages(1); };
 
   // Especialidades y ciudades que tienen doctores (especialidades de más recomendaciones a menos).
   const specialties = useMemo(() => {
@@ -136,7 +153,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const visibleKey = visible.map((d) => d.slug).join(",");
   useEffect(() => { if (inView && visibleKey) recordRecommendedViews(visibleKey.split(","), "impression"); }, [inView, visibleKey]);
   const filtering = q.trim() !== "" || specialty !== "todas" || city !== "todas";
-  const reset = () => { setQ(""); setSpecialty("todas"); setSub("todas"); setCity("todas"); setShown(PAGE_SIZE); };
+  const reset = () => { setQ(""); setSpecialty("todas"); setSub("todas"); setCity("todas"); setPages(1); };
 
   const goToList = () => document.getElementById("doctores-lista")?.scrollIntoView({ behavior: "smooth", block: "start" });
   // Opciones del menú de especialidad: las 10 principales (con su número), "Otras" y después cada especialidad suelta.
@@ -166,7 +183,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
             <div className="hidden sm:flex items-stretch max-w-3xl mx-auto mt-6 bg-white rounded-full shadow-md border border-brand-navy/10 p-1.5">
               <label className="relative flex-[1.2] min-w-0 px-5 py-1.5 rounded-full hover:bg-brand-flowMist/70 cursor-text">
                 <span className="block text-[11px] font-semibold text-brand-navy">Doctor</span>
-                <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setShown(PAGE_SIZE); }} placeholder="Buscar por nombre" autoComplete="off"
+                <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); }} placeholder="Buscar por nombre" autoComplete="off"
                   className="w-full bg-transparent text-sm text-brand-navy placeholder:text-brand-navy/50 outline-none truncate" />
               </label>
               <span className="w-px my-2 bg-brand-navy/10" aria-hidden="true" />
@@ -181,7 +198,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
               <div className="relative flex-1 min-w-0 px-5 py-1.5 rounded-full hover:bg-brand-flowMist/70 cursor-pointer">
                 <span className="block text-[11px] font-semibold text-brand-navy">Ciudad</span>
                 <span className="block text-sm text-brand-navy truncate">{cityLabel}</span>
-                <select value={city} onChange={(e) => { setCity(e.target.value); setShown(PAGE_SIZE); }} aria-label="Ciudad" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                <select value={city} onChange={(e) => { setCity(e.target.value); setPages(1); }} aria-label="Ciudad" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                   <option value="todas">Todas las ciudades</option>
                   {cities.map((c) => <option key={c.key} value={c.key}>{c.label} ({c.n})</option>)}
                 </select>
@@ -203,7 +220,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
 
             {/* Pestañas con ícono por especialidad (las 10 principales con doctores y "Otras"). */}
             <div className="mt-5 overflow-x-auto border-b border-brand-navy/15 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-5 sm:gap-7 px-0.5">
+              <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-7 sm:gap-10 px-1">
                 <Tab icon={Heart} label="Todos" on={specialty === "todas"} onClick={() => pickSpecialty("todas")} />
                 {groups.map((g) => <Tab key={g.key} icon={TAB_ICONS[g.key]} label={g.title} on={specialty === `g:${g.key}`} onClick={() => pickSpecialty(`g:${g.key}`)} />)}
                 {othersCount > 0 && <Tab icon={MoreHorizontal} label="Otras" on={specialty === "otras"} onClick={() => pickSpecialty("otras")} />}
@@ -213,7 +230,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
             {subs.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Subespecialidad">
                 {[{ key: "todas", label: "Todas" }, ...subs].map((x) => (
-                  <button key={x.key} type="button" aria-pressed={sub === x.key} onClick={() => { setSub(x.key); setShown(PAGE_SIZE); }}
+                  <button key={x.key} type="button" aria-pressed={sub === x.key} onClick={() => { setSub(x.key); setPages(1); }}
                     className={`h-8 px-3.5 rounded-full text-sm font-medium transition-colors ${sub === x.key ? "bg-brand-navy text-white" : "bg-white/80 text-brand-navy hover:bg-white"}`}>
                     {x.label}
                   </button>
@@ -262,7 +279,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
 
             {list.length > shown && (
               <div className="mt-4 text-center">
-                <button type="button" onClick={() => setShown((n) => n + PAGE_SIZE)} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full border border-white bg-white/70 hover:bg-white text-sm font-semibold text-brand-navy transition-colors">
+                <button type="button" onClick={() => setPages((n) => n + 1)} className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full border border-white bg-white/70 hover:bg-white text-sm font-semibold text-brand-navy transition-colors">
                   Ver más ({list.length - shown}) <ChevronDown className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
@@ -277,7 +294,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
           <DialogHeader><DialogTitle className="font-heading text-lg text-brand-navy">Buscar doctor</DialogTitle></DialogHeader>
           <label className="block">
             <span className="block text-sm font-semibold text-brand-navy mb-1">Doctor</span>
-            <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setShown(PAGE_SIZE); }} placeholder="Nombre y apellido" autoComplete="off"
+            <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); }} placeholder="Nombre y apellido" autoComplete="off"
               className="h-12 w-full rounded-xl border border-border px-3 text-base text-brand-navy placeholder:text-brand-navy/50 focus:outline-none focus:ring-2 focus:ring-brand-blue/40" />
           </label>
           <label className="block">
@@ -287,7 +304,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
           {subs.length > 0 && (
             <label className="block">
               <span className="block text-sm font-semibold text-brand-navy mb-1">Subespecialidad</span>
-              <select value={sub} onChange={(e) => { setSub(e.target.value); setShown(PAGE_SIZE); }} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">
+              <select value={sub} onChange={(e) => { setSub(e.target.value); setPages(1); }} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">
                 <option value="todas">Todas</option>
                 {subs.map((x) => <option key={x.key} value={x.key}>{x.label} ({x.n})</option>)}
               </select>
@@ -295,7 +312,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
           )}
           <label className="block">
             <span className="block text-sm font-semibold text-brand-navy mb-1">Ciudad</span>
-            <select value={city} onChange={(e) => { setCity(e.target.value); setShown(PAGE_SIZE); }} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">
+            <select value={city} onChange={(e) => { setCity(e.target.value); setPages(1); }} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">
               <option value="todas">Todas las ciudades</option>
               {cities.map((c) => <option key={c.key} value={c.key}>{c.label} ({c.n})</option>)}
             </select>
