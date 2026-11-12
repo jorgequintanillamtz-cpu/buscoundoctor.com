@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ChevronDown, Search, Stethoscope, Flower2, Baby, Sparkles, HeartPulse, Brain, Apple, Droplet, Pill, MoreHorizontal } from "lucide-react";
+import { Heart, ChevronDown, Search, X, MapPin, Stethoscope, Flower2, Baby, Sparkles, HeartPulse, Brain, Apple, Droplet, Pill, MoreHorizontal } from "lucide-react";
 import ToothIcon from "@/components/icons/ToothIcon";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SPECIALTY_LANDINGS } from "@/lib/specialtyLandings";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
@@ -92,7 +91,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const [pages, setPages] = useState(1); // cuántas "tandas" de doctores se ven (cada "Ver más" suma una)
   const pageSize = useIsMobile() ? PAGE_SIZE_MOBILE : PAGE_SIZE;
   const shown = pages * pageSize;
-  const [sheetOpen, setSheetOpen] = useState(false);
   // Al cambiar de especialidad se limpia la subespecialidad (cada especialidad tiene las suyas).
   // `specialty` es "todas", "g:<llave>" (una de las 10 con pestaña, junta Dentista + Odontopediatría, etc.), "otras" o la clave de una especialidad suelta.
   const pickSpecialty = (value) => { setSpecialty(value); setSub("todas"); setPages(1); };
@@ -132,7 +130,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const landingTitle = landingKey ? SPECIALTY_LANDINGS[landingKey]?.title : null;
   const specialtyLabel = specialty === "todas" ? "Todas" : specialty === "otras" ? "Otras especialidades" : specialty.startsWith("g:") ? (SPECIALTY_LANDINGS[specialty.slice(2)]?.title || "") : (specialties.find((x) => x.key === specialty)?.label || "");
   const cityLabel = city === "todas" ? "Todas" : (cities.find((x) => x.key === city)?.label || "");
-  const subLabel = sub === "todas" ? "" : (subs.find((x) => x.key === sub)?.label || "");
 
   const list = useMemo(() => {
     return doctors
@@ -159,6 +156,8 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const filtering = q.trim() !== "" || specialty !== "todas" || city !== "todas";
   const reset = () => { setQ(""); setSpecialty("todas"); setSub("todas"); setCity("todas"); setPages(1); };
 
+  // Una especialidad suelta (sin pestaña propia, p. ej. Alergología): la pestaña "Otras" queda marcada y salen sus botones.
+  const isLooseSpecialty = specialty !== "todas" && specialty !== "otras" && !specialty.startsWith("g:");
   const goToList = () => document.getElementById("doctores-lista")?.scrollIntoView({ behavior: "smooth", block: "start" });
   // Opciones del menú de especialidad: las 10 principales (con su número), "Otras" y después cada especialidad suelta.
   const specialtyOptions = (
@@ -169,8 +168,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
       {others.map((x) => <option key={x.key} value={x.key}>{x.label} ({x.n})</option>)}
     </>
   );
-  // Resumen de lo elegido (para el renglón del celular).
-  const summary = [q.trim(), specialty !== "todas" ? specialtyLabel : "", subLabel, city !== "todas" ? cityLabel : ""].filter(Boolean);
   return (
     <section id="doctores" ref={sectionRef} className="bg-gradient-to-b from-brand-flowMist to-brand-flowSky pt-8 pb-12 sm:py-14 scroll-mt-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -212,24 +209,44 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
               </button>
             </div>
 
-            {/* Celular: un solo renglón que abre la pantalla de búsqueda. */}
-            <button type="button" onClick={() => setSheetOpen(true)} aria-haspopup="dialog"
-              className="sm:hidden mt-4 w-full flex items-center gap-3 bg-white rounded-full shadow-md border border-brand-navy/10 px-4 py-2.5 text-left">
+            {/* Celular: la píldora es una caja para escribir el nombre (sin ventanas); la especialidad va en las pestañas y la ciudad en los botones de abajo. */}
+            <label className="sm:hidden mt-4 flex items-center gap-3 bg-white rounded-full shadow-md border border-brand-navy/10 pl-4 pr-3 h-12">
               <Search className="w-5 h-5 flex-none text-brand-navy" aria-hidden="true" />
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-brand-navy truncate">{summary.length ? summary.join(" · ") : "Buscar doctor"}</span>
-                <span className="block text-xs text-brand-navy/60 truncate">{summary.length ? `${list.length} ${list.length === 1 ? "doctor" : "doctores"}` : "Nombre, especialidad o ciudad"}</span>
-              </span>
-            </button>
+              <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); }} placeholder="Buscar doctor por nombre" aria-label="Buscar doctor por nombre" autoComplete="off"
+                className="min-w-0 flex-1 bg-transparent text-base text-brand-navy placeholder:text-brand-navy/50 outline-none" />
+              {q && <button type="button" onClick={() => { setQ(""); setPages(1); }} aria-label="Borrar búsqueda" className="w-7 h-7 flex-none rounded-full text-brand-navy/60 hover:bg-brand-navy/10 flex items-center justify-center"><X className="w-4 h-4" /></button>}
+            </label>
 
             {/* Pestañas con ícono por especialidad (las 10 principales con doctores y "Otras"). */}
             <div className="mt-5 overflow-x-auto border-b border-brand-navy/15 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-5 sm:gap-10 px-1">
                 <Tab icon={Heart} label="Todos" on={specialty === "todas"} onClick={() => pickSpecialty("todas")} iconClass="text-red-500 fill-red-500" />
                 {groups.map((g) => <Tab key={g.key} icon={TAB_ICONS[g.key]} label={g.title} color={SPECIALTY_LANDINGS[g.key]?.from} on={specialty === `g:${g.key}`} onClick={() => pickSpecialty(`g:${g.key}`)} />)}
-                {othersCount > 0 && <Tab icon={MoreHorizontal} label="Otras" color="#d9dfeb" on={specialty === "otras"} onClick={() => pickSpecialty("otras")} />}
+                {othersCount > 0 && <Tab icon={MoreHorizontal} label="Otras" color="#d9dfeb" on={specialty === "otras" || isLooseSpecialty} onClick={() => pickSpecialty("otras")} />}
               </div>
             </div>
+            {/* Otras especialidades (las que no tienen pestaña): una fila de botones que se desliza. */}
+            {(specialty === "otras" || isLooseSpecialty) && others.length > 0 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Otras especialidades">
+                {[{ key: "otras", label: "Todas", n: othersCount }, ...others].map((x) => (
+                  <button key={x.key} type="button" aria-pressed={specialty === x.key} onClick={() => pickSpecialty(x.key)}
+                    className={`h-8 flex-none px-3.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${specialty === x.key ? "bg-brand-navy text-white" : "bg-white/80 text-brand-navy hover:bg-white"}`}>
+                    {x.label} ({x.n})
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Ciudad (solo celular; en computadora está en la píldora): un toque para elegirla y otro para quitarla. */}
+            {cities.length > 1 && (
+              <div className="sm:hidden mt-3 flex flex-wrap gap-2" role="group" aria-label="Ciudad">
+                {cities.map((c) => (
+                  <button key={c.key} type="button" aria-pressed={city === c.key} onClick={() => { setCity(city === c.key ? "todas" : c.key); setPages(1); }}
+                    className={`h-8 px-3.5 rounded-full text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${city === c.key ? "bg-brand-navy text-white" : "bg-white/80 text-brand-navy hover:bg-white"}`}>
+                    <MapPin className="w-3.5 h-3.5" aria-hidden="true" />{c.label}
+                  </button>
+                ))}
+              </div>
+            )}
             {/* Subespecialidad: solo si la especialidad elegida tiene doctores con subespecialidad. */}
             {subs.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Subespecialidad">
@@ -292,43 +309,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
         )}
       </div>
 
-      {/* Pantalla de búsqueda del celular: los mismos filtros, un campo por renglón y a todo lo ancho (sin menús cortados). */}
-      <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
-        <DialogContent aria-describedby={undefined} className="w-[calc(100vw-1.5rem)] max-w-md rounded-2xl p-5 gap-3 max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="font-heading text-lg text-brand-navy">Buscar doctor</DialogTitle></DialogHeader>
-          <label className="block">
-            <span className="block text-sm font-semibold text-brand-navy mb-1">Doctor</span>
-            <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); }} placeholder="Nombre y apellido" autoComplete="off"
-              className="h-12 w-full rounded-xl border border-border px-3 text-base text-brand-navy placeholder:text-brand-navy/50 focus:outline-none focus:ring-2 focus:ring-brand-blue/40" />
-          </label>
-          <label className="block">
-            <span className="block text-sm font-semibold text-brand-navy mb-1">Especialidad</span>
-            <select value={specialty} onChange={(e) => pickSpecialty(e.target.value)} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">{specialtyOptions}</select>
-          </label>
-          {subs.length > 0 && (
-            <label className="block">
-              <span className="block text-sm font-semibold text-brand-navy mb-1">Subespecialidad</span>
-              <select value={sub} onChange={(e) => { setSub(e.target.value); setPages(1); }} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">
-                <option value="todas">Todas</option>
-                {subs.map((x) => <option key={x.key} value={x.key}>{x.label} ({x.n})</option>)}
-              </select>
-            </label>
-          )}
-          <label className="block">
-            <span className="block text-sm font-semibold text-brand-navy mb-1">Ciudad</span>
-            <select value={city} onChange={(e) => { setCity(e.target.value); setPages(1); }} className="h-12 w-full rounded-xl border border-border bg-white px-3 text-base text-brand-navy focus:outline-none focus:ring-2 focus:ring-brand-blue/40">
-              <option value="todas">Todas las ciudades</option>
-              {cities.map((c) => <option key={c.key} value={c.key}>{c.label} ({c.n})</option>)}
-            </select>
-          </label>
-          <div className="flex items-center justify-between gap-3 pt-2">
-            <button type="button" onClick={reset} className="text-sm font-medium text-brand-navy underline">Borrar todo</button>
-            <button type="button" onClick={() => { setSheetOpen(false); window.setTimeout(goToList, 150); }} className="h-12 px-6 rounded-xl bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors">
-              Ver {list.length} {list.length === 1 ? "doctor" : "doctores"}
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }
