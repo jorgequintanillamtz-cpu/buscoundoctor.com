@@ -55,6 +55,30 @@ function nameMatches(fullName, query) {
   return qs.every((q) => words.some((w) => w.startsWith(q) || (q.length >= 4 && lev(q, w.slice(0, q.length)) <= 1)));
 }
 
+// Texto con la parte que coincide con lo escrito en negritas (sin importar acentos ni mayúsculas), como las sugerencias de Airbnb.
+function Highlight({ text, query }) {
+  const nq = norm(query);
+  const idx = nq ? norm(text).indexOf(nq) : -1;
+  if (idx < 0) return <>{text}</>;
+  return <>{text.slice(0, idx)}<b className="font-semibold">{text.slice(idx, idx + nq.length)}</b>{text.slice(idx + nq.length)}</>;
+}
+
+// Fila de una sugerencia de la caja del celular: ícono (o foto) en círculo, título y una línea de detalle.
+function SuggestRow({ lead, title, detail, query, onClick, to }) {
+  const inner = (
+    <>
+      {lead}
+      <span className="min-w-0 flex-1 text-left">
+        <span className="block text-[15px] text-brand-navy truncate"><Highlight text={title} query={query} /></span>
+        {detail && <span className="block text-[13px] text-brand-navy/60 truncate">{detail}</span>}
+      </span>
+    </>
+  );
+  const cls = "w-full flex items-center gap-3 px-2.5 py-2 rounded-xl hover:bg-brand-flowMist/70 active:bg-brand-flowMist";
+  return to ? <Link to={to} className={cls}>{inner}</Link> : <button type="button" onClick={onClick} className={cls}>{inner}</button>;
+}
+const Circle = ({ color = "#eef1f6", children }) => <span className="w-10 h-10 flex-none rounded-full flex items-center justify-center" style={{ backgroundColor: color }}>{children}</span>;
+
 // Pestaña con ícono dentro de un círculo de color (los mismos colores de las tarjetas de especialidad, `from` de specialtyLandings.js; el
 // ícono va en azul marino para que se lea). "Todos" lleva el corazón en rojo sobre blanco y "Otras" gris.
 function Tab({ icon: Icon, label, on, onClick, color, iconClass = "text-brand-navy" }) {
@@ -89,7 +113,8 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const [city, setCity] = useState("todas");
   const [sub, setSub] = useState("todas");
   const [pages, setPages] = useState(1); // cuántas "tandas" de doctores se ven (cada "Ver más" suma una)
-  const pageSize = useIsMobile() ? PAGE_SIZE_MOBILE : PAGE_SIZE;
+  const isMobile = useIsMobile();
+  const pageSize = isMobile ? PAGE_SIZE_MOBILE : PAGE_SIZE;
   const shown = pages * pageSize;
   // Al cambiar de especialidad se limpia la subespecialidad (cada especialidad tiene las suyas).
   // `specialty` es "todas", "g:<llave>" (una de las 10 con pestaña, junta Dentista + Odontopediatría, etc.), "otras" o la clave de una especialidad suelta.
@@ -131,14 +156,18 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const specialtyLabel = specialty === "todas" ? "Todas" : specialty === "otras" ? "Otras especialidades" : specialty.startsWith("g:") ? (SPECIALTY_LANDINGS[specialty.slice(2)]?.title || "") : (specialties.find((x) => x.key === specialty)?.label || "");
   const cityLabel = city === "todas" ? "Todas" : (cities.find((x) => x.key === city)?.label || "");
 
+  // En celular la caja también busca especialidades y ciudades: si lo escrito no coincide con el nombre de ningún doctor (p. ej. "den"),
+  // la lista de abajo no se vacía por eso (las sugerencias de la caja ya lo cubren). En computadora el campo Doctor siempre filtra por nombre.
+  const nameHasMatch = useMemo(() => q.trim() !== "" && doctors.some((d) => nameMatches(d.full_name, q)), [doctors, q]);
+  const qEff = isMobile && !nameHasMatch ? "" : q;
   const list = useMemo(() => {
     return doctors
       .filter((d) => specMatches(d, specialty))
       .filter((d) => sub === "todas" || norm(d.subspecialty) === sub)
       .filter((d) => city === "todas" || norm(zoneLabel(d.zone)) === city)
-      .filter((d) => nameMatches(d.full_name, q))
+      .filter((d) => nameMatches(d.full_name, qEff))
       .sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0) || String(a.full_name).localeCompare(String(b.full_name), "es"));
-  }, [doctors, specialty, sub, city, q]);
+  }, [doctors, specialty, sub, city, qEff]);
   const visible = list.slice(0, shown);
   // Impresiones (CLAUDE.md §8r, paso 30): cuando el bloque está en pantalla, cuenta a los doctores que se ven en la lista
   // (la base cuenta una por visitante por doctor por día).
@@ -158,6 +187,44 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
 
   // Una especialidad suelta (sin pestaña propia, p. ej. Alergología): la pestaña "Otras" queda marcada y salen sus botones.
   const isLooseSpecialty = specialty !== "todas" && specialty !== "otras" && !specialty.startsWith("g:");
+  // Caja inteligente del celular (estilo Airbnb, sin ventanas): al tocarla se despliega debajo una lista de sugerencias; al escribir se
+  // agrupan en Especialidades, Ciudades y Doctores, con lo escrito en negritas. Elegir una especialidad o ciudad filtra la lista de abajo.
+  const [boxOpen, setBoxOpen] = useState(false);
+  const boxRef = useRef(null);
+  useEffect(() => {
+    if (!boxOpen) return undefined;
+    const onDown = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setBoxOpen(false); };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [boxOpen]);
+  // Al cambiar de especialidad, la pestaña elegida se trae a la vista (puede estar fuera de la pantalla en celular).
+  useEffect(() => {
+    const el = document.querySelector('#doctores [role=tab][aria-selected=true]');
+    el?.scrollIntoView?.({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [specialty]);
+  const nq = norm(q.replace(/\b(dr|dra|doctor|doctora)\b\.?/gi, " "));
+  const suggest = useMemo(() => {
+    if (!nq) {
+      return {
+        specs: [...groups].sort((a, b) => b.n - a.n).slice(0, 6).map((g) => ({ value: `g:${g.key}`, key: g.key, title: g.title, n: g.n })),
+        cities: cities.map((c) => ({ key: c.key, label: c.label, n: c.n })),
+        docs: [],
+        other: othersCount,
+      };
+    }
+    const hit = (t) => { const w = norm(t); return w.includes(nq) || w.split(/\s+/).some((x) => x.startsWith(nq)); };
+    return {
+      specs: [
+        ...groups.filter((g) => hit(g.title)).map((g) => ({ value: `g:${g.key}`, key: g.key, title: g.title, n: g.n })),
+        ...others.filter((x) => hit(x.label)).map((x) => ({ value: x.key, key: null, title: x.label, n: x.n })),
+      ].slice(0, 4),
+      cities: cities.filter((c) => hit(c.label)).slice(0, 2).map((c) => ({ key: c.key, label: c.label, n: c.n })),
+      docs: doctors.filter((d) => nameMatches(d.full_name, q)).sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0)).slice(0, 4),
+      other: 0,
+    };
+  }, [nq, q, groups, others, cities, doctors, othersCount]);
+  const chooseSpecialty = (value) => { pickSpecialty(value); setQ(""); setBoxOpen(false); document.activeElement?.blur?.(); };
+  const chooseCity = (key) => { setCity(key); setQ(""); setPages(1); setBoxOpen(false); document.activeElement?.blur?.(); };
   const goToList = () => document.getElementById("doctores-lista")?.scrollIntoView({ behavior: "smooth", block: "start" });
   // Opciones del menú de especialidad: las 10 principales (con su número), "Otras" y después cada especialidad suelta.
   const specialtyOptions = (
@@ -209,13 +276,66 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
               </button>
             </div>
 
-            {/* Celular: la píldora es una caja para escribir el nombre (sin ventanas); la especialidad va en las pestañas y la ciudad en los botones de abajo. */}
-            <label className="sm:hidden mt-4 flex items-center gap-3 bg-white rounded-full shadow-md border border-brand-navy/10 pl-4 pr-3 h-12">
-              <Search className="w-5 h-5 flex-none text-brand-navy" aria-hidden="true" />
-              <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); }} placeholder="Buscar doctor por nombre" aria-label="Buscar doctor por nombre" autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent text-base text-brand-navy placeholder:text-brand-navy/50 outline-none" />
-              {q && <button type="button" onClick={() => { setQ(""); setPages(1); }} aria-label="Borrar búsqueda" className="w-7 h-7 flex-none rounded-full text-brand-navy/60 hover:bg-brand-navy/10 flex items-center justify-center"><X className="w-4 h-4" /></button>}
-            </label>
+            {/* Celular: caja inteligente (sin ventanas): sugerencias de especialidades, ciudades y doctores debajo de la caja. */}
+            <div ref={boxRef} className="sm:hidden relative mt-4">
+              <label className="flex items-center gap-3 bg-white rounded-full shadow-md border border-brand-navy/10 pl-4 pr-3 h-12">
+                <Search className="w-5 h-5 flex-none text-brand-navy" aria-hidden="true" />
+                <input type="text" enterKeyHint="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); setBoxOpen(true); }} onFocus={() => setBoxOpen(true)}
+                  onKeyDown={(e) => { if (e.key === "Escape") { setBoxOpen(false); e.currentTarget.blur(); } }}
+                  placeholder="Doctor, especialidad o ciudad" aria-label="Buscar por doctor, especialidad o ciudad" aria-expanded={boxOpen} autoComplete="off"
+                  className="min-w-0 flex-1 bg-transparent text-base text-brand-navy placeholder:text-brand-navy/50 outline-none" />
+                {q && <button type="button" onClick={() => { setQ(""); setPages(1); }} aria-label="Borrar búsqueda" className="w-7 h-7 flex-none rounded-full text-brand-navy/60 hover:bg-brand-navy/10 flex items-center justify-center"><X className="w-4 h-4" /></button>}
+              </label>
+              {boxOpen && (
+                <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-white rounded-2xl shadow-xl border border-brand-navy/10 p-2 max-h-[62vh] overflow-y-auto overscroll-contain">
+                  {suggest.specs.length > 0 && (
+                    <div>
+                      <p className="px-2.5 pt-1.5 pb-1 text-xs font-semibold text-brand-navy/60">{nq ? "Especialidades" : "Especialidades populares"}</p>
+                      {suggest.specs.map((x) => {
+                        const Icon = x.key ? TAB_ICONS[x.key] : MoreHorizontal;
+                        return (
+                          <SuggestRow key={x.value} query={nq ? q : ""} title={x.title} detail={`${x.n} ${x.n === 1 ? "doctor" : "doctores"}`} onClick={() => chooseSpecialty(x.value)}
+                            lead={<Circle color={x.key ? SPECIALTY_LANDINGS[x.key]?.from : "#d9dfeb"}><Icon className="w-5 h-5 text-brand-navy" strokeWidth={1.75} aria-hidden="true" /></Circle>} />
+                        );
+                      })}
+                      {!nq && suggest.other > 0 && (
+                        <SuggestRow title="Otras especialidades" detail={`${suggest.other} doctores`} onClick={() => chooseSpecialty("otras")}
+                          lead={<Circle color="#d9dfeb"><MoreHorizontal className="w-5 h-5 text-brand-navy" aria-hidden="true" /></Circle>} />
+                      )}
+                    </div>
+                  )}
+                  {suggest.cities.length > 0 && (
+                    <div>
+                      <p className="px-2.5 pt-2 pb-1 text-xs font-semibold text-brand-navy/60">Ciudades</p>
+                      {suggest.cities.map((c) => (
+                        <SuggestRow key={c.key} query={nq ? q : ""} title={c.label} detail={`${c.n} ${c.n === 1 ? "doctor" : "doctores"}`} onClick={() => chooseCity(c.key)}
+                          lead={<Circle><MapPin className="w-5 h-5 text-brand-navy" strokeWidth={1.75} aria-hidden="true" /></Circle>} />
+                      ))}
+                    </div>
+                  )}
+                  {suggest.docs.length > 0 && (
+                    <div>
+                      <p className="px-2.5 pt-2 pb-1 text-xs font-semibold text-brand-navy/60">Doctores</p>
+                      {suggest.docs.map((d) => {
+                        const n = Number(d.count) || 0;
+                        return (
+                          <SuggestRow key={d.slug} to={`/recomendado-flow/${d.slug}`} query={q} title={d.full_name}
+                            detail={`${[d.subspecialty || d.specialty, zoneLabel(d.zone)].filter(Boolean).join(" · ")} · ${n} ${n === 1 ? "recomendación" : "recomendaciones"}`}
+                            lead={<RecommendedAvatar photo={d.photo} name={d.full_name} className="w-10 h-10 flex-none" />} />
+                        );
+                      })}
+                    </div>
+                  )}
+                  {nq && suggest.specs.length === 0 && suggest.cities.length === 0 && suggest.docs.length === 0 && (
+                    <div className="px-3 py-4 text-center">
+                      <p className="text-sm font-semibold text-brand-navy">No lo vemos todavía</p>
+                      <p className="text-sm text-brand-navy/60 mt-0.5">Sé el primero en recomendarlo: toma un minuto.</p>
+                      <button type="button" onClick={() => { setBoxOpen(false); onRecommend?.(q.trim()); }} className="mt-3 inline-flex items-center justify-center h-10 px-5 rounded-full bg-brand-blue hover:bg-brand-blue/90 text-white text-sm font-semibold transition-colors">Recomendar a mi doctor</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Pestañas con ícono por especialidad (las 10 principales con doctores y "Otras"). */}
             <div className="mt-5 overflow-x-auto border-b border-brand-navy/15 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
