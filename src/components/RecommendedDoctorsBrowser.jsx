@@ -206,10 +206,14 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const suggest = useMemo(() => {
     if (!nq) {
       return {
-        specs: [...groups].sort((a, b) => b.n - a.n).slice(0, 6).map((g) => ({ value: `g:${g.key}`, key: g.key, title: g.title, n: g.n })),
+        // Todas las especialidades con doctores (las 10 principales y cada una de las demás por su nombre), de más a menos doctores.
+        specs: [
+          ...groups.map((g) => ({ value: `g:${g.key}`, key: g.key, title: g.title, n: g.n })),
+          ...others.map((x) => ({ value: x.key, key: null, title: x.label, n: x.n })),
+        ].sort((a, b) => b.n - a.n || a.title.localeCompare(b.title, "es")),
         cities: cities.map((c) => ({ key: c.key, label: c.label, n: c.n })),
         docs: [],
-        other: othersCount,
+        other: 0,
       };
     }
     const hit = (t) => { const w = norm(t); return w.includes(nq) || w.split(/\s+/).some((x) => x.startsWith(nq)); };
@@ -222,7 +226,7 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
       docs: doctors.filter((d) => nameMatches(d.full_name, q)).sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0)).slice(0, 4),
       other: 0,
     };
-  }, [nq, q, groups, others, cities, doctors, othersCount]);
+  }, [nq, q, groups, others, cities, doctors]);
   const chooseSpecialty = (value) => { pickSpecialty(value); setQ(""); setBoxOpen(false); document.activeElement?.blur?.(); };
   const chooseCity = (key) => { setCity(key); setQ(""); setPages(1); setBoxOpen(false); document.activeElement?.blur?.(); };
   const goToList = () => document.getElementById("doctores-lista")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -290,18 +294,14 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
                 <div className="absolute left-0 right-0 top-full mt-2 z-30 bg-white rounded-2xl shadow-xl border border-brand-navy/10 p-2 max-h-[62vh] overflow-y-auto overscroll-contain">
                   {suggest.specs.length > 0 && (
                     <div>
-                      <p className="px-2.5 pt-1.5 pb-1 text-xs font-semibold text-brand-navy/60">{nq ? "Especialidades" : "Especialidades populares"}</p>
+                      <p className="px-2.5 pt-1.5 pb-1 text-xs font-semibold text-brand-navy/60">Especialidades</p>
                       {suggest.specs.map((x) => {
-                        const Icon = x.key ? TAB_ICONS[x.key] : MoreHorizontal;
+                        const Icon = x.key ? TAB_ICONS[x.key] : Stethoscope;
                         return (
                           <SuggestRow key={x.value} query={nq ? q : ""} title={x.title} detail={`${x.n} ${x.n === 1 ? "doctor" : "doctores"}`} onClick={() => chooseSpecialty(x.value)}
                             lead={<Circle color={x.key ? SPECIALTY_LANDINGS[x.key]?.from : "#d9dfeb"}><Icon className="w-5 h-5 text-brand-navy" strokeWidth={1.75} aria-hidden="true" /></Circle>} />
                         );
                       })}
-                      {!nq && suggest.other > 0 && (
-                        <SuggestRow title="Otras especialidades" detail={`${suggest.other} doctores`} onClick={() => chooseSpecialty("otras")}
-                          lead={<Circle color="#d9dfeb"><MoreHorizontal className="w-5 h-5 text-brand-navy" aria-hidden="true" /></Circle>} />
-                      )}
                     </div>
                   )}
                   {suggest.cities.length > 0 && (
