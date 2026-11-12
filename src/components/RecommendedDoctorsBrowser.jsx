@@ -56,11 +56,15 @@ function nameMatches(fullName, query) {
   return qs.every((q) => words.some((w) => w.startsWith(q) || (q.length >= 4 && lev(q, w.slice(0, q.length)) <= 1)));
 }
 
-function Tab({ icon: Icon, label, on, onClick }) {
+// Pestaña con ícono dentro de un círculo de color (los mismos colores de las tarjetas de especialidad, `from` de specialtyLandings.js; el
+// ícono va en azul marino para que se lea). "Todos" lleva el corazón en rojo sobre blanco y "Otras" gris.
+function Tab({ icon: Icon, label, on, onClick, color, iconClass = "text-brand-navy" }) {
   return (
     <button type="button" role="tab" aria-selected={on} onClick={onClick}
-      className={`flex-none flex flex-col items-center gap-1.5 pb-2.5 pt-1.5 border-b-2 text-sm whitespace-nowrap transition-colors ${on ? "border-brand-navy text-brand-navy font-semibold" : "border-transparent text-brand-navy/60 hover:text-brand-navy"}`}>
-      <Icon className="w-8 h-8" strokeWidth={1.75} aria-hidden="true" />
+      className={`flex-none flex flex-col items-center gap-1.5 pb-2.5 pt-1.5 border-b-2 text-sm whitespace-nowrap transition-colors ${on ? "border-brand-navy text-brand-navy font-semibold" : "border-transparent text-brand-navy/70 hover:text-brand-navy"}`}>
+      <span className={`w-12 h-12 rounded-full flex items-center justify-center transition-transform ${on ? "ring-2 ring-brand-navy ring-offset-2 ring-offset-brand-flowSky/0" : ""}`} style={{ backgroundColor: color || "#ffffff" }}>
+        <Icon className={`w-7 h-7 ${iconClass}`} strokeWidth={1.75} aria-hidden="true" />
+      </span>
       {label}
     </button>
   );
@@ -220,10 +224,10 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
 
             {/* Pestañas con ícono por especialidad (las 10 principales con doctores y "Otras"). */}
             <div className="mt-5 overflow-x-auto border-b border-brand-navy/15 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-7 sm:gap-10 px-1">
-                <Tab icon={Heart} label="Todos" on={specialty === "todas"} onClick={() => pickSpecialty("todas")} />
-                {groups.map((g) => <Tab key={g.key} icon={TAB_ICONS[g.key]} label={g.title} on={specialty === `g:${g.key}`} onClick={() => pickSpecialty(`g:${g.key}`)} />)}
-                {othersCount > 0 && <Tab icon={MoreHorizontal} label="Otras" on={specialty === "otras"} onClick={() => pickSpecialty("otras")} />}
+              <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-5 sm:gap-10 px-1">
+                <Tab icon={Heart} label="Todos" on={specialty === "todas"} onClick={() => pickSpecialty("todas")} iconClass="text-red-500 fill-red-500" />
+                {groups.map((g) => <Tab key={g.key} icon={TAB_ICONS[g.key]} label={g.title} color={SPECIALTY_LANDINGS[g.key]?.from} on={specialty === `g:${g.key}`} onClick={() => pickSpecialty(`g:${g.key}`)} />)}
+                {othersCount > 0 && <Tab icon={MoreHorizontal} label="Otras" color="#d9dfeb" on={specialty === "otras"} onClick={() => pickSpecialty("otras")} />}
               </div>
             </div>
             {/* Subespecialidad: solo si la especialidad elegida tiene doctores con subespecialidad. */}
