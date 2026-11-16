@@ -4,9 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Heart, Share2,
-  Stethoscope, Flower2, HeartPulse, Brain, Sparkles, Apple, Eye, Bone, Ear, Wind, Pill, Droplet, Activity,
-  Scissors, Leaf, Ribbon, Hand, Dumbbell, Syringe, ShieldPlus,
+  ArrowRight, ChevronDown, Heart, Share2,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import CardSlider from "@/components/CardSlider";
@@ -75,36 +73,40 @@ export const FAQ = [
   { q: "¿Una recomendación es una opinión médica?", a: "No. Es la opinión de un paciente sobre el trato y la atención que recibió. No sustituye una valoración médica." },
 ];
 
-// Tarjetas de "Ver recomendaciones en estas especialidades": cada una con su color e ícono. `match` compara contra
+// Tarjetas de "Ver recomendaciones en estas especialidades": cada una con su ilustración 3D (`img`, archivo de public/icons/especialidades/, Fluent Emoji 3D, MIT). `match` compara contra
 // la especialidad del doctor sin acentos ni mayúsculas (para contar cuántos hay y armar el enlace a /recomendados,
 // que usa el id "esp-<especialidad>"). Dentistas, pediatras y dermatólogos no van aquí: ya tienen carrusel fijo.
 // `landing`: las que tienen página propia /<landing> (CLAUDE.md pasos 45-47); su tarjeta lleva ahí.
 // Para agregar o quitar una, edita esta lista.
 const SPECIALTY_CARDS = [
-  { name: "Medicina general", landing: "medico-general", icon: Stethoscope, tone: "bg-sky-50 border-sky-100 text-sky-700", iconBg: "bg-sky-100", match: /medic(o|ina) general/ },
-  { name: "Ginecología", landing: "ginecologo", icon: Flower2, tone: "bg-pink-50 border-pink-100 text-pink-700", iconBg: "bg-pink-100", match: /ginecolog/ },
-  { name: "Cardiología", landing: "cardiologo", icon: HeartPulse, tone: "bg-red-50 border-red-100 text-red-700", iconBg: "bg-red-100", match: /cardiolog/ },
-  { name: "Psicología", landing: "psicologo", icon: Brain, tone: "bg-violet-50 border-violet-100 text-violet-700", iconBg: "bg-violet-100", match: /psicolog/ },
-  { name: "Psiquiatría", icon: Sparkles, tone: "bg-indigo-50 border-indigo-100 text-indigo-700", iconBg: "bg-indigo-100", match: /psiquiatr/ },
-  { name: "Nutrición", landing: "nutriologo", icon: Apple, tone: "bg-lime-50 border-lime-100 text-lime-700", iconBg: "bg-lime-100", match: /nutri/ },
-  { name: "Oftalmología", icon: Eye, tone: "bg-cyan-50 border-cyan-100 text-cyan-700", iconBg: "bg-cyan-100", match: /oftalmolog/ },
-  { name: "Ortopedia", icon: Bone, tone: "bg-amber-50 border-amber-100 text-amber-700", iconBg: "bg-amber-100", match: /ortoped|traumatolog/ },
-  { name: "Otorrinolaringología", icon: Ear, tone: "bg-orange-50 border-orange-100 text-orange-700", iconBg: "bg-orange-100", match: /otorrino/ },
-  { name: "Neumología", icon: Wind, tone: "bg-blue-50 border-blue-100 text-blue-700", iconBg: "bg-blue-100", match: /neumolog/ },
-  { name: "Gastroenterología", landing: "gastroenterologo", icon: Pill, tone: "bg-yellow-50 border-yellow-100 text-yellow-700", iconBg: "bg-yellow-100", match: /gastro/ },
-  { name: "Endocrinología", landing: "endocrinologo", icon: Droplet, tone: "bg-teal-50 border-teal-100 text-teal-700", iconBg: "bg-teal-100", match: /endocrin/ },
-  { name: "Neurología", icon: Activity, tone: "bg-purple-50 border-purple-100 text-purple-700", iconBg: "bg-purple-100", match: /neurolog/ },
-  { name: "Urología", icon: ShieldPlus, tone: "bg-slate-50 border-slate-200 text-slate-700", iconBg: "bg-slate-100", match: /urolog/ },
-  { name: "Cirugía plástica", icon: Scissors, tone: "bg-rose-50 border-rose-100 text-rose-700", iconBg: "bg-rose-100", match: /cirugia plastica/ },
-  { name: "Alergología", icon: Leaf, tone: "bg-green-50 border-green-100 text-green-700", iconBg: "bg-green-100", match: /alergolog/ },
-  { name: "Oncología", icon: Ribbon, tone: "bg-fuchsia-50 border-fuchsia-100 text-fuchsia-700", iconBg: "bg-fuchsia-100", match: /oncolog/ },
-  { name: "Reumatología", icon: Hand, tone: "bg-stone-50 border-stone-200 text-stone-700", iconBg: "bg-stone-100", match: /reumatolog/ },
-  { name: "Medicina del deporte", icon: Dumbbell, tone: "bg-emerald-50 border-emerald-100 text-emerald-700", iconBg: "bg-emerald-100", match: /deporte/ },
-  { name: "Medicina interna", icon: Syringe, tone: "bg-zinc-50 border-zinc-200 text-zinc-700", iconBg: "bg-zinc-100", match: /medicina interna|internist/ },
+  { name: "Medicina general", landing: "medico-general", img: "medico-general", match: /medic(o|ina) general/ },
+  { name: "Ginecología", landing: "ginecologo", img: "ginecologo", match: /ginecolog/ },
+  { name: "Cardiología", landing: "cardiologo", img: "cardiologo", match: /cardiolog/ },
+  { name: "Psicología", landing: "psicologo", img: "psicologo", match: /psicolog/ },
+  { name: "Psiquiatría", img: "psiquiatria", match: /psiquiatr/ },
+  { name: "Nutrición", landing: "nutriologo", img: "nutriologo", match: /nutri/ },
+  { name: "Oftalmología", img: "oftalmologia", match: /oftalmolog/ },
+  { name: "Ortopedia", img: "ortopedia", match: /ortoped|traumatolog/ },
+  { name: "Otorrinolaringología", img: "otorrino", match: /otorrino/ },
+  { name: "Neumología", img: "neumologia", match: /neumolog/ },
+  { name: "Gastroenterología", landing: "gastroenterologo", img: "gastroenterologo", match: /gastro/ },
+  { name: "Endocrinología", landing: "endocrinologo", img: "endocrinologo", match: /endocrin/ },
+  { name: "Neurología", img: "neurologia", match: /neurolog/ },
+  { name: "Urología", img: "urologia", match: /urolog/ },
+  { name: "Cirugía plástica", img: "cirugia-plastica", match: /cirugia plastica/ },
+  { name: "Alergología", img: "alergologia", match: /alergolog/ },
+  { name: "Oncología", img: "oncologia", match: /oncolog/ },
+  { name: "Reumatología", img: "reumatologia", match: /reumatolog/ },
+  { name: "Medicina del deporte", img: "deporte", match: /deporte/ },
+  { name: "Medicina interna", img: "medicina-interna", match: /medicina interna|internist/ },
 ];
 
+// Cuántas tarjetas se ven antes de "Ver todas las especialidades" (2026-11-16, pedido de Jorge: acortar la sección).
+const CARDS_VISIBLE = 8;
+
 function SpecialtyCards({ doctors }) {
-  const cards = SPECIALTY_CARDS.map((c) => {
+  const [open, setOpen] = useState(false);
+  const cards = SPECIALTY_CARDS.map((c, i) => {
     const mine = doctors.filter((d) => c.match.test(norm(d.specialty)));
     const sp = mine[0]?.specialty;
     // Con página propia (/<especialidad>) va ahí, aunque no tenga doctores (la página dice "Sé el primero…"); sin
@@ -113,35 +115,59 @@ function SpecialtyCards({ doctors }) {
     const href = c.landing ? `/${c.landing}` : sp ? "#doctores" : null;
     // Recomendaciones aprobadas de la especialidad (suma de `count`), el mismo número que las tarjetas de arriba.
     const recs = mine.reduce((n, d) => n + (Number(d.count) || 0), 0);
-    return { ...c, count: mine.length, recs, href };
+    return { ...c, count: mine.length, recs, href, i };
   });
+  // Con doctores, de más a menos (si empatan, más recomendaciones y luego el orden de la lista); las de 0 doctores van aparte, al final.
+  const withDocs = cards.filter((c) => c.count > 0).sort((a, b) => b.count - a.count || b.recs - a.recs || a.i - b.i);
+  const noDocs = cards.filter((c) => c.count === 0);
+  const shown = open ? withDocs : withDocs.slice(0, CARDS_VISIBLE);
+  const hiddenCount = (withDocs.length - shown.length) + (open ? 0 : noDocs.length);
+  const showNoDocs = open || withDocs.length <= CARDS_VISIBLE;
+  const linkProps = (c, cls, body) => (c.href && !c.href.startsWith("#")
+    ? <Link key={c.name} to={c.href} className={cls}>{body}</Link>
+    : <a key={c.name} href={c.href || "#formulario"} className={cls}>{body}</a>);
+  // Vidrio: blanco translúcido con borde tenue; la ilustración 3D de cada especialidad pone el color.
+  const cardCls = "block rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/15 hover:-translate-y-0.5";
   return (
     <section id="especialidades" className="bg-gradient-to-b from-brand-flowSky to-brand-flowDeep py-16 scroll-mt-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <h2 className="font-heading font-medium tracking-tight text-2xl sm:text-3xl text-white text-center">Ver recomendaciones en estas especialidades</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
-          {cards.map((c) => {
-            const Icon = c.icon;
-            const body = (
-              <>
-                <span className={`w-11 h-11 rounded-xl flex items-center justify-center ${c.iconBg} ${c.tone.split(" ").find((k) => k.startsWith("text-"))}`}><Icon className="w-6 h-6" aria-hidden="true" /></span>
-                <span className="mt-3 block font-heading font-medium text-white text-sm sm:text-base leading-snug break-words">
-                  {c.name}
-                  <span aria-hidden="true" className="font-normal"> {c.recs}</span>
-                  <span className="sr-only">, {c.recs} {c.recs === 1 ? "recomendación" : "recomendaciones"}</span>
-                </span>
-                <span className="mt-1 block text-xs text-white/70">
-                  {c.count > 0 ? `${c.count} ${c.count === 1 ? "doctor recomendado" : "doctores recomendados"}` : "Sé el primero en recomendar"}
-                </span>
-              </>
-            );
-            // Vidrio: blanco translúcido con borde tenue; el color de cada especialidad queda solo en su ícono.
-            const cls = `block rounded-2xl border border-white/20 bg-white/10 backdrop-blur-sm p-4 text-left transition-all hover:bg-white/15 hover:-translate-y-0.5`;
-            return c.href && !c.href.startsWith("#")
-              ? <Link key={c.name} to={c.href} className={cls}>{body}</Link>
-              : <a key={c.name} href={c.href || "#formulario"} className={cls}>{body}</a>;
-          })}
+          {shown.map((c) => linkProps(c, cardCls, (
+            <>
+              <img src={`/icons/especialidades/${c.img}.png`} alt="" width={48} height={48} loading="lazy" decoding="async" draggable={false} className="w-12 h-12 object-contain" />
+              <span lang="es" className="mt-3 block font-heading font-medium text-white text-sm sm:text-base leading-snug break-words hyphens-auto">{c.name}</span>
+              {/* Una sola línea con los dos números (2026-11-16): antes el número de recomendaciones iba pegado al nombre y confundía con el de doctores. */}
+              <span className="mt-1 block text-xs text-white/70">
+                {c.count} {c.count === 1 ? "doctor" : "doctores"} · {c.recs} {c.recs === 1 ? "recomendación" : "recomendaciones"}
+              </span>
+            </>
+          )))}
         </div>
+
+        {hiddenCount > 0 && (
+          <div className="mt-5 text-center">
+            <button type="button" onClick={() => setOpen(true)} aria-expanded={false}
+              className="inline-flex items-center gap-1.5 h-11 px-6 rounded-full border border-white/40 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors">
+              Ver todas las especialidades ({hiddenCount} más) <ChevronDown className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        {/* Las que todavía no tienen doctores recomendados, en una fila aparte al final (antes eran tarjetas vacías "0 · Sé el primero"). */}
+        {showNoDocs && noDocs.length > 0 && (
+          <div className="mt-8">
+            <p className="text-center text-sm text-white/80">Aún sin recomendaciones: sé el primero en recomendar</p>
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {noDocs.map((c) => linkProps(c, "inline-flex items-center gap-2 h-11 pl-2 pr-4 rounded-full border border-white/25 bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors", (
+                <>
+                  <img src={`/icons/especialidades/${c.img}.png`} alt="" width={28} height={28} loading="lazy" decoding="async" draggable={false} className="w-7 h-7 object-contain" />
+                  {c.name}
+                </>
+              )))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
