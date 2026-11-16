@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Heart, ChevronDown, Search, X, MapPin, Stethoscope, Flower2, Baby, Sparkles, HeartPulse, Brain, Apple, Droplet, Pill, MoreHorizontal } from "lucide-react";
 import ToothIcon from "@/components/icons/ToothIcon";
 import { SPECIALTY_LANDINGS } from "@/lib/specialtyLandings";
@@ -118,7 +118,13 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const shown = pages * pageSize;
   // Al cambiar de especialidad se limpia la subespecialidad (cada especialidad tiene las suyas).
   // `specialty` es "todas", "g:<llave>" (una de las 10 con pestaña, junta Dentista + Odontopediatría, etc.), "otras" o la clave de una especialidad suelta.
-  const pickSpecialty = (value) => { setSpecialty(value); setSub("todas"); setPages(1); };
+  // Las 10 especialidades con página propia (/dentista, /pediatra…): al elegirlas (pestaña, menú o la caja de sugerencias) se va a su página,
+  // conservando los utm_* (2026-11-16, pedido de Jorge). Las demás (Otras, Alergología…) filtran aquí mismo.
+  const navigate = useNavigate();
+  const pickSpecialty = (value) => {
+    if (value.startsWith("g:")) { navigate(withUtm(`/${value.slice(2)}`, utmQuery(window.location.search))); return; }
+    setSpecialty(value); setSub("todas"); setPages(1);
+  };
 
   // Especialidades y ciudades que tienen doctores (especialidades de más recomendaciones a menos).
   const specialties = useMemo(() => {
@@ -150,9 +156,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
   const groups = useMemo(() => TAB_KEYS.map((k) => ({ key: k, title: SPECIALTY_LANDINGS[k]?.title || k, n: doctors.filter((d) => groupOf(d) === k).length })).filter((g) => g.n > 0), [doctors]);
   const others = useMemo(() => specialties.filter((x) => !landingKeyFor(x.key)), [specialties]);
   const othersCount = useMemo(() => doctors.filter((d) => !groupOf(d)).length, [doctors]);
-  // Enlace a la página propia de la especialidad (/dentista…), si la tiene; conserva los utm_*.
-  const landingKey = specialty.startsWith("g:") ? specialty.slice(2) : null;
-  const landingTitle = landingKey ? SPECIALTY_LANDINGS[landingKey]?.title : null;
   const specialtyLabel = specialty === "todas" ? "Todas" : specialty === "otras" ? "Otras especialidades" : specialty.startsWith("g:") ? (SPECIALTY_LANDINGS[specialty.slice(2)]?.title || "") : (specialties.find((x) => x.key === specialty)?.label || "");
   const cityLabel = city === "todas" ? "Todas" : (cities.find((x) => x.key === city)?.label || "");
 
@@ -381,7 +384,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
             <p id="doctores-lista" className="mt-3 text-sm text-brand-navy/70 scroll-mt-24" aria-live="polite">
               {list.length} {list.length === 1 ? "doctor" : "doctores"}
               {filtering && <> · <button type="button" onClick={reset} className="underline hover:text-brand-navy">Quitar filtros</button></>}
-              {landingKey && <> · <Link to={withUtm(`/${landingKey}`, utmQuery(window.location.search))} className="underline hover:text-brand-navy">Ver página de {landingTitle}</Link></>}
             </p>
 
             {list.length === 0 ? (
