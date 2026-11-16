@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, ChevronDown, Search, X, MapPin, Stethoscope, Flower2, Baby, Sparkles, HeartPulse, Brain, Apple, Droplet, Pill, MoreHorizontal } from "lucide-react";
-import ToothIcon from "@/components/icons/ToothIcon";
+import { Heart, ChevronDown, Search, X, MapPin } from "lucide-react";
 import { SPECIALTY_LANDINGS } from "@/lib/specialtyLandings";
 import RecommendedAvatar from "@/components/RecommendedAvatar";
 import { recommendationTagLabel } from "@/lib/recommendationTags";
@@ -25,11 +24,13 @@ const LANDING_MATCH = {
 };
 const landingKeyFor = (specialtyKey) => Object.keys(LANDING_MATCH).find((k) => LANDING_MATCH[k].test(specialtyKey)) || null;
 // Las 10 pestañas (orden de src/lib/topSpecialties.js) y su ícono (los mismos del carrusel de especialidades).
-const TAB_ICONS = {
-  "medico-general": Stethoscope, ginecologo: Flower2, pediatra: Baby, dentista: ToothIcon, dermatologo: Sparkles,
-  cardiologo: HeartPulse, psicologo: Brain, nutriologo: Apple, endocrinologo: Droplet, gastroenterologo: Pill,
-};
-const TAB_KEYS = Object.keys(TAB_ICONS);
+// Las 10 pestañas, en el orden de src/lib/topSpecialties.js. Cada una lleva una ilustración 3D (Fluent Emoji 3D de Microsoft, licencia MIT; los
+// archivos viven en public/icons/especialidades/ junto con su licencia). Son pequeñas (128 px, ~12 KB cada una).
+const TAB_KEYS_LIST = ["medico-general", "ginecologo", "pediatra", "dentista", "dermatologo", "cardiologo", "psicologo", "nutriologo", "endocrinologo", "gastroenterologo"];
+// Dos nombres largos se abrevian en la pestaña como se dice en el consultorio (el nombre completo sigue en las sugerencias, el menú y las páginas).
+const TAB_SHORT = { gastroenterologo: "Gastro", endocrinologo: "Endocrino" };
+const tabImg = (key) => `/icons/especialidades/${key}.png`;
+const TAB_KEYS = TAB_KEYS_LIST;
 const groupOf = (d) => landingKeyFor(norm(d.specialty));
 const specMatches = (d, spec) => {
   if (spec === "todas") return true;
@@ -79,15 +80,14 @@ function SuggestRow({ lead, title, detail, query, onClick, to }) {
 }
 const Circle = ({ color = "#eef1f6", children }) => <span className="w-10 h-10 flex-none rounded-full flex items-center justify-center" style={{ backgroundColor: color }}>{children}</span>;
 
-// Pestaña con ícono dentro de un círculo de color (los mismos colores de las tarjetas de especialidad, `from` de specialtyLandings.js; el
-// ícono va en azul marino para que se lea). "Todos" lleva el corazón en rojo sobre blanco y "Otras" gris.
-function Tab({ icon: Icon, label, on, onClick, color, iconClass = "text-brand-navy" }) {
+// Pestaña estilo Airbnb: ilustración 3D chica (28 px) a la izquierda del nombre, la elegida con la raya de abajo y en seminegritas (Jorge, 2026-11-16:
+// "hacer los iconos similares, más chicos", con la barra de Airbnb de ejemplo). El espacio entre pestañas es igual; las 10 + "Todos" y "Otras" se deslizan de lado
+// si no caben.
+function Tab({ img, label, fullLabel, on, onClick }) {
   return (
-    <button type="button" role="tab" aria-selected={on} onClick={onClick}
-      className={`flex-none flex flex-col items-center gap-1.5 pb-2.5 pt-1.5 border-b-2 text-sm whitespace-nowrap transition-colors ${on ? "border-brand-navy text-brand-navy font-semibold" : "border-transparent text-brand-navy/70 hover:text-brand-navy"}`}>
-      <span className={`w-12 h-12 rounded-full flex items-center justify-center transition-transform ${on ? "ring-2 ring-brand-navy ring-offset-2 ring-offset-brand-flowSky/0" : ""}`} style={{ backgroundColor: color || "#ffffff" }}>
-        <Icon className={`w-7 h-7 ${iconClass}`} strokeWidth={1.75} aria-hidden="true" />
-      </span>
+    <button type="button" role="tab" aria-selected={on} aria-label={fullLabel || undefined} onClick={onClick}
+      className={`flex-none flex items-center gap-2 pt-2 pb-3 border-b-2 text-sm whitespace-nowrap transition-colors ${on ? "border-brand-navy text-brand-navy font-semibold" : "border-transparent text-brand-navy/65 hover:text-brand-navy"}`}>
+      <img src={img} alt="" width={28} height={28} decoding="async" draggable={false} className="w-7 h-7 object-contain" />
       {label}
     </button>
   );
@@ -153,7 +153,12 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
     return [...map.values()].sort((a, b) => b.n - a.n || a.label.localeCompare(b.label, "es"));
   }, [doctors, specialty]);
   // Pestañas y opciones del menú: las 10 principales con doctores (con su número), "Otras" y las especialidades sueltas.
-  const groups = useMemo(() => TAB_KEYS.map((k) => ({ key: k, title: SPECIALTY_LANDINGS[k]?.title || k, n: doctors.filter((d) => groupOf(d) === k).length })).filter((g) => g.n > 0), [doctors]);
+  // Las pestañas van de la especialidad con más doctores a la que tiene menos (2026-11-16, pedido de Jorge: "ordena por prioridad de doctores");
+  // si empatan, la que suma más recomendaciones, y si vuelven a empatar, el orden fijo de TAB_KEYS.
+  const groups = useMemo(() => TAB_KEYS.map((k, i) => {
+    const ds = doctors.filter((d) => groupOf(d) === k);
+    return { key: k, title: SPECIALTY_LANDINGS[k]?.title || k, n: ds.length, recs: ds.reduce((t, d) => t + (Number(d.count) || 0), 0), i };
+  }).filter((g) => g.n > 0).sort((a, b) => b.n - a.n || b.recs - a.recs || a.i - b.i), [doctors]);
   const others = useMemo(() => specialties.filter((x) => !landingKeyFor(x.key)), [specialties]);
   const othersCount = useMemo(() => doctors.filter((d) => !groupOf(d)).length, [doctors]);
   const specialtyLabel = specialty === "todas" ? "Todas" : specialty === "otras" ? "Otras especialidades" : specialty.startsWith("g:") ? (SPECIALTY_LANDINGS[specialty.slice(2)]?.title || "") : (specialties.find((x) => x.key === specialty)?.label || "");
@@ -205,6 +210,21 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
     const el = document.querySelector('#doctores [role=tab][aria-selected=true]');
     el?.scrollIntoView?.({ inline: "center", block: "nearest", behavior: "smooth" });
   }, [specialty]);
+  // Fila de pestañas: si no caben, se deslizan de lado y se desvanece el borde donde hay más (así se nota que hay más pestañas).
+  const tabsScrollRef = useRef(null);
+  const [tabsFade, setTabsFade] = useState({ l: false, r: false });
+  useEffect(() => {
+    const el = tabsScrollRef.current;
+    if (!el) return undefined;
+    const upd = () => setTabsFade({ l: el.scrollLeft > 4, r: el.scrollLeft + el.clientWidth < el.scrollWidth - 4 });
+    upd();
+    el.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    return () => { el.removeEventListener("scroll", upd); window.removeEventListener("resize", upd); };
+  }, [groups.length, othersCount, data]);
+  const tabsMask = tabsFade.l || tabsFade.r
+    ? `linear-gradient(to right, ${tabsFade.l ? "transparent 0, black 32px" : "black 0"}, ${tabsFade.r ? "black calc(100% - 32px), transparent 100%" : "black 100%"})`
+    : undefined;
   const nq = norm(q.replace(/\b(dr|dra|doctor|doctora)\b\.?/gi, " "));
   const suggest = useMemo(() => {
     if (!nq) {
@@ -254,8 +274,16 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
           <p className="mt-6 text-sm text-brand-navy/80">Aquí aparecerán los doctores recomendados. Sé el primero: recomienda a tu doctor arriba.</p>
         ) : (
           <>
+            {/* Pestañas con ícono por especialidad (las 10 principales con doctores y "Otras"). */}
+            <div ref={tabsScrollRef} style={tabsMask ? { WebkitMaskImage: tabsMask, maskImage: tabsMask } : undefined} className="mt-4 min-[1120px]:-mx-12 overflow-x-auto border-b border-brand-navy/15 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-5 px-1">
+                <Tab img={tabImg("todos")} label="Todos" on={specialty === "todas"} onClick={() => pickSpecialty("todas")} />
+                {groups.map((g) => <Tab key={g.key} img={tabImg(g.key)} label={TAB_SHORT[g.key] || g.title} fullLabel={TAB_SHORT[g.key] ? g.title : undefined} on={specialty === `g:${g.key}`} onClick={() => pickSpecialty(`g:${g.key}`)} />)}
+                {othersCount > 0 && <Tab img={tabImg("otras")} label="Otras" on={specialty === "otras" || isLooseSpecialty} onClick={() => pickSpecialty("otras")} />}
+              </div>
+            </div>
             {/* Barra en píldora (computadora): tres campos y botón de buscar. Cada campo es un área completa en la que se puede tocar. */}
-            <div className="hidden sm:flex items-stretch max-w-3xl mx-auto mt-6 bg-white rounded-full shadow-md border border-brand-navy/10 p-1.5">
+            <div className="hidden sm:flex items-stretch max-w-3xl mx-auto mt-5 bg-white rounded-full shadow-md border border-brand-navy/10 p-1.5">
               <label className="relative flex-[1.2] min-w-0 px-5 py-1.5 rounded-full hover:bg-brand-flowMist/70 cursor-text">
                 <span className="block text-[11px] font-semibold text-brand-navy">Doctor</span>
                 <input type="search" value={q} onChange={(e) => { setQ(e.target.value.slice(0, 60)); setPages(1); }} placeholder="Buscar por nombre" autoComplete="off"
@@ -299,10 +327,9 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
                     <div>
                       <p className="px-2.5 pt-1.5 pb-1 text-xs font-semibold text-brand-navy/60">Especialidades</p>
                       {suggest.specs.map((x) => {
-                        const Icon = x.key ? TAB_ICONS[x.key] : Stethoscope;
                         return (
                           <SuggestRow key={x.value} query={nq ? q : ""} title={x.title} detail={`${x.n} ${x.n === 1 ? "doctor" : "doctores"}`} onClick={() => chooseSpecialty(x.value)}
-                            lead={<Circle color={x.key ? SPECIALTY_LANDINGS[x.key]?.from : "#d9dfeb"}><Icon className="w-5 h-5 text-brand-navy" strokeWidth={1.75} aria-hidden="true" /></Circle>} />
+                            lead={<img src={tabImg(x.key || "otras")} alt="" width={40} height={40} decoding="async" draggable={false} className="w-10 h-10 flex-none object-contain" />} />
                         );
                       })}
                     </div>
@@ -340,14 +367,6 @@ export default function RecommendedDoctorsBrowser({ data, onRecommend }) {
               )}
             </div>
 
-            {/* Pestañas con ícono por especialidad (las 10 principales con doctores y "Otras"). */}
-            <div className="mt-5 overflow-x-auto border-b border-brand-navy/15 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div role="tablist" aria-label="Especialidad" className="flex w-max min-w-full sm:justify-center gap-5 sm:gap-10 px-1">
-                <Tab icon={Heart} label="Todos" on={specialty === "todas"} onClick={() => pickSpecialty("todas")} iconClass="text-red-500 fill-red-500" />
-                {groups.map((g) => <Tab key={g.key} icon={TAB_ICONS[g.key]} label={g.title} color={SPECIALTY_LANDINGS[g.key]?.from} on={specialty === `g:${g.key}`} onClick={() => pickSpecialty(`g:${g.key}`)} />)}
-                {othersCount > 0 && <Tab icon={MoreHorizontal} label="Otras" color="#d9dfeb" on={specialty === "otras" || isLooseSpecialty} onClick={() => pickSpecialty("otras")} />}
-              </div>
-            </div>
             {/* Otras especialidades (las que no tienen pestaña): una fila de botones que se desliza. */}
             {(specialty === "otras" || isLooseSpecialty) && others.length > 0 && (
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Otras especialidades">
